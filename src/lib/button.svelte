@@ -3,7 +3,7 @@
 
 	export let icon: ComponentConstructor<IconProps> | undefined = undefined
 	export let variant: 'rounded' | 'square' = 'square'
-	export let border: boolean = true
+	export let border = true
 </script>
 
 <button class={`${variant} ${border ? 'border' : ''}`}>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	export let direction: 'row' | 'column' = 'column'
-	export let gap: number = 0
+	export let gap = 0
 </script>
 
 <div class={`root ${direction}`} style={`gap: ${gap}px`}>
