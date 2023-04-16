@@ -1,0 +1,33 @@
+:root {
+	--spacing-6: 6px;
+	--spacing-12: 12px;
+	--spacing-24: 24px;
+
+	--color-border: #999999;
+	--color-background: #fff;
+
+	--font-size-button: 16px;
+
+	--font-weight-button: 400;
+}
+
+body {
+	margin: 0;
+	padding: 0;
+	font-family: Inter;
+	font-size: 14px;
+}
+
+h1 {
+	font-size: 16px;
+	font-weight: 500;
+	padding: 0;
+	margin: 0;
+}
+
+h2 {
+	font-size: 16px;
+	font-weight: 700;
+	padding: 0;
+	margin: 0;
+}
