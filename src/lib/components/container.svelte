@@ -11,6 +11,9 @@
 	.root {
 		display: flex;
 		padding: 0px var(--spacing-24);
+		width: 100%;
+		max-width: 498px;
+		margin-inline: auto;
 	}
 	.row {
 		flex-direction: row;

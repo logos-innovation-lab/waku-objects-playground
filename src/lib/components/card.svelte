@@ -11,6 +11,11 @@
 		</div>
 		<div class="column grow">
 			<div class="row">
+				{#if $$slots.menu}
+					<div class="menu">
+						<slot name="menu" />
+					</div>
+				{/if}
 				<h2>{title}</h2>
 				<slot />
 			</div>
@@ -19,7 +24,7 @@
 	</div>
 </div>
 
-<style>
+<style lang="scss">
 	.root {
 		border: 1px solid var(--color-border);
 		padding: var(--spacing-12);
@@ -37,6 +42,7 @@
 	.row {
 		display: flex;
 		flex-direction: row;
+		position: relative;
 	}
 	.column {
 		display: flex;
@@ -44,5 +50,10 @@
 	}
 	.grow {
 		flex-grow: 1;
+	}
+
+	.menu {
+		position: absolute;
+		inset: 0 0 auto auto;
 	}
 </style>
