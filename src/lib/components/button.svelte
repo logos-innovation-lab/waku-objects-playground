@@ -2,11 +2,12 @@
 	import type { ComponentConstructor, IconProps } from '$lib/types'
 
 	export let icon: ComponentConstructor<IconProps> | undefined = undefined
-	export let variant: 'rounded' | 'square' = 'square'
+	export let variant: 'rounded' | 'square' | 'nopad' = 'square'
 	export let border = true
+	export let disabled: boolean | undefined = undefined
 </script>
 
-<button class={`${variant} ${border ? 'border' : ''}`}>
+<button type="button" {disabled} class={`${variant} ${border ? 'border' : ''}`} on:click>
 	{#if icon !== undefined}
 		<div class="wrapper">
 			<svelte:component this={icon} />
@@ -15,11 +16,10 @@
 	<slot />
 </button>
 
-<style>
+<style lang="scss">
 	button {
 		background: var(--color-background);
 		margin: 0;
-		padding: var(--spacing-12);
 		font-size: var(--font-size-button);
 		font-weight: var(--font-weight-button);
 		cursor: pointer;
@@ -28,15 +28,31 @@
 		justify-content: center;
 		align-items: center;
 		gap: var(--spacing-12);
+		padding: 10px;
 		border: none;
-	}
-	.square {
-		border-radius: 0;
-	}
-	.rounded {
-		border-radius: 200px;
-	}
-	.border {
-		border: 1px solid var(--color-border);
+
+		&:disabled {
+			cursor: not-allowed;
+
+			& :global(svg) {
+				fill: var(--color-border);
+			}
+		}
+		&.square {
+			border-radius: 0;
+			margin-inline: auto;
+		}
+		&.rounded {
+			border-radius: 200px;
+		}
+		&.nopad {
+			padding: 0;
+		}
+		&.border {
+			border: 1px solid var(--color-border);
+		}
+		.wrapper {
+			line-height: 0;
+		}
 	}
 </style>

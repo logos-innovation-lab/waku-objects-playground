@@ -5,17 +5,50 @@
 
 	--color-border: #999999;
 	--color-background: #fff;
+	--color-grey-bg: #eeeeee;
+
+	--font-body: 'Inter';
 
 	--font-size-button: 16px;
-
 	--font-weight-button: 400;
+
+	--font-size-normal: 14px;
+	--font-weight-normal: 400;
+}
+
+html {
+	scroll-behavior: smooth;
+	line-height: 1.25;
+	-webkit-text-size-adjust: 100%;
+	overflow-wrap: anywhere;
 }
 
 body {
 	margin: 0;
 	padding: 0;
-	font-family: Inter;
-	font-size: 14px;
+	font-family: var(--font-body);
+	font-weight: var(--font-weight-normal);
+	font-size: var(--font-size-normal);
+}
+
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	font: inherit;
+}
+
+img,
+picture,
+video {
+	display: block;
+	max-width: 100%;
+	border-style: none;
 }
 
 h1 {
