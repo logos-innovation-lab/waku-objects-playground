@@ -4,6 +4,8 @@
 	import Close from '$lib/components/icons/close.svelte'
 	import Edit from '$lib/components/icons/edit.svelte'
 	import Add from '$lib/components/icons/add.svelte'
+	import ArrowRight from '$lib/components/icons/arrow-right.svelte'
+	import Checkmark from '$lib/components/icons/checkmark.svelte'
 	import ArrowLeft from '$lib/components/icons/arrow-left.svelte'
 	import Sort from '$lib/components/icons/caret-sort.svelte'
 	import Container from '$lib/components/container.svelte'
@@ -56,7 +58,7 @@
 				icon={ArrowLeft}
 				border={false}
 				variant="nopad"
-				on:click={() => history.back}
+				on:click={() => (state = 'select-wallet')}
 			/>
 			<Button
 				slot="right"
@@ -76,7 +78,7 @@
 				<DropdownItem onClick={() => console.log('DAI')}>DAI</DropdownItem>
 			</Dropdown>
 		</div>
-		<Button icon={Add} variant="square" />
+		<Button icon={ArrowRight} variant="square" on:click={() => (state = 'send-request')} />
 	{:else if state === 'send-request'}
 		<Header title="Request transaction">
 			<Button
@@ -84,7 +86,7 @@
 				icon={ArrowLeft}
 				border={false}
 				variant="nopad"
-				on:click={() => history.back}
+				on:click={() => (state = 'type-amount')}
 			/>
 			<Button
 				slot="right"
@@ -114,7 +116,7 @@
 				<span> ETH 0.029900675925729405 </span>
 			</div>
 		</div>
-		<Button icon={Add}>Add to chat</Button>
+		<Button icon={Checkmark} on:click={() => goto(ROUTES.HOME)}>Add to chat</Button>
 	{:else}
 		<h2>How did I get here?</h2>
 	{/if}
