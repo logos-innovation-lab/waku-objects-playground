@@ -2,11 +2,9 @@
 </script>
 
 <header class="root">
-	{#if $$slots.left}
-		<div class="left">
-			<slot name="left" />
-		</div>
-	{/if}
+	<div class="left">
+		<slot name="left" />
+	</div>
 	<div>
 		<slot />
 	</div>

@@ -12,8 +12,8 @@
 		display: flex;
 		padding: 0px var(--spacing-24);
 		width: 100%;
-		max-width: 498px;
-		margin-inline: auto;
+		height: 100%;
+		flex-grow: 1;
 	}
 	.row {
 		flex-direction: row;
