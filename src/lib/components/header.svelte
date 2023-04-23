@@ -1,13 +1,12 @@
 <script lang="ts">
+	export let title: string
 </script>
 
 <header class="root">
 	<div class="left">
 		<slot name="left" />
 	</div>
-	<div>
-		<slot />
-	</div>
+	<h1>{title}</h1>
 	<div class="right">
 		<slot name="right" />
 	</div>
@@ -26,6 +25,11 @@
 		.left,
 		.right {
 			flex-basis: 42px;
+		}
+
+		.right {
+			display: flex;
+			justify-content: flex-end;
 		}
 	}
 </style>

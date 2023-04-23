@@ -50,7 +50,7 @@
 
 {#if state === 'chat'}
 	<Container>
-		<Header>
+		<Header title="Chat">
 			<Button
 				slot="left"
 				icon={ArrowLeft}
@@ -58,7 +58,6 @@
 				variant="nopad"
 				on:click={() => goto(ROUTES.HOME)}
 			/>
-			<h1>Chat</h1>
 		</Header>
 		<div class="messages">
 			<div class="messages-inner">
@@ -87,7 +86,7 @@
 	</Container>
 {:else if state === 'waku'}
 	<Container gap={12}>
-		<Header>
+		<Header title="Waku Objects">
 			<Button
 				slot="left"
 				icon={ArrowLeft}
@@ -95,7 +94,6 @@
 				variant="nopad"
 				on:click={() => (state = 'chat')}
 			/>
-			<h1>Waku Objects</h1>
 		</Header>
 		{#each cards as card}
 			<Card {...card}>

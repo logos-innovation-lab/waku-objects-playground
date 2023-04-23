@@ -3,12 +3,12 @@
 	export let gap = 0
 </script>
 
-<div class={`root ${direction}`} style={`gap: ${gap}px`}>
+<div class={`container ${direction}`} style={`gap: ${gap}px`}>
 	<slot />
 </div>
 
 <style>
-	.root {
+	.container {
 		display: flex;
 		padding: 0px var(--spacing-24);
 		width: 100%;

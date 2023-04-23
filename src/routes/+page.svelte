@@ -17,8 +17,7 @@
 </script>
 
 <Container gap={12}>
-	<Header>
-		<h1>WO Playground</h1>
+	<Header title="WO Playground">
 		<svelte:fragment slot="right">
 			{#if !$profile.address}
 				<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><Wallet /></Button>

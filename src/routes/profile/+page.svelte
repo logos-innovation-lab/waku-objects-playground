@@ -30,7 +30,7 @@
 </script>
 
 <Container gap={12}>
-	<Header>
+	<Header title="Profile">
 		<Button
 			slot="left"
 			icon={ArrowLeft}
@@ -38,7 +38,6 @@
 			variant="nopad"
 			on:click={() => goto('/')}
 		/>
-		<h1>Profile</h1>
 	</Header>
 
 	<div class="mid">

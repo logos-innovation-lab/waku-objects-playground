@@ -45,7 +45,7 @@
 
 {#if state === 'edit-participants'}
 	<Container gap={12}>
-		<Header>
+		<Header title="New chat">
 			<Button
 				slot="left"
 				icon={ArrowLeft}
@@ -53,7 +53,6 @@
 				variant="nopad"
 				on:click={() => goto(ROUTES.HOME)}
 			/>
-			<h1>New chat</h1>
 			<svelte:fragment slot="right">
 				{#if !$profile.address}
 					<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><Wallet /></Button>
@@ -117,7 +116,7 @@
 	</Container>
 {:else if state === 'edit-name'}
 	<Container gap={12}>
-		<Header>
+		<Header title="New chat">
 			<Button
 				slot="left"
 				icon={ArrowLeft}
@@ -125,7 +124,6 @@
 				variant="nopad"
 				on:click={() => (state = 'edit-participants')}
 			/>
-			<h1>New chat</h1>
 			<svelte:fragment slot="right">
 				{#if !$profile.address}
 					<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><Wallet /></Button>
@@ -152,7 +150,7 @@
 	</Container>
 {:else if state === 'send-message'}
 	<Container gap={12}>
-		<Header>
+		<Header title="New chat">
 			<Button
 				slot="left"
 				icon={ArrowLeft}
@@ -160,7 +158,6 @@
 				variant="nopad"
 				on:click={() => (state = 'edit-participants')}
 			/>
-			<h1>New chat</h1>
 			<svelte:fragment slot="right">
 				{#if !$profile.address}
 					<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><Wallet /></Button>

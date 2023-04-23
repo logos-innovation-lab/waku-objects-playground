@@ -21,7 +21,7 @@
 		textarea {
 			width: 100%;
 			border: 1px solid var(--color-border);
-			border-radius: 21px;
+			// border-radius: 21px;
 			padding: var(--spacing-12);
 			margin: 0;
 			font-size: var(--font-size-normal);

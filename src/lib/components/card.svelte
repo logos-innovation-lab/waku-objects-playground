@@ -1,7 +1,12 @@
 <script lang="ts">
-	export let image: string
-	export let title: string
-	export let description: string
+	export let image: string | undefined = undefined
+	export let title: string | undefined = undefined
+	export let description: string | undefined = undefined
+	// export let route: string
+	export let token1: string | undefined = undefined
+	export let token2: string | undefined = undefined
+
+	export let onClick: (() => unknown) | undefined = undefined
 </script>
 
 <div class="root grow">
@@ -16,10 +21,19 @@
 						<slot name="menu" />
 					</div>
 				{/if}
-				<h2>{title}</h2>
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<h2 on:click={onClick}>{title}</h2>
 				<slot />
 			</div>
-			<span class="description">{description}</span>
+			{#if description}
+				<span class="description">{description}</span>
+			{/if}
+			{#if token1}
+				<span class="description">{token1}</span>
+			{/if}
+			{#if token2}
+				<span class="description">{token2}</span>
+			{/if}
 		</div>
 	</div>
 </div>
@@ -55,5 +69,9 @@
 	.menu {
 		position: absolute;
 		inset: 0 0 auto auto;
+	}
+
+	h2 {
+		cursor: pointer;
 	}
 </style>
