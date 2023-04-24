@@ -1,7 +1,6 @@
 import { type Signer, type Eip1193Provider, BrowserProvider, type Networkish } from 'ethers'
 import { browser } from '$app/environment'
 import { profile } from '$lib/stores/profile'
-import { chats, type Chat } from '$lib/stores/chat'
 
 type WindowWithMaybeEthereum = Window &
 	typeof globalThis & { ethereum: Eip1193Provider | undefined }
@@ -31,7 +30,7 @@ const windowWithEthereum = browser && (window as WindowWithEthereum)
 
 function onAccountChanged() {
 	// Clear profile
-	profile.set({})
+	profile.set({ loading: true })
 }
 
 export function subscribeAccountChanged(): () => unknown {

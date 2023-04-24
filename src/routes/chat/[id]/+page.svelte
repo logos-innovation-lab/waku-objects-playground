@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { page } from '$app/stores'
+
 	import Add from '$lib/components/icons/add.svelte'
 	import Menu from '$lib/components/icons/overflow-menu-horizontal.svelte'
 	import ArrowLeft from '$lib/components/icons/arrow-left.svelte'
@@ -11,7 +13,13 @@
 
 	import Dropdown from '$lib/components/dropdown.svelte'
 	import DropdownItem from '$lib/components/dropdown-item.svelte'
+
 	import { goto } from '$app/navigation'
+	import { profile } from '$lib/stores/profile'
+	import { chats } from '$lib/stores/chat'
+	import SendAltFilled from '$lib/components/icons/send-alt-filled.svelte'
+	import adapters from '$lib/adapters'
+	import ROUTES from '$lib/routes'
 
 	const cards = [
 		{
@@ -27,6 +35,17 @@
 	]
 
 	let state: 'waku' | 'chat' = 'chat'
+	$: messages = $chats.chats.get($page.params.id)?.messages || []
+	let loading = false
+	let text = ''
+	$: if ($profile.address === undefined) goto(ROUTES.HOME)
+
+	const sendMessage = async () => {
+		loading = true
+		await adapters.sendChatMessage($page.params.id, text)
+		text = ''
+		loading = false
+	}
 </script>
 
 {#if state === 'chat'}
@@ -37,36 +56,20 @@
 				icon={ArrowLeft}
 				border={false}
 				variant="nopad"
-				on:click={() => goto('/')}
+				on:click={() => goto(ROUTES.HOME)}
 			/>
 			<h1>Chat</h1>
 		</Header>
 		<div class="messages">
 			<div class="messages-inner">
 				<!-- Chat bubbles -->
-				<div class="message">
-					<div class="message-content">
-						<div class="message-text">Lorem ipsum dolor sit amet consectetur adipisicing elit.</div>
-					</div>
-				</div>
-				<div class="message their-message">
-					<div class="message-content">
-						<div class="message-text">Necessitatibus, excepturi.</div>
-					</div>
-				</div>
-				<div class="message">
-					<div class="message-content">
-						<div class="message-text">Sit amet consectetur adipisicing elit.</div>
-					</div>
-				</div>
-				<div class="message their-message">
-					<div class="message-content">
-						<div class="message-text">
-							Eum asperiores, adipisci aliquid tempore excepturi dicta minima nam dolore accusantium
-							sit ipsa error aspernatur, provident tempora?
+				{#each messages as message}
+					<div class={`message ${message.fromAddress !== $profile.address ? 'their-message' : ''}`}>
+						<div class="message-content">
+							<div class="message-text">{message.text}</div>
 						</div>
 					</div>
-				</div>
+				{/each}
 			</div>
 		</div>
 		<div class="chat-input">
@@ -76,7 +79,10 @@
 				<DropdownItem onClick={() => console.log('Pic from Lib')}>Pic from Lib</DropdownItem>
 				<DropdownItem onClick={() => (state = 'waku')}>Waku Object</DropdownItem>
 			</Dropdown>
-			<Textarea placeholder="Say something" />
+			<Textarea placeholder="Say something" bind:value={text} />
+			<Button variant="rounded" border={false} disabled={loading} on:click={sendMessage}
+				><SendAltFilled /></Button
+			>
 		</div>
 	</Container>
 {:else if state === 'waku'}

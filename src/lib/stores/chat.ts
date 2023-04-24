@@ -8,11 +8,11 @@ export interface Message {
 
 export interface DraftChat {
 	messages: Message[]
+	users: string[]
+	name?: string
 }
 
 export interface Chat extends DraftChat {
-	users: string[]
-	name?: string
 	chatId: string
 }
 

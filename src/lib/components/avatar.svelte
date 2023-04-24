@@ -1,5 +1,6 @@
 <script lang="ts">
 	import adapters from '$lib/adapters'
+	import User from './icons/user.svelte'
 
 	export let picture: string | undefined = undefined
 	export let onClick: (() => unknown) | undefined = undefined
@@ -10,6 +11,8 @@
 	<div class="img">
 		{#if picture}
 			<img src={adapters.getPicture(picture)} alt="profile" />
+		{:else}
+			<User />
 		{/if}
 	</div>
 </div>

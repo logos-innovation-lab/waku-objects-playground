@@ -7,10 +7,8 @@ import {
 	addDoc,
 	onSnapshot,
 	query,
-	updateDoc,
 	arrayUnion,
 	where,
-	arrayRemove,
 	getDoc,
 } from 'firebase/firestore'
 import { create } from 'ipfs-http-client'
@@ -23,7 +21,7 @@ import {
 import { profile } from '$lib/stores/profile'
 import type { Signer } from 'ethers'
 import type { Adapter, Contact } from '..'
-import { chats, type Chat, type Message } from '$lib/stores/chat'
+import { chats, type DraftChat, type Chat, type Message } from '$lib/stores/chat'
 import { get } from 'svelte/store'
 import { contacts, type User } from '$lib/stores/users'
 
@@ -155,6 +153,13 @@ export default class FirebaseAdapter implements Adapter {
 			setDoc(userDoc, { address, ...data }, { merge: true })
 			profile.update((state) => ({ ...state, address, name, avatar }))
 		}
+	}
+
+	async startChat(chat: DraftChat): Promise<string> {
+		const chatCollection = collection(db, `/chats`)
+		const chatDoc = await addDoc(chatCollection, chat)
+
+		return chatDoc.id
 	}
 
 	async sendChatMessage(chatId: string, text: string): Promise<void> {

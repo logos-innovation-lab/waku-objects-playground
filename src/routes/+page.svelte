@@ -8,11 +8,12 @@
 
 	import { profile } from '$lib/stores/profile'
 	import { chats } from '$lib/stores/chat'
-	import { contacts } from '$lib/stores/users'
 
 	import adapters from '$lib/adapters'
 	import { goto } from '$app/navigation'
 	import Avatar from '$lib/components/avatar.svelte'
+
+	import ROUTES from '$lib/routes'
 </script>
 
 <Container gap={12}>
@@ -22,7 +23,7 @@
 			{#if !$profile.address}
 				<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><Wallet /></Button>
 			{:else}
-				<Avatar picture={$profile.avatar} onClick={() => goto('/profile')} />
+				<Avatar picture={$profile.avatar} onClick={() => goto(ROUTES.PROFILE)} />
 			{/if}
 		</svelte:fragment>
 	</Header>
@@ -38,22 +39,22 @@
 			<h2>Failed to load chats: {$chats.error.message}</h2>
 		{:else}
 			<h2>Chats</h2>
-			{#each [...$chats.chats] as chat}
-				{JSON.stringify(chat)}
-			{:else}
-				<p>No chats</p>
-			{/each}
-			<h2>Contacts</h2>
 			<ul>
-				{#each [...$contacts.contacts] as contact}
-					<li><pre>{contact[0]}</pre></li>
+				{#each [...$chats.chats] as [id, chat]}
+					<!-- svelte-ignore a11y-click-events-have-key-events -->
+					<li on:click={() => goto(ROUTES.CHAT(id))}>
+						<Avatar />
+						<span>{chat.messages[chat.messages.length - 1]?.text.substring(0, 50)}</span>
+					</li>
+				{:else}
+					<p>No chats</p>
 				{/each}
 			</ul>
 		{/if}
 	</div>
 
 	<div class="bottom">
-		<Button variant="rounded">
+		<Button variant="rounded" on:click={() => goto(ROUTES.CHAT_NEW)}>
 			<Add /> New chat
 		</Button>
 	</div>
@@ -67,5 +68,18 @@
 	}
 	.mid {
 		flex-grow: 1;
+	}
+
+	ul {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+	}
+
+	li {
+		display: flex;
+		align-items: center;
+		gap: var(--spacing-12);
+		cursor: pointer;
 	}
 </style>
