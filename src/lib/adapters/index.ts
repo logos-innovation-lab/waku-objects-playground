@@ -14,8 +14,11 @@ export interface Adapter {
 
 	logIn(): Promise<void>
 	logOut(): Promise<void>
-	saveUserProfile(name: string, avatar: string): Promise<void>
+	saveUserProfile(name?: string, avatar?: string): Promise<void>
 	canLogIn(): boolean
+
+	uploadPicture(picture: string): Promise<string>
+	getPicture(cid: string): string
 }
 
 export default new FirebaseAdapter() as Adapter

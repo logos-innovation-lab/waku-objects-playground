@@ -13,6 +13,7 @@ import {
 	arrayRemove,
 	getDoc,
 } from 'firebase/firestore'
+import { create } from 'ipfs-http-client'
 import {
 	canConnectWallet,
 	connectWallet,
@@ -35,6 +36,10 @@ const firebaseConfig = {
 	appId: '1:824762862617:web:4fe585c2d751a1d4586e88',
 }
 
+const IPFS_AUTH =
+	'Basic Mk5Nbk1vZUNSTWMyOTlCQjYzWm9QZzlQYTU3OjAwZTk2MmJjZTBkZmQxZWQxNGNhNmY1M2JiYjYxMTli'
+const IPFS_GATEWAY = 'https://kurate.infura-ipfs.io/ipfs'
+
 const app = initializeApp(firebaseConfig)
 const db = getFirestore(app)
 
@@ -42,6 +47,14 @@ export default class FirebaseAdapter implements Adapter {
 	private signer: Signer | undefined
 	private subscriptions: Array<() => unknown> = []
 	private userSubscriptions: Array<() => unknown> = []
+	private ipfs = create({
+		host: 'ipfs.infura.io',
+		port: 5001,
+		protocol: 'https',
+		headers: {
+			authorization: IPFS_AUTH,
+		},
+	})
 
 	start() {
 		this.subscriptions.push(subscribeAccountChanged())
@@ -49,6 +62,13 @@ export default class FirebaseAdapter implements Adapter {
 
 		const unsubscribeUser = profile.subscribe(async (p) => {
 			if (p.address && this.userSubscriptions.length === 0) {
+				const profileSnapshot = doc(db, `users/${p.address}`)
+				const subscribeProfile = onSnapshot(profileSnapshot, (res) => {
+					const { avatar, name } = res.data() as Contact // FIXME: Check this with ZOD
+					profile.update((state) => ({ ...state, avatar, name, loading: false }))
+				})
+				this.userSubscriptions.push(subscribeProfile)
+
 				const chatsSnapshot = query(
 					collection(db, `chats`),
 					where('users', 'array-contains', p.address),
@@ -110,7 +130,7 @@ export default class FirebaseAdapter implements Adapter {
 	}
 	logOut(): Promise<void> {
 		this.signer = undefined
-		profile.set({})
+		profile.set({ loading: true })
 
 		return Promise.resolve()
 	}
@@ -121,17 +141,20 @@ export default class FirebaseAdapter implements Adapter {
 		return contact.data() as Contact // FIXME: type this properly
 	}
 
-	async saveUserProfile(name: string, avatar: string): Promise<void> {
+	async saveUserProfile(name?: string, avatar?: string): Promise<void> {
 		const signer = await connectWallet()
 		this.signer = signer
 		const address = await signer.getAddress()
 		const userDoc = doc(db, `users/${address}`)
 
-		const data: Partial<Contact> = { name }
+		const data: Partial<Contact> = {}
 		if (avatar) data.avatar = avatar
+		if (name) data.name = name
 
-		setDoc(userDoc, { address, ...data }, { merge: true })
-		profile.update((state) => ({ ...state, address, name, avatar }))
+		if (avatar || name) {
+			setDoc(userDoc, { address, ...data }, { merge: true })
+			profile.update((state) => ({ ...state, address, name, avatar }))
+		}
 	}
 
 	async sendChatMessage(chatId: string, text: string): Promise<void> {
@@ -147,5 +170,16 @@ export default class FirebaseAdapter implements Adapter {
 
 		const chatDoc = doc(db, `chats/${chatId}`)
 		setDoc(chatDoc, { messages: arrayUnion(message), lastMessage: text }, { merge: true })
+	}
+
+	async uploadPicture(picture: string): Promise<string> {
+		const blob = await (await fetch(picture)).blob()
+		const res = await this.ipfs.add(blob)
+
+		return res.cid.toString()
+	}
+
+	getPicture(cid: string): string {
+		return `${IPFS_GATEWAY}/${cid}`
 	}
 }

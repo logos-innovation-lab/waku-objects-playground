@@ -13,6 +13,7 @@
 
 	import adapters from '$lib/adapters'
 	import { goto } from '$app/navigation'
+	import Avatar from '$lib/components/avatar.svelte'
 </script>
 
 <Container gap={12}>
@@ -22,7 +23,7 @@
 			{#if !$profile.address}
 				<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><Wallet /></Button>
 			{:else}
-				<Button on:click={() => goto('/profile')}><User /></Button>
+				<Avatar picture={$profile.avatar} onClick={() => goto('/profile')} />
 			{/if}
 		</svelte:fragment>
 	</Header>
@@ -45,8 +46,8 @@
 			{/each}
 			<h2>Contacts</h2>
 			<ul>
-				{#each [...$contacts.contacts] as [ contact]}
-					<li><pre>{contact.address}</pre></li>
+				{#each [...$contacts.contacts] as contact}
+					<li><pre>{contact[0]}</pre></li>
 				{/each}
 			</ul>
 		{/if}
