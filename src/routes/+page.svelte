@@ -1,7 +1,6 @@
 <script lang="ts">
 	import Add from '$lib/components/icons/add.svelte'
 	import Wallet from '$lib/components/icons/wallet.svelte'
-	import User from '$lib/components/icons/user.svelte'
 
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'

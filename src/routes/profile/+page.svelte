@@ -15,8 +15,9 @@
 	import { clipAndResize } from '$lib/utils/image'
 	import Textarea from '$lib/components/textarea.svelte'
 
-	let picture: string | undefined = $profile.avatar
-	let name: string | undefined = $profile.name
+	$: picture = $profile.avatar
+	$: name = $profile.name
+
 	let pictureFiles: FileList | undefined = undefined
 	async function resizePersonaPicture(p?: File) {
 		try {
@@ -41,7 +42,15 @@
 	</Header>
 
 	<div class="mid">
-		{#if $profile.address}
+		{#if !$profile.address}
+			<h2>Connect your wallet</h2>
+			<p>To use Waku Objects, you need to access your account by connecting your wallet.</p>
+			<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><Wallet /></Button>
+		{:else if $profile.loading}
+			<h2>Loading...</h2>
+		{:else if $profile.error}
+			<h2>Failed to load profile: {$profile.error.message}</h2>
+		{:else}
 			<h2>Your account</h2>
 			<div class="avatar">
 				{#if picture}
@@ -75,10 +84,6 @@
 				>
 				<Button on:click={() => adapters.logOut()}>Log out</Button>
 			</div>
-		{:else}
-			<h2>Connect your wallet</h2>
-			<p>To use Waku Objects, you need to access your account by connecting your wallet.</p>
-			<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><Wallet /></Button>
 		{/if}
 	</div>
 </Container>

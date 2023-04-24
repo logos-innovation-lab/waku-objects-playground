@@ -5,6 +5,7 @@ export interface Profile {
 	name?: string
 	avatar?: string
 	loading: boolean
+	error?: Error
 }
 
 export type ProfileStore = Writable<Profile>
