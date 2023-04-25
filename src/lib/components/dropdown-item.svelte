@@ -23,8 +23,8 @@
 		align-items: center;
 		gap: var(--spacing-24);
 		font-family: var(--font-serif);
-		font-size: var(--font-size-lg);
-		background-color: var(--color-background);
+		font-size: var(--font-size-normal);
+		background-color: var(--color-content-bg);
 		border: 1px solid var(--color-border);
 
 		&.danger {

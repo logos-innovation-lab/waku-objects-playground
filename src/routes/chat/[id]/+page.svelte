@@ -26,11 +26,13 @@
 			image: '',
 			title: 'Request transaction',
 			description: 'Receive funds from anyone in the chat to your wallet.',
+			onClick: () => goto(ROUTES.REQUEST_TRANSACTION),
 		},
 		{
 			image: '',
 			title: 'Send transaction',
 			description: 'Send funds to anyone in the chat from your wallet.',
+			onClick: () => goto(ROUTES.SEND_TRANSACTION),
 		},
 	]
 
@@ -49,41 +51,51 @@
 </script>
 
 {#if state === 'chat'}
-	<Container>
-		<Header title="Chat">
-			<Button
-				slot="left"
-				icon={ArrowLeft}
-				border={false}
-				variant="nopad"
-				on:click={() => goto(ROUTES.HOME)}
-			/>
-		</Header>
-		<div class="messages">
-			<div class="messages-inner">
-				<!-- Chat bubbles -->
-				{#each messages as message}
-					<div class={`message ${message.fromAddress !== $profile.address ? 'their-message' : ''}`}>
-						<div class="message-content">
-							<div class="message-text">{message.text}</div>
-						</div>
+	<div class="chat">
+		<div class="chat-messages">
+			<Container>
+				<Header title="Chat">
+					<Button
+						slot="left"
+						icon={ArrowLeft}
+						border={false}
+						variant="nopad"
+						on:click={() => goto(ROUTES.HOME)}
+					/>
+				</Header>
+				<div class="messages">
+					<div class="messages-inner">
+						<!-- Chat bubbles -->
+						{#each messages as message}
+							<div
+								class={`message ${message.fromAddress !== $profile.address ? 'their-message' : ''}`}
+							>
+								<div class="message-content">
+									<div class="message-text">{message.text}</div>
+								</div>
+							</div>
+						{/each}
 					</div>
-				{/each}
-			</div>
+				</div>
+			</Container>
 		</div>
-		<div class="chat-input">
-			<Dropdown up>
-				<Button slot="button" icon={Add} variant="rounded" />
-				<DropdownItem onClick={() => console.log('Pic from Cam')}>Pic from Cam</DropdownItem>
-				<DropdownItem onClick={() => console.log('Pic from Lib')}>Pic from Lib</DropdownItem>
-				<DropdownItem onClick={() => (state = 'waku')}>Waku Object</DropdownItem>
-			</Dropdown>
-			<Textarea placeholder="Say something" bind:value={text} />
-			<Button variant="rounded" border={false} disabled={loading} on:click={sendMessage}
-				><SendAltFilled /></Button
-			>
+		<div class="chat-input-wrapper">
+			<Container>
+				<div class="chat-input">
+					<Dropdown up>
+						<Button slot="button" icon={Add} variant="rounded" />
+						<DropdownItem onClick={() => console.log('Pic from Cam')}>Pic from Cam</DropdownItem>
+						<DropdownItem onClick={() => console.log('Pic from Lib')}>Pic from Lib</DropdownItem>
+						<DropdownItem onClick={() => (state = 'waku')}>Waku Object</DropdownItem>
+					</Dropdown>
+					<Textarea placeholder="Say something" bind:value={text} pad={24} />
+					<Button variant="nopad" border={false} disabled={loading} on:click={sendMessage}
+						><SendAltFilled /></Button
+					>
+				</div>
+			</Container>
 		</div>
-	</Container>
+	</div>
 {:else if state === 'waku'}
 	<Container gap={12}>
 		<Header title="Waku Objects">
@@ -116,46 +128,58 @@
 	.messages {
 		margin-bottom: 96px;
 		flex-grow: 1;
+	}
+	.messages-inner {
+		padding-top: var(--spacing-48);
+	}
 
-		.messages-inner {
-			padding-top: var(--spacing-48);
+	.message {
+		display: flex;
+		gap: var(--spacing-6);
+		flex-direction: column;
+		align-items: flex-end;
+		margin-bottom: var(--spacing-24);
+	}
+	.message-content {
+		display: flex;
+		flex-direction: row;
+		gap: var(--spacing-6);
+		align-items: flex-end;
+	}
+
+	.message-text {
+		padding: var(--spacing-12);
+		border-radius: var(--spacing-24);
+		border-bottom-right-radius: 0;
+		display: inline-block;
+		font-family: var(--font-serif);
+		font-size: var(--font-size-lg);
+		background-color: var(--color-grey-bg);
+		border: 1px solid var(--color-grey-bg);
+	}
+
+	.their-message {
+		align-items: flex-start;
+
+		.message-text {
+			border-bottom-right-radius: var(--spacing-24);
+			border: 1px solid var(--color-border);
+			background-color: transparent;
 		}
+	}
 
-		.message {
-			display: flex;
-			gap: var(--spacing-6);
-			flex-direction: column;
-			align-items: flex-end;
-			margin-bottom: var(--spacing-24);
+	.chat {
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+	}
 
-			.message-content {
-				display: flex;
-				flex-direction: row;
-				gap: var(--spacing-6);
-				align-items: flex-end;
-			}
+	.chat-messages {
+		flex-grow: 1;
+	}
 
-			.message-text {
-				padding: var(--spacing-12);
-				border-radius: var(--spacing-24);
-				border-bottom-right-radius: 0;
-				display: inline-block;
-				font-family: var(--font-serif);
-				font-size: var(--font-size-lg);
-				background-color: var(--color-grey-bg);
-				border: 1px solid var(--color-grey-bg);
-			}
-
-			&.their-message {
-				align-items: flex-start;
-
-				.message-text {
-					border-bottom-right-radius: var(--spacing-24);
-					border: 1px solid var(--color-border);
-					background-color: transparent;
-				}
-			}
-		}
+	.chat-input-wrapper {
+		flex-grow: 0;
 	}
 
 	.chat-input {

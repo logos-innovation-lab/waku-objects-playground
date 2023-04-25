@@ -35,9 +35,10 @@
 	let state: 'select-wallet' | 'type-amount' | 'send-request' = 'select-wallet'
 </script>
 
-<Container gap={12}>
-	{#if state === 'select-wallet'}
+{#if state === 'select-wallet'}
+	<Container>
 		<Header title="Request transaction">
+			<!-- TODO: fix on:click action -->
 			<Button
 				slot="right"
 				icon={Close}
@@ -46,12 +47,16 @@
 				on:click={() => goto(ROUTES.HOME)}
 			/>
 		</Header>
+	</Container>
+	<Container gap={12} variant="center">
 		<h2>Please select the wallet where you want to receive the funds.</h2>
 		{#each wallets as wallet}
 			<Card {...wallet} />
 		{/each}
 		<Button icon={Add}>New wallet</Button>
-	{:else if state === 'type-amount'}
+	</Container>
+{:else if state === 'type-amount'}
+	<Container gap={12} variant="space-between">
 		<Header title="Request transaction">
 			<Button
 				slot="left"
@@ -68,18 +73,25 @@
 				on:click={() => goto(ROUTES.HOME)}
 			/>
 		</Header>
-		<h2>How much would you like to receive?</h2>
-		<div class="amt-field">
-			<Textarea placeholder="0.0000" />
-			<Dropdown>
-				<Button slot="button" icon={Sort} variant="nopad" border={false}>ETH</Button>
-				<DropdownItem onClick={() => console.log('ETH')}>ETH</DropdownItem>
-				<DropdownItem onClick={() => console.log('SNT')}>SNT</DropdownItem>
-				<DropdownItem onClick={() => console.log('DAI')}>DAI</DropdownItem>
-			</Dropdown>
+		<div class="how-much">
+			<h2>How much would you like to receive?</h2>
+			<div class="amt-field">
+				<Textarea placeholder="0.0000" />
+				<Dropdown>
+					<Button slot="button" icon={Sort} variant="square" border={true} reverse={true}
+						>ETH</Button
+					>
+					<DropdownItem onClick={() => console.log('ETH')}>ETH</DropdownItem>
+					<DropdownItem onClick={() => console.log('SNT')}>SNT</DropdownItem>
+					<DropdownItem onClick={() => console.log('DAI')}>DAI</DropdownItem>
+				</Dropdown>
+			</div>
+			<div class="converted">(0 USD)</div>
 		</div>
 		<Button icon={ArrowRight} variant="square" on:click={() => (state = 'send-request')} />
-	{:else if state === 'send-request'}
+	</Container>
+{:else if state === 'send-request'}
+	<Container>
 		<Header title="Request transaction">
 			<Button
 				slot="left"
@@ -96,13 +108,15 @@
 				on:click={() => goto(ROUTES.HOME)}
 			/>
 		</Header>
+	</Container>
+	<Container gap={12} variant="center">
 		<div class="item">
 			<span class="label">
 				Requested amount
 				<Edit size={20} />
 			</span>
 			<div class="gray-bg">
-				<span> 0.057 ETH </span>
+				<span class="amt"> 0.057 ETH </span>
 				<span> (Approx. 103.11 USD) </span>
 			</div>
 		</div>
@@ -112,28 +126,61 @@
 				<Edit size={20} />
 			</span>
 			<div class="gray-bg">
-				<span> Main wallet (0x6e6d...21f9) </span>
+				<span class="wallet"> Main wallet (0x6e6d...21f9) </span>
 				<span> ETH 0.029900675925729405 </span>
 			</div>
 		</div>
 		<Button icon={Checkmark} on:click={() => goto(ROUTES.HOME)}>Add to chat</Button>
-	{:else}
-		<h2>How did I get here?</h2>
-	{/if}
-</Container>
+	</Container>
+{:else}
+	<h2>How did I get here?</h2>
+{/if}
 
 <style lang="scss">
 	h2 {
-		margin-bottom: var(--spacing-12);
+		margin-bottom: calc(var(--spacing-12) + var(--spacing-6));
+	}
+
+	.how-much {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-6);
 	}
 
 	.amt-field {
 		display: flex;
+		align-items: center;
 		gap: var(--spacing-12);
 	}
 
 	.label {
 		display: flex;
 		justify-content: space-between;
+	}
+	.item {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-6);
+		margin-bottom: var(--spacing-12);
+		.amt {
+			font-size: var(--font-size-lg);
+			font-weight: var(--font-weight-md);
+		}
+		.wallet {
+			font-size: var(--font-size-normal);
+			font-weight: var(--font-weight-bold);
+		}
+	}
+	.label {
+		display: flex;
+		gap: var(--spacing-6);
+		justify-content: space-between;
+	}
+	.gray-bg {
+		background-color: var(--color-grey-bg);
+		padding: var(--spacing-12);
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-6);
 	}
 </style>

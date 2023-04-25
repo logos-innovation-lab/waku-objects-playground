@@ -2,18 +2,19 @@
 	export let image: string | undefined = undefined
 	export let title: string | undefined = undefined
 	export let description: string | undefined = undefined
-	// export let route: string
 	export let token1: string | undefined = undefined
 	export let token2: string | undefined = undefined
 
 	export let onClick: (() => unknown) | undefined = undefined
 </script>
 
-<div class="root grow">
+<div class="card">
 	<div class="row">
-		<div class="img">
-			<img src={image} alt="waku object" />
-		</div>
+		{#if image}
+			<div class="img">
+				<img src={image} alt="waku object" />
+			</div>
+		{/if}
 		<div class="column grow">
 			<div class="row">
 				{#if $$slots.menu}
@@ -21,8 +22,12 @@
 						<slot name="menu" />
 					</div>
 				{/if}
-				<!-- svelte-ignore a11y-click-events-have-key-events -->
-				<h2 on:click={onClick}>{title}</h2>
+				{#if onClick}
+					<!-- svelte-ignore a11y-click-events-have-key-events -->
+					<h3 on:click={onClick}>{title}</h3>
+				{:else}
+					<h3>{title}</h3>
+				{/if}
 				<slot />
 			</div>
 			{#if description}
@@ -39,7 +44,7 @@
 </div>
 
 <style lang="scss">
-	.root {
+	.card {
 		border: 1px solid var(--color-border);
 		padding: var(--spacing-12);
 	}
@@ -62,16 +67,16 @@
 		display: flex;
 		flex-direction: column;
 	}
-	.grow {
-		flex-grow: 1;
-	}
+	// .grow {
+	// 	flex-grow: 1;
+	// }
 
 	.menu {
 		position: absolute;
 		inset: 0 0 auto auto;
 	}
 
-	h2 {
+	h3 {
 		cursor: pointer;
 	}
 </style>

@@ -3,9 +3,10 @@
 	export let placeholder = ''
 	export let label = ''
 	export let autofocus = false
+	export let pad = 0
 </script>
 
-<label>
+<label style={`padding-block: ${pad}`}>
 	{label}
 	<!-- svelte-ignore a11y-autofocus -->
 	<textarea bind:value on:keydown on:keypress on:keyup {autofocus} {placeholder} rows="1" />
@@ -14,18 +15,22 @@
 <style lang="scss">
 	label {
 		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-12);
 		font-size: var(--font-size-normal);
 		padding-block: var(--spacing-24);
 		width: 100%;
+		font-size: var(--font-size-lg);
+		font-weight: var(--font-weight-normal);
 
 		textarea {
 			width: 100%;
 			border: 1px solid var(--color-border);
-			// border-radius: 21px;
 			padding: var(--spacing-12);
 			margin: 0;
 			font-size: var(--font-size-normal);
-			line-height: 14px;
+			font-weight: var(--font-weight-normal);
+			line-height: var(--font-size-normal);
 			min-height: 1px;
 			resize: none;
 		}

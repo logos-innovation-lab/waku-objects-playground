@@ -23,7 +23,7 @@
 
 <style lang="scss">
 	label {
-		background: var(--color-background);
+		background: var(--color-content-bg);
 		margin: 0;
 		font-size: var(--font-size-button);
 		font-weight: var(--font-weight-button);

@@ -5,9 +5,15 @@
 	export let variant: 'rounded' | 'square' | 'nopad' = 'square'
 	export let border = true
 	export let disabled: boolean | undefined = undefined
+	export let reverse = false
 </script>
 
-<button type="button" {disabled} class={`${variant} ${border ? 'border' : ''}`} on:click>
+<button
+	type="button"
+	{disabled}
+	class={`${variant} ${border ? 'border' : ''} ${reverse ? 'reverse' : ''}`}
+	on:click
+>
 	{#if icon !== undefined}
 		<div class="wrapper">
 			<svelte:component this={icon} />
@@ -18,7 +24,7 @@
 
 <style lang="scss">
 	button {
-		background: var(--color-background);
+		background: var(--color-content-bg);
 		margin: 0;
 		font-size: var(--font-size-button);
 		font-weight: var(--font-weight-button);
@@ -30,6 +36,11 @@
 		gap: var(--spacing-12);
 		padding: 10px;
 		border: none;
+		overflow-wrap: normal;
+
+		&.reverse {
+			flex-direction: row-reverse;
+		}
 
 		&:disabled {
 			cursor: not-allowed;
