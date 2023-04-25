@@ -1,28 +1,26 @@
-
 :root {
 	--spacing-6: 6px;
 	--spacing-12: 12px;
 	--spacing-24: 24px;
 
 	--color-border: #999999;
-	--color-grey-bg: #F0F0F0;
+	--color-grey-bg: #f0f0f0;
 	--color-page-bg: #000000;
 
 	--color-content-bg: #ffffff;
 
 	--font-body: 'Inter';
-	
+
 	--font-size-sm: 14px;
 	--font-size-normal: 16px;
 	--font-size-lg: 20px;
-	
+
 	--font-weight-normal: 400;
 	--font-weight-md: 500;
 	--font-weight-bold: 700;
-	
+
 	--font-size-button: var(--font-size-normal);
 	--font-weight-button: var(--font-weight-normal);
-
 }
 
 html {
