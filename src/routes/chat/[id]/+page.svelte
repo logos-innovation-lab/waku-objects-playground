@@ -2,6 +2,9 @@
 	import { page } from '$app/stores'
 
 	import Add from '$lib/components/icons/add.svelte'
+	import Edit from '$lib/components/icons/edit.svelte'
+	import Checkmark from '$lib/components/icons/checkmark.svelte'
+	import SendAltFilled from '$lib/components/icons/send-alt-filled.svelte'
 	import Menu from '$lib/components/icons/overflow-menu-horizontal.svelte'
 	import ArrowLeft from '$lib/components/icons/arrow-left.svelte'
 
@@ -17,7 +20,6 @@
 	import { goto } from '$app/navigation'
 	import { profile } from '$lib/stores/profile'
 	import { chats } from '$lib/stores/chat'
-	import SendAltFilled from '$lib/components/icons/send-alt-filled.svelte'
 	import adapters from '$lib/adapters'
 	import ROUTES from '$lib/routes'
 
@@ -37,6 +39,8 @@
 	]
 
 	let state: 'waku' | 'chat' = 'chat'
+	let object = true
+
 	$: messages = $chats.chats.get($page.params.id)?.messages || []
 	let loading = false
 	let text = ''
@@ -52,7 +56,7 @@
 
 {#if state === 'chat'}
 	<div class="chat">
-		<div class="chat-messages">
+		<div class="header-wrapper">
 			<Container>
 				<Header title="Chat">
 					<Button
@@ -63,18 +67,67 @@
 						on:click={() => goto(ROUTES.HOME)}
 					/>
 				</Header>
+			</Container>
+		</div>
+		<div class="chat-messages">
+			<Container>
 				<div class="messages">
 					<div class="messages-inner">
 						<!-- Chat bubbles -->
 						{#each messages as message}
-							<div
-								class={`message ${message.fromAddress !== $profile.address ? 'their-message' : ''}`}
-							>
+							{#if message.text.length > 0}
+								<div
+									class={`message ${
+										message.fromAddress !== $profile.address ? 'their-message' : ''
+									}`}
+								>
+									<div class="message-content">
+										<div class="message-text">{message.text}</div>
+									</div>
+								</div>
+							{/if}
+						{/each}
+						{#if object}
+							<div class={`message their-message`}>
 								<div class="message-content">
-									<div class="message-text">{message.text}</div>
+									<div class="message-text message-object-request">
+										<div class="req-title">Requestd transaction</div>
+										<div class="req-amt">0.00057 ETH</div>
+										<div class="req-converted">Approx. 50 USD</div>
+										<div class="req-status">pending</div>
+										<Button icon={Checkmark} align="left">Pay now</Button>
+									</div>
 								</div>
 							</div>
-						{/each}
+							<div class={`message`}>
+								<div class="message-content">
+									<div class="message-text message-object-request">
+										<div class="req-title">Requestd transaction</div>
+										<div class="req-amt">0.00057 ETH</div>
+										<div class="req-converted">Approx. 50 USD</div>
+										<div class="req-status">pending</div>
+										<Button icon={Edit} align="right">Edit</Button>
+									</div>
+								</div>
+							</div>
+
+							<div class={`message their-message`}>
+								<div class="message-content">
+									<div class="message-text message-object-confirmation">
+										<div class="conf-link">Requested transaction 0.00057 ETH</div>
+										<div class="conf-status">Transaction confirmed</div>
+									</div>
+								</div>
+							</div>
+							<div class={`message`}>
+								<div class="message-content">
+									<div class="message-text message-object-confirmation">
+										<div class="conf-link">Requested transaction 0.00057 ETH</div>
+										<div class="conf-status">Transaction confirmed</div>
+									</div>
+								</div>
+							</div>
+						{/if}
 					</div>
 				</div>
 			</Container>
@@ -125,12 +178,20 @@
 {/if}
 
 <style lang="scss">
+	.header-wrapper {
+		background-color: var(--color-content-bg);
+		position: sticky;
+		top: 0;
+		flex-grow: 0;
+	}
+
 	.messages {
-		margin-bottom: 96px;
-		flex-grow: 1;
+		// margin-bottom: 96px;
+		flex-grow: 50;
 	}
 	.messages-inner {
 		padding-top: var(--spacing-48);
+		overflow-y: auto;
 	}
 
 	.message {
@@ -145,6 +206,7 @@
 		flex-direction: row;
 		gap: var(--spacing-6);
 		align-items: flex-end;
+		text-align: right;
 	}
 
 	.message-text {
@@ -160,26 +222,74 @@
 
 	.their-message {
 		align-items: flex-start;
+		text-align: left;
+
+		.message-content {
+			text-align: left;
+		}
 
 		.message-text {
 			border-bottom-right-radius: var(--spacing-24);
+			border-bottom-left-radius: 0;
 			border: 1px solid var(--color-border);
 			background-color: transparent;
 		}
 	}
 
+	.message-object-request {
+		font-size: var(--font-size-sm);
+		.req-title {
+			margin-bottom: var(--spacing-12);
+		}
+		.req-amt {
+			font-size: var(--font-size-lg);
+			font-weight: var(--font-weight-md);
+		}
+		.req-converted {
+			margin-bottom: var(--spacing-12);
+		}
+		.req-status {
+			display: inline-block;
+			background-color: #d8d8d8;
+			border-radius: 21px;
+			text-transform: uppercase;
+			font-size: 10px;
+			padding: var(--spacing-6);
+			margin-bottom: var(--spacing-12);
+		}
+	}
+
+	.message-object-confirmation {
+		font-size: var(--font-size-sm);
+
+		.conf-link {
+			font-style: italic;
+			color: var(--color-border);
+			text-decoration: underline;
+			margin-bottom: var(--spacing-12);
+			cursor: pointer;
+		}
+	}
+
 	.chat {
-		height: 100%;
 		display: flex;
 		flex-direction: column;
+		height: 100%;
 	}
 
 	.chat-messages {
 		flex-grow: 1;
+		overflow-y: auto;
 	}
 
 	.chat-input-wrapper {
 		flex-grow: 0;
+		// position: absolute;
+		// inset: auto 0 0;
+		position: sticky;
+		bottom: 0;
+		background-color: var(--color-content-bg);
+		border-top: 1px solid var(--color-border);
 	}
 
 	.chat-input {

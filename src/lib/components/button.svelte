@@ -6,12 +6,16 @@
 	export let border = true
 	export let disabled: boolean | undefined = undefined
 	export let reverse = false
+	export let large = false
+	export let align: 'left' | 'right' | 'center' = 'center'
 </script>
 
 <button
 	type="button"
 	{disabled}
-	class={`${variant} ${border ? 'border' : ''} ${reverse ? 'reverse' : ''}`}
+	class={`${variant} ${align} ${border ? 'border' : ''} ${reverse ? 'reverse' : ''} ${
+		large ? 'lg' : ''
+	}`}
 	on:click
 >
 	{#if icon !== undefined}
@@ -30,16 +34,35 @@
 		font-weight: var(--font-weight-button);
 		cursor: pointer;
 		display: flex;
-		flex-direction: row;
 		justify-content: center;
+		flex-direction: row;
 		align-items: center;
 		gap: var(--spacing-12);
 		padding: 10px;
 		border: none;
 		overflow-wrap: normal;
 
+		&.center {
+			margin-inline: auto;
+		}
+
+		&.left {
+			margin-left: 0;
+			margin-right: auto;
+		}
+
+		&.right {
+			margin-left: auto;
+			margin-right: 0;
+		}
+
 		&.reverse {
 			flex-direction: row-reverse;
+		}
+
+		&.lg {
+			font-size: var(--font-size-button-lg);
+			font-weight: var(--font-weight-button-bold);
 		}
 
 		&:disabled {
@@ -51,7 +74,6 @@
 		}
 		&.square {
 			border-radius: 0;
-			margin-inline: auto;
 		}
 		&.rounded {
 			border-radius: 200px;

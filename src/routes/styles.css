@@ -20,7 +20,9 @@
 	--font-weight-bold: 700;
 
 	--font-size-button: var(--font-size-normal);
+	--font-size-button-lg: var(--font-size-lg);
 	--font-weight-button: var(--font-weight-normal);
+	--font-weight-button-bold: var(--font-weight-md);
 }
 
 html {

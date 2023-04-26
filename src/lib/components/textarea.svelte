@@ -28,9 +28,9 @@
 			border: 1px solid var(--color-border);
 			padding: var(--spacing-12);
 			margin: 0;
-			font-size: var(--font-size-normal);
-			font-weight: var(--font-weight-normal);
-			line-height: var(--font-size-normal);
+			font-size: var(--font-size-lg);
+			font-weight: var(--font-weight-md);
+			line-height: var(--font-size-lg);
 			min-height: 1px;
 			resize: none;
 		}

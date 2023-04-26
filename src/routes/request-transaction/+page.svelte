@@ -33,110 +33,141 @@
 	]
 
 	let state: 'select-wallet' | 'type-amount' | 'send-request' = 'select-wallet'
+	let amt = ''
+	let currency: 'ETH' | 'SNT' | 'DAI' = 'ETH'
 </script>
 
-{#if state === 'select-wallet'}
-	<Container>
-		<Header title="Request transaction">
-			<!-- TODO: fix on:click action -->
-			<Button
-				slot="right"
-				icon={Close}
-				border={false}
-				variant="nopad"
-				on:click={() => goto(ROUTES.HOME)}
-			/>
-		</Header>
-	</Container>
-	<Container gap={12} variant="center">
-		<h2>Please select the wallet where you want to receive the funds.</h2>
-		{#each wallets as wallet}
-			<Card {...wallet} />
-		{/each}
-		<Button icon={Add}>New wallet</Button>
-	</Container>
-{:else if state === 'type-amount'}
-	<Container gap={12} variant="space-between">
-		<Header title="Request transaction">
-			<Button
-				slot="left"
-				icon={ArrowLeft}
-				border={false}
-				variant="nopad"
-				on:click={() => (state = 'select-wallet')}
-			/>
-			<Button
-				slot="right"
-				icon={Close}
-				border={false}
-				variant="nopad"
-				on:click={() => goto(ROUTES.HOME)}
-			/>
-		</Header>
-		<div class="how-much">
-			<h2>How much would you like to receive?</h2>
-			<div class="amt-field">
-				<Textarea placeholder="0.0000" />
-				<Dropdown>
-					<Button slot="button" icon={Sort} variant="square" border={true} reverse={true}
-						>ETH</Button
-					>
-					<DropdownItem onClick={() => console.log('ETH')}>ETH</DropdownItem>
-					<DropdownItem onClick={() => console.log('SNT')}>SNT</DropdownItem>
-					<DropdownItem onClick={() => console.log('DAI')}>DAI</DropdownItem>
-				</Dropdown>
-			</div>
-			<div class="converted">(0 USD)</div>
+<div class="request-wrapper">
+	{#if state === 'select-wallet'}
+		<div class="header-wrapper">
+			<Container>
+				<Header title="Request transaction">
+					<!-- TODO: fix on:click action -->
+					<Button
+						slot="right"
+						icon={Close}
+						border={false}
+						variant="nopad"
+						align="right"
+						on:click={() => goto(ROUTES.HOME)}
+					/>
+				</Header>
+			</Container>
 		</div>
-		<Button icon={ArrowRight} variant="square" on:click={() => (state = 'send-request')} />
-	</Container>
-{:else if state === 'send-request'}
-	<Container>
-		<Header title="Request transaction">
-			<Button
-				slot="left"
-				icon={ArrowLeft}
-				border={false}
-				variant="nopad"
-				on:click={() => (state = 'type-amount')}
-			/>
-			<Button
-				slot="right"
-				icon={Close}
-				border={false}
-				variant="nopad"
-				on:click={() => goto(ROUTES.HOME)}
-			/>
-		</Header>
-	</Container>
-	<Container gap={12} variant="center">
-		<div class="item">
-			<span class="label">
-				Requested amount
-				<Edit size={20} />
-			</span>
-			<div class="gray-bg">
-				<span class="amt"> 0.057 ETH </span>
-				<span> (Approx. 103.11 USD) </span>
-			</div>
+		<Container gap={12} variant="center">
+			<h2>Please select the wallet where you want to receive the funds.</h2>
+			{#each wallets as wallet}
+				<Card {...wallet} />
+			{/each}
+			<Button icon={Add}>New wallet</Button>
+		</Container>
+	{:else if state === 'type-amount'}
+		<div class="header-wrapper">
+			<Container variant="center">
+				<Header title="Request transaction">
+					<Button
+						slot="left"
+						icon={ArrowLeft}
+						border={false}
+						variant="nopad"
+						on:click={() => (state = 'select-wallet')}
+					/>
+					<Button
+						slot="right"
+						icon={Close}
+						border={false}
+						variant="nopad"
+						on:click={() => goto(ROUTES.HOME)}
+					/>
+				</Header>
+			</Container>
 		</div>
-		<div class="item">
-			<span class="label">
-				To
-				<Edit size={20} />
-			</span>
-			<div class="gray-bg">
-				<span class="wallet"> Main wallet (0x6e6d...21f9) </span>
-				<span> ETH 0.029900675925729405 </span>
+		<Container gap={12} variant="center">
+			<div class="how-much">
+				<h2>How much would you like to receive?</h2>
+				<div class="amt-field">
+					<Textarea placeholder="0.0000" bind:value={amt} />
+					<Dropdown>
+						<Button
+							slot="button"
+							icon={Sort}
+							variant="square"
+							border={true}
+							reverse={true}
+							large={true}>{currency}</Button
+						>
+						<DropdownItem onClick={() => (currency = 'ETH')}>ETH</DropdownItem>
+						<DropdownItem onClick={() => (currency = 'SNT')}>SNT</DropdownItem>
+						<DropdownItem onClick={() => (currency = 'DAI')}>DAI</DropdownItem>
+					</Dropdown>
+				</div>
+				<div class="converted">(0 USD)</div>
 			</div>
+			<Button icon={ArrowRight} variant="square" on:click={() => (state = 'send-request')} />
+		</Container>
+	{:else if state === 'send-request'}
+		<div class="header-wrapper">
+			<Container>
+				<Header title="Request transaction">
+					<Button
+						slot="left"
+						icon={ArrowLeft}
+						border={false}
+						variant="nopad"
+						on:click={() => (state = 'type-amount')}
+					/>
+					<Button
+						slot="right"
+						icon={Close}
+						border={false}
+						variant="nopad"
+						on:click={() => goto(ROUTES.HOME)}
+					/>
+				</Header>
+			</Container>
 		</div>
-		<Button icon={Checkmark} on:click={() => goto(ROUTES.HOME)}>Add to chat</Button>
-	</Container>
-{:else}
-	<h2>How did I get here?</h2>
-{/if}
+		<Container gap={12} variant="center">
+			<div class="item">
+				<span class="label">
+					Requested amount
+					<Edit size={20} />
+				</span>
+				<div class="gray-bg">
+					<span class="amt"> {amt} {currency} </span>
+					<span> (Approx. ?? USD) </span>
+				</div>
+			</div>
+			<div class="item">
+				<span class="label">
+					To
+					<Edit size={20} />
+				</span>
+				<div class="gray-bg">
+					<span class="wallet"> Main wallet (0x6e6d...21f9) </span>
+					<span> ETH 0.029900675925729405 </span>
+				</div>
+			</div>
+			<Button icon={Checkmark} on:click={() => goto(ROUTES.HOME)}>Add to chat</Button>
+		</Container>
+	{:else}
+		<Container>
+			<h2>How did I get here?</h2>
+		</Container>
+	{/if}
+</div>
 
 <style lang="scss">
+	.request-wrapper {
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+		justify-content: space-between;
+	}
+	.header-wrapper {
+		position: sticky;
+		top: 0;
+	}
+
 	h2 {
 		margin-bottom: calc(var(--spacing-12) + var(--spacing-6));
 	}

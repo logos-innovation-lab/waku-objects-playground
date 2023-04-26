@@ -1,7 +1,7 @@
 <script lang="ts">
 	export let direction: 'row' | 'column' = 'column'
 	export let gap = 0
-	export let variant: 'space-between' | 'flex-start' | 'center' = 'flex-start'
+	export let variant: 'space-between' | 'flex-start' | 'flex-end' | 'center' = 'flex-start'
 </script>
 
 <div class={`container ${direction} ${variant}`} style={`gap: ${gap}px`}>
@@ -11,6 +11,7 @@
 <style>
 	.container {
 		display: flex;
+		justify-content: flex-start;
 		padding: 0px var(--spacing-24);
 		width: 100%;
 	}
@@ -30,5 +31,8 @@
 	}
 	.center {
 		justify-content: center;
+	}
+	.flex-end {
+		justify-content: flex-end;
 	}
 </style>

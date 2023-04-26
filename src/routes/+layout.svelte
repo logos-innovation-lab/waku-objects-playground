@@ -33,15 +33,17 @@
 		height: 100dvh;
 		width: 100vw;
 		background-color: black;
-		padding: 0 var(--spacing-24);
+		/* padding: 0 var(--spacing-24); */
 	}
 
 	.wrapper {
-		max-height: calc(100vh - var(--spacing-24));
+		/* max-height: calc(100vh - var(--spacing-24)); */
 		max-width: 412px;
 		width: 100%;
 		height: 100%;
 		background-color: white;
-		padding-bottom: var(--spacing-24);
+		/* padding-bottom: var(--spacing-24); */
+		/* overflow: auto; */
+		position: relative;
 	}
 </style>
