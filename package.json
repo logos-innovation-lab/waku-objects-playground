@@ -14,8 +14,6 @@
 		"knip": "knip"
 	},
 	"devDependencies": {
-		"500.css": "link:@fontsource/inter/500.css",
-		"700.css": "link:@fontsource/inter/700.css",
 		"@fontsource/inter": "^4.5.15",
 		"@sveltejs/adapter-auto": "^2.0.0",
 		"@sveltejs/kit": "^1.15.5",

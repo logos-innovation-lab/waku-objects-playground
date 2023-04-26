@@ -1,6 +1,6 @@
 <script lang="ts">
 	import '@total-typescript/ts-reset'
-	import '@fontsource/inter'
+	import '@fontsource/inter' // Defaults to weight 400 with all styles included.
 	import '@fontsource/inter/700.css'
 	import '@fontsource/inter/500.css'
 	import './styles.css'
