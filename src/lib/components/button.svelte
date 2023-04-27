@@ -2,34 +2,68 @@
 	import type { ComponentConstructor, IconProps } from '$lib/types'
 
 	export let icon: ComponentConstructor<IconProps> | undefined = undefined
+	export let iconStart: ComponentConstructor<IconProps> | undefined = undefined
+	export let iconEnd: ComponentConstructor<IconProps> | undefined = undefined
 	export let variant: 'rounded' | 'square' | 'nopad' = 'square'
 	export let border = true
 	export let disabled: boolean | undefined = undefined
+	export let large = false
+	export let justify: 'left' | 'right' | 'center' = 'center'
 </script>
 
-<button type="button" {disabled} class={`${variant} ${border ? 'border' : ''}`} on:click>
-	{#if icon !== undefined}
+<button
+	type="button"
+	{disabled}
+	class={`${variant} ${justify} ${border ? 'border' : ''} ${large ? 'lg' : ''}`}
+	on:click
+>
+	{#if iconStart !== undefined || icon !== undefined}
 		<div class="wrapper">
-			<svelte:component this={icon} />
+			<svelte:component this={iconStart || icon} />
 		</div>
 	{/if}
 	<slot />
+	{#if iconEnd !== undefined}
+		<div class="wrapper">
+			<svelte:component this={iconEnd} />
+		</div>
+	{/if}
 </button>
 
 <style lang="scss">
 	button {
-		background: var(--color-background);
+		background: var(--color-content-bg);
 		margin: 0;
 		font-size: var(--font-size-button);
 		font-weight: var(--font-weight-button);
 		cursor: pointer;
 		display: flex;
-		flex-direction: row;
 		justify-content: center;
+		flex-direction: row;
 		align-items: center;
 		gap: var(--spacing-12);
 		padding: 10px;
 		border: none;
+		overflow-wrap: normal;
+
+		&.center:not(.nopad) {
+			margin-inline: auto;
+		}
+
+		&.left {
+			margin-left: 0;
+			margin-right: auto;
+		}
+
+		&.right {
+			margin-left: auto;
+			margin-right: 0;
+		}
+
+		&.lg {
+			font-size: var(--font-size-button-lg);
+			font-weight: var(--font-weight-button-bold);
+		}
 
 		&:disabled {
 			cursor: not-allowed;
@@ -40,7 +74,6 @@
 		}
 		&.square {
 			border-radius: 0;
-			margin-inline: auto;
 		}
 		&.rounded {
 			border-radius: 200px;

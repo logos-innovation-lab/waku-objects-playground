@@ -7,7 +7,6 @@
 	let cls: string | undefined = undefined
 	export { cls as class }
 	export let disabled: boolean | undefined = undefined
-	export let rep: boolean | undefined = undefined
 	export let up: boolean | undefined = undefined
 
 	let showDropdown = false
@@ -42,7 +41,7 @@
 	</div>
 
 	<div class={`root ${cls}`}>
-		<ul class={`${showDropdown ? '' : 'hidden'} ${rep ? 'rep' : ''} ${up ? 'up' : ''} ${cls}`}>
+		<ul class={`${showDropdown ? '' : 'hidden'} ${up ? 'up' : ''} ${cls}`}>
 			<slot />
 		</ul>
 	</div>
