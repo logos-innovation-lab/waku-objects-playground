@@ -2,28 +2,32 @@
 	import type { ComponentConstructor, IconProps } from '$lib/types'
 
 	export let icon: ComponentConstructor<IconProps> | undefined = undefined
+	export let iconStart: ComponentConstructor<IconProps> | undefined = undefined
+	export let iconEnd: ComponentConstructor<IconProps> | undefined = undefined
 	export let variant: 'rounded' | 'square' | 'nopad' = 'square'
 	export let border = true
 	export let disabled: boolean | undefined = undefined
-	export let reverse = false
 	export let large = false
-	export let align: 'left' | 'right' | 'center' = 'center'
+	export let justify: 'left' | 'right' | 'center' = 'center'
 </script>
 
 <button
 	type="button"
 	{disabled}
-	class={`${variant} ${align} ${border ? 'border' : ''} ${reverse ? 'reverse' : ''} ${
-		large ? 'lg' : ''
-	}`}
+	class={`${variant} ${justify} ${border ? 'border' : ''} ${large ? 'lg' : ''}`}
 	on:click
 >
-	{#if icon !== undefined}
+	{#if iconStart !== undefined || icon !== undefined}
 		<div class="wrapper">
-			<svelte:component this={icon} />
+			<svelte:component this={iconStart || icon} />
 		</div>
 	{/if}
 	<slot />
+	{#if iconEnd !== undefined}
+		<div class="wrapper">
+			<svelte:component this={iconEnd} />
+		</div>
+	{/if}
 </button>
 
 <style lang="scss">
@@ -42,7 +46,7 @@
 		border: none;
 		overflow-wrap: normal;
 
-		&.center {
+		&.center:not(.nopad) {
 			margin-inline: auto;
 		}
 
@@ -54,10 +58,6 @@
 		&.right {
 			margin-left: auto;
 			margin-right: 0;
-		}
-
-		&.reverse {
-			flex-direction: row-reverse;
 		}
 
 		&.lg {

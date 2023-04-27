@@ -44,95 +44,102 @@
 </script>
 
 {#if state === 'edit-participants'}
-	<Container gap={12}>
-		<Header title="New chat">
-			<Button
-				slot="left"
-				icon={ArrowLeft}
-				border={false}
-				variant="nopad"
-				on:click={() => goto(ROUTES.HOME)}
-			/>
-			<svelte:fragment slot="right">
-				{#if !$profile.address}
-					<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><Wallet /></Button>
-				{:else}
-					<Avatar picture={$profile.avatar} onClick={() => goto('/profile')} />
-				{/if}
-			</svelte:fragment>
-		</Header>
+	<Header title="New chat">
+		<Button
+			slot="left"
+			icon={ArrowLeft}
+			border={false}
+			variant="nopad"
+			on:click={() => goto(ROUTES.HOME)}
+		/>
+		<svelte:fragment slot="right">
+			{#if !$profile.address}
+				<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><Wallet /></Button>
+			{:else}
+				<Avatar picture={$profile.avatar} onClick={() => goto('/profile')} />
+			{/if}
+		</svelte:fragment>
+	</Header>
+	<div class="content">
+		<Container gap={12}>
+			<div class="mid">
+				<section>
+					<h2>Chat participants</h2>
+					<ul>
+						{#each participants as participant}
+							{@const contact = $contacts.contacts.get(participant)}
+							{#if contact}
+								<li>
+									<div class="nogrow">
+										<Button
+											variant="rounded"
+											border={false}
+											icon={Close}
+											on:click={() =>
+												(participants = participants.filter((p) => p !== participant))}
+										/>
+									</div>
+									<Avatar picture={contact.avatar} />{contact.name ?? contact.address}
+								</li>
+							{/if}
+						{:else}
+							<p>No participants, please select at least one</p>
+						{/each}
+					</ul>
+				</section>
 
-		<div class="mid">
-			<section>
-				<h2>Chat participants</h2>
-				<ul>
-					{#each participants as participant}
-						{@const contact = $contacts.contacts.get(participant)}
-						{#if contact}
+				<section>
+					<h2>Contact list</h2>
+					<span>(for now this is all registered users)</span>
+					<ul>
+						{#each [...$contacts.contacts].filter(([address]) => !participants.includes(address) && address !== $profile.address) as [address, contact]}
 							<li>
-								<Button
-									variant="rounded"
-									border={false}
-									icon={Close}
-									on:click={() => (participants = participants.filter((p) => p !== participant))}
-								/><Avatar picture={contact.avatar} />{contact.name ?? contact.address}
+								<div class="nogrow">
+									<Button
+										variant="rounded"
+										border={false}
+										icon={Add}
+										on:click={() => (participants = [...participants, address])}
+									/>
+								</div>
+								<Avatar picture={contact.avatar} />{contact.name ?? contact.address}
 							</li>
-						{/if}
-					{:else}
-						<p>No participants, please select at least one</p>
-					{/each}
-				</ul>
-			</section>
+						{/each}
+					</ul>
+				</section>
+			</div>
 
-			<section>
-				<h2>Contact list</h2>
-				<span>(for now this is all registered users)</span>
-				<ul>
-					{#each [...$contacts.contacts].filter(([address]) => !participants.includes(address) && address !== $profile.address) as [address, contact]}
-						<li>
-							<Button
-								variant="rounded"
-								border={false}
-								icon={Add}
-								on:click={() => (participants = [...participants, address])}
-							/><Avatar picture={contact.avatar} />{contact.name ?? contact.address}
-						</li>
-					{/each}
-				</ul>
-			</section>
-		</div>
-
-		<div class="bottom">
-			<Button
-				variant="rounded"
-				disabled={participants.length === 0}
-				on:click={() => {
-					state = participants.length > 1 ? 'edit-name' : 'send-message'
-				}}
-			>
-				<ArrowRight /> Next
-			</Button>
-		</div>
-	</Container>
+			<div class="bottom">
+				<Button
+					variant="rounded"
+					disabled={participants.length === 0}
+					on:click={() => {
+						state = participants.length > 1 ? 'edit-name' : 'send-message'
+					}}
+				>
+					<ArrowRight /> Next
+				</Button>
+			</div>
+		</Container>
+	</div>
 {:else if state === 'edit-name'}
+	<Header title="New chat">
+		<Button
+			slot="left"
+			icon={ArrowLeft}
+			border={false}
+			variant="nopad"
+			on:click={() => (state = 'edit-participants')}
+		/>
+		<svelte:fragment slot="right">
+			{#if !$profile.address}
+				<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><Wallet /></Button>
+			{:else}
+				<Avatar picture={$profile.avatar} onClick={() => goto('/profile')} />
+			{/if}
+		</svelte:fragment>
+	</Header>
 	<Container gap={12}>
-		<Header title="New chat">
-			<Button
-				slot="left"
-				icon={ArrowLeft}
-				border={false}
-				variant="nopad"
-				on:click={() => (state = 'edit-participants')}
-			/>
-			<svelte:fragment slot="right">
-				{#if !$profile.address}
-					<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><Wallet /></Button>
-				{:else}
-					<Avatar picture={$profile.avatar} onClick={() => goto('/profile')} />
-				{/if}
-			</svelte:fragment>
-		</Header>
-
 		<div class="mid">
 			<p>Please name your group chat</p>
 			<Textarea label="Chat name" bind:value={chatName} />
@@ -149,23 +156,23 @@
 		</div>
 	</Container>
 {:else if state === 'send-message'}
+	<Header title="New chat">
+		<Button
+			slot="left"
+			icon={ArrowLeft}
+			border={false}
+			variant="nopad"
+			on:click={() => (state = 'edit-participants')}
+		/>
+		<svelte:fragment slot="right">
+			{#if !$profile.address}
+				<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><Wallet /></Button>
+			{:else}
+				<Avatar picture={$profile.avatar} onClick={() => goto('/profile')} />
+			{/if}
+		</svelte:fragment>
+	</Header>
 	<Container gap={12}>
-		<Header title="New chat">
-			<Button
-				slot="left"
-				icon={ArrowLeft}
-				border={false}
-				variant="nopad"
-				on:click={() => (state = 'edit-participants')}
-			/>
-			<svelte:fragment slot="right">
-				{#if !$profile.address}
-					<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><Wallet /></Button>
-				{:else}
-					<Avatar picture={$profile.avatar} onClick={() => goto('/profile')} />
-				{/if}
-			</svelte:fragment>
-		</Header>
 		<div class="mid">
 			<h2>{chatName}</h2>
 			<p>This is the very beginning of your conversation between you and</p>
@@ -193,9 +200,9 @@
 		justify-content: flex-end;
 		margin: var(--spacing-24) 0px;
 	}
-	.mid {
-		flex-grow: 1;
-	}
+	// .mid {
+	// 	flex-grow: 1;
+	// }
 	section {
 		margin: var(--spacing-24) 0px;
 	}
@@ -210,5 +217,8 @@
 		display: flex;
 		align-items: center;
 		gap: var(--spacing-12);
+	}
+	.nogrow {
+		flex-grow: 0;
 	}
 </style>

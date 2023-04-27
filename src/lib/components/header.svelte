@@ -1,20 +1,32 @@
 <script lang="ts">
+	import Container from '$lib/components/container.svelte'
+
 	export let title: string
 </script>
 
-<header class="root">
-	<div class="left">
-		<slot name="left" />
-	</div>
-	<h1>{title}</h1>
-	<div class="right">
-		<slot name="right" />
-	</div>
+<header class="header-wrapper">
+	<Container>
+		<div class="root">
+			<div class="left">
+				<slot name="left" />
+			</div>
+			<h1>{title}</h1>
+			<div class="right">
+				<slot name="right" />
+			</div>
+		</div>
+	</Container>
 </header>
 
 <style lang="scss">
-	.root {
+	.header-wrapper {
 		position: sticky;
+		top: 0;
+		height: auto;
+		background-color: var(--color-content-bg);
+	}
+
+	.root {
 		display: flex;
 		flex-direction: row;
 		justify-content: space-between;

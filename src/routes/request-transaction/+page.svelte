@@ -39,22 +39,17 @@
 
 <div class="request-wrapper">
 	{#if state === 'select-wallet'}
-		<div class="header-wrapper">
-			<Container>
-				<Header title="Request transaction">
-					<!-- TODO: fix on:click action -->
-					<Button
-						slot="right"
-						icon={Close}
-						border={false}
-						variant="nopad"
-						align="right"
-						on:click={() => goto(ROUTES.HOME)}
-					/>
-				</Header>
-			</Container>
-		</div>
-		<Container gap={12} variant="center">
+		<Header title="Request transaction">
+			<!-- TODO: fix on:click action -->
+			<Button
+				slot="right"
+				icon={Close}
+				border={false}
+				variant="nopad"
+				on:click={() => goto(ROUTES.HOME)}
+			/>
+		</Header>
+		<Container gap={12} justify="center">
 			<h2>Please select the wallet where you want to receive the funds.</h2>
 			{#each wallets as wallet}
 				<Card {...wallet} />
@@ -62,39 +57,30 @@
 			<Button icon={Add}>New wallet</Button>
 		</Container>
 	{:else if state === 'type-amount'}
-		<div class="header-wrapper">
-			<Container variant="center">
-				<Header title="Request transaction">
-					<Button
-						slot="left"
-						icon={ArrowLeft}
-						border={false}
-						variant="nopad"
-						on:click={() => (state = 'select-wallet')}
-					/>
-					<Button
-						slot="right"
-						icon={Close}
-						border={false}
-						variant="nopad"
-						on:click={() => goto(ROUTES.HOME)}
-					/>
-				</Header>
-			</Container>
-		</div>
-		<Container gap={12} variant="center">
+		<Header title="Request transaction">
+			<Button
+				slot="left"
+				icon={ArrowLeft}
+				border={false}
+				variant="nopad"
+				on:click={() => (state = 'select-wallet')}
+			/>
+			<Button
+				slot="right"
+				icon={Close}
+				border={false}
+				variant="nopad"
+				on:click={() => goto(ROUTES.HOME)}
+			/>
+		</Header>
+		<Container gap={12} justify="center">
 			<div class="how-much">
 				<h2>How much would you like to receive?</h2>
 				<div class="amt-field">
 					<Textarea placeholder="0.0000" bind:value={amt} />
 					<Dropdown>
-						<Button
-							slot="button"
-							icon={Sort}
-							variant="square"
-							border={true}
-							reverse={true}
-							large={true}>{currency}</Button
+						<Button slot="button" iconEnd={Sort} variant="square" border={true} large={true}
+							>{currency}</Button
 						>
 						<DropdownItem onClick={() => (currency = 'ETH')}>ETH</DropdownItem>
 						<DropdownItem onClick={() => (currency = 'SNT')}>SNT</DropdownItem>
@@ -106,27 +92,23 @@
 			<Button icon={ArrowRight} variant="square" on:click={() => (state = 'send-request')} />
 		</Container>
 	{:else if state === 'send-request'}
-		<div class="header-wrapper">
-			<Container>
-				<Header title="Request transaction">
-					<Button
-						slot="left"
-						icon={ArrowLeft}
-						border={false}
-						variant="nopad"
-						on:click={() => (state = 'type-amount')}
-					/>
-					<Button
-						slot="right"
-						icon={Close}
-						border={false}
-						variant="nopad"
-						on:click={() => goto(ROUTES.HOME)}
-					/>
-				</Header>
-			</Container>
-		</div>
-		<Container gap={12} variant="center">
+		<Header title="Request transaction">
+			<Button
+				slot="left"
+				icon={ArrowLeft}
+				border={false}
+				variant="nopad"
+				on:click={() => (state = 'type-amount')}
+			/>
+			<Button
+				slot="right"
+				icon={Close}
+				border={false}
+				variant="nopad"
+				on:click={() => goto(ROUTES.HOME)}
+			/>
+		</Header>
+		<Container gap={12} justify="center">
 			<div class="item">
 				<span class="label">
 					Requested amount
@@ -162,10 +144,6 @@
 		display: flex;
 		flex-direction: column;
 		justify-content: space-between;
-	}
-	.header-wrapper {
-		position: sticky;
-		top: 0;
 	}
 
 	h2 {

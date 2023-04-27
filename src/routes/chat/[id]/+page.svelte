@@ -56,19 +56,15 @@
 
 {#if state === 'chat'}
 	<div class="chat">
-		<div class="header-wrapper">
-			<Container>
-				<Header title="Chat">
-					<Button
-						slot="left"
-						icon={ArrowLeft}
-						border={false}
-						variant="nopad"
-						on:click={() => goto(ROUTES.HOME)}
-					/>
-				</Header>
-			</Container>
-		</div>
+		<Header title="Chat">
+			<Button
+				slot="left"
+				icon={ArrowLeft}
+				border={false}
+				variant="nopad"
+				on:click={() => goto(ROUTES.HOME)}
+			/>
+		</Header>
 		<div class="chat-messages">
 			<Container>
 				<div class="messages">
@@ -95,7 +91,7 @@
 										<div class="req-amt">0.00057 ETH</div>
 										<div class="req-converted">Approx. 50 USD</div>
 										<div class="req-status">pending</div>
-										<Button icon={Checkmark} align="left">Pay now</Button>
+										<Button icon={Checkmark} justify="left">Pay now</Button>
 									</div>
 								</div>
 							</div>
@@ -106,7 +102,7 @@
 										<div class="req-amt">0.00057 ETH</div>
 										<div class="req-converted">Approx. 50 USD</div>
 										<div class="req-status">pending</div>
-										<Button icon={Edit} align="right">Edit</Button>
+										<Button icon={Edit} justify="right">Edit</Button>
 									</div>
 								</div>
 							</div>
@@ -150,16 +146,16 @@
 		</div>
 	</div>
 {:else if state === 'waku'}
+	<Header title="Waku Objects">
+		<Button
+			slot="left"
+			icon={ArrowLeft}
+			border={false}
+			variant="nopad"
+			on:click={() => (state = 'chat')}
+		/>
+	</Header>
 	<Container gap={12}>
-		<Header title="Waku Objects">
-			<Button
-				slot="left"
-				icon={ArrowLeft}
-				border={false}
-				variant="nopad"
-				on:click={() => (state = 'chat')}
-			/>
-		</Header>
 		{#each cards as card}
 			<Card {...card}>
 				<svelte:fragment slot="menu">
@@ -178,13 +174,6 @@
 {/if}
 
 <style lang="scss">
-	.header-wrapper {
-		background-color: var(--color-content-bg);
-		position: sticky;
-		top: 0;
-		flex-grow: 0;
-	}
-
 	.messages {
 		// margin-bottom: 96px;
 		flex-grow: 50;
