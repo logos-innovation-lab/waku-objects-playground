@@ -4,6 +4,9 @@ devDependencies:
   '@fontsource/inter':
     specifier: ^4.5.15
     version: 4.5.15
+  '@fontsource/source-sans-pro':
+    specifier: ^4.5.11
+    version: 4.5.11
   '@sveltejs/adapter-auto':
     specifier: ^2.0.0
     version: 2.0.0(@sveltejs/kit@1.15.5)
@@ -770,6 +773,10 @@ packages:
 
   /@fontsource/inter@4.5.15:
     resolution: {integrity: sha512-FzleM9AxZQK2nqsTDtBiY0PMEVWvnKnuu2i09+p6DHvrHsuucoV2j0tmw+kAT3L4hvsLdAIDv6MdGehsPIdT+Q==}
+    dev: true
+
+  /@fontsource/source-sans-pro@4.5.11:
+    resolution: {integrity: sha512-f7iw44q1EjBv3MNcHCGAgrW/QVyweaEouFsJzykPhTOGnZFSwFJRISToXornOmuAy7xUUGiVdqOLiykgZoYB8A==}
     dev: true
 
   /@grpc/grpc-js@1.7.3:

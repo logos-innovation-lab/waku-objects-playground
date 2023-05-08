@@ -23,7 +23,7 @@
 		align-items: center;
 		gap: var(--spacing-24);
 		font-family: var(--font-serif);
-		font-size: var(--font-size-normal);
+		font-size: var(--font-size-16);
 		background-color: var(--color-content-bg);
 		border: 1px solid var(--color-border);
 

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Container from '$lib/components/container.svelte'
 
-	export let title: string
+	export let title: string = ''
 </script>
 
 <header class="header-wrapper">

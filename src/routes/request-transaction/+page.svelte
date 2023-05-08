@@ -172,12 +172,12 @@
 		gap: var(--spacing-6);
 		margin-bottom: var(--spacing-12);
 		.amt {
-			font-size: var(--font-size-lg);
-			font-weight: var(--font-weight-md);
+			font-size: var(--font-size-20);
+			font-weight: var(--font-weight-600);
 		}
 		.wallet {
-			font-size: var(--font-size-normal);
-			font-weight: var(--font-weight-bold);
+			font-size: var(--font-size-16);
+			font-weight: var(--font-weight-600);
 		}
 	}
 	.label {

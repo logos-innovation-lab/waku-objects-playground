@@ -34,17 +34,18 @@
 	button {
 		background: var(--color-content-bg);
 		margin: 0;
-		font-size: var(--font-size-button);
-		font-weight: var(--font-weight-button);
+		font-size: var(--font-size-16);
+		font-weight: var(--font-weight-600);
 		cursor: pointer;
 		display: flex;
 		justify-content: center;
 		flex-direction: row;
 		align-items: center;
-		gap: var(--spacing-12);
-		padding: 10px;
+		gap: var(--spacing-6);
+		padding: 13px 14px;
 		border: none;
 		overflow-wrap: normal;
+		color: var(--color-body);
 
 		&.center:not(.nopad) {
 			margin-inline: auto;
@@ -61,8 +62,7 @@
 		}
 
 		&.lg {
-			font-size: var(--font-size-button-lg);
-			font-weight: var(--font-weight-button-bold);
+			font-size: var(--font-size-20);
 		}
 
 		&:disabled {
@@ -84,8 +84,11 @@
 		&.border {
 			border: 1px solid var(--color-border);
 		}
-		.wrapper {
-			line-height: 0;
+	}
+	.wrapper {
+		line-height: 0;
+		:global(svg) {
+			fill: var(--color-btn-icon);
 		}
 	}
 </style>

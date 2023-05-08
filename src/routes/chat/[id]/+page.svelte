@@ -204,7 +204,7 @@
 		border-bottom-right-radius: 0;
 		display: inline-block;
 		font-family: var(--font-serif);
-		font-size: var(--font-size-lg);
+		font-size: var(--font-size-20);
 		background-color: var(--color-grey-bg);
 		border: 1px solid var(--color-grey-bg);
 	}
@@ -226,13 +226,13 @@
 	}
 
 	.message-object-request {
-		font-size: var(--font-size-sm);
+		font-size: var(--font-size-14);
 		.req-title {
 			margin-bottom: var(--spacing-12);
 		}
 		.req-amt {
-			font-size: var(--font-size-lg);
-			font-weight: var(--font-weight-md);
+			font-size: var(--font-size-20);
+			font-weight: var(--font-weight-600);
 		}
 		.req-converted {
 			margin-bottom: var(--spacing-12);
@@ -249,7 +249,7 @@
 	}
 
 	.message-object-confirmation {
-		font-size: var(--font-size-sm);
+		font-size: var(--font-size-14);
 
 		.conf-link {
 			font-style: italic;

@@ -1,8 +1,8 @@
 <script lang="ts">
 	import '@total-typescript/ts-reset'
-	import '@fontsource/inter' // Defaults to weight 400 with all styles included.
-	import '@fontsource/inter/700.css'
-	import '@fontsource/inter/500.css'
+	import '@fontsource/source-sans-pro' // Defaults to weight 400 with all styles included.
+	import '@fontsource/source-sans-pro/600.css'
+	import '@fontsource/source-sans-pro/700.css'
 	import './styles.css'
 	import { onMount } from 'svelte'
 	import { onDestroy } from 'svelte'
@@ -32,7 +32,7 @@
 		height: 100vh;
 		height: 100dvh;
 		width: 100vw;
-		background-color: black;
+		background-color: var(--color-wrapper-bg);
 		/* padding: 0 var(--spacing-24); */
 	}
 
