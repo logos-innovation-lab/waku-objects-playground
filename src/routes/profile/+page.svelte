@@ -29,7 +29,7 @@
 	$: resizePersonaPicture(pictureFiles && pictureFiles[0])
 </script>
 
-<Container gap={12}>
+<Container>
 	<Header title="Profile">
 		<Button
 			slot="left"

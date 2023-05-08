@@ -1,10 +1,11 @@
 :root {
+	--spacing-3: 3px;
 	--spacing-6: 6px;
 	--spacing-12: 12px;
 	--spacing-24: 24px;
 
 	--color-border: #eeeeee;
-	--color-btn-icon: #909090;
+	--color-gray-light: #909090;
 	--color-grey-bg: #f0f0f0;
 	--color-wrapper-bg: #000000;
 	--color-body: #303030;
@@ -21,7 +22,6 @@
 	--font-weight-400: 400;
 	--font-weight-600: 600;
 	--font-weight-700: 700;
-
 }
 
 html {

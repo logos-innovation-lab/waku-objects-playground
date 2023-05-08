@@ -61,7 +61,7 @@
 		</svelte:fragment>
 	</Header>
 	<div class="content">
-		<Container gap={12}>
+		<Container>
 			<div class="mid">
 				<section>
 					<h2>Chat participants</h2>
@@ -139,7 +139,7 @@
 			{/if}
 		</svelte:fragment>
 	</Header>
-	<Container gap={12}>
+	<Container>
 		<div class="mid">
 			<p>Please name your group chat</p>
 			<Textarea label="Chat name" bind:value={chatName} />
@@ -172,7 +172,7 @@
 			{/if}
 		</svelte:fragment>
 	</Header>
-	<Container gap={12}>
+	<Container>
 		<div class="mid">
 			<h2>{chatName}</h2>
 			<p>This is the very beginning of your conversation between you and</p>
@@ -217,6 +217,7 @@
 		display: flex;
 		align-items: center;
 		gap: var(--spacing-12);
+		margin-block: var(--spacing-12);
 	}
 	.nogrow {
 		flex-grow: 0;

@@ -155,7 +155,7 @@
 			on:click={() => (state = 'chat')}
 		/>
 	</Header>
-	<Container gap={12}>
+	<Container>
 		{#each cards as card}
 			<Card {...card}>
 				<svelte:fragment slot="menu">
@@ -204,7 +204,7 @@
 		border-bottom-right-radius: 0;
 		display: inline-block;
 		font-family: var(--font-serif);
-		font-size: var(--font-size-20);
+		font-size: var(--font-size-18);
 		background-color: var(--color-grey-bg);
 		border: 1px solid var(--color-grey-bg);
 	}

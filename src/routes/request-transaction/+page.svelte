@@ -49,7 +49,7 @@
 				on:click={() => goto(ROUTES.HOME)}
 			/>
 		</Header>
-		<Container gap={12} justify="center">
+		<Container>
 			<h2>Please select the wallet where you want to receive the funds.</h2>
 			{#each wallets as wallet}
 				<Card {...wallet} />
@@ -73,7 +73,7 @@
 				on:click={() => goto(ROUTES.HOME)}
 			/>
 		</Header>
-		<Container gap={12} justify="center">
+		<Container>
 			<div class="how-much">
 				<h2>How much would you like to receive?</h2>
 				<div class="amt-field">
@@ -108,7 +108,7 @@
 				on:click={() => goto(ROUTES.HOME)}
 			/>
 		</Header>
-		<Container gap={12} justify="center">
+		<Container>
 			<div class="item">
 				<span class="label">
 					Requested amount

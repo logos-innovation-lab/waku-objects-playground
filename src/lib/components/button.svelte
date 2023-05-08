@@ -88,7 +88,7 @@
 	.wrapper {
 		line-height: 0;
 		:global(svg) {
-			fill: var(--color-btn-icon);
+			fill: var(--color-gray-light);
 		}
 	}
 </style>

@@ -3,7 +3,7 @@
 	import User from './icons/user.svelte'
 
 	export let picture: string | undefined = undefined
-	export let size = 70
+	export let size = 48
 	export let onClick: (() => unknown) | undefined = undefined
 	export let avatarSize = size / 2
 </script>
@@ -24,7 +24,7 @@
 		cursor: pointer;
 	}
 	.avatar {
-		margin: var(--spacing-12) 0px;
+		// margin: var(--spacing-12) 0px;
 		border-radius: 100px;
 
 		.img {

@@ -9,6 +9,7 @@
 
 	import { profile } from '$lib/stores/profile'
 	import { chats } from '$lib/stores/chat'
+	import { formatDateAndTime } from '$lib/utils/format'
 
 	import adapters from '$lib/adapters'
 	import { goto } from '$app/navigation'
@@ -19,27 +20,29 @@
 
 <div class="content">
 	{#if !$profile.address}
-		<Container gap={12} justify="center" align="center">
-			<div class="chatbot">
-				<ChatBot size={32} />
+		<Container>
+			<div class="loggedout">
+				<div class="chatbot">
+					<ChatBot size={32} />
+				</div>
+				<div>
+					<p class="bold">Waku chats</p>
+					<p>Connect a web3 wallet to get started</p>
+				</div>
+				<Button
+					disabled={!adapters.canLogIn()}
+					on:click={adapters.logIn}
+					variant="rounded"
+					iconStart={Login}>Connect</Button
+				>
 			</div>
-			<div>
-				<p class="bold">Waku chats</p>
-				<p>Connect a web3 wallet to get started</p>
-			</div>
-			<Button
-				disabled={!adapters.canLogIn()}
-				on:click={adapters.logIn}
-				variant="rounded"
-				iconStart={Login}>Connect</Button
-			>
 		</Container>
 	{:else if $chats.loading}
-		<Container gap={12} justify="center" align="center">
+		<Container>
 			<h2>Loading...</h2>
 		</Container>
 	{:else if $chats.error}
-		<Container gap={12} justify="center" align="center">
+		<Container>
 			<h2>Failed to load chats: {$chats.error.message}</h2>
 		</Container>
 	{:else}
@@ -59,25 +62,34 @@
 				{/if}
 			</svelte:fragment>
 		</Header>
-		<Container gap={12} justify="flex-start">
-			<ul class="chats">
-				{#each [...$chats.chats] as [id, chat]}
-					<!-- svelte-ignore a11y-click-events-have-key-events -->
-					<li on:click={() => goto(ROUTES.CHAT(id))}>
-						<Avatar />
-						<div>
-							<!-- TODO: show username or wallet address instead of chat name -->
-							<p class="username">{chat.name}<span class="badge">{chat.messages.length}</span></p>
-							<p class="message">
-								{chat.messages[chat.messages.length - 1]?.text.substring(0, 50)}
-							</p>
+		<ul class="chats">
+			{#each [...$chats.chats] as [id, chat]}
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<li on:click={() => goto(ROUTES.CHAT(id))}>
+					<Container>
+						<div class="chat">
+							<Avatar size={70} />
+							<div class="content">
+								<div class="user-info">
+									<!-- TODO: show username or wallet address instead of chat name -->
+									<span class="username">
+										{chat.name}<span class="badge">{chat.messages.length}</span>
+									</span>
+									<span class="timestamp">
+										{formatDateAndTime(chat.messages[chat.messages.length - 1].timestamp)}
+									</span>
+								</div>
+								<p class="message">
+									{chat.messages[chat.messages.length - 1]?.text.substring(0, 50)}
+								</p>
+							</div>
 						</div>
-					</li>
-				{:else}
-					<p>No chats</p>
-				{/each}
-			</ul>
-		</Container>
+					</Container>
+				</li>
+			{:else}
+				<p>No chats</p>
+			{/each}
+		</ul>
 	{/if}
 </div>
 
@@ -91,11 +103,31 @@
 	// 	flex-grow: 1;
 	// }
 
+	.loggedout {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-12);
+		place-items: center;
+		justify-content: center;
+		min-height: 100vh;
+	}
+
 	.username {
+		display: inline-flex;
+		flex-direction: row;
+		gap: var(--spacing-6);
+		align-items: center;
+		font-size: var(--font-size-18);
+		font-weight: var(--font-weight-600);
+	}
+
+	.user-info {
+		margin-bottom: var(--spacing-3);
 		display: flex;
 		flex-direction: row;
 		gap: var(--spacing-6);
 		align-items: center;
+		justify-content: space-between;
 	}
 	.badge {
 		background-color: var(--color-body);
@@ -110,6 +142,25 @@
 	.chats {
 		li {
 			border-bottom: 1px solid var(--color-border);
+		}
+	}
+
+	.timestamp {
+		font-size: var(-font-size-14);
+		color: var(--color-gray-light);
+		margin-left: auto;
+	}
+
+	.chat {
+		display: flex;
+		flex-direction: row;
+		gap: var(--spacing-12);
+		justify-content: flex-start;
+		align-items: flex-start;
+		padding-block: var(--spacing-24);
+
+		.content {
+			flex-grow: 1;
 		}
 	}
 
