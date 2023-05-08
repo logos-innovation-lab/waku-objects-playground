@@ -2,6 +2,7 @@
 	import NewChat from '$lib/components/icons/add-comment.svelte'
 	import Login from '$lib/components/icons/login.svelte'
 	import ChatBot from '$lib/components/icons/chat-bot.svelte'
+	import Search from '$lib/components/icons/search.svelte'
 
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
@@ -52,6 +53,7 @@
 					<Button border={false} on:click={() => goto(ROUTES.CHAT_NEW)}>
 						<NewChat size={24} />
 					</Button>
+					<Search size={24} />
 				</div>
 			</svelte:fragment>
 			<svelte:fragment slot="right">
