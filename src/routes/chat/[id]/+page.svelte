@@ -57,13 +57,7 @@
 {#if state === 'chat'}
 	<div class="chat">
 		<Header title="Chat">
-			<Button
-				slot="left"
-				icon={ArrowLeft}
-				border={false}
-				variant="nopad"
-				on:click={() => goto(ROUTES.HOME)}
-			/>
+			<Button slot="left" icon={ArrowLeft} on:click={() => goto(ROUTES.HOME)} />
 		</Header>
 		<div class="chat-messages">
 			<Container>
@@ -91,7 +85,7 @@
 										<div class="req-amt">0.00057 ETH</div>
 										<div class="req-converted">Approx. 50 USD</div>
 										<div class="req-status">pending</div>
-										<Button icon={Checkmark} justify="left">Pay now</Button>
+										<Button icon={Checkmark}>Pay now</Button>
 									</div>
 								</div>
 							</div>
@@ -102,7 +96,7 @@
 										<div class="req-amt">0.00057 ETH</div>
 										<div class="req-converted">Approx. 50 USD</div>
 										<div class="req-status">pending</div>
-										<Button icon={Edit} justify="right">Edit</Button>
+										<Button icon={Edit}>Edit</Button>
 									</div>
 								</div>
 							</div>
@@ -132,35 +126,27 @@
 			<Container>
 				<div class="chat-input">
 					<Dropdown up>
-						<Button slot="button" icon={Add} variant="rounded" />
+						<Button slot="button" icon={Add} />
 						<DropdownItem onClick={() => console.log('Pic from Cam')}>Pic from Cam</DropdownItem>
 						<DropdownItem onClick={() => console.log('Pic from Lib')}>Pic from Lib</DropdownItem>
 						<DropdownItem onClick={() => (state = 'waku')}>Waku Object</DropdownItem>
 					</Dropdown>
 					<Textarea placeholder="Say something" bind:value={text} pad={24} />
-					<Button variant="nopad" border={false} disabled={loading} on:click={sendMessage}
-						><SendAltFilled /></Button
-					>
+					<Button disabled={loading} on:click={sendMessage}><SendAltFilled /></Button>
 				</div>
 			</Container>
 		</div>
 	</div>
 {:else if state === 'waku'}
 	<Header title="Waku Objects">
-		<Button
-			slot="left"
-			icon={ArrowLeft}
-			border={false}
-			variant="nopad"
-			on:click={() => (state = 'chat')}
-		/>
+		<Button slot="left" icon={ArrowLeft} on:click={() => (state = 'chat')} />
 	</Header>
 	<Container>
 		{#each cards as card}
 			<Card {...card}>
 				<svelte:fragment slot="menu">
 					<Dropdown>
-						<Button slot="button" icon={Menu} variant="nopad" border={false} />
+						<Button slot="button" icon={Menu} />
 						<DropdownItem onClick={() => console.log('View more info')}>View more info</DropdownItem
 						>
 						<DropdownItem onClick={() => console.log('Uninstall')}>Uninstall</DropdownItem>
@@ -204,9 +190,9 @@
 		border-bottom-right-radius: 0;
 		display: inline-block;
 		font-family: var(--font-serif);
-		font-size: var(--font-size-18);
-		background-color: var(--color-grey-bg);
-		border: 1px solid var(--color-grey-bg);
+		font-size: var(--font-size-lg);
+		background-color: var(--white);
+		border: 1px solid var(--gray10);
 	}
 
 	.their-message {
@@ -220,18 +206,17 @@
 		.message-text {
 			border-bottom-right-radius: var(--spacing-24);
 			border-bottom-left-radius: 0;
-			border: 1px solid var(--color-border);
-			background-color: transparent;
+			border: 1px solid var(--gray20);
 		}
 	}
 
 	.message-object-request {
-		font-size: var(--font-size-14);
+		font-size: var(--font-size-sm);
 		.req-title {
 			margin-bottom: var(--spacing-12);
 		}
 		.req-amt {
-			font-size: var(--font-size-20);
+			font-size: var(--font-size-xl);
 			font-weight: var(--font-weight-600);
 		}
 		.req-converted {
@@ -249,11 +234,11 @@
 	}
 
 	.message-object-confirmation {
-		font-size: var(--font-size-14);
+		font-size: var(--font-size-sm);
 
 		.conf-link {
 			font-style: italic;
-			color: var(--color-border);
+			color: var(--gray20);
 			text-decoration: underline;
 			margin-bottom: var(--spacing-12);
 			cursor: pointer;
@@ -264,6 +249,7 @@
 		display: flex;
 		flex-direction: column;
 		height: 100%;
+		background-color: var(--gray10);
 	}
 
 	.chat-messages {
@@ -277,8 +263,8 @@
 		// inset: auto 0 0;
 		position: sticky;
 		bottom: 0;
-		background-color: var(--color-content-bg);
-		border-top: 1px solid var(--color-border);
+		background-color: var(--white);
+		border-top: 1px solid var(--gray20);
 	}
 
 	.chat-input {

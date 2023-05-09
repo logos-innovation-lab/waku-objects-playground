@@ -41,13 +41,7 @@
 	{#if state === 'select-wallet'}
 		<Header title="Request transaction">
 			<!-- TODO: fix on:click action -->
-			<Button
-				slot="right"
-				icon={Close}
-				border={false}
-				variant="nopad"
-				on:click={() => goto(ROUTES.HOME)}
-			/>
+			<Button slot="right" icon={Close} on:click={() => goto(ROUTES.HOME)} />
 		</Header>
 		<Container>
 			<h2>Please select the wallet where you want to receive the funds.</h2>
@@ -58,20 +52,8 @@
 		</Container>
 	{:else if state === 'type-amount'}
 		<Header title="Request transaction">
-			<Button
-				slot="left"
-				icon={ArrowLeft}
-				border={false}
-				variant="nopad"
-				on:click={() => (state = 'select-wallet')}
-			/>
-			<Button
-				slot="right"
-				icon={Close}
-				border={false}
-				variant="nopad"
-				on:click={() => goto(ROUTES.HOME)}
-			/>
+			<Button slot="left" icon={ArrowLeft} on:click={() => (state = 'select-wallet')} />
+			<Button slot="right" icon={Close} on:click={() => goto(ROUTES.HOME)} />
 		</Header>
 		<Container>
 			<div class="how-much">
@@ -79,9 +61,7 @@
 				<div class="amt-field">
 					<Textarea placeholder="0.0000" bind:value={amt} />
 					<Dropdown>
-						<Button slot="button" iconEnd={Sort} variant="square" border={true} large={true}
-							>{currency}</Button
-						>
+						<Button slot="button" iconEnd={Sort}>{currency}</Button>
 						<DropdownItem onClick={() => (currency = 'ETH')}>ETH</DropdownItem>
 						<DropdownItem onClick={() => (currency = 'SNT')}>SNT</DropdownItem>
 						<DropdownItem onClick={() => (currency = 'DAI')}>DAI</DropdownItem>
@@ -89,24 +69,12 @@
 				</div>
 				<div class="converted">(0 USD)</div>
 			</div>
-			<Button icon={ArrowRight} variant="square" on:click={() => (state = 'send-request')} />
+			<Button icon={ArrowRight} on:click={() => (state = 'send-request')} />
 		</Container>
 	{:else if state === 'send-request'}
 		<Header title="Request transaction">
-			<Button
-				slot="left"
-				icon={ArrowLeft}
-				border={false}
-				variant="nopad"
-				on:click={() => (state = 'type-amount')}
-			/>
-			<Button
-				slot="right"
-				icon={Close}
-				border={false}
-				variant="nopad"
-				on:click={() => goto(ROUTES.HOME)}
-			/>
+			<Button slot="left" icon={ArrowLeft} on:click={() => (state = 'type-amount')} />
+			<Button slot="right" icon={Close} on:click={() => goto(ROUTES.HOME)} />
 		</Header>
 		<Container>
 			<div class="item">
@@ -172,11 +140,11 @@
 		gap: var(--spacing-6);
 		margin-bottom: var(--spacing-12);
 		.amt {
-			font-size: var(--font-size-20);
+			font-size: var(--font-size-xl);
 			font-weight: var(--font-weight-600);
 		}
 		.wallet {
-			font-size: var(--font-size-16);
+			font-size: var(--font-size-normal);
 			font-weight: var(--font-weight-600);
 		}
 	}
@@ -186,7 +154,7 @@
 		justify-content: space-between;
 	}
 	.gray-bg {
-		background-color: var(--color-grey-bg);
+		background-color: var(--gray10);
 		padding: var(--spacing-12);
 		display: flex;
 		flex-direction: column;

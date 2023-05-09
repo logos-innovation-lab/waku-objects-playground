@@ -30,11 +30,8 @@
 					<p class="bold">Waku chats</p>
 					<p>Connect a web3 wallet to get started</p>
 				</div>
-				<Button
-					disabled={!adapters.canLogIn()}
-					on:click={adapters.logIn}
-					variant="rounded"
-					iconStart={Login}>Connect</Button
+				<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn} iconStart={Login}
+					>Connect</Button
 				>
 			</div>
 		</Container>
@@ -49,11 +46,10 @@
 	{:else}
 		<Header>
 			<svelte:fragment slot="left">
-				<div class="bottom">
-					<Button border={false} on:click={() => goto(ROUTES.CHAT_NEW)}>
+				<div class="header-btns">
+					<Button variant="icon" on:click={() => goto(ROUTES.CHAT_NEW)}>
 						<NewChat size={24} />
 					</Button>
-					<Search size={24} />
 				</div>
 			</svelte:fragment>
 			<svelte:fragment slot="right">
@@ -75,7 +71,9 @@
 								<div class="user-info">
 									<!-- TODO: show username or wallet address instead of chat name -->
 									<span class="username">
-										{chat.name}<span class="badge">{chat.messages.length}</span>
+										{chat.name ? chat.name : 'Unnamed chat'}<span class="badge"
+											>{chat.messages.length}</span
+										>
 									</span>
 									<span class="timestamp">
 										{formatDateAndTime(chat.messages[chat.messages.length - 1].timestamp)}
@@ -96,15 +94,6 @@
 </div>
 
 <style lang="scss">
-	// .bottom {
-	// 	display: flex;
-	// 	justify-content: flex-end;
-	// 	margin: var(--spacing-24) 0px;
-	// }
-	// .mid {
-	// 	flex-grow: 1;
-	// }
-
 	.loggedout {
 		display: flex;
 		flex-direction: column;
@@ -112,6 +101,7 @@
 		place-items: center;
 		justify-content: center;
 		min-height: 100vh;
+		text-align: center;
 	}
 
 	.username {
@@ -119,7 +109,7 @@
 		flex-direction: row;
 		gap: var(--spacing-6);
 		align-items: center;
-		font-size: var(--font-size-18);
+		font-size: var(--font-size-lg);
 		font-weight: var(--font-weight-600);
 	}
 
@@ -132,24 +122,24 @@
 		justify-content: space-between;
 	}
 	.badge {
-		background-color: var(--color-body);
-		color: var(--color-content-bg);
+		background-color: var(--gray60);
+		color: var(--white);
 		padding: 2px 7px;
 		border-radius: var(--spacing-12);
 		text-align: center;
-		font-size: var(--font-size-14);
+		font-size: var(--font-size-sm);
 		font-weight: var(--font-weight-700);
 	}
 
 	.chats {
 		li {
-			border-bottom: 1px solid var(--color-border);
+			border-bottom: 1px solid var(--gray20);
 		}
 	}
 
 	.timestamp {
 		font-size: var(-font-size-14);
-		color: var(--color-gray-light);
+		color: var(--gray40);
 		margin-left: auto;
 	}
 

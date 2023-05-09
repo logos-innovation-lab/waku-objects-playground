@@ -45,7 +45,7 @@
 
 <style lang="scss">
 	.card {
-		border: 1px solid var(--color-border);
+		border: 1px solid var(--gray20);
 		padding: var(--spacing-12);
 	}
 	.img {

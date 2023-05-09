@@ -23,7 +23,7 @@
 
 <style lang="scss">
 	label {
-		background: var(--color-content-bg);
+		background: var(--white);
 		margin: 0;
 		font-size: var(--font-size-button);
 		font-weight: var(--font-weight-button);
@@ -40,7 +40,7 @@
 			cursor: not-allowed;
 
 			& :global(svg) {
-				fill: var(--color-border);
+				fill: var(--gray20);
 			}
 		}
 		&.square {
@@ -54,7 +54,7 @@
 			padding: 0;
 		}
 		&.border {
-			border: 1px solid var(--color-border);
+			border: 1px solid var(--gray20);
 		}
 		.wrapper {
 			line-height: 0;

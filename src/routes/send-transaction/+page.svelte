@@ -7,6 +7,6 @@
 
 <Container>
 	<Header title="Send transaction">
-		<Button slot="left" icon={ArrowLeft} border={false} variant="nopad" />
+		<Button slot="left" icon={ArrowLeft} />
 	</Header>
 </Container>

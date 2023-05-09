@@ -32,7 +32,7 @@
 		height: 100vh;
 		height: 100dvh;
 		width: 100vw;
-		background-color: var(--color-wrapper-bg);
+		background-color: var(--black);
 		/* padding: 0 var(--spacing-24); */
 	}
 
