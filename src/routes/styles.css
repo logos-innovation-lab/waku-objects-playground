@@ -1,28 +1,52 @@
 :root {
+	--spacing-3: 3px;
 	--spacing-6: 6px;
 	--spacing-12: 12px;
 	--spacing-24: 24px;
 
-	--color-border: #999999;
-	--color-grey-bg: #f0f0f0;
-	--color-page-bg: #000000;
+	/* --white: #ffffff;
+	--gray10: #f9f9f9;
+	--gray20: #e7e7e7;
+	--gray30: #bcbcbc;
+	--gray40: #7c7c7c;
+	--gray50: #3f3f3f;
+	--black: #000000; */
 
-	--color-content-bg: #ffffff;
+	--white: hsl(0, 0%, 100%);
+	--gray10: hsl(0, 0%, 98%);
+	--gray20: hsl(0, 0%, 91%);
+	--gray30: hsl(0, 0%, 74%);
+	--gray40: hsl(0, 0%, 49%);
+	--gray50: hsl(0, 0%, 25%);
+	--black: hsl(0, 0%, 0%);
 
-	--font-body: 'Inter';
+	--transparent: transparent;
+
+	--font-body: 'Source Sans Pro';
 
 	--font-size-sm: 14px;
 	--font-size-normal: 16px;
-	--font-size-lg: 20px;
+	--font-size-lg: 18px;
+	--font-size-xl: 20px;
 
-	--font-weight-normal: 400;
-	--font-weight-md: 500;
-	--font-weight-bold: 700;
+	--font-weight-400: 400;
+	--font-weight-600: 600;
+	--font-weight-700: 700;
 
-	--font-size-button: var(--font-size-normal);
-	--font-size-button-lg: var(--font-size-lg);
-	--font-weight-button: var(--font-weight-normal);
-	--font-weight-button-bold: var(--font-weight-md);
+	/* INPUT */
+	--input-bg: var(--gray10);
+	--input-border: var(--gray20);
+	--input-placeholder: var(--gray40);
+	--input-active-bg: var(--white);
+	--input-active-border: var(--gray20);
+	--input-active-content: var(--black);
+	--input-filled-bg: var(--gray10);
+	--input-filled-border: var(--gray20);
+	--input-filled-content: var(--gray50);
+	--input-filled-icon: var(--gray40);
+
+	/* INPUT - SEARCH-ICON */
+	/* size: 20px */
 }
 
 html {
@@ -36,8 +60,9 @@ body {
 	margin: 0;
 	padding: 0;
 	font-family: var(--font-body);
-	font-weight: var(--font-weight-normal);
+	font-weight: var(--font-weight-400);
 	font-size: var(--font-size-normal);
+	color: var(--gray50);
 }
 
 *,
@@ -60,23 +85,27 @@ video {
 	border-style: none;
 }
 
+svg {
+	fill: var(--gray50);
+}
+
 h1 {
-	font-size: var(--font-size-lg);
-	font-weight: var(--font-weight-md);
+	font-size: var(--font-size-xl);
+	font-weight: var(--font-weight-600);
 	padding: 0;
 	margin: 0;
 }
 
 h2 {
-	font-size: var(--font-size-lg);
-	font-weight: var(--font-weight-normal);
+	font-size: var(--font-size-xl);
+	font-weight: var(--font-weight-400);
 	padding: 0;
 	margin: 0;
 }
 
 h3 {
 	font-size: var(--font-size-normal);
-	font-weight: var(--font-weight-bold);
+	font-weight: var(--font-weight-600);
 	padding: 0;
 	margin: 0;
 }

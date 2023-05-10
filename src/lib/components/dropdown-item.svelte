@@ -24,15 +24,15 @@
 		gap: var(--spacing-24);
 		font-family: var(--font-serif);
 		font-size: var(--font-size-normal);
-		background-color: var(--color-content-bg);
-		border: 1px solid var(--color-border);
+		background-color: var(--white);
+		border: 1px solid var(--gray20);
 
 		&.danger {
 			color: var(--color-red);
 		}
 
 		&:hover {
-			background-color: var(--color-grey-bg);
+			background-color: var(--gray10);
 		}
 
 		&.disabled {

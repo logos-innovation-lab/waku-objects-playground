@@ -20,17 +20,17 @@
 		font-size: var(--font-size-normal);
 		padding-block: var(--spacing-24);
 		width: 100%;
-		font-size: var(--font-size-lg);
-		font-weight: var(--font-weight-normal);
+		font-size: var(--font-size-xl);
+		font-weight: var(--font-weight-400);
 
 		textarea {
 			width: 100%;
-			border: 1px solid var(--color-border);
+			border: 1px solid var(--gray20);
 			padding: var(--spacing-12);
 			margin: 0;
-			font-size: var(--font-size-lg);
-			font-weight: var(--font-weight-md);
-			line-height: var(--font-size-lg);
+			font-size: var(--font-size-xl);
+			font-weight: var(--font-weight-600);
+			line-height: var(--font-size-xl);
 			min-height: 1px;
 			resize: none;
 		}

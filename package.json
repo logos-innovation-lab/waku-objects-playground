@@ -14,7 +14,7 @@
 		"knip": "knip"
 	},
 	"devDependencies": {
-		"@fontsource/inter": "^4.5.15",
+		"@fontsource/source-sans-pro": "^4.5.11",
 		"@sveltejs/adapter-auto": "^2.0.0",
 		"@sveltejs/kit": "^1.15.5",
 		"@total-typescript/ts-reset": "^0.4.2",

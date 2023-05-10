@@ -3,16 +3,18 @@
 	import User from './icons/user.svelte'
 
 	export let picture: string | undefined = undefined
+	export let size = 48
 	export let onClick: (() => unknown) | undefined = undefined
+	export let avatarSize = size / 2
 </script>
 
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div class={`avatar ${onClick !== undefined ? 'click' : ''}`} on:click={onClick}>
-	<div class="img">
+	<div class="img" style={`height: ${size}px;`}>
 		{#if picture}
 			<img src={adapters.getPicture(picture)} alt="profile" />
 		{:else}
-			<User />
+			<User size={avatarSize} />
 		{/if}
 	</div>
 </div>
@@ -22,12 +24,11 @@
 		cursor: pointer;
 	}
 	.avatar {
-		margin: var(--spacing-12) 0px;
+		// margin: var(--spacing-12) 0px;
 		border-radius: 100px;
 
 		.img {
 			aspect-ratio: 1;
-			height: 40px;
 			border-radius: 100px;
 			display: flex;
 			justify-content: center;

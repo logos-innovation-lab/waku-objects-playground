@@ -1,6 +1,8 @@
 <script lang="ts">
-	import Add from '$lib/components/icons/add.svelte'
-	import Wallet from '$lib/components/icons/wallet.svelte'
+	import NewChat from '$lib/components/icons/add-comment.svelte'
+	import Login from '$lib/components/icons/login.svelte'
+	import ChatBot from '$lib/components/icons/chat-bot.svelte'
+	import Search from '$lib/components/icons/search.svelte'
 
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
@@ -8,6 +10,7 @@
 
 	import { profile } from '$lib/stores/profile'
 	import { chats } from '$lib/stores/chat'
+	import { formatDateAndTime } from '$lib/utils/format'
 
 	import adapters from '$lib/adapters'
 	import { goto } from '$app/navigation'
@@ -16,59 +19,146 @@
 	import ROUTES from '$lib/routes'
 </script>
 
-<Header title="WO Playground">
-	<svelte:fragment slot="right">
-		{#if !$profile.address}
-			<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><Wallet /></Button>
-		{:else}
-			<Avatar picture={$profile.avatar} onClick={() => goto(ROUTES.PROFILE)} />
-		{/if}
-	</svelte:fragment>
-</Header>
 <div class="content">
-	<Container gap={12} justify="center">
-		<div class="mid">
-			{#if !$profile.address}
-				<h2>Connect your wallet</h2>
-				<p>To use Waku Objects, you need to access your account by connecting your wallet.</p>
-				<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><Wallet /></Button>
-			{:else if $chats.loading}
-				<h2>Loading...</h2>
-			{:else if $chats.error}
-				<h2>Failed to load chats: {$chats.error.message}</h2>
+	{#if !$profile.address}
+		<Container>
+			<div class="loggedout">
+				<div class="chatbot">
+					<ChatBot size={32} />
+				</div>
+				<div>
+					<p class="bold">Waku chats</p>
+					<p>Connect a web3 wallet to get started</p>
+				</div>
+				<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn} iconStart={Login}
+					>Connect</Button
+				>
+			</div>
+		</Container>
+	{:else if $chats.loading}
+		<Container>
+			<h2>Loading...</h2>
+		</Container>
+	{:else if $chats.error}
+		<Container>
+			<h2>Failed to load chats: {$chats.error.message}</h2>
+		</Container>
+	{:else}
+		<Header>
+			<svelte:fragment slot="left">
+				<div class="header-btns">
+					<Button variant="icon" on:click={() => goto(ROUTES.CHAT_NEW)}>
+						<NewChat size={24} />
+					</Button>
+				</div>
+			</svelte:fragment>
+			<svelte:fragment slot="right">
+				{#if !$profile.address}
+					<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><NewChat /></Button>
+				{:else}
+					<Avatar size={24} picture={$profile.avatar} onClick={() => goto(ROUTES.PROFILE)} />
+				{/if}
+			</svelte:fragment>
+		</Header>
+		<ul class="chats">
+			{#each [...$chats.chats] as [id, chat]}
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<li on:click={() => goto(ROUTES.CHAT(id))}>
+					<Container>
+						<div class="chat">
+							<Avatar size={70} />
+							<div class="content">
+								<div class="user-info">
+									<!-- TODO: show username or wallet address instead of chat name -->
+									<span class="username">
+										{chat.name ? chat.name : 'Unnamed chat'}<span class="badge"
+											>{chat.messages.length}</span
+										>
+									</span>
+									<span class="timestamp">
+										{formatDateAndTime(chat.messages[chat.messages.length - 1].timestamp)}
+									</span>
+								</div>
+								<p class="message">
+									{chat.messages[chat.messages.length - 1]?.text.substring(0, 50)}
+								</p>
+							</div>
+						</div>
+					</Container>
+				</li>
 			{:else}
-				<h2>Chats</h2>
-				<ul>
-					{#each [...$chats.chats] as [id, chat]}
-						<!-- svelte-ignore a11y-click-events-have-key-events -->
-						<li on:click={() => goto(ROUTES.CHAT(id))}>
-							<Avatar />
-							<span>{chat.messages[chat.messages.length - 1]?.text.substring(0, 50)}</span>
-						</li>
-					{:else}
-						<p>No chats</p>
-					{/each}
-				</ul>
-			{/if}
-		</div>
-
-		<div class="bottom">
-			<Button variant="rounded" on:click={() => goto(ROUTES.CHAT_NEW)}>
-				<Add /> New chat
-			</Button>
-		</div>
-	</Container>
+				<p>No chats</p>
+			{/each}
+		</ul>
+	{/if}
 </div>
 
 <style lang="scss">
-	.bottom {
+	.loggedout {
 		display: flex;
-		justify-content: flex-end;
-		margin: var(--spacing-24) 0px;
+		flex-direction: column;
+		gap: var(--spacing-12);
+		place-items: center;
+		justify-content: center;
+		min-height: 100vh;
+		text-align: center;
 	}
-	// .mid {
-	// 	flex-grow: 1;
-	// }
+
+	.username {
+		display: inline-flex;
+		flex-direction: row;
+		gap: var(--spacing-6);
+		align-items: center;
+		font-size: var(--font-size-lg);
+		font-weight: var(--font-weight-600);
+	}
+
+	.user-info {
+		margin-bottom: var(--spacing-3);
+		display: flex;
+		flex-direction: row;
+		gap: var(--spacing-6);
+		align-items: center;
+		justify-content: space-between;
+	}
+	.badge {
+		background-color: var(--gray50);
+		color: var(--white);
+		padding: 2px 7px;
+		border-radius: var(--spacing-12);
+		text-align: center;
+		font-size: var(--font-size-sm);
+		font-weight: var(--font-weight-700);
+	}
+
+	.chats {
+		li {
+			border-bottom: 1px solid var(--gray20);
+		}
+	}
+
+	.timestamp {
+		font-size: var(-font-size-14);
+		color: var(--gray40);
+		margin-left: auto;
+	}
+
+	.chat {
+		display: flex;
+		flex-direction: row;
+		gap: var(--spacing-12);
+		justify-content: flex-start;
+		align-items: flex-start;
+		padding-block: var(--spacing-24);
+
+		.content {
+			flex-grow: 1;
+		}
+	}
+
+	.bold {
+		font-weight: var(--font-weight-600);
+	}
 
 	ul {
 		list-style: none;
