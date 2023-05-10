@@ -122,7 +122,7 @@
 		justify-content: space-between;
 	}
 	.badge {
-		background-color: var(--gray60);
+		background-color: var(--gray50);
 		color: var(--white);
 		padding: 2px 7px;
 		border-radius: var(--spacing-12);

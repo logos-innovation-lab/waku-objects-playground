@@ -4,14 +4,22 @@
 	--spacing-12: 12px;
 	--spacing-24: 24px;
 
-	--white: #ffffff;
+	/* --white: #ffffff;
 	--gray10: #f9f9f9;
 	--gray20: #e7e7e7;
 	--gray30: #bcbcbc;
 	--gray40: #7c7c7c;
 	--gray50: #3f3f3f;
-	--gray60: #303030;
-	--black: #000000;
+	--black: #000000; */
+
+	--white: hsl(0, 0%, 100%);
+	--gray10: hsl(0, 0%, 98%);
+	--gray20: hsl(0, 0%, 91%);
+	--gray30: hsl(0, 0%, 74%);
+	--gray40: hsl(0, 0%, 49%);
+	--gray50: hsl(0, 0%, 25%);
+	--black: hsl(0, 0%, 0%);
+	
 	--transparent: transparent;
 
 	--font-body: 'Source Sans Pro';
@@ -54,7 +62,7 @@ body {
 	font-family: var(--font-body);
 	font-weight: var(--font-weight-400);
 	font-size: var(--font-size-normal);
-	color: var(--gray60);
+	color: var(--gray50);
 }
 
 *,
@@ -78,7 +86,7 @@ video {
 }
 
 svg {
-	fill: var(--gray60);
+	fill: var(--gray50);
 }
 
 h1 {
