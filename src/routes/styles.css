@@ -4,25 +4,37 @@
 	--spacing-12: 12px;
 	--spacing-24: 24px;
 
-	/* --white: #ffffff;
-	--gray10: #f9f9f9;
-	--gray20: #e7e7e7;
-	--gray30: #bcbcbc;
-	--gray40: #7c7c7c;
-	--gray50: #3f3f3f;
-	--black: #000000; */
+	--white: #FFFFFF;
+	--gray10: #F3F3F3;
+	--gray20: #E7E7E7;
+	--gray30: #BCBCBC;
+	--gray40: #7C7C7C;
+	--gray50: #3F3F3F;
+	--black: #000000;
 
-	--white: hsl(0, 0%, 100%);
-	--gray10: hsl(0, 0%, 98%);
+	/* RGB */
+
+	--white-rgb: 255, 255, 255;
+	--gray10-rgb: 243, 243, 243;
+	--gray20-rgb: 231, 231, 231;
+	--gray30-rgb: 188, 188, 188;
+	--gray40-rgb: 124, 124, 124;
+	--gray50-rgb: 63, 63, 63;
+	--black-rgb: 0, 0, 0;
+
+	/* HSL */
+
+	/* --white: hsl(0, 0%, 100%);
+	--gray10: hsl(0, 0%, 95%);
 	--gray20: hsl(0, 0%, 91%);
 	--gray30: hsl(0, 0%, 74%);
 	--gray40: hsl(0, 0%, 49%);
 	--gray50: hsl(0, 0%, 25%);
-	--black: hsl(0, 0%, 0%);
+	--black: hsl(0, 0%, 0%); */
 
 	--transparent: transparent;
 
-	--font-body: 'Source Sans Pro';
+	--font-body: sans-serif;
 
 	--font-size-sm: 14px;
 	--font-size-normal: 16px;
@@ -30,8 +42,11 @@
 	--font-size-xl: 20px;
 
 	--font-weight-400: 400;
+	--font-weight-500: 500;
 	--font-weight-600: 600;
 	--font-weight-700: 700;
+
+	--border-radius: var(--spacing-24);
 
 	/* INPUT */
 	--input-bg: var(--gray10);
@@ -60,6 +75,7 @@ body {
 	margin: 0;
 	padding: 0;
 	font-family: var(--font-body);
+	line-height: 20px;
 	font-weight: var(--font-weight-400);
 	font-size: var(--font-size-normal);
 	color: var(--gray50);
@@ -108,4 +124,32 @@ h3 {
 	font-weight: var(--font-weight-600);
 	padding: 0;
 	margin: 0;
+}
+
+.text-title {
+	font-weight: var(--font-weight-700);
+	font-size: var(--font-size-lg);
+	line-height: 24px;
+}
+
+.text-lg {
+	font-size: var(--font-size-lg);
+	line-height: 24px;
+}
+
+.text-sm {
+	font-size: var(--font-size-sm);
+	line-height: 16px;
+}
+
+.text-serif {
+	font-family: serif;
+}
+
+.text-italic {
+	font-style: italic;
+}
+
+.text-bold {
+	font-weight: 700;
 }

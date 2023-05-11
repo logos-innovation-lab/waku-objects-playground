@@ -4,11 +4,16 @@
 	export let icon: ComponentConstructor<IconProps> | undefined = undefined
 	export let iconStart: ComponentConstructor<IconProps> | undefined = undefined
 	export let iconEnd: ComponentConstructor<IconProps> | undefined = undefined
-	export let variant: '' | 'icon' | 'strong' = ''
+	export let variant: '' | 'icon' | 'strong' | 'account' = ''
 	export let disabled: boolean | undefined = undefined
 </script>
 
 <button type="button" {disabled} class={variant} on:click>
+	{#if variant === 'account'}
+		<div class="avatar">
+			<slot name="avatar" />
+		</div>
+	{/if}
 	{#if iconStart !== undefined || icon !== undefined}
 		<div class="wrapper">
 			<svelte:component this={iconStart || icon} />
@@ -51,10 +56,10 @@
 		border-radius: 30px;
 		color: var(--gray50);
 		font-size: var(--font-size-normal);
-		font-weight: var(--font-weight-600);
+		font-weight: var(--font-weight-500);
 		line-height: 20px;
 		margin: 0;
-		padding: 14px;
+		padding: 11px;
 		overflow-wrap: normal;
 		cursor: pointer;
 		display: flex;
@@ -136,6 +141,24 @@
 		}
 		&.border {
 			border: 1px solid var(--gray20);
+		}
+
+		&.account {
+			padding-left: 64px;
+			position: relative;
+			height: 48px;
+
+			.avatar {
+				position: absolute;
+				inset: 0 auto 0 0;
+				border-radius: var(--border-radius);
+				overflow: hidden;
+
+				:global(img) {
+					width: 48px;
+					height: 48px;
+				}
+			}
 		}
 	}
 </style>
