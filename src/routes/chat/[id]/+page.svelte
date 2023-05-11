@@ -131,7 +131,23 @@
 						<DropdownItem onClick={() => console.log('Pic from Lib')}>Pic from Lib</DropdownItem>
 						<DropdownItem onClick={() => (state = 'waku')}>Waku Object</DropdownItem>
 					</Dropdown>
-					<Textarea placeholder="Say something" bind:value={text} pad={24} />
+					<Textarea
+						placeholder="Say something"
+						bind:value={text}
+						pad={24}
+						on:keypress={(e) => {
+							// When enter is pressed without modifier keys, send the message
+							if (e.key === 'Enter' && !(e.shiftKey || e.ctrlKey || e.altKey)) {
+								sendMessage()
+								e.preventDefault()
+							}
+							// When shift+enter is pressed, add a newline
+							if (e.key === 'Enter' && (e.altKey || e.ctrlKey)) {
+								text += '\n'
+								e.preventDefault()
+							}
+						}}
+					/>
 					<Button disabled={loading} on:click={sendMessage}><SendAltFilled /></Button>
 				</div>
 			</Container>

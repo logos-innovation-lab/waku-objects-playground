@@ -2,10 +2,13 @@ import { type Signer, type Eip1193Provider, BrowserProvider, type Networkish } f
 import { browser } from '$app/environment'
 import { profile } from '$lib/stores/profile'
 
-type WindowWithMaybeEthereum = Window &
-	typeof globalThis & { ethereum: Eip1193Provider | undefined }
-type WindowWithEthereum = Window &
-	typeof globalThis & { ethereum: Eip1193Provider & { on: any; removeListener: any } }
+type EthEvents = 'accountsChanged' | 'chainChanged'
+type Ethereum = Eip1193Provider & {
+	on: (eventName: EthEvents, eventHandler: () => void) => void
+	removeListener: (eventName: EthEvents, eventHandler: () => void) => void
+}
+type WindowWithMaybeEthereum = Window & typeof globalThis & { ethereum: Ethereum | undefined }
+type WindowWithEthereum = Window & typeof globalThis & { ethereum: Ethereum }
 
 export async function connectWallet(network?: Networkish): Promise<Signer> {
 	if (canConnectWallet()) {
