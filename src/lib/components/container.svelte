@@ -13,7 +13,7 @@
 	<slot />
 </div> -->
 
-<style>
+<style lang="scss">
 	.container {
 		/* display: flex;
 		justify-content: flex-start; */
