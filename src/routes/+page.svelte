@@ -61,38 +61,41 @@
 						<svelte:fragment slot="avatar">
 							<Avatar size={48} picture={$profile.avatar} />
 						</svelte:fragment>
-						{$profile.name ? $profile.name : formatAddress($profile.address)}
+						{$profile.name ?? formatAddress($profile.address)}
 					</Button>
 				{/if}
 			</svelte:fragment>
 		</Header>
 		<ul class="chats">
 			{#each [...$chats.chats] as [id, chat]}
-				<!-- svelte-ignore a11y-click-events-have-key-events -->
-				<li on:click={() => goto(ROUTES.CHAT(id))}>
-					<Container>
-						<div class="chat">
-							<Avatar size={70} />
-							<div class="content">
-								<div class="user-info">
-									<!-- TODO: show username or wallet address instead of chat name -->
-									<span class="username text-large text-bold">
-										{chat.name ? chat.name : 'Unnamed chat'}
-										<Badge dark>
-											{chat.messages.length}
-										</Badge>
-									</span>
-									<span class="timestamp">
-										{formatDateAndTime(chat.messages[chat.messages.length - 1].timestamp)}
-									</span>
+				{@const lastMessage = chat.messages[chat.messages.length - 1]}
+				{#if lastMessage}
+					<!-- svelte-ignore a11y-click-events-have-key-events -->
+					<li on:click={() => goto(ROUTES.CHAT(id))}>
+						<Container>
+							<div class="chat">
+								<Avatar size={70} />
+								<div class="content">
+									<div class="user-info">
+										<!-- TODO: show username or wallet address instead of chat name -->
+										<span class="username text-large text-bold">
+											{chat.name ? chat.name : 'Unnamed chat'}
+											<Badge dark>
+												{chat.messages.length}
+											</Badge>
+										</span>
+										<span class="timestamp">
+											{formatDateAndTime(lastMessage.timestamp)}
+										</span>
+									</div>
+									<p class="message text-serif">
+										{lastMessage.text.substring(0, 50)}
+									</p>
 								</div>
-								<p class="message text-serif">
-									{chat.messages[chat.messages.length - 1]?.text.substring(0, 50)}
-								</p>
 							</div>
-						</div>
-					</Container>
-				</li>
+						</Container>
+					</li>
+				{/if}
 			{:else}
 				<p>No chats</p>
 			{/each}
