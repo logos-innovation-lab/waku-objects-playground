@@ -2,7 +2,6 @@
 	import NewChat from '$lib/components/icons/add-comment.svelte'
 	import Login from '$lib/components/icons/login.svelte'
 	import ChatBot from '$lib/components/icons/chat-bot.svelte'
-	// import Search from '$lib/components/icons/search.svelte'
 
 	import Container from '$lib/components/container.svelte'
 	import Badge from '$lib/components/badge.svelte'
@@ -108,9 +107,8 @@
 							<Avatar size={70} />
 							<div class="content">
 								<div class="user-info">
-									<!-- TODO: show username or wallet address instead of chat name -->
 									<span class="username text-large text-bold">
-										{chat.name ? chat.name : 'Unnamed chat'}
+										{chat.name}
 										<Badge dark>
 											{chat.messages.length}
 										</Badge>

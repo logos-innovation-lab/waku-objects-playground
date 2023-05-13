@@ -18,12 +18,13 @@ import {
 	subscribeAccountChanged,
 	subscribeChainChanged,
 } from './blockchain'
-import { profile } from '$lib/stores/profile'
+import { profile, type Profile } from '$lib/stores/profile'
 import type { Signer } from 'ethers'
 import type { Adapter, Contact } from '..'
 import { chats, type DraftChat, type Chat, type Message } from '$lib/stores/chat'
 import { get } from 'svelte/store'
 import { contacts, type User } from '$lib/stores/users'
+import { formatAddress } from '$lib/utils/format'
 
 const firebaseConfig = {
 	apiKey: 'AIzaSyCs8WujyoHcDqTFtG5b3R3HJVEyWmOCMpA',
@@ -74,8 +75,22 @@ export default class FirebaseAdapter implements Adapter {
 				const subscribeChats = onSnapshot(chatsSnapshot, (res) => {
 					const newChats = new Map<string, Chat>()
 					res.docs.forEach((d) => {
-						const data = d.data() as Omit<Chat, 'chatId'> // FIXME: Check this with ZOD
-						const chat = { ...data, chatId: d.id }
+						const data = d.data() as Omit<DraftChat, 'chatId'> // FIXME: Check this with ZOD
+						const users: User[] = data.users.map((d) => {
+							const c = get(contacts)
+							const cntct = c.contacts.get(d)
+							if (cntct) {
+								return cntct
+							}
+							return { address: d, name: formatAddress(d) }
+						})
+						let name: string
+						if (data.name && data.name !== '') name = data.name
+						else if (users.length === 1)
+							name = users.find((u) => u.address !== p.address)?.name ?? 'Unnamed chat'
+						else name = 'Unnamed chat'
+						const chat: Chat = { messages: data.messages, chatId: d.id, users, name }
+						console.log(chat)
 						newChats.set(d.id, chat)
 					})
 					chats.update((state) => ({ ...state, chats: newChats, loading: false }))
