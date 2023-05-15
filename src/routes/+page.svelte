@@ -22,102 +22,120 @@
 	import AddComment from '$lib/components/icons/add-comment.svelte'
 </script>
 
-<div class="content">
-	{#if !$profile.address}
-		<Container align="center" gap={6} justify="center" fullheight>
-			<div class="chatbot">
-				<ChatBot size={32} />
+{#if !$profile.address}
+	<Container align="center" gap={6} justify="center" grow>
+		<div class="chatbot">
+			<ChatBot size={32} />
+		</div>
+		<p class="text-lg text-bold">Waku chats</p>
+		<div class="btn-spacing">
+			<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn} iconStart={Login}
+				>Connect</Button
+			>
+		</div>
+	</Container>
+{:else if $chats.loading}
+	<Container align="center" grow gap={6} justify="center">
+		<div class="center">
+			<h2>Loading...</h2>
+		</div>
+	</Container>
+{:else if $chats.error}
+	<Container align="center" grow gap={6} justify="center">
+		<div class="center">
+			<h2>Failed to load chats: {$chats.error.message}</h2>
+		</div>
+	</Container>
+{:else if $chats.chats.size === 0}
+	<Header>
+		<svelte:fragment slot="left">
+			<div class="header-btns">
+				<Button variant="icon" on:click={() => goto(ROUTES.CHAT_NEW)}>
+					<NewChat size={24} />
+				</Button>
 			</div>
-			<p class="text-lg text-bold">Waku chats</p>
-			<div class="btn-spacing">
-				<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn} iconStart={Login}
-					>Connect</Button
-				>
-			</div>
-		</Container>
-	{:else if $chats.loading}
-		<Container align="center" fullheight gap={6} justify="center">
-			<div class="center">
-				<h2>Loading...</h2>
-			</div>
-		</Container>
-	{:else if $chats.error}
-		<Container align="center" fullheight gap={6} justify="center">
-			<div class="center">
-				<h2>Failed to load chats: {$chats.error.message}</h2>
-			</div>
-		</Container>
-	{:else if $chats.chats.size === 0}
-		<Container align="center" fullheight gap={6} justify="center">
-			<p class="text-lg text-bold">No active chats</p>
-			<p class="text-lg">Invite someone to chat</p>
-			<div class="btn-spacing">
-				<Button iconStart={AddComment} on:click={() => goto(ROUTES.CHAT_NEW)}>Invite to chat</Button
-				>
-			</div>
-		</Container>
-	{:else}
-		<Header search>
-			<svelte:fragment slot="left">
-				<div class="header-btns">
-					<Button variant="icon" on:click={() => goto(ROUTES.CHAT_NEW)}>
-						<NewChat size={24} />
-					</Button>
-				</div>
-			</svelte:fragment>
-			<svelte:fragment slot="right">
-				{#if !$profile.address}
-					<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><NewChat /></Button>
-				{:else}
-					<Button variant="account" on:click={() => goto(ROUTES.PROFILE)}>
-						<svelte:fragment slot="avatar">
-							<Avatar size={48} picture={$profile.avatar} />
-						</svelte:fragment>
-						{$profile.name ?? formatAddress($profile.address)}
-					</Button>
-				{/if}
-			</svelte:fragment>
-		</Header>
-		<ul class="chats">
-			{#each [...$chats.chats] as [id, chat]}
-				{@const lastMessage = chat.messages[chat.messages.length - 1]}
-				{#if lastMessage}
-					<!-- svelte-ignore a11y-click-events-have-key-events -->
-					<li on:click={() => goto(ROUTES.CHAT(id))}>
-						<Container>
-							<div class="chat">
-								<Avatar size={70} />
-								<div class="content">
-									<div class="user-info">
-										<!-- TODO: show username or wallet address instead of chat name -->
-										<span class="username text-large text-bold">
-											{chat.name ? chat.name : 'Unnamed chat'}
-											<Badge dark>
-												{chat.messages.length}
-											</Badge>
-										</span>
-										<span class="timestamp">
-											{formatDateAndTime(lastMessage.timestamp)}
-										</span>
-									</div>
-									<p class="message text-serif">
-										{lastMessage.text.substring(0, 50)}
-									</p>
-								</div>
-							</div>
-						</Container>
-					</li>
-				{/if}
+		</svelte:fragment>
+		<svelte:fragment slot="right">
+			{#if !$profile.address}
+				<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><NewChat /></Button>
 			{:else}
-				<Container align="center" fullheight gap={6} justify="center">
-					<div class="center">
-						<p>No chats</p>
-					</div>
-				</Container>
-			{/each}
-		</ul>
-	{/if}
-</div>
+				<Button variant="account" on:click={() => goto(ROUTES.PROFILE)}>
+					<svelte:fragment slot="avatar">
+						<Avatar size={48} picture={$profile.avatar} />
+					</svelte:fragment>
+					{$profile.name ?? formatAddress($profile.address)}
+				</Button>
+			{/if}
+		</svelte:fragment>
+	</Header>
+	<Container align="center" grow gap={6} justify="center">
+		<p class="text-lg text-bold">No active chats</p>
+		<p class="text-lg">Invite someone to chat</p>
+		<div class="btn-spacing">
+			<Button iconStart={AddComment} on:click={() => goto(ROUTES.CHAT_NEW)}>Invite to chat</Button>
+		</div>
+	</Container>
+{:else}
+	<Header search>
+		<svelte:fragment slot="left">
+			<div class="header-btns">
+				<Button variant="icon" on:click={() => goto(ROUTES.CHAT_NEW)}>
+					<NewChat size={24} />
+				</Button>
+			</div>
+		</svelte:fragment>
+		<svelte:fragment slot="right">
+			{#if !$profile.address}
+				<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><NewChat /></Button>
+			{:else}
+				<Button variant="account" on:click={() => goto(ROUTES.PROFILE)}>
+					<svelte:fragment slot="avatar">
+						<Avatar size={48} picture={$profile.avatar} />
+					</svelte:fragment>
+					{$profile.name ?? formatAddress($profile.address)}
+				</Button>
+			{/if}
+		</svelte:fragment>
+	</Header>
+	<ul class="chats">
+		{#each [...$chats.chats] as [id, chat]}
+			{@const lastMessage = chat.messages[chat.messages.length - 1]}
+			{#if lastMessage}
+				<!-- svelte-ignore a11y-click-events-have-key-events -->
+				<li on:click={() => goto(ROUTES.CHAT(id))}>
+					<Container>
+						<div class="chat">
+							<Avatar size={70} />
+							<div class="content">
+								<div class="user-info">
+									<!-- TODO: show username or wallet address instead of chat name -->
+									<span class="username text-large text-bold">
+										{chat.name ? chat.name : 'Unnamed chat'}
+										<Badge dark>
+											{chat.messages.length}
+										</Badge>
+									</span>
+									<span class="timestamp">
+										{formatDateAndTime(lastMessage.timestamp)}
+									</span>
+								</div>
+								<p class="message text-serif">
+									{lastMessage.text.substring(0, 50)}
+								</p>
+							</div>
+						</div>
+					</Container>
+				</li>
+			{/if}
+		{:else}
+			<Container align="center" grow gap={6} justify="center">
+				<div class="center">
+					<p>No chats</p>
+				</div>
+			</Container>
+		{/each}
+	</ul>
+{/if}
 
 <style lang="scss">
 	.center {

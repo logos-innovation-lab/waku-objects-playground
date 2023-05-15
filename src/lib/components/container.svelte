@@ -2,12 +2,12 @@
 	export let direction: 'row' | 'column' = 'column'
 	export let gap = 0
 	export let justify: 'space-between' | 'flex-start' | 'flex-end' | 'center' = 'flex-start'
-	export let fullheight: boolean | undefined = undefined
 	export let align: 'left' | 'right' | 'center' | undefined = undefined
+	export let grow: boolean | undefined = undefined
 </script>
 
 <div
-	class={`container text-${align} ${direction} ${justify} ${fullheight ? 'fullheight' : ''}`}
+	class={`container text-${align} ${direction} ${justify} ${grow ? 'grow' : ''}`}
 	style={`gap: ${gap}px`}
 >
 	<slot />
@@ -19,6 +19,7 @@
 		justify-content: flex-start;
 		padding: 0px var(--spacing-12);
 		width: 100%;
+		flex-grow: 0;
 	}
 	.row {
 		flex-direction: row;
@@ -48,8 +49,7 @@
 	.text-center {
 		text-align: center;
 	}
-	.fullheight {
-		min-height: 100dvh;
-		min-height: 100vh;
+	.grow {
+		flex-grow: 1;
 	}
 </style>
