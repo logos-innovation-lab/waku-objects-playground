@@ -19,30 +19,42 @@
 	import Avatar from '$lib/components/avatar.svelte'
 
 	import ROUTES from '$lib/routes'
+	import AddComment from '$lib/components/icons/add-comment.svelte'
 </script>
 
 <div class="content">
 	{#if !$profile.address}
-		<Container>
-			<div class="loggedout">
-				<div class="chatbot">
-					<ChatBot size={32} />
-				</div>
-				<p class="text-lg text-bold">Waku chats</p>
-				<div class="btn-connect">
-					<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn} iconStart={Login}
-						>Connect</Button
-					>
-				</div>
+		<Container align="center" gap={6} justify="center" fullheight>
+			<div class="chatbot">
+				<ChatBot size={32} />
+			</div>
+			<p class="text-lg text-bold">Waku chats</p>
+			<div class="btn-spacing">
+				<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn} iconStart={Login}
+					>Connect</Button
+				>
 			</div>
 		</Container>
 	{:else if $chats.loading}
-		<Container>
-			<h2>Loading...</h2>
+		<Container align="center" fullheight gap={6} justify="center">
+			<div class="center">
+				<h2>Loading...</h2>
+			</div>
 		</Container>
 	{:else if $chats.error}
-		<Container>
-			<h2>Failed to load chats: {$chats.error.message}</h2>
+		<Container align="center" fullheight gap={6} justify="center">
+			<div class="center">
+				<h2>Failed to load chats: {$chats.error.message}</h2>
+			</div>
+		</Container>
+	{:else if $chats.chats.size === 0}
+		<Container align="center" fullheight gap={6} justify="center">
+			<p class="text-lg text-bold">No active chats</p>
+			<p class="text-lg">Invite someone to chat</p>
+			<div class="btn-spacing">
+				<Button iconStart={AddComment} on:click={() => goto(ROUTES.CHAT_NEW)}>Invite to chat</Button
+				>
+			</div>
 		</Container>
 	{:else}
 		<Header search>
@@ -97,25 +109,30 @@
 					</li>
 				{/if}
 			{:else}
-				<p>No chats</p>
+				<Container align="center" fullheight gap={6} justify="center">
+					<div class="center">
+						<p>No chats</p>
+					</div>
+				</Container>
 			{/each}
 		</ul>
 	{/if}
 </div>
 
 <style lang="scss">
-	.loggedout {
+	.center {
+		text-align: center;
+		margin-inline: auto;
 		display: flex;
 		flex-direction: column;
 		gap: var(--spacing-6);
-		place-items: center;
 		justify-content: center;
-		min-height: 100vh;
-		text-align: center;
+		align-items: center;
+		place-items: center;
+	}
 
-		.btn-connect {
-			margin-top: var(--spacing-6);
-		}
+	.btn-spacing {
+		margin-top: var(--spacing-6);
 	}
 
 	.chats {
