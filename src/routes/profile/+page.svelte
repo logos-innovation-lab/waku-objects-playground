@@ -31,7 +31,9 @@
 
 <Container>
 	<Header title="Profile">
-		<Button slot="left" icon={ArrowLeft} on:click={() => goto('/')} />
+		<Button slot="left" on:click={() => goto('/')}>
+			<ArrowLeft />
+		</Button>
 	</Header>
 
 	<div class="mid">

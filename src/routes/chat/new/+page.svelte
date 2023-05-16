@@ -45,7 +45,9 @@
 
 {#if state === 'edit-participants'}
 	<Header title="New chat">
-		<Button slot="left" icon={ArrowLeft} on:click={() => goto(ROUTES.HOME)} />
+		<Button slot="left" on:click={() => goto(ROUTES.HOME)}>
+			<ArrowLeft />
+		</Button>
 		<svelte:fragment slot="right">
 			{#if !$profile.address}
 				<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><Wallet /></Button>
@@ -66,10 +68,11 @@
 								<li>
 									<div class="nogrow">
 										<Button
-											icon={Close}
 											on:click={() =>
 												(participants = participants.filter((p) => p !== participant))}
-										/>
+										>
+											<Close />
+										</Button>
 									</div>
 									<Avatar picture={contact.avatar} />{contact.name ?? contact.address}
 								</li>
@@ -87,7 +90,9 @@
 						{#each [...$contacts.contacts].filter(([address]) => !participants.includes(address) && address !== $profile.address) as [address, contact]}
 							<li>
 								<div class="nogrow">
-									<Button icon={Add} on:click={() => (participants = [...participants, address])} />
+									<Button on:click={() => (participants = [...participants, address])}>
+										<Add />
+									</Button>
 								</div>
 								<Avatar picture={contact.avatar} />{contact.name ?? contact.address}
 							</li>
@@ -110,7 +115,9 @@
 	</div>
 {:else if state === 'edit-name'}
 	<Header title="New chat">
-		<Button slot="left" icon={ArrowLeft} on:click={() => (state = 'edit-participants')} />
+		<Button slot="left" on:click={() => (state = 'edit-participants')}>
+			<ArrowLeft />
+		</Button>
 		<svelte:fragment slot="right">
 			{#if !$profile.address}
 				<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><Wallet /></Button>
@@ -133,7 +140,9 @@
 	</Container>
 {:else if state === 'send-message'}
 	<Header title="New chat">
-		<Button slot="left" icon={ArrowLeft} on:click={() => (state = 'edit-participants')} />
+		<Button slot="left" on:click={() => (state = 'edit-participants')}>
+			<ArrowLeft />
+		</Button>
 		<svelte:fragment slot="right">
 			{#if !$profile.address}
 				<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><Wallet /></Button>

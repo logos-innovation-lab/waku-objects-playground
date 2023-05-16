@@ -28,9 +28,10 @@
 		</div>
 		<p class="text-lg text-bold">Waku chats</p>
 		<div class="btn-spacing">
-			<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn} iconStart={Login}
-				>Connect</Button
-			>
+			<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}>
+				<Login />
+				Connect
+			</Button>
 		</div>
 	</Container>
 {:else if $chats.loading}
@@ -56,7 +57,9 @@
 		</svelte:fragment>
 		<svelte:fragment slot="right">
 			{#if !$profile.address}
-				<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><NewChat /></Button>
+				<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}>
+					<NewChat />
+				</Button>
 			{:else}
 				<Button variant="account" on:click={() => goto(ROUTES.PROFILE)}>
 					<svelte:fragment slot="avatar">
@@ -71,7 +74,10 @@
 		<p class="text-lg text-bold">No active chats</p>
 		<p class="text-lg">Invite someone to chat</p>
 		<div class="btn-spacing">
-			<Button iconStart={AddComment} on:click={() => goto(ROUTES.CHAT_NEW)}>Invite to chat</Button>
+			<Button on:click={() => goto(ROUTES.CHAT_NEW)}>
+				<AddComment />
+				Invite to chat
+			</Button>
 		</div>
 	</Container>
 {:else}
