@@ -24,6 +24,8 @@ import type { Adapter, Contact } from '..'
 import { chats, type DraftChat, type Chat, type Message } from '$lib/stores/chat'
 import { get } from 'svelte/store'
 import { contacts, type User } from '$lib/stores/users'
+import { ChatDbSchema, UserDbSchema } from './schemas'
+import { formatAddress } from '$lib/utils/format'
 
 const firebaseConfig = {
 	apiKey: 'AIzaSyCs8WujyoHcDqTFtG5b3R3HJVEyWmOCMpA',
@@ -62,8 +64,13 @@ export default class FirebaseAdapter implements Adapter {
 			if (p.address && this.userSubscriptions.length === 0) {
 				const profileSnapshot = doc(db, `users/${p.address}`)
 				const subscribeProfile = onSnapshot(profileSnapshot, (res) => {
-					const { avatar, name } = res.data() as Contact // FIXME: Check this with ZOD
-					profile.update((state) => ({ ...state, avatar, name, loading: false }))
+					const parseRes = UserDbSchema.safeParse(res.data())
+					if (parseRes.success) {
+						const user: User = parseRes.data
+						profile.update((state) => ({ ...state, ...user, loading: false }))
+					} else {
+						console.error(parseRes.error.issues)
+					}
 				})
 				this.userSubscriptions.push(subscribeProfile)
 
@@ -71,14 +78,58 @@ export default class FirebaseAdapter implements Adapter {
 					collection(db, `chats`),
 					where('users', 'array-contains', p.address),
 				)
-				const subscribeChats = onSnapshot(chatsSnapshot, (res) => {
-					const newChats = new Map<string, Chat>()
-					res.docs.forEach((d) => {
-						const data = d.data() as Omit<Chat, 'chatId'> // FIXME: Check this with ZOD
-						const chat = { ...data, chatId: d.id }
-						newChats.set(d.id, chat)
+				const subscribeChats = onSnapshot(chatsSnapshot, async (res) => {
+					// Need to wait for contacts to be loaded before processing chats
+					const contactsPromise = new Promise<Map<string, User>>((resolve, reject) => {
+						const unsubscribe = contacts.subscribe((c) => {
+							if (c.loading === false) {
+								unsubscribe()
+								resolve(c.contacts)
+							}
+							if (c.error) {
+								unsubscribe()
+								reject(c.error)
+							}
+						})
 					})
-					chats.update((state) => ({ ...state, chats: newChats, loading: false }))
+					try {
+						const cnts = await contactsPromise
+
+						const newChats = new Map<string, Chat>()
+						res.docs.forEach((d) => {
+							const parseRes = ChatDbSchema.safeParse(d.data())
+
+							if (parseRes.success) {
+								const users: User[] = []
+								parseRes.data.users.forEach((a) => {
+									const user = cnts.get(a)
+									if (user) users.push(user)
+									else console.error(`Could not find user with address ${a}`)
+								})
+								const chat: Chat = {
+									messages: parseRes.data.messages,
+									name: parseRes.data.name,
+									users,
+									chatId: d.id,
+								}
+
+								// If there are two participants, use the other user name/address as chat name
+								if ((!chat.name || chat.name === '') && chat.users.length === 2) {
+									const otherUser = chat.users.find((other) => other.address !== p.address)
+									if (!otherUser) return
+
+									chat.name = otherUser.name ?? formatAddress(otherUser.address)
+								}
+
+								newChats.set(d.id, chat)
+							} else {
+								console.error(parseRes.error.issues)
+							}
+						})
+						chats.update((state) => ({ ...state, chats: newChats, loading: false }))
+					} catch (error) {
+						console.error('Error loading chats', error)
+					}
 				})
 				this.userSubscriptions.push(subscribeChats)
 
@@ -87,8 +138,13 @@ export default class FirebaseAdapter implements Adapter {
 				const subscribeUsers = onSnapshot(contactsCollection, (res) => {
 					const cnts = new Map<string, User>()
 					res.docs.forEach((d) => {
-						const user = d.data() as User // FIXME: Check this with ZOD
-						cnts.set(user.address, user)
+						const parseRes = UserDbSchema.safeParse(d.data())
+						if (parseRes.success) {
+							const user: User = parseRes.data
+							cnts.set(user.address, user)
+						} else {
+							console.error(parseRes.error.issues)
+						}
 					})
 					contacts.set({ contacts: cnts, loading: false })
 				})

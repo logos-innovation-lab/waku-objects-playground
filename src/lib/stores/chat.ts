@@ -1,4 +1,5 @@
 import { writable, type Writable } from 'svelte/store'
+import type { User } from './users'
 
 export interface Message {
 	timestamp: number
@@ -12,8 +13,11 @@ export interface DraftChat {
 	name?: string
 }
 
-export interface Chat extends DraftChat {
+export interface Chat {
 	chatId: string
+	messages: Message[]
+	users: User[]
+	name?: string
 }
 
 interface ChatData {
