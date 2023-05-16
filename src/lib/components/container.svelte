@@ -1,37 +1,33 @@
 <script lang="ts">
-	// export let direction: 'row' | 'column' = 'column'
-	// export let gap = 0
-	// export let justify: 'space-between' | 'flex-start' | 'flex-end' | 'center' = 'flex-start'
-	// export let align: 'left' | 'right' | 'center' | undefined = undefined
+	export let direction: 'row' | 'column' = 'column'
+	export let gap = 0
+	export let justify: 'space-between' | 'flex-start' | 'flex-end' | 'center' = 'flex-start'
+	export let align: 'left' | 'right' | 'center' | undefined = undefined
+	export let grow: boolean | undefined = undefined
 </script>
 
-<div class="container">
+<div
+	class={`container text-${align} ${direction} ${justify} ${grow ? 'grow' : ''}`}
+	style={`gap: ${gap}px`}
+>
 	<slot />
 </div>
 
-<!-- <div class={`container ${direction} ${justify} ${align}`} style={`gap: ${gap}px`}>
-	<slot />
-</div> -->
-
 <style lang="scss">
 	.container {
-		/* display: flex;
-		justify-content: flex-start; */
+		display: flex;
+		justify-content: flex-start;
 		padding: 0px var(--spacing-12);
 		width: 100%;
+		flex-grow: 0;
 	}
-	/* .row {
+	.row {
 		flex-direction: row;
 	}
 	.column {
 		flex-direction: column;
 	}
-	.space-between,
-	.stretch,
-	.center,
-	.flex-end {
-		min-height: 100vh;
-	}
+
 	.space-between {
 		justify-content: space-between;
 	}
@@ -44,13 +40,16 @@
 	.flex-end {
 		justify-content: flex-end;
 	}
-	.left {
+	.text-left {
 		text-align: left;
 	}
-	.right {
+	.text-right {
 		text-align: right;
 	}
-	.center {
+	.text-center {
 		text-align: center;
-	} */
+	}
+	.grow {
+		flex-grow: 1;
+	}
 </style>

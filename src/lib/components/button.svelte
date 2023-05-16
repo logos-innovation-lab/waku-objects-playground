@@ -67,6 +67,7 @@
 		flex-direction: row;
 		align-items: center;
 		gap: var(--spacing-6);
+		margin-inline: auto;
 
 		.wrapper {
 			line-height: 0;
