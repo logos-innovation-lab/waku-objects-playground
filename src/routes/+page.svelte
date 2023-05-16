@@ -108,7 +108,7 @@
 							<div class="content">
 								<div class="user-info">
 									<span class="username text-large text-bold">
-										{chat.name}
+										{chat.name ?? 'Unnamed chat'}
 										<Badge dark>
 											{chat.messages.length}
 										</Badge>

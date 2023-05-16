@@ -18,12 +18,13 @@ import {
 	subscribeAccountChanged,
 	subscribeChainChanged,
 } from './blockchain'
-import { profile, type Profile } from '$lib/stores/profile'
+import { profile } from '$lib/stores/profile'
 import type { Signer } from 'ethers'
 import type { Adapter, Contact } from '..'
 import { chats, type DraftChat, type Chat, type Message } from '$lib/stores/chat'
 import { get } from 'svelte/store'
 import { contacts, type User } from '$lib/stores/users'
+import { ChatDbSchema, UserDbSchema } from './schemas'
 import { formatAddress } from '$lib/utils/format'
 
 const firebaseConfig = {
@@ -63,8 +64,13 @@ export default class FirebaseAdapter implements Adapter {
 			if (p.address && this.userSubscriptions.length === 0) {
 				const profileSnapshot = doc(db, `users/${p.address}`)
 				const subscribeProfile = onSnapshot(profileSnapshot, (res) => {
-					const { avatar, name } = res.data() as Contact // FIXME: Check this with ZOD
-					profile.update((state) => ({ ...state, avatar, name, loading: false }))
+					const parseRes = UserDbSchema.safeParse(res.data())
+					if (parseRes.success) {
+						const user: User = parseRes.data
+						profile.update((state) => ({ ...state, ...user, loading: false }))
+					} else {
+						console.error(parseRes.error.issues)
+					}
 				})
 				this.userSubscriptions.push(subscribeProfile)
 
@@ -75,23 +81,37 @@ export default class FirebaseAdapter implements Adapter {
 				const subscribeChats = onSnapshot(chatsSnapshot, (res) => {
 					const newChats = new Map<string, Chat>()
 					res.docs.forEach((d) => {
-						const data = d.data() as Omit<DraftChat, 'chatId'> // FIXME: Check this with ZOD
-						const users: User[] = data.users.map((d) => {
-							const c = get(contacts)
-							const cntct = c.contacts.get(d)
-							if (cntct) {
-								return cntct
+						const parseRes = ChatDbSchema.safeParse(d.data())
+
+						if (parseRes.success) {
+							// FIXME: it is possible that this is not populated yet.
+							// Right now unlikely, but should be checked
+							const cnts = get(contacts).contacts
+							const users: User[] = []
+							parseRes.data.users.forEach((a) => {
+								const user = cnts.get(a)
+								if (user) users.push(user)
+								else console.error(`Could not find user with address ${a}`)
+							})
+							const chat: Chat = {
+								messages: parseRes.data.messages,
+								name: parseRes.data.name,
+								users,
+								chatId: d.id,
 							}
-							return { address: d, name: formatAddress(d) }
-						})
-						let name: string
-						if (data.name && data.name !== '') name = data.name
-						else if (users.length === 1)
-							name = users.find((u) => u.address !== p.address)?.name ?? 'Unnamed chat'
-						else name = 'Unnamed chat'
-						const chat: Chat = { messages: data.messages, chatId: d.id, users, name }
-						console.log(chat)
-						newChats.set(d.id, chat)
+
+							// If there are two participants
+							if ((!chat.name || chat.name === '') && chat.users.length === 2) {
+								const otherUser = chat.users.find((other) => other.address !== p.address)
+								if (!otherUser) return
+
+								chat.name = otherUser.name ?? formatAddress(otherUser.address)
+							}
+
+							newChats.set(d.id, chat)
+						} else {
+							console.error(parseRes.error.issues)
+						}
 					})
 					chats.update((state) => ({ ...state, chats: newChats, loading: false }))
 				})
@@ -102,8 +122,13 @@ export default class FirebaseAdapter implements Adapter {
 				const subscribeUsers = onSnapshot(contactsCollection, (res) => {
 					const cnts = new Map<string, User>()
 					res.docs.forEach((d) => {
-						const user = d.data() as User // FIXME: Check this with ZOD
-						cnts.set(user.address, user)
+						const parseRes = UserDbSchema.safeParse(d.data())
+						if (parseRes.success) {
+							const user: User = parseRes.data
+							cnts.set(user.address, user)
+						} else {
+							console.error(parseRes.error.issues)
+						}
 					})
 					contacts.set({ contacts: cnts, loading: false })
 				})

@@ -17,7 +17,7 @@ export interface Chat {
 	chatId: string
 	messages: Message[]
 	users: User[]
-	name: string
+	name?: string
 }
 
 interface ChatData {

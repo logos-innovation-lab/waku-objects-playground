@@ -2,7 +2,7 @@ import { writable, type Writable } from 'svelte/store'
 
 export interface User {
 	address: string
-	name: string
+	name?: string
 	avatar?: string
 }
 
