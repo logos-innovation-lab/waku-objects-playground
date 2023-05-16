@@ -17,7 +17,7 @@
 	.container {
 		display: flex;
 		justify-content: flex-start;
-		padding: 0px var(--spacing-12);
+		padding: var(--spacing-12);
 		width: 100%;
 		flex-grow: 0;
 	}

@@ -171,7 +171,6 @@
 		gap: var(--spacing-12);
 		justify-content: flex-start;
 		align-items: flex-start;
-		padding-block: var(--spacing-12);
 
 		.content {
 			flex-grow: 1;
