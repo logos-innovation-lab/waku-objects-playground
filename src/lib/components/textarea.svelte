@@ -18,7 +18,6 @@
 		flex-direction: column;
 		gap: var(--spacing-12);
 		font-size: var(--font-size-normal);
-		padding-block: var(--spacing-24);
 		width: 100%;
 		font-size: var(--font-size-xl);
 		font-weight: var(--font-weight-400);

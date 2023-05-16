@@ -46,7 +46,6 @@
 		top: 0;
 		height: auto;
 		background-color: var(--white);
-		padding-block: var(--spacing-12);
 		border-bottom: 1px solid var(--gray20);
 		z-index: 100;
 	}
