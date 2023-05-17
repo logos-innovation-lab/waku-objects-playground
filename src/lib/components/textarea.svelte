@@ -8,8 +8,18 @@
 
 <label style={`padding-block: ${pad}`}>
 	{label}
+	<!-- TODO: allow textarea height to increase according to entered text -->
 	<!-- svelte-ignore a11y-autofocus -->
-	<textarea bind:value on:keydown on:keypress on:keyup {autofocus} {placeholder} rows="1" />
+	<textarea
+		class="text-lg"
+		bind:value
+		on:keydown
+		on:keypress
+		on:keyup
+		{autofocus}
+		{placeholder}
+		rows="1"
+	/>
 </label>
 
 <style lang="scss">
@@ -23,15 +33,18 @@
 		font-weight: var(--font-weight-400);
 
 		textarea {
+			color: var(--black);
 			width: 100%;
 			border: 1px solid var(--gray20);
-			padding: var(--spacing-12);
+			border-radius: var(--border-radius);
+			padding: 11px var(--spacing-12);
 			margin: 0;
-			font-size: var(--font-size-xl);
-			font-weight: var(--font-weight-600);
-			line-height: var(--font-size-xl);
 			min-height: 1px;
 			resize: none;
+		}
+
+		::placeholder {
+			color: var(--gray40);
 		}
 	}
 </style>

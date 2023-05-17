@@ -7,6 +7,8 @@
 
 <Container>
 	<Header title="Send transaction">
-		<Button slot="left" icon={ArrowLeft} />
+		<Button slot="left">
+			<ArrowLeft />
+		</Button>
 	</Header>
 </Container>

@@ -41,19 +41,25 @@
 	{#if state === 'select-wallet'}
 		<Header title="Request transaction">
 			<!-- TODO: fix on:click action -->
-			<Button slot="right" icon={Close} on:click={() => goto(ROUTES.HOME)} />
+			<Button slot="right" on:click={() => goto(ROUTES.HOME)}>
+				<Close />
+			</Button>
 		</Header>
 		<Container>
 			<h2>Please select the wallet where you want to receive the funds.</h2>
 			{#each wallets as wallet}
 				<Card {...wallet} />
 			{/each}
-			<Button icon={Add}>New wallet</Button>
+			<Button><Add />New wallet</Button>
 		</Container>
 	{:else if state === 'type-amount'}
 		<Header title="Request transaction">
-			<Button slot="left" icon={ArrowLeft} on:click={() => (state = 'select-wallet')} />
-			<Button slot="right" icon={Close} on:click={() => goto(ROUTES.HOME)} />
+			<Button slot="left" on:click={() => (state = 'select-wallet')}>
+				<ArrowLeft />
+			</Button>
+			<Button slot="right" on:click={() => goto(ROUTES.HOME)}>
+				<Close />
+			</Button>
 		</Header>
 		<Container>
 			<div class="how-much">
@@ -61,7 +67,7 @@
 				<div class="amt-field">
 					<Textarea placeholder="0.0000" bind:value={amt} />
 					<Dropdown>
-						<Button slot="button" iconEnd={Sort}>{currency}</Button>
+						<Button slot="button">{currency}<Sort /></Button>
 						<DropdownItem onClick={() => (currency = 'ETH')}>ETH</DropdownItem>
 						<DropdownItem onClick={() => (currency = 'SNT')}>SNT</DropdownItem>
 						<DropdownItem onClick={() => (currency = 'DAI')}>DAI</DropdownItem>
@@ -69,12 +75,18 @@
 				</div>
 				<div class="converted">(0 USD)</div>
 			</div>
-			<Button icon={ArrowRight} on:click={() => (state = 'send-request')} />
+			<Button on:click={() => (state = 'send-request')}>
+				<ArrowRight />
+			</Button>
 		</Container>
 	{:else if state === 'send-request'}
 		<Header title="Request transaction">
-			<Button slot="left" icon={ArrowLeft} on:click={() => (state = 'type-amount')} />
-			<Button slot="right" icon={Close} on:click={() => goto(ROUTES.HOME)} />
+			<Button slot="left" on:click={() => (state = 'type-amount')}>
+				<ArrowLeft />
+			</Button>
+			<Button slot="right" on:click={() => goto(ROUTES.HOME)}>
+				<Close />
+			</Button>
 		</Header>
 		<Container>
 			<div class="item">
@@ -97,11 +109,11 @@
 					<span> ETH 0.029900675925729405 </span>
 				</div>
 			</div>
-			<Button icon={Checkmark} on:click={() => goto(ROUTES.HOME)}>Add to chat</Button>
+			<Button on:click={() => goto(ROUTES.HOME)}><Checkmark />Add to chat</Button>
 		</Container>
 	{:else}
 		<Container>
-			<h2>How did I get here?</h2>
+			<h2>🤔 How did I get here?</h2>
 		</Container>
 	{/if}
 </div>

@@ -4,9 +4,9 @@
 	import Add from '$lib/components/icons/add.svelte'
 	import Edit from '$lib/components/icons/edit.svelte'
 	import Checkmark from '$lib/components/icons/checkmark.svelte'
-	import SendAltFilled from '$lib/components/icons/send-alt-filled.svelte'
+	import ArrowUp from '$lib/components/icons/arrow-up.svelte'
 	import Menu from '$lib/components/icons/overflow-menu-horizontal.svelte'
-	import ArrowLeft from '$lib/components/icons/arrow-left.svelte'
+	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
 
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
@@ -39,7 +39,7 @@
 	]
 
 	let state: 'waku' | 'chat' = 'chat'
-	let object = true
+	let object = false
 
 	$: messages = $chats.chats.get($page.params.id)?.messages || []
 	let loading = false
@@ -56,8 +56,11 @@
 
 {#if state === 'chat'}
 	<div class="chat">
+		<!-- TODO: replace header title with chat name or person's name (?) -->
 		<Header title="Chat">
-			<Button slot="left" icon={ArrowLeft} on:click={() => goto(ROUTES.HOME)} />
+			<Button variant="icon" slot="left" on:click={() => goto(ROUTES.HOME)}>
+				<ChevronLeft />
+			</Button>
 		</Header>
 		<div class="chat-messages">
 			<Container>
@@ -68,11 +71,11 @@
 							{#if message.text.length > 0}
 								<div
 									class={`message ${
-										message.fromAddress !== $profile.address ? 'their-message' : ''
+										message.fromAddress !== $profile.address ? 'their-message' : 'my-message'
 									}`}
 								>
 									<div class="message-content">
-										<div class="message-text">{message.text}</div>
+										<div class="message-text text-lg">{message.text}</div>
 									</div>
 								</div>
 							{/if}
@@ -80,30 +83,30 @@
 						{#if object}
 							<div class={`message their-message`}>
 								<div class="message-content">
-									<div class="message-text message-object-request">
+									<div class="message-text text-lg message-object-request">
 										<div class="req-title">Requestd transaction</div>
 										<div class="req-amt">0.00057 ETH</div>
 										<div class="req-converted">Approx. 50 USD</div>
 										<div class="req-status">pending</div>
-										<Button icon={Checkmark}>Pay now</Button>
+										<Button><Checkmark />Pay now</Button>
 									</div>
 								</div>
 							</div>
 							<div class={`message`}>
 								<div class="message-content">
-									<div class="message-text message-object-request">
+									<div class="message-text text-lg message-object-request">
 										<div class="req-title">Requestd transaction</div>
 										<div class="req-amt">0.00057 ETH</div>
 										<div class="req-converted">Approx. 50 USD</div>
 										<div class="req-status">pending</div>
-										<Button icon={Edit}>Edit</Button>
+										<Button><Edit />Edit</Button>
 									</div>
 								</div>
 							</div>
 
 							<div class={`message their-message`}>
 								<div class="message-content">
-									<div class="message-text message-object-confirmation">
+									<div class="message-text text-lg message-object-confirmation">
 										<div class="conf-link">Requested transaction 0.00057 ETH</div>
 										<div class="conf-status">Transaction confirmed</div>
 									</div>
@@ -111,7 +114,7 @@
 							</div>
 							<div class={`message`}>
 								<div class="message-content">
-									<div class="message-text message-object-confirmation">
+									<div class="message-text text-lg message-object-confirmation">
 										<div class="conf-link">Requested transaction 0.00057 ETH</div>
 										<div class="conf-status">Transaction confirmed</div>
 									</div>
@@ -126,13 +129,15 @@
 			<Container>
 				<div class="chat-input">
 					<Dropdown up>
-						<Button slot="button" icon={Add} />
+						<Button variant="icon" slot="button">
+							<Add />
+						</Button>
 						<DropdownItem onClick={() => console.log('Pic from Cam')}>Pic from Cam</DropdownItem>
 						<DropdownItem onClick={() => console.log('Pic from Lib')}>Pic from Lib</DropdownItem>
 						<DropdownItem onClick={() => (state = 'waku')}>Waku Object</DropdownItem>
 					</Dropdown>
 					<Textarea
-						placeholder="Say something"
+						placeholder="Message"
 						bind:value={text}
 						pad={24}
 						on:keypress={(e) => {
@@ -148,21 +153,29 @@
 							}
 						}}
 					/>
-					<Button disabled={loading} on:click={sendMessage}><SendAltFilled /></Button>
+					{#if text.length > 0}
+						<Button variant="strong" disabled={loading} on:click={sendMessage}>
+							<ArrowUp />
+						</Button>
+					{/if}
 				</div>
 			</Container>
 		</div>
 	</div>
 {:else if state === 'waku'}
 	<Header title="Waku Objects">
-		<Button slot="left" icon={ArrowLeft} on:click={() => (state = 'chat')} />
+		<Button variant="icon" slot="left" on:click={() => (state = 'chat')}>
+			<ChevronLeft />
+		</Button>
 	</Header>
 	<Container>
 		{#each cards as card}
 			<Card {...card}>
 				<svelte:fragment slot="menu">
 					<Dropdown>
-						<Button slot="button" icon={Menu} />
+						<Button slot="button">
+							<Menu />
+						</Button>
 						<DropdownItem onClick={() => console.log('View more info')}>View more info</DropdownItem
 						>
 						<DropdownItem onClick={() => console.log('Uninstall')}>Uninstall</DropdownItem>
@@ -171,14 +184,13 @@
 			</Card>
 		{/each}
 
-		<Button icon={Add}>Add Waku Object</Button>
+		<Button><Add />Add Waku Object</Button>
 	</Container>
 {/if}
 
 <style lang="scss">
 	.messages {
-		// margin-bottom: 96px;
-		flex-grow: 50;
+		flex-grow: 1;
 	}
 	.messages-inner {
 		padding-top: var(--spacing-48);
@@ -190,7 +202,18 @@
 		gap: var(--spacing-6);
 		flex-direction: column;
 		align-items: flex-end;
-		margin-bottom: var(--spacing-24);
+		max-width: 75%;
+		margin-right: auto;
+		margin-left: 0;
+		&:not(:last-child) {
+			margin-bottom: var(--spacing-12);
+		}
+
+		&.my-message {
+			font-style: italic;
+			margin-left: auto;
+			margin-right: 0;
+		}
 	}
 	.message-content {
 		display: flex;
@@ -202,13 +225,13 @@
 
 	.message-text {
 		padding: var(--spacing-12);
-		border-radius: var(--spacing-24);
-		border-bottom-right-radius: 0;
+		border-radius: var(--border-radius);
 		display: inline-block;
 		font-family: var(--font-serif);
-		font-size: var(--font-size-lg);
+		// font-size: var(--font-size-lg);
 		background-color: var(--white);
 		border: 1px solid var(--gray10);
+		// @extend .text-lg;
 	}
 
 	.their-message {
