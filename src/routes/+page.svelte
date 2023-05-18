@@ -29,7 +29,7 @@
 		isCreatingIdentity = true
 		try {
 			await adapters.createWallet()
-			goto('/identity/new')
+			goto(ROUTES.IDENTITY_NEW)
 		} catch (e) {
 			console.error(e)
 		}
@@ -87,7 +87,7 @@
 			</div>
 		</svelte:fragment>
 		<svelte:fragment slot="right">
-			<Button variant="account" on:click={() => goto(ROUTES.PROFILE)}>
+			<Button variant="account" on:click={() => goto(ROUTES.IDENTITY)}>
 				<svelte:fragment slot="avatar">
 					<Avatar size={48} picture={$profile.avatar} />
 				</svelte:fragment>
@@ -115,7 +115,7 @@
 			</div>
 		</svelte:fragment>
 		<svelte:fragment slot="right">
-			<Button variant="account" on:click={() => goto(ROUTES.PROFILE)}>
+			<Button variant="account" on:click={() => goto(ROUTES.IDENTITY)}>
 				<svelte:fragment slot="avatar">
 					<Avatar size={48} picture={$profile.avatar} />
 				</svelte:fragment>
