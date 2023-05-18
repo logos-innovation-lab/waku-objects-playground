@@ -24,7 +24,6 @@
 		cursor: pointer;
 	}
 	.avatar {
-		// margin: var(--spacing-12) 0px;
 		border-radius: 100px;
 
 		.img {

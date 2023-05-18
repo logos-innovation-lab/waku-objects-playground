@@ -1,5 +1,4 @@
 <script lang="ts">
-	// import Wallet from '$lib/components/icons/wallet.svelte'
 	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
 	import Renew from '$lib/components/icons/renew.svelte'
 	import Image from '$lib/components/icons/image.svelte'
@@ -79,22 +78,6 @@
 	<Divider pad={12} />
 	<Container gap={6}>
 		<Textarea bind:value={$profile.address} nonEditable label="Account address" />
-
-		<!-- <div class="wallet-info">
-			<h2>Wallet address</h2>
-			<div class="wallet-info-wrapper">
-				{$profile.address}
-			</div>
-		</div>
-		<div class="row">
-			<Button
-				disabled={$profile.avatar === picture && $profile.name === name}
-				on:click={() => {
-					adapters.saveUserProfile(name, picture)
-				}}>Save</Button
-			>
-			<Button on:click={() => adapters.logOut()}>Log out</Button>
-		</div> -->
 	</Container>
 {/if}
 

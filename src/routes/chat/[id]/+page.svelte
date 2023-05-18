@@ -228,10 +228,8 @@
 		border-radius: var(--border-radius);
 		display: inline-block;
 		font-family: var(--font-serif);
-		// font-size: var(--font-size-lg);
 		background-color: var(--white);
 		border: 1px solid var(--gray10);
-		// @extend .text-lg;
 	}
 
 	.their-message {
@@ -298,8 +296,6 @@
 
 	.chat-input-wrapper {
 		flex-grow: 0;
-		// position: absolute;
-		// inset: auto 0 0;
 		position: sticky;
 		bottom: 0;
 		background-color: var(--white);

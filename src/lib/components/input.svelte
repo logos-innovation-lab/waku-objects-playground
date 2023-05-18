@@ -14,17 +14,6 @@
 	label {
 		font-size: var(--font-size-sm);
 		color: var(--gray40);
-		// display: flex;
-		// flex-direction: column;
-		// align-items: flex-start;
-		// gap: var(--spacing-6);
-		// padding-block: var(--spacing-24);
-		// transition: background-color 0.2s;
-
-		// &:focus-within {
-		// 	background-color: var(--grey-150);
-		// 	transition: background-color 0.2s;
-		// }
 	}
 	textarea {
 		width: 100%;
