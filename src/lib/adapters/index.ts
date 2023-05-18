@@ -13,10 +13,10 @@ export interface Adapter {
 	// This is run when the app unmounts and should clear subscriptions
 	stop?: () => Promise<void> | void
 
-	logIn(): Promise<void>
-	logOut(): Promise<void>
+	createWallet(): Promise<void>
+	restoreWallet(mnemonic: string): Promise<void>
+	disconnectWallet(): Promise<void>
 	saveUserProfile(name?: string, avatar?: string): Promise<void>
-	canLogIn(): boolean
 
 	uploadPicture(picture: string): Promise<string>
 	getPicture(cid: string): string
