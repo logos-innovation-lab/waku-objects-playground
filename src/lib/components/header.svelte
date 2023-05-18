@@ -109,7 +109,7 @@
 
 	.search-input {
 		position: sticky;
-		margin-top: -64px;
+		margin-top: -68px;
 		z-index: 10;
 		padding-top: var(--spacing-12);
 		transition: margin-top 0.2s, opacity 0.2s;
