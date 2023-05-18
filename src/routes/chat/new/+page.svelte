@@ -49,11 +49,7 @@
 			<ArrowLeft />
 		</Button>
 		<svelte:fragment slot="right">
-			{#if !$profile.address}
-				<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><Wallet /></Button>
-			{:else}
-				<Avatar picture={$profile.avatar} onClick={() => goto('/profile')} />
-			{/if}
+			<Avatar picture={$profile.avatar} onClick={() => goto(ROUTES.IDENTITY)} />
 		</svelte:fragment>
 	</Header>
 	<div class="content">
@@ -119,11 +115,7 @@
 			<ArrowLeft />
 		</Button>
 		<svelte:fragment slot="right">
-			{#if !$profile.address}
-				<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><Wallet /></Button>
-			{:else}
-				<Avatar picture={$profile.avatar} onClick={() => goto('/profile')} />
-			{/if}
+			<Avatar picture={$profile.avatar} onClick={() => goto(ROUTES.IDENTITY)} />
 		</svelte:fragment>
 	</Header>
 	<Container>
@@ -144,11 +136,7 @@
 			<ArrowLeft />
 		</Button>
 		<svelte:fragment slot="right">
-			{#if !$profile.address}
-				<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><Wallet /></Button>
-			{:else}
-				<Avatar picture={$profile.avatar} onClick={() => goto('/profile')} />
-			{/if}
+			<Avatar picture={$profile.avatar} onClick={() => goto(ROUTES.IDENTITY)} />
 		</svelte:fragment>
 	</Header>
 	<Container>

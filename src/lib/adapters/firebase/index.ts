@@ -12,17 +12,11 @@ import {
 	getDoc,
 } from 'firebase/firestore'
 import { create } from 'ipfs-http-client'
-import {
-	canConnectWallet,
-	connectWallet,
-	subscribeAccountChanged,
-	subscribeChainChanged,
-} from './blockchain'
 import { profile } from '$lib/stores/profile'
-import type { Signer } from 'ethers'
+import { Wallet, HDNodeWallet } from 'ethers'
 import type { Adapter, Contact } from '..'
 import { chats, type DraftChat, type Chat, type Message } from '$lib/stores/chat'
-import { get } from 'svelte/store'
+import { get, type Unsubscriber } from 'svelte/store'
 import { contacts, type User } from '$lib/stores/users'
 import { ChatDbSchema, UserDbSchema } from './schemas'
 import { formatAddress } from '$lib/utils/format'
@@ -43,8 +37,20 @@ const IPFS_GATEWAY = 'https://kurate.infura-ipfs.io/ipfs'
 const app = initializeApp(firebaseConfig)
 const db = getFirestore(app)
 
+async function logIn(wallet: HDNodeWallet): Promise<void> {
+	const address = await wallet.getAddress()
+	const userDoc = doc(db, `users/${address}`)
+
+	await setDoc(userDoc, { address, lastSignIn: Date.now() }, { merge: true })
+	const user = await getDoc(userDoc)
+
+	// FIXME: type this properly
+	const { name } = user.data() as { name: string }
+	profile.update((state) => ({ ...state, address, name, loading: false }))
+}
+
 export default class FirebaseAdapter implements Adapter {
-	private signer: Signer | undefined
+	private wallet: HDNodeWallet | undefined
 	private subscriptions: Array<() => unknown> = []
 	private userSubscriptions: Array<() => unknown> = []
 	private ipfs = create({
@@ -57,8 +63,12 @@ export default class FirebaseAdapter implements Adapter {
 	})
 
 	start() {
-		this.subscriptions.push(subscribeAccountChanged())
-		this.subscriptions.push(subscribeChainChanged())
+		const mnemonic = localStorage.getItem('mnemonic')
+		if (mnemonic) {
+			this.restoreWallet(mnemonic)
+		} else {
+			profile.update((state) => ({ ...state, loading: false }))
+		}
 
 		const unsubscribeUser = profile.subscribe(async (p) => {
 			if (p.address && this.userSubscriptions.length === 0) {
@@ -80,20 +90,20 @@ export default class FirebaseAdapter implements Adapter {
 				)
 				const subscribeChats = onSnapshot(chatsSnapshot, async (res) => {
 					// Need to wait for contacts to be loaded before processing chats
+					let unsubscribe: Unsubscriber | undefined
 					const contactsPromise = new Promise<Map<string, User>>((resolve, reject) => {
-						const unsubscribe = contacts.subscribe((c) => {
+						unsubscribe = contacts.subscribe((c) => {
 							if (c.loading === false) {
-								unsubscribe()
 								resolve(c.contacts)
 							}
 							if (c.error) {
-								unsubscribe()
 								reject(c.error)
 							}
 						})
 					})
 					try {
 						const cnts = await contactsPromise
+						unsubscribe && unsubscribe()
 
 						const newChats = new Map<string, Chat>()
 						res.docs.forEach((d) => {
@@ -165,26 +175,33 @@ export default class FirebaseAdapter implements Adapter {
 		this.userSubscriptions.forEach((s) => s())
 	}
 
-	canLogIn(): boolean {
-		return canConnectWallet()
-	}
+	async createWallet(): Promise<void> {
+		this.wallet = Wallet.createRandom()
 
-	async logIn(): Promise<void> {
-		const signer = await connectWallet()
-		this.signer = signer
-		const address = await signer.getAddress()
+		const phrase = this.wallet.mnemonic?.phrase
+
+		if (phrase) localStorage.setItem('mnemonic', phrase)
+
+		const address = await this.wallet.getAddress()
+
 		const userDoc = doc(db, `users/${address}`)
+		setDoc(userDoc, { address, lastSignIn: Date.now() }, { merge: true })
 
-		await setDoc(userDoc, { address, lastSignIn: Date.now() }, { merge: true })
-		const user = await getDoc(userDoc)
-
-		// FIXME: type this properly
-		const { name } = user.data() as { name: string }
-		profile.update((state) => ({ ...state, address, name }))
+		profile.update((state) => ({ ...state, address, loading: false }))
 	}
-	logOut(): Promise<void> {
-		this.signer = undefined
-		profile.set({ loading: true })
+
+	restoreWallet(mnemonic: string): Promise<void> {
+		// Create a new wallet from the mnemonic
+		this.wallet = Wallet.fromPhrase(mnemonic)
+
+		const phrase = this.wallet.mnemonic?.phrase
+		if (phrase) localStorage.setItem('mnemonic', phrase)
+
+		return logIn(this.wallet)
+	}
+	disconnectWallet(): Promise<void> {
+		this.wallet = undefined
+		localStorage.removeItem('mnemonic')
 
 		return Promise.resolve()
 	}
@@ -196,9 +213,9 @@ export default class FirebaseAdapter implements Adapter {
 	}
 
 	async saveUserProfile(name?: string, avatar?: string): Promise<void> {
-		const signer = await connectWallet()
-		this.signer = signer
-		const address = await signer.getAddress()
+		const address = get(profile).address
+		if (!address) throw new Error('Not signed in')
+
 		const userDoc = doc(db, `users/${address}`)
 
 		const data: Partial<Contact> = {}

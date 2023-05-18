@@ -1,6 +1,8 @@
 export default {
 	HOME: '/',
-	PROFILE: '/profile/',
+	IDENTITY: '/identity/',
+	IDENTITY_NEW: '/identity/new',
+	IDENTITY_CONFIRM: '/identity/confirm',
 	CHAT: (id: string) => `/chat/${id}`,
 	CHAT_NEW: '/chat/new',
 

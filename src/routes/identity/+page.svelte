@@ -3,9 +3,7 @@
 	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
 	import Renew from '$lib/components/icons/renew.svelte'
 	import Image from '$lib/components/icons/image.svelte'
-	import Login from '$lib/components/icons/login.svelte'
 	import User from '$lib/components/icons/user.svelte'
-	import ChatBot from '$lib/components/icons/chat-bot.svelte'
 
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
@@ -16,12 +14,17 @@
 
 	import adapters from '$lib/adapters'
 	import { profile } from '$lib/stores/profile'
-	import { formatAddress } from '$lib/utils/format'
 	import { goto } from '$app/navigation'
 	import { clipAndResize } from '$lib/utils/image'
+	import routes from '$lib/routes'
 
-	$: picture = $profile.avatar
-	$: name = $profile.name
+	let picture = $profile.avatar
+	let name = $profile.name
+
+	$: if ($profile.loading === false && !name && !picture) {
+		name = $profile.name
+		picture = $profile.avatar
+	}
 
 	let pictureFiles: FileList | undefined = undefined
 	async function resizePersonaPicture(p?: File) {
@@ -35,24 +38,11 @@
 </script>
 
 <Header title="Account">
-	<Button slot="left" variant="icon" on:click={() => goto('/')}>
+	<Button slot="left" variant="icon" on:click={() => goto(routes.HOME)}>
 		<ChevronLeft />
 	</Button>
 </Header>
-{#if !$profile.address}
-	<Container align="center" gap={6} justify="center" grow>
-		<div class="chatbot">
-			<ChatBot size={32} />
-		</div>
-		<p class="text-lg text-bold">Waku chats</p>
-		<div class="btn-spacing">
-			<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}>
-				<Login />
-				Connect
-			</Button>
-		</div>
-	</Container>
-{:else if $profile.loading}
+{#if $profile.loading}
 	<Container align="center" grow gap={6} justify="center">
 		<h2>Loading...</h2>
 	</Container>
@@ -84,7 +74,7 @@
 				Add picture
 			{/if}
 		</InputFile>
-		<Textarea value={formatAddress($profile.address)} nonEditable label="Display name" />
+		<Textarea value={$profile.name} nonEditable label="Display name" />
 	</Container>
 	<Divider pad={12} />
 	<Container gap={6}>

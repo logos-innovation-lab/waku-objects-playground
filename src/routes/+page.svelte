@@ -1,36 +1,67 @@
 <script lang="ts">
-	import NewChat from '$lib/components/icons/add-comment.svelte'
-	import Login from '$lib/components/icons/login.svelte'
+	import { goto } from '$app/navigation'
+
+	// Icons
+	import AddComment from '$lib/components/icons/add-comment.svelte'
 	import ChatBot from '$lib/components/icons/chat-bot.svelte'
+	import Login from '$lib/components/icons/login.svelte'
+	import NewChat from '$lib/components/icons/add-comment.svelte'
+	import UserFollow from '$lib/components/icons/user-follow.svelte'
 
-	import Container from '$lib/components/container.svelte'
+	// Components
+	import Avatar from '$lib/components/avatar.svelte'
 	import Badge from '$lib/components/badge.svelte'
-	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'
+	import Container from '$lib/components/container.svelte'
+	import Header from '$lib/components/header.svelte'
 
+	// Stores
 	import { profile } from '$lib/stores/profile'
 	import { chats } from '$lib/stores/chat'
-	import { formatDateAndTime } from '$lib/utils/format'
-	import { formatAddress } from '$lib/utils/format'
 
+	import { formatDateAndTime, formatAddress } from '$lib/utils/format'
 	import adapters from '$lib/adapters'
-	import { goto } from '$app/navigation'
-	import Avatar from '$lib/components/avatar.svelte'
-
 	import ROUTES from '$lib/routes'
-	import AddComment from '$lib/components/icons/add-comment.svelte'
+
+	let isCreatingIdentity = false
+
+	async function createIdentity() {
+		isCreatingIdentity = true
+		try {
+			await adapters.createWallet()
+			goto(ROUTES.IDENTITY_NEW)
+		} catch (e) {
+			console.error(e)
+		}
+		isCreatingIdentity = false
+	}
 </script>
 
-{#if !$profile.address}
+{#if $profile.loading}
+	<Container align="center" grow gap={6} justify="center">
+		<div class="center">
+			<h2>Loading...</h2>
+		</div>
+	</Container>
+{:else if !$profile.address}
 	<Container align="center" gap={6} justify="center" grow>
 		<div class="chatbot">
 			<ChatBot size={32} />
 		</div>
 		<p class="text-lg text-bold">Waku chats</p>
 		<div class="btn-spacing">
-			<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}>
+			<Button disabled={isCreatingIdentity} on:click={createIdentity}>
+				<UserFollow />
+				{isCreatingIdentity ? 'Creating new identity...' : 'Create new identity'}
+			</Button>
+		</div>
+		<div class="btn-spacing">
+			<Button
+				disabled={isCreatingIdentity}
+				on:click={() => console.log('Connect existing identity')}
+			>
 				<Login />
-				Connect
+				Connect existing identity
 			</Button>
 		</div>
 	</Container>
@@ -56,18 +87,12 @@
 			</div>
 		</svelte:fragment>
 		<svelte:fragment slot="right">
-			{#if !$profile.address}
-				<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}>
-					<NewChat />
-				</Button>
-			{:else}
-				<Button variant="account" on:click={() => goto(ROUTES.PROFILE)}>
-					<svelte:fragment slot="avatar">
-						<Avatar size={48} picture={$profile.avatar} />
-					</svelte:fragment>
-					{$profile.name ?? formatAddress($profile.address)}
-				</Button>
-			{/if}
+			<Button variant="account" on:click={() => goto(ROUTES.IDENTITY)}>
+				<svelte:fragment slot="avatar">
+					<Avatar size={48} picture={$profile.avatar} />
+				</svelte:fragment>
+				{$profile.name ?? formatAddress($profile.address)}
+			</Button>
 		</svelte:fragment>
 	</Header>
 	<Container align="center" grow gap={6} justify="center">
@@ -90,16 +115,12 @@
 			</div>
 		</svelte:fragment>
 		<svelte:fragment slot="right">
-			{#if !$profile.address}
-				<Button disabled={!adapters.canLogIn()} on:click={adapters.logIn}><NewChat /></Button>
-			{:else}
-				<Button variant="account" on:click={() => goto(ROUTES.PROFILE)}>
-					<svelte:fragment slot="avatar">
-						<Avatar size={48} picture={$profile.avatar} />
-					</svelte:fragment>
-					{$profile.name ?? formatAddress($profile.address)}
-				</Button>
-			{/if}
+			<Button variant="account" on:click={() => goto(ROUTES.IDENTITY)}>
+				<svelte:fragment slot="avatar">
+					<Avatar size={48} picture={$profile.avatar} />
+				</svelte:fragment>
+				{$profile.name ?? formatAddress($profile.address)}
+			</Button>
 		</svelte:fragment>
 	</Header>
 	<ul class="chats">
