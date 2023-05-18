@@ -165,9 +165,7 @@
 		justify-content: flex-end;
 		margin: var(--spacing-24) 0px;
 	}
-	// .mid {
-	// 	flex-grow: 1;
-	// }
+
 	section {
 		margin: var(--spacing-24) 0px;
 	}

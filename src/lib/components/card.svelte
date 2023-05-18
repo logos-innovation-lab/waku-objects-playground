@@ -67,9 +67,6 @@
 		display: flex;
 		flex-direction: column;
 	}
-	// .grow {
-	// 	flex-grow: 1;
-	// }
 
 	.menu {
 		position: absolute;

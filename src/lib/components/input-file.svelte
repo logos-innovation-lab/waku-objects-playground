@@ -1,21 +1,10 @@
 <script lang="ts">
-	// import type { ComponentConstructor, IconProps } from '$lib/types'
-
-	// export let icon: ComponentConstructor<IconProps> | undefined = undefined
-	// export let variant: 'rounded' | 'square' | 'nopad' = 'square'
-	// export let border = true
 	export let disabled: boolean | undefined = undefined
 	export let multiple = false
 	export let files: FileList | undefined = undefined
 </script>
 
 <label class={`input-file`}>
-	<!-- {#if icon !== undefined}
-		<div class="wrapper">
-			<svelte:component this={icon} />
-		</div>
-	{/if} -->
-
 	<slot />
 	<!-- svelte-ignore a11y-missing-attribute -->
 	<input type="file" {disabled} bind:files hidden {multiple} />
@@ -51,22 +40,5 @@
 				fill: var(--gray30);
 			}
 		}
-
-		// &.square {
-		// 	border-radius: 0;
-		// 	margin-inline: auto;
-		// }
-		// &.rounded {
-		// 	border-radius: 200px;
-		// }
-		// &.nopad {
-		// 	padding: 0;
-		// }
-		// &.border {
-		// 	border: 1px solid var(--gray20);
-		// }
-		// .wrapper {
-		// 	line-height: 0;
-		// }
 	}
 </style>
