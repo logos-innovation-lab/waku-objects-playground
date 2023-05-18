@@ -29,7 +29,7 @@
 					</div>
 				{/if}
 			</div>
-			<h1>{title}</h1>
+			<h1 class="text-normal">{title}</h1>
 			<div class="right">
 				<slot name="right" />
 			</div>

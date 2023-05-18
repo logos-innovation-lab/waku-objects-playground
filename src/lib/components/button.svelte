@@ -16,7 +16,7 @@
 	button {
 		background: var(--transparent);
 		border: 1px solid var(--gray20);
-		border-radius: 30px;
+		border-radius: var(--border-radius);
 		color: var(--gray50);
 		font-size: var(--font-size-normal);
 		font-weight: var(--font-weight-500);

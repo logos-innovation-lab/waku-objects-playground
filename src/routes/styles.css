@@ -137,6 +137,11 @@ h3 {
 	font-size: var(--font-size-lg);
 	line-height: 24px;
 }
+.text-normal {
+	font-size: var(--font-size-normal);
+	line-height: 20px;
+	font-weight: 400;
+}
 
 .text-sm {
 	font-size: var(--font-size-sm);
