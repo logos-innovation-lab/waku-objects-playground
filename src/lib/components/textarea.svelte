@@ -5,6 +5,7 @@
 	export let autofocus = false
 	export let pad = 0
 	export let nonEditable = false
+	export let rows = 1
 </script>
 
 <label class="textarea text-sm" style={`padding-block: ${pad}`}>
@@ -20,7 +21,7 @@
 		{autofocus}
 		{placeholder}
 		disabled={nonEditable}
-		rows="1"
+		{rows}
 	/>
 </label>
 
@@ -28,6 +29,7 @@
 	label.textarea {
 		display: flex;
 		flex-direction: column;
+		align-items: flex-start;
 		gap: var(--spacing-6);
 		width: 100%;
 		color: var(--gray40);

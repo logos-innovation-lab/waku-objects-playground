@@ -44,26 +44,21 @@
 		</div>
 	</Container>
 {:else if !$profile.address}
-	<Container align="center" gap={6} justify="center" grow>
+	<Container align="center" gap={12} justify="center" grow>
 		<div class="chatbot">
-			<ChatBot size={32} />
+			<div>
+				<ChatBot size={32} />
+			</div>
+			<p class="text-lg text-bold">Waku chats</p>
 		</div>
-		<p class="text-lg text-bold">Waku chats</p>
-		<div class="btn-spacing">
-			<Button disabled={isCreatingIdentity} on:click={createIdentity}>
-				<UserFollow />
-				{isCreatingIdentity ? 'Creating new identity...' : 'Create new identity'}
-			</Button>
-		</div>
-		<div class="btn-spacing">
-			<Button
-				disabled={isCreatingIdentity}
-				on:click={() => console.log('Connect existing identity')}
-			>
-				<Login />
-				Connect existing identity
-			</Button>
-		</div>
+		<Button disabled={isCreatingIdentity} on:click={createIdentity}>
+			<UserFollow />
+			{isCreatingIdentity ? 'Creating new identity...' : 'Create new identity'}
+		</Button>
+		<Button disabled={isCreatingIdentity} on:click={() => goto(ROUTES.IDENTITY_CONNECT)}>
+			<Login />
+			Connect existing identity
+		</Button>
 	</Container>
 {:else if $chats.loading}
 	<Container align="center" grow gap={6} justify="center">
@@ -224,5 +219,15 @@
 		font-size: var(--font-size-sm);
 		color: var(--gray40);
 		margin-left: auto;
+	}
+
+	.chatbot {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-6);
+		margin-bottom: var(--spacing-12);
+		div {
+			line-height: 0;
+		}
 	}
 </style>

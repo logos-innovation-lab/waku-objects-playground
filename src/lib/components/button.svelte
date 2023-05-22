@@ -55,6 +55,8 @@
 
 		&.strong {
 			background-color: var(--gray50);
+			color: var(--gray10);
+
 			:global(svg) {
 				fill: var(--gray10);
 				width: 24px;
@@ -71,7 +73,7 @@
 			}
 
 			&:disabled {
-				background-color: var(--grey-30);
+				background-color: rgba(var(--gray50-rgb), 0.25);
 			}
 		}
 

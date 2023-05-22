@@ -74,6 +74,7 @@
 		h1 {
 			flex-grow: 1;
 			text-align: center;
+			font-weight: var(--font-weight-500);
 		}
 
 		.left,

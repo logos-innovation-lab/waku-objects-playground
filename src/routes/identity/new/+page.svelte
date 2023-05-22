@@ -2,7 +2,6 @@
 	import ArrowRight from '$lib/components/icons/arrow-right.svelte'
 	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
 	import Renew from '$lib/components/icons/renew.svelte'
-	import Image from '$lib/components/icons/image.svelte'
 	import User from '$lib/components/icons/user.svelte'
 
 	import Button from '$lib/components/button.svelte'
@@ -13,7 +12,6 @@
 
 	import adapters from '$lib/adapters'
 	import { profile } from '$lib/stores/profile'
-	import { formatAddress } from '$lib/utils/format'
 	import { goto } from '$app/navigation'
 	import { clipAndResize } from '$lib/utils/image'
 	import routes from '$lib/routes'
@@ -54,16 +52,16 @@
 		<ChevronLeft />
 	</Button>
 </Header>
-<Container gap={6}>
-	{#if $profile.loading}
-		<Container align="center" grow gap={6} justify="center">
-			<h2>Loading...</h2>
-		</Container>
-	{:else if $profile.error}
-		<Container align="center" grow gap={6} justify="center">
-			<h2>Failed to load profile: {$profile.error.message}</h2>
-		</Container>
-	{:else}
+{#if $profile.loading}
+	<Container align="center" grow gap={6} justify="center">
+		<h2>Loading...</h2>
+	</Container>
+{:else if $profile.error}
+	<Container align="center" grow gap={6} justify="center">
+		<h2>Failed to load profile: {$profile.error.message}</h2>
+	</Container>
+{:else}
+	<Container gap={12}>
 		<div class="avatar">
 			{#if picture}
 				<div class="img">
@@ -78,28 +76,25 @@
 			{/if}
 		</div>
 		<InputFile bind:files={pictureFiles}>
-			{#if picture}
-				<Renew />
-				Change picture
-			{:else}
-				<Image />
-				Add picture
-			{/if}
+			<Renew />
+			Change picture
 		</InputFile>
-		<Textarea
-			bind:value={name}
-			placeholder={formatAddress($profile.address || '')}
-			label="Display name"
-		/>
-		<Button disabled={saving} on:click={saveProfile}>
+		<Textarea bind:value={name} label="Display name" />
+	</Container>
+	<Container grow justify="flex-end">
+		<Button
+			variant="strong"
+			disabled={name === '' || name === undefined || saving}
+			on:click={saveProfile}
+		>
 			<ArrowRight />
 		</Button>
-	{/if}
-</Container>
+	</Container>
+{/if}
 
 <style lang="scss">
 	.avatar {
-		margin: var(--spacing-12) 0px;
+		margin: var(--spacing-12) auto 0;
 		border-radius: 100px;
 	}
 	.no-img,
