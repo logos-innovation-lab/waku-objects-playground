@@ -65,15 +65,10 @@
 			{/if}
 		</div>
 		<InputFile bind:files={pictureFiles}>
-			{#if picture}
-				<Renew />
-				Change picture
-			{:else}
-				<Image />
-				Add picture
-			{/if}
+			<Renew />
+			Change picture
 		</InputFile>
-		<Textarea value={$profile.name} nonEditable label="Display name" />
+		<Textarea value={$profile.name} label="Display name" />
 	</Container>
 	<Divider pad={12} />
 	<Container gap={6}>

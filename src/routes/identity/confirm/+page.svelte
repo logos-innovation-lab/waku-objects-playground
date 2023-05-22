@@ -43,9 +43,9 @@
 		<ChevronLeft />
 	</Button>
 </Header>
-<Container gap={6}>
-	<p>How to recover your identity</p>
-	<p>
+<Container gap={6} grow justify="center" align="center">
+	<p class="text-lg text-bold">How to recover your identity</p>
+	<p class="text-lg description">
 		If you need to recover your identity, you will need your recovery phrase. Back it up now, or
 		later from your identity settings page.
 	</p>
@@ -53,11 +53,16 @@
 		<DocumentSigned />
 		Backup recovery phrase
 	</Button>
-	<Button on:click={() => goto(routes.HOME)}>
+</Container>
+<Container>
+	<Button variant="strong" on:click={() => goto(routes.HOME)}>
 		<Checkmark />
 		I understand
 	</Button>
 </Container>
 
 <style lang="scss">
+	.description {
+		margin-bottom: calc(var(--spacing-24) - var(--spacing-6));
+	}
 </style>

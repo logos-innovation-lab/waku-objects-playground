@@ -20,7 +20,7 @@
 		font-weight: var(--font-weight-500);
 		line-height: 20px;
 		padding: 11px;
-		margin: 0 auto var(--spacing-6);
+		margin: 0 auto;
 		display: flex;
 		justify-content: center;
 		flex-direction: row;
