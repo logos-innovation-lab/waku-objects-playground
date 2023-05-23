@@ -20,6 +20,7 @@ import { get, type Unsubscriber } from 'svelte/store'
 import { contacts, type User } from '$lib/stores/users'
 import { ChatDbSchema, UserDbSchema } from './schemas'
 import { formatAddress } from '$lib/utils/format'
+import { browser } from '$app/environment'
 
 const firebaseConfig = {
 	apiKey: 'AIzaSyCs8WujyoHcDqTFtG5b3R3HJVEyWmOCMpA',
@@ -63,7 +64,7 @@ export default class FirebaseAdapter implements Adapter {
 	})
 
 	start() {
-		const mnemonic = localStorage.getItem('mnemonic')
+		const mnemonic = browser ? localStorage.getItem('mnemonic') : undefined
 		if (mnemonic) {
 			this.restoreWallet(mnemonic)
 		} else {
@@ -180,14 +181,7 @@ export default class FirebaseAdapter implements Adapter {
 
 		const phrase = this.wallet.mnemonic?.phrase
 
-		if (phrase) localStorage.setItem('mnemonic', phrase)
-
-		const address = await this.wallet.getAddress()
-
-		const userDoc = doc(db, `users/${address}`)
-		setDoc(userDoc, { address, lastSignIn: Date.now() }, { merge: true })
-
-		profile.update((state) => ({ ...state, address, loading: false }))
+		if (phrase && browser) localStorage.setItem('mnemonic', phrase)
 	}
 
 	restoreWallet(mnemonic: string): Promise<void> {
@@ -195,15 +189,19 @@ export default class FirebaseAdapter implements Adapter {
 		this.wallet = Wallet.fromPhrase(mnemonic)
 
 		const phrase = this.wallet.mnemonic?.phrase
-		if (phrase) localStorage.setItem('mnemonic', phrase)
+		if (phrase && browser) localStorage.setItem('mnemonic', phrase)
 
 		return logIn(this.wallet)
 	}
 	disconnectWallet(): Promise<void> {
 		this.wallet = undefined
-		localStorage.removeItem('mnemonic')
+		browser && localStorage.removeItem('mnemonic')
 
 		return Promise.resolve()
+	}
+
+	hasWallet() {
+		return Boolean(this.wallet) || (browser && localStorage.getItem('mnemonic') !== null)
 	}
 
 	async getContact(address: string): Promise<Contact> {
@@ -213,7 +211,7 @@ export default class FirebaseAdapter implements Adapter {
 	}
 
 	async saveUserProfile(name?: string, avatar?: string): Promise<void> {
-		const address = get(profile).address
+		const address = await this.wallet?.getAddress()
 		if (!address) throw new Error('Not signed in')
 
 		const userDoc = doc(db, `users/${address}`)
@@ -222,10 +220,8 @@ export default class FirebaseAdapter implements Adapter {
 		if (avatar) data.avatar = avatar
 		if (name) data.name = name
 
-		if (avatar || name) {
-			setDoc(userDoc, { address, ...data }, { merge: true })
-			profile.update((state) => ({ ...state, address, name, avatar }))
-		}
+		setDoc(userDoc, { address, ...data }, { merge: true })
+		profile.update((state) => ({ ...state, address, name, avatar }))
 	}
 
 	async startChat(chat: DraftChat): Promise<string> {

@@ -22,19 +22,6 @@
 	import { formatDateAndTime, formatAddress } from '$lib/utils/format'
 	import adapters from '$lib/adapters'
 	import ROUTES from '$lib/routes'
-
-	let isCreatingIdentity = false
-
-	async function createIdentity() {
-		isCreatingIdentity = true
-		try {
-			await adapters.createWallet()
-			goto(ROUTES.IDENTITY_NEW)
-		} catch (e) {
-			console.error(e)
-		}
-		isCreatingIdentity = false
-	}
 </script>
 
 {#if $profile.loading}
@@ -51,11 +38,11 @@
 			</div>
 			<p class="text-lg text-bold">Waku chats</p>
 		</div>
-		<Button disabled={isCreatingIdentity} on:click={createIdentity}>
+		<Button on:click={() => goto(ROUTES.IDENTITY_NEW)}>
 			<UserFollow />
-			{isCreatingIdentity ? 'Creating new identity...' : 'Create new identity'}
+			Create new identity
 		</Button>
-		<Button disabled={isCreatingIdentity} on:click={() => goto(ROUTES.IDENTITY_CONNECT)}>
+		<Button on:click={() => goto(ROUTES.IDENTITY_CONNECT)}>
 			<Login />
 			Connect existing identity
 		</Button>

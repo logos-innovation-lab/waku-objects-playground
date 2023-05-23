@@ -16,14 +16,15 @@
 	import { clipAndResize } from '$lib/utils/image'
 	import routes from '$lib/routes'
 
-	let picture = $profile.avatar
-	let name = $profile.name
+	// Redirect to homepage if user already has a wallet
+	if (adapters.hasWallet()) goto(routes.HOME)
 
-	$: if ($profile.loading === false && !name && !picture) {
-		name = $profile.name
-		picture = $profile.avatar
-	}
+	let picture = ''
+	let name = ''
 	let saving = false
+	let isCreatingIdentity = false
+
+	createIdentity()
 
 	let pictureFiles: FileList | undefined = undefined
 	async function resizePersonaPicture(p?: File) {
@@ -45,6 +46,16 @@
 		}
 		saving = false
 	}
+
+	async function createIdentity() {
+		isCreatingIdentity = true
+		try {
+			await adapters.createWallet()
+		} catch (e) {
+			console.error(e)
+		}
+		isCreatingIdentity = false
+	}
 </script>
 
 <Header title="Create new identity">
@@ -52,45 +63,32 @@
 		<ChevronLeft />
 	</Button>
 </Header>
-{#if $profile.loading}
-	<Container align="center" grow gap={6} justify="center">
-		<h2>Loading...</h2>
-	</Container>
-{:else if $profile.error}
-	<Container align="center" grow gap={6} justify="center">
-		<h2>Failed to load profile: {$profile.error.message}</h2>
-	</Container>
-{:else}
-	<Container gap={12}>
-		<div class="avatar">
-			{#if picture}
-				<div class="img">
-					<img src={adapters.getPicture(picture)} alt="profile" />
+
+<Container gap={12}>
+	<div class="avatar">
+		{#if picture}
+			<div class="img">
+				<img src={adapters.getPicture(picture)} alt="profile" />
+			</div>
+		{:else}
+			<div class="no-img">
+				<div class="profile-default">
+					<User size={70} />
 				</div>
-			{:else}
-				<div class="no-img">
-					<div class="profile-default">
-						<User size={70} />
-					</div>
-				</div>
-			{/if}
-		</div>
-		<InputFile bind:files={pictureFiles}>
-			<Renew />
-			Change picture
-		</InputFile>
-		<Textarea bind:value={name} label="Display name" />
-	</Container>
-	<Container grow justify="flex-end">
-		<Button
-			variant="strong"
-			disabled={name === '' || name === undefined || saving}
-			on:click={saveProfile}
-		>
-			<ArrowRight />
-		</Button>
-	</Container>
-{/if}
+			</div>
+		{/if}
+	</div>
+	<InputFile bind:files={pictureFiles}>
+		<Renew />
+		Change picture
+	</InputFile>
+	<Textarea bind:value={name} label="Display name" />
+</Container>
+<Container grow justify="flex-end">
+	<Button variant="strong" disabled={isCreatingIdentity || !name || saving} on:click={saveProfile}>
+		<ArrowRight />
+	</Button>
+</Container>
 
 <style lang="scss">
 	.avatar {

@@ -15,6 +15,7 @@ export interface Adapter {
 
 	createWallet(): Promise<void>
 	restoreWallet(mnemonic: string): Promise<void>
+	hasWallet(): boolean
 	disconnectWallet(): Promise<void>
 	saveUserProfile(name?: string, avatar?: string): Promise<void>
 
