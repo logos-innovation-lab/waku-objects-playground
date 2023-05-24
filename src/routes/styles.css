@@ -49,6 +49,8 @@
 
 	--border-radius: var(--spacing-24);
 
+	--border: 1px solid var(--gray10);
+
 	/* INPUT */
 	--input-bg: var(--gray10);
 	--input-border: var(--gray20);

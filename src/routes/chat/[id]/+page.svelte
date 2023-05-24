@@ -7,13 +7,14 @@
 	import ArrowUp from '$lib/components/icons/arrow-up.svelte'
 	import Menu from '$lib/components/icons/overflow-menu-horizontal.svelte'
 	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
+	import User from '$lib/components/icons/user.svelte'
 
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
 	import Textarea from '$lib/components/textarea.svelte'
 	import Card from '$lib/components/card.svelte'
 	import Button from '$lib/components/button.svelte'
-
+	import Avatar from '$lib/components/avatar.svelte'
 	import Dropdown from '$lib/components/dropdown.svelte'
 	import DropdownItem from '$lib/components/dropdown-item.svelte'
 
@@ -52,15 +53,21 @@
 		text = ''
 		loading = false
 	}
+
+	let chatImg = $chats.chats.get($page.params.id)?.users[0].avatar
 </script>
 
 {#if state === 'chat'}
 	<div class="chat">
-		<!-- TODO: replace header title with chat name or person's name (?) -->
-		<Header title="Chat">
+		<Header>
 			<Button variant="icon" slot="left" on:click={() => goto(ROUTES.HOME)}>
 				<ChevronLeft />
 			</Button>
+			<svelte:fragment slot="chat">
+				<!-- TODO: display chatter's profile image, if existing (currently placeholder) -->
+				<Avatar picture={chatImg ? chatImg : ''} />
+				{$chats.chats.get($page.params.id)?.name}
+			</svelte:fragment>
 		</Header>
 		<div class="chat-messages">
 			<Container>
@@ -139,7 +146,6 @@
 					<Textarea
 						placeholder="Message"
 						bind:value={text}
-						pad={24}
 						on:keypress={(e) => {
 							// When enter is pressed without modifier keys, send the message
 							if (e.key === 'Enter' && !(e.shiftKey || e.ctrlKey || e.altKey)) {

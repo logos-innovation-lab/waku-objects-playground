@@ -31,6 +31,7 @@
 		align-items: center;
 		gap: var(--spacing-6);
 		margin-inline: auto;
+		white-space: nowrap;
 
 		&:active {
 			background-color: var(--gray20);
@@ -38,6 +39,7 @@
 
 		&:disabled {
 			cursor: not-allowed;
+			color: rgba(var(--gray50-rgb), 0.25);
 
 			& :global(svg) {
 				fill: var(--gray30);

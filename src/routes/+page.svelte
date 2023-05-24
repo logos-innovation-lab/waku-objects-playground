@@ -101,7 +101,7 @@
 		</div>
 	</Container>
 {:else}
-	<Header search>
+	<Header>
 		<svelte:fragment slot="left">
 			<div class="header-btns">
 				<Button variant="icon" on:click={() => goto(ROUTES.CHAT_NEW)}>
@@ -124,12 +124,12 @@
 			{#if lastMessage}
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<li on:click={() => goto(ROUTES.CHAT(id))}>
-					<Container>
+					<Container grow>
 						<div class="chat">
-							<Avatar size={70} />
+							<Avatar size={70} picture={chat.users[0].avatar} />
 							<div class="content">
 								<div class="user-info">
-									<span class="username text-large text-bold">
+									<span class="username text-lg text-bold">
 										{chat.name ?? 'Unnamed chat'}
 										<Badge dark>
 											{chat.messages.length}
@@ -139,7 +139,12 @@
 										{formatDateAndTime(lastMessage.timestamp)}
 									</span>
 								</div>
-								<p class="message text-serif">
+								<p
+									class={`message text-serif ${
+										lastMessage.fromAddress === $profile.address ? 'my-message' : ''
+									}`}
+								>
+									{lastMessage.fromAddress === $profile.address ? 'You: ' : ''}
 									{lastMessage.text.substring(0, 50)}
 								</p>
 							</div>
@@ -229,5 +234,9 @@
 		div {
 			line-height: 0;
 		}
+	}
+
+	.my-message {
+		font-style: italic;
 	}
 </style>

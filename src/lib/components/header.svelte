@@ -29,7 +29,13 @@
 					</div>
 				{/if}
 			</div>
-			<h1 class="text-normal">{title}</h1>
+			{#if title}
+				<h1 class="text-normal">{title}</h1>
+			{:else if $$slots.chat}
+				<div class="chat">
+					<slot name="chat" />
+				</div>
+			{/if}
 			<div class="right">
 				<slot name="right" />
 			</div>
@@ -71,10 +77,22 @@
 		background-color: var(--white);
 		z-index: 30;
 
-		h1 {
+		h1,
+		.chat {
 			flex-grow: 1;
 			text-align: center;
 			font-weight: var(--font-weight-500);
+		}
+
+		.chat {
+			display: flex;
+			gap: var(--spacing-12);
+			justify-content: center;
+			align-items: center;
+
+			:global(img) {
+				border-radius: var(--border-radius);
+			}
 		}
 
 		.left,
