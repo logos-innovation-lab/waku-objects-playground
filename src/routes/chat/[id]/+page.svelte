@@ -234,7 +234,7 @@
 		display: inline-block;
 		font-family: var(--font-serif);
 		background-color: var(--white);
-		border: 1px solid var(--gray10);
+		// border: 1px solid var(--gray10);
 	}
 
 	.their-message {
@@ -245,12 +245,12 @@
 			text-align: left;
 		}
 
-		.message-text {
-			border-bottom-right-radius: var(--spacing-24);
-			border-bottom-left-radius: 0;
-			border: 1px solid var(--gray20);
-		}
+		// .message-text {
+		// border-bottom-right-radius: var(--spacing-24);
+		// border-bottom-left-radius: 0;
+		// border: 1px solid var(--gray20);
 	}
+	// }
 
 	.message-object-request {
 		font-size: var(--font-size-sm);
