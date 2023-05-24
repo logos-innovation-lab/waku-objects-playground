@@ -7,7 +7,6 @@
 	import ArrowUp from '$lib/components/icons/arrow-up.svelte'
 	import Menu from '$lib/components/icons/overflow-menu-horizontal.svelte'
 	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
-	import User from '$lib/components/icons/user.svelte'
 
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'

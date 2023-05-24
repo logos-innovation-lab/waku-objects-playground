@@ -26,9 +26,6 @@
 	import Textarea from '$lib/components/textarea.svelte'
 	import type { DraftChat } from '$lib/stores/chat'
 
-	import { chats } from '$lib/stores/chat'
-	import { formatAddress } from '$lib/utils/format'
-
 	// Not logged in users should be redirected to home page
 	$: if (!$profile.address) goto(ROUTES.HOME)
 
