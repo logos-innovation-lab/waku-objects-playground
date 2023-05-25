@@ -21,7 +21,8 @@ import { chats, type DraftChat, type Chat, type Message } from '$lib/stores/chat
 import { profile } from '$lib/stores/profile'
 import { contacts, type User } from '$lib/stores/users'
 
-import { ChatDbSchema, type Mnemonic12, Mnemonic12Schema, UserDbSchema } from './schemas'
+import { ChatDbSchema, UserDbSchema } from './schemas'
+import { Mnemonic12Schema, type Mnemonic12 } from '$lib/utils/schemas'
 
 import { formatAddress } from '$lib/utils/format'
 import { getFromLocalStorage, removeFromLocalStorage, saveToLocalStorage } from '../utils'

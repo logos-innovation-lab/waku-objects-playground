@@ -9,8 +9,25 @@
 	import { goto } from '$app/navigation'
 	import routes from '$lib/routes'
 	import Textarea from '$lib/components/textarea.svelte'
+	import adapters from '$lib/adapters'
 
 	let phrase = ''
+	let restoring = false
+
+	async function restoreWallet() {
+		if (!phrase) return
+		restoring = true
+
+		try {
+			await adapters.restoreWallet(phrase)
+
+			goto(routes.HOME)
+		} catch (error) {
+			console.error(error)
+		}
+
+		restoring = false
+	}
 </script>
 
 <Header title="Connect your existing identity">
@@ -33,10 +50,9 @@
 	/>
 </Container>
 <Container>
-	<!-- TODO: fix button action -->
-	<Button disabled={phrase === ''} variant="strong" on:click={() => goto(routes.HOME)}>
+	<Button disabled={restoring || !phrase} variant="strong" on:click={restoreWallet}>
 		<Checkmark />
-		Connect identity
+		{restoring ? 'Connecting...' : 'Connect identity'}
 	</Button>
 </Container>
 

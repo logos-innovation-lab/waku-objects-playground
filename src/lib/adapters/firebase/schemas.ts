@@ -1,9 +1,8 @@
+import { AddressSchema } from '$lib/utils/schemas'
 import { z } from 'zod'
 
-const address = z.string().regex(/^(0x)?[a-f0-9]{40}$/i, 'Address must be 40 hex numbers')
-
 export const UserDbSchema = z.object({
-	address,
+	address: AddressSchema,
 	name: z.string().optional(),
 	avatar: z.string().optional(),
 })
@@ -14,14 +13,10 @@ export const ChatDbSchema = z.object({
 		z.object({
 			timestamp: z.number().int().positive(),
 			text: z.string(),
-			fromAddress: address,
+			fromAddress: AddressSchema,
 		}),
 	),
-	users: z.array(address),
+	users: z.array(AddressSchema),
 	name: z.string().optional(),
 })
 export type ChatDb = z.infer<typeof ChatDbSchema>
-
-// 12 word mnemonic
-export const Mnemonic12Schema = z.string().regex(/^(\w+\s){11}\w+$/i)
-export type Mnemonic12 = z.infer<typeof Mnemonic12Schema>
