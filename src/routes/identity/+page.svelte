@@ -15,24 +15,50 @@
 	import { goto } from '$app/navigation'
 	import { clipAndResize } from '$lib/utils/image'
 	import routes from '$lib/routes'
+	import { onDestroy } from 'svelte'
 
-	let picture = $profile.avatar
+	let avatar = $profile.avatar
 	let name = $profile.name
 
-	$: if ($profile.loading === false && !name && !picture) {
+	$: if ($profile.loading === false && !name && !avatar) {
 		name = $profile.name
-		picture = $profile.avatar
+		avatar = $profile.avatar
 	}
 
-	let pictureFiles: FileList | undefined = undefined
+	let files: FileList | undefined = undefined
 	async function resizePersonaPicture(p?: File) {
 		try {
-			picture = p ? await adapters.uploadPicture(await clipAndResize(p, 200, 200)) : picture
+			avatar = p ? await adapters.uploadPicture(await clipAndResize(p, 200, 200)) : avatar
 		} catch (error) {
 			console.error(error)
 		}
 	}
-	$: resizePersonaPicture(pictureFiles && pictureFiles[0])
+	$: resizePersonaPicture(files && files[0])
+
+	// Whenever profile name or avatar changes, save it
+	$: if (
+		!$profile.loading &&
+		((name && name !== $profile.name) || (avatar && avatar !== $profile.avatar))
+	) {
+		debounceSaveProfile()
+	}
+	let timer: ReturnType<typeof setTimeout> | undefined
+
+	// Debounce saving profile
+	function debounceSaveProfile() {
+		if (timer) clearTimeout(timer)
+		timer = setTimeout(() => {
+			adapters.saveUserProfile(name, avatar)
+			timer = undefined
+		}, 1000)
+	}
+
+	onDestroy(() => {
+		if (timer) {
+			clearTimeout(timer)
+			adapters.saveUserProfile(name, avatar)
+		}
+	})
 </script>
 
 <Header title="Account">
@@ -51,9 +77,9 @@
 {:else}
 	<Container gap={6}>
 		<div class="avatar">
-			{#if picture}
+			{#if avatar}
 				<div class="img">
-					<img src={adapters.getPicture(picture)} alt="profile" />
+					<img src={adapters.getPicture(avatar)} alt="your avatar" />
 				</div>
 			{:else}
 				<div class="no-img">
@@ -63,11 +89,11 @@
 				</div>
 			{/if}
 		</div>
-		<InputFile bind:files={pictureFiles}>
+		<InputFile bind:files>
 			<Renew />
 			Change picture
 		</InputFile>
-		<Textarea value={$profile.name} label="Display name" />
+		<Textarea bind:value={name} label="Display name" />
 	</Container>
 	<Divider pad={12} />
 	<Container gap={6}>
