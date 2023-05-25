@@ -12,15 +12,19 @@ import {
 	getDoc,
 } from 'firebase/firestore'
 import { create } from 'ipfs-http-client'
-import { profile } from '$lib/stores/profile'
 import { Wallet, HDNodeWallet } from 'ethers'
 import type { Adapter, Contact } from '..'
-import { chats, type DraftChat, type Chat, type Message } from '$lib/stores/chat'
+
+// Stores
 import { get, type Unsubscriber } from 'svelte/store'
+import { chats, type DraftChat, type Chat, type Message } from '$lib/stores/chat'
+import { profile } from '$lib/stores/profile'
 import { contacts, type User } from '$lib/stores/users'
-import { ChatDbSchema, UserDbSchema } from './schemas'
+
+import { ChatDbSchema, type Mnemonic12, Mnemonic12Schema, UserDbSchema } from './schemas'
+
 import { formatAddress } from '$lib/utils/format'
-import { browser } from '$app/environment'
+import { getFromLocalStorage, removeFromLocalStorage, saveToLocalStorage } from '../utils'
 
 const firebaseConfig = {
 	apiKey: 'AIzaSyCs8WujyoHcDqTFtG5b3R3HJVEyWmOCMpA',
@@ -64,7 +68,7 @@ export default class FirebaseAdapter implements Adapter {
 	})
 
 	start() {
-		const mnemonic = browser ? localStorage.getItem('mnemonic') : undefined
+		const mnemonic = getFromLocalStorage<Mnemonic12>('mnemonic', Mnemonic12Schema)
 		if (mnemonic) {
 			this.restoreWallet(mnemonic)
 		} else {
@@ -180,8 +184,11 @@ export default class FirebaseAdapter implements Adapter {
 		this.wallet = Wallet.createRandom()
 
 		const phrase = this.wallet.mnemonic?.phrase
-
-		if (phrase && browser) localStorage.setItem('mnemonic', phrase)
+		if (!phrase) {
+			console.error('No mnemonic found in wallet')
+			return
+		}
+		saveToLocalStorage('mnemonic', phrase)
 	}
 
 	restoreWallet(mnemonic: string): Promise<void> {
@@ -189,19 +196,25 @@ export default class FirebaseAdapter implements Adapter {
 		this.wallet = Wallet.fromPhrase(mnemonic)
 
 		const phrase = this.wallet.mnemonic?.phrase
-		if (phrase && browser) localStorage.setItem('mnemonic', phrase)
+		if (!phrase) {
+			console.error('No mnemonic found in wallet')
+			return Promise.resolve()
+		}
+		saveToLocalStorage('mnemonic', phrase)
 
 		return logIn(this.wallet)
 	}
 	disconnectWallet(): Promise<void> {
 		this.wallet = undefined
-		browser && localStorage.removeItem('mnemonic')
+		removeFromLocalStorage('mnemonic')
 
 		return Promise.resolve()
 	}
 
 	hasWallet() {
-		return Boolean(this.wallet) || (browser && localStorage.getItem('mnemonic') !== null)
+		return (
+			Boolean(this.wallet) || getFromLocalStorage<Mnemonic12>('mnemonic', Mnemonic12Schema) !== null
+		)
 	}
 
 	async getContact(address: string): Promise<Contact> {

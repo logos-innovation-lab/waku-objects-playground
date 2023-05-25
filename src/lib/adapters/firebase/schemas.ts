@@ -7,6 +7,7 @@ export const UserDbSchema = z.object({
 	name: z.string().optional(),
 	avatar: z.string().optional(),
 })
+export type UserDb = z.infer<typeof UserDbSchema>
 
 export const ChatDbSchema = z.object({
 	messages: z.array(
@@ -19,3 +20,8 @@ export const ChatDbSchema = z.object({
 	users: z.array(address),
 	name: z.string().optional(),
 })
+export type ChatDb = z.infer<typeof ChatDbSchema>
+
+// 12 word mnemonic
+export const Mnemonic12Schema = z.string().regex(/^(\w+\s){11}\w+$/i)
+export type Mnemonic12 = z.infer<typeof Mnemonic12Schema>

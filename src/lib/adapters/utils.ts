@@ -3,41 +3,46 @@ import type { Schema } from 'zod'
 
 type JSONdecoded = string | number | boolean | object | Array<JSONdecoded>
 
-/**
- * Sleep for N miliseconds
- *
- * @param ms Number of miliseconds to sleep
- */
-export async function sleep(ms: number): Promise<void> {
-	return new Promise<void>((resolve) => setTimeout(() => resolve(), ms))
-}
+export async function saveToLocalStorage<T extends JSONdecoded>(key: string, data: T) {
+	if (!browser || !localStorage) {
+		console.error('Error saving to local storage: not in browser', data)
+		return
+	}
 
-export async function saveToLocalStorage<T extends JSONdecoded>(
-	key: string,
-	schema: Schema<T>,
-	data: T,
-) {
-	const parseData = schema.safeParse(data)
-	if (parseData.success === false) {
-		throw new Error(`Error saving to local storage: ${parseData.error.issues}`)
-	}
-	if (browser && localStorage) {
-		localStorage.setItem(key, JSON.stringify(data))
-	}
+	localStorage.setItem(key, JSON.stringify(data))
 }
 
 export function getFromLocalStorage<T extends JSONdecoded>(
 	key: string,
 	schema: Schema<T>,
 ): T | undefined {
-	if (browser && localStorage) {
-		const data = localStorage.getItem(key)
-		if (data) {
-			const parsed = JSON.parse(data)
-			const parseData = schema.safeParse(parsed)
-			if (parseData.success) {
-				return parseData.data
-			}
-		}
+	if (!browser || !localStorage) {
+		console.error('Error getting from local storage: not in browser')
+		return
 	}
+
+	const data = localStorage.getItem(key)
+	if (!data) {
+		console.error('Error getting from local storage: no data', data)
+		return
+	}
+
+	const parsed = JSON.parse(data)
+	const parseData = schema.safeParse(parsed)
+
+	if (!parseData.success) {
+		console.error(`Error getting from local storage: invalid data. ${parseData.error.issues}`, data)
+		return
+	}
+
+	return parseData.data
+}
+
+export function removeFromLocalStorage(key: string) {
+	if (!browser || !localStorage) {
+		console.error('Error removing from local storage: not in browser')
+		return
+	}
+
+	localStorage.removeItem(key)
 }
