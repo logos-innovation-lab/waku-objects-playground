@@ -71,11 +71,11 @@
 	</Button>
 </Header>
 {#if $profile.loading}
-	<Container align="center" grow gap={6} justify="center">
+	<Container align="center" grow gap={6} justify="center" pad={24}>
 		<h2>Loading...</h2>
 	</Container>
 {:else if $profile.error}
-	<Container align="center" grow gap={6} justify="center">
+	<Container align="center" grow gap={6} justify="center" pad={24}>
 		<h2>Failed to load profile: {$profile.error.message}</h2>
 	</Container>
 {:else}
@@ -113,13 +113,13 @@
 			</div>
 		</Container>
 	</div>
-	<Container align="center" gap={12}>
+	<Container align="center" gap={12} pad={24}>
 		<p>
 			If you disconnect or need to recover access to your identity you will need your recovery
 			phrase
 		</p>
 	</Container>
-	<Container align="center" gap={12}>
+	<Container align="center" gap={12} pad={24}>
 		<!-- TODO: add action to buttons -->
 		<Button on:click={() => goto(routes.IDENTITY_BACKUP)}>
 			<DocumentSigned />
@@ -170,7 +170,6 @@
 	}
 
 	.account {
-		margin-block: var(--spacing-12);
 		border-top: 1px solid var(--gray20);
 		border-bottom: 1px solid var(--gray20);
 
