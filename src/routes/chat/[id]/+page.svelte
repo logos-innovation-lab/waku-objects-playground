@@ -13,7 +13,7 @@
 	import Textarea from '$lib/components/textarea.svelte'
 	import Card from '$lib/components/card.svelte'
 	import Button from '$lib/components/button.svelte'
-
+	import Avatar from '$lib/components/avatar.svelte'
 	import Dropdown from '$lib/components/dropdown.svelte'
 	import DropdownItem from '$lib/components/dropdown-item.svelte'
 
@@ -52,15 +52,21 @@
 		text = ''
 		loading = false
 	}
+
+	let chatImg = $chats.chats.get($page.params.id)?.users[0].avatar
 </script>
 
 {#if state === 'chat'}
 	<div class="chat">
-		<!-- TODO: replace header title with chat name or person's name (?) -->
-		<Header title="Chat">
+		<Header>
 			<Button variant="icon" slot="left" on:click={() => goto(ROUTES.HOME)}>
 				<ChevronLeft />
 			</Button>
+			<svelte:fragment slot="chat">
+				<!-- TODO: display chatter's profile image, if existing (currently placeholder) -->
+				<Avatar picture={chatImg ? chatImg : ''} />
+				{$chats.chats.get($page.params.id)?.name}
+			</svelte:fragment>
 		</Header>
 		<div class="chat-messages">
 			<Container>
@@ -139,7 +145,6 @@
 					<Textarea
 						placeholder="Message"
 						bind:value={text}
-						pad={24}
 						on:keypress={(e) => {
 							// When enter is pressed without modifier keys, send the message
 							if (e.key === 'Enter' && !(e.shiftKey || e.ctrlKey || e.altKey)) {
@@ -229,7 +234,7 @@
 		display: inline-block;
 		font-family: var(--font-serif);
 		background-color: var(--white);
-		border: 1px solid var(--gray10);
+		// border: 1px solid var(--gray10);
 	}
 
 	.their-message {
@@ -240,12 +245,12 @@
 			text-align: left;
 		}
 
-		.message-text {
-			border-bottom-right-radius: var(--spacing-24);
-			border-bottom-left-radius: 0;
-			border: 1px solid var(--gray20);
-		}
+		// .message-text {
+		// border-bottom-right-radius: var(--spacing-24);
+		// border-bottom-left-radius: 0;
+		// border: 1px solid var(--gray20);
 	}
+	// }
 
 	.message-object-request {
 		font-size: var(--font-size-sm);

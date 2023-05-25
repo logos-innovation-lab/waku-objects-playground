@@ -8,8 +8,10 @@
 	export let rows = 1
 </script>
 
-<label class="textarea text-sm" style={`padding-block: ${pad}`}>
-	<span>{label}</span>
+<label class="textarea text-sm" style={`padding-block: ${pad}px`}>
+	{#if label !== ''}
+		<span>{label}</span>
+	{/if}
 	<!-- TODO: allow textarea height to increase according to entered text -->
 	<!-- svelte-ignore a11y-autofocus -->
 	<textarea
@@ -36,6 +38,7 @@
 
 		span {
 			margin-left: var(--spacing-12);
+			text-align: left;
 		}
 
 		textarea {
