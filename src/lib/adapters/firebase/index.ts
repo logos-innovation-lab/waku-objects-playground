@@ -1,6 +1,4 @@
-import { initializeApp } from 'firebase/app'
 import {
-	getFirestore,
 	doc,
 	setDoc,
 	collection,
@@ -11,7 +9,6 @@ import {
 	where,
 	getDoc,
 } from 'firebase/firestore'
-import { create } from 'ipfs-http-client'
 import { Wallet, HDNodeWallet } from 'ethers'
 import type { Adapter, Contact } from '..'
 
@@ -26,22 +23,7 @@ import { Mnemonic12Schema, type Mnemonic12 } from '$lib/utils/schemas'
 
 import { formatAddress } from '$lib/utils/format'
 import { getFromLocalStorage, removeFromLocalStorage, saveToLocalStorage } from '../utils'
-
-const firebaseConfig = {
-	apiKey: 'AIzaSyCs8WujyoHcDqTFtG5b3R3HJVEyWmOCMpA',
-	authDomain: 'waku-objects.firebaseapp.com',
-	projectId: 'waku-objects',
-	storageBucket: 'waku-objects.appspot.com',
-	messagingSenderId: '824762862617',
-	appId: '1:824762862617:web:4fe585c2d751a1d4586e88',
-}
-
-const IPFS_AUTH =
-	'Basic Mk5Nbk1vZUNSTWMyOTlCQjYzWm9QZzlQYTU3OjAwZTk2MmJjZTBkZmQxZWQxNGNhNmY1M2JiYjYxMTli'
-const IPFS_GATEWAY = 'https://kurate.infura-ipfs.io/ipfs'
-
-const app = initializeApp(firebaseConfig)
-const db = getFirestore(app)
+import { db, ipfs, IPFS_GATEWAY } from './connections'
 
 async function logIn(wallet: HDNodeWallet): Promise<void> {
 	const address = await wallet.getAddress()
@@ -59,14 +41,6 @@ export default class FirebaseAdapter implements Adapter {
 	private wallet: HDNodeWallet | undefined
 	private subscriptions: Array<() => unknown> = []
 	private userSubscriptions: Array<() => unknown> = []
-	private ipfs = create({
-		host: 'ipfs.infura.io',
-		port: 5001,
-		protocol: 'https',
-		headers: {
-			authorization: IPFS_AUTH,
-		},
-	})
 
 	start() {
 		const mnemonic = getFromLocalStorage<Mnemonic12>('mnemonic', Mnemonic12Schema)
@@ -262,7 +236,7 @@ export default class FirebaseAdapter implements Adapter {
 
 	async uploadPicture(picture: string): Promise<string> {
 		const blob = await (await fetch(picture)).blob()
-		const res = await this.ipfs.add(blob)
+		const res = await ipfs.add(blob)
 
 		return res.cid.toString()
 	}

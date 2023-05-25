@@ -11,13 +11,9 @@
 	import Textarea from '$lib/components/textarea.svelte'
 
 	import adapters from '$lib/adapters'
-	import { profile } from '$lib/stores/profile'
 	import { goto } from '$app/navigation'
 	import { clipAndResize } from '$lib/utils/image'
 	import routes from '$lib/routes'
-
-	// Redirect to homepage if user already has a wallet
-	if (adapters.hasWallet()) goto(routes.HOME)
 
 	let picture = ''
 	let name = ''

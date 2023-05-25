@@ -4,13 +4,9 @@
 	import '@fontsource/source-sans-pro/600.css'
 	import '@fontsource/source-sans-pro/700.css'
 	import './styles.css'
-	import { onMount } from 'svelte'
+
 	import { onDestroy } from 'svelte'
 	import adapter from '$lib/adapters'
-
-	onMount(() => {
-		if (typeof adapter.start === 'function') adapter.start()
-	})
 
 	onDestroy(() => {
 		if (typeof adapter.stop === 'function') adapter.stop()
