@@ -15,6 +15,7 @@
 	import { goto } from '$app/navigation'
 	import { clipAndResize } from '$lib/utils/image'
 	import routes from '$lib/routes'
+	import { onDestroy } from 'svelte'
 
 	let avatar = $profile.avatar
 	let name = $profile.name
@@ -39,8 +40,25 @@
 		!$profile.loading &&
 		((name && name !== $profile.name) || (avatar && avatar !== $profile.avatar))
 	) {
-		adapters.saveUserProfile(name, avatar)
+		debounceSaveProfile()
 	}
+	let timer: ReturnType<typeof setTimeout> | undefined
+
+	// Debounce saving profile
+	function debounceSaveProfile() {
+		if (timer) clearTimeout(timer)
+		timer = setTimeout(() => {
+			adapters.saveUserProfile(name, avatar)
+			timer = undefined
+		}, 1000)
+	}
+
+	onDestroy(() => {
+		if (timer) {
+			clearTimeout(timer)
+			adapters.saveUserProfile(name, avatar)
+		}
+	})
 </script>
 
 <Header title="Account">
