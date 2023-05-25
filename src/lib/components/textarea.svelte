@@ -35,9 +35,6 @@
 		gap: var(--spacing-6);
 		width: 100%;
 		color: var(--gray40);
-		margin-left: -12px;
-		margin-right: -12px;
-		width: calc(100% + 24px);
 
 		span {
 			margin-left: var(--spacing-12);

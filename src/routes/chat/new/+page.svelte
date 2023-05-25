@@ -135,7 +135,12 @@
 		</Button>
 	</Container>
 {:else if state === 'send-message'}
-	<Header title={participants.length > 1 ? chatName : participants[0]}>
+	<Header
+		title={participants.length > 1
+			? chatName
+			: $contacts.contacts.get(participants[0])?.name ??
+			  $contacts.contacts.get(participants[0])?.address}
+	>
 		<Button slot="left" on:click={() => (state = 'edit-participants')}>
 			<ArrowLeft />
 		</Button>

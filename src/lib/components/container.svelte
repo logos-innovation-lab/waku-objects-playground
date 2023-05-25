@@ -2,17 +2,18 @@
 	export let direction: 'row' | 'column' = 'column'
 	export let gap = 0
 	export let justify: 'space-between' | 'flex-start' | 'flex-end' | 'center' = 'flex-start'
-	export let align: 'left' | 'right' | 'center' | undefined = undefined
-	export let alignItems: 'left' | 'right' | 'center' | undefined = undefined
+	export let align: 'left' | 'right' | 'center' | 'none' = 'none'
+	export let alignItems: 'left' | 'right' | 'center' | 'none' = 'none'
 	export let grow: boolean | undefined = undefined
 	export let sticky: 'top' | 'bottom' | 'none' = 'none'
+	export let pad = 12
 </script>
 
 <div
-	class={`container text-${align} items-${alignItems} ${direction} ${justify} sticky-${sticky} ${
-		grow ? 'grow' : ''
-	}`}
-	style={`gap: ${gap}px`}
+	class={`container text-${align} items-${alignItems} ${
+		sticky !== 'none' ? 'sticky-' + { sticky } : ''
+	} ${direction} ${justify} ${grow ? 'grow' : ''}`}
+	style={`gap: ${gap}px; padding-inline: ${pad}px;`}
 >
 	<slot />
 </div>

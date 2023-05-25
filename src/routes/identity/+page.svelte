@@ -121,7 +121,7 @@
 	</Container>
 	<Container align="center" gap={12}>
 		<!-- TODO: add action to buttons -->
-		<Button>
+		<Button on:click={() => goto(routes.IDENTITY_BACKUP)}>
 			<DocumentSigned />
 			Backup recovery phrase
 		</Button>

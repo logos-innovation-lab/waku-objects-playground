@@ -76,8 +76,6 @@
 		gap: var(--spacing-12);
 		background-color: var(--white);
 		z-index: 30;
-		margin-left: -12px;
-		margin-right: -12px;
 
 		h1,
 		.chat {
