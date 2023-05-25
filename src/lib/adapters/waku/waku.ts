@@ -23,7 +23,7 @@ export async function connectWaku() {
     await waitForRemotePeer(waku, [Protocols.Filter, Protocols.LightPush, Protocols.Store])
 
     return waku
-}  
+}
 
 export async function subscribe(waku: LightNode, id: string, callback: Callback<DecodedMessage>) {
     const contentTopic = topicBase + id
@@ -47,19 +47,19 @@ export function decodeMessagePayload(wakuMessage: DecodedMessage): string {
 }
 
 export async function sendMessage(
-	waku: LightNode,
+    waku: LightNode,
     id: string,
-	message: string,
+    message: string,
 ) {
-	// Post the metadata on Waku
-	const payload = utils.utf8ToBytes(message)
+    // Post the metadata on Waku
+    const payload = utils.utf8ToBytes(message)
 
     const contentTopic = topicBase + id
     const encoder = createEncoder({ contentTopic });
 
-	// Send the message
-	await waku.lightPush.send(encoder, { payload })
+    // Send the message
+    await waku.lightPush.send(encoder, { payload })
 
-	// Return message
-	return message
+    // Return message
+    return message
 }
