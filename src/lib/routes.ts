@@ -4,6 +4,8 @@ export default {
 	IDENTITY_NEW: '/identity/new',
 	IDENTITY_CONFIRM: '/identity/confirm',
 	IDENTITY_CONNECT: '/identity/connect',
+	IDENTITY_ACCOUNT: '/identity/account',
+	IDENTITY_SEED: '/identity/seed-copy',
 	CHAT: (id: string) => `/chat/${id}`,
 	CHAT_NEW: '/chat/new',
 

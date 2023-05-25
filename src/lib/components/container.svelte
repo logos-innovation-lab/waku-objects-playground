@@ -3,12 +3,15 @@
 	export let gap = 0
 	export let justify: 'space-between' | 'flex-start' | 'flex-end' | 'center' = 'flex-start'
 	export let align: 'left' | 'right' | 'center' | undefined = undefined
+	export let alignItems: 'left' | 'right' | 'center' | undefined = undefined
 	export let grow: boolean | undefined = undefined
 	export let sticky: 'top' | 'bottom' | 'none' = 'none'
 </script>
 
 <div
-	class={`container text-${align} ${direction} ${justify} sticky-${sticky} ${grow ? 'grow' : ''}`}
+	class={`container text-${align} items-${alignItems} ${direction} ${justify} sticky-${sticky} ${
+		grow ? 'grow' : ''
+	}`}
 	style={`gap: ${gap}px`}
 >
 	<slot />
@@ -18,7 +21,7 @@
 	.container {
 		display: flex;
 		justify-content: flex-start;
-		padding: var(--spacing-12);
+		padding: var(--spacing-12) var(--spacing-24);
 		width: 100%;
 		flex-grow: 0;
 	}
@@ -70,6 +73,15 @@
 	}
 	.text-center {
 		text-align: center;
+		align-items: center;
+	}
+	.items-left {
+		align-items: flex-start;
+	}
+	.items-right {
+		align-items: flex-end;
+	}
+	.items-center {
 		align-items: center;
 	}
 	.grow {

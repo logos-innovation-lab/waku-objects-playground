@@ -1,6 +1,8 @@
 <script lang="ts">
 	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
+	import ChevronRight from '$lib/components/icons/chevron-right.svelte'
 	import Renew from '$lib/components/icons/renew.svelte'
+	import Wallet from '$lib/components/icons/wallet.svelte'
 	import User from '$lib/components/icons/user.svelte'
 
 	import Container from '$lib/components/container.svelte'
@@ -16,6 +18,8 @@
 	import { clipAndResize } from '$lib/utils/image'
 	import routes from '$lib/routes'
 	import { onDestroy } from 'svelte'
+	import DocumentSigned from '$lib/components/icons/document-signed.svelte'
+	import Logout from '$lib/components/icons/logout.svelte'
 
 	let avatar = $profile.avatar
 	let name = $profile.name
@@ -61,7 +65,7 @@
 	})
 </script>
 
-<Header title="Account">
+<Header title="Identity">
 	<Button slot="left" variant="icon" on:click={() => goto(routes.HOME)}>
 		<ChevronLeft />
 	</Button>
@@ -93,11 +97,38 @@
 			<Renew />
 			Change picture
 		</InputFile>
-		<Textarea bind:value={name} label="Display name" />
+		<div class="displayname">
+			<Textarea bind:value={name} label="Display name" />
+		</div>
 	</Container>
-	<Divider pad={12} />
-	<Container gap={6}>
-		<Textarea bind:value={$profile.address} nonEditable label="Account address" />
+	<div class="account">
+		<Container direction="row" justify="space-between" align="center" alignItems="center">
+			<div class="wallet">
+				<Wallet size={20} /> Account
+			</div>
+			<div>
+				<Button variant="icon" on:click={() => goto(routes.IDENTITY_ACCOUNT)}>
+					<ChevronRight />
+				</Button>
+			</div>
+		</Container>
+	</div>
+	<Container align="center" gap={12}>
+		<p>
+			If you disconnect or need to recover access to your identity you will need your recovery
+			phrase
+		</p>
+	</Container>
+	<Container align="center" gap={12}>
+		<!-- TODO: add action to buttons -->
+		<Button>
+			<DocumentSigned />
+			Backup recovery phrase
+		</Button>
+		<Button>
+			<Logout />
+			Disconnect identity from device
+		</Button>
 	</Container>
 {/if}
 
@@ -132,5 +163,23 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+	}
+
+	.displayname {
+		margin-top: var(--spacing-6);
+	}
+
+	.account {
+		margin-block: var(--spacing-12);
+		border-top: 1px solid var(--gray20);
+		border-bottom: 1px solid var(--gray20);
+
+		.wallet {
+			display: flex;
+			justify-content: flex-start;
+			align-items: center;
+			gap: var(--spacing-6);
+			padding-left: var(--spacing-12);
+		}
 	}
 </style>
