@@ -7,35 +7,8 @@
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'
 
-	import adapters from '$lib/adapters'
-	import { profile } from '$lib/stores/profile'
 	import { goto } from '$app/navigation'
-	import { clipAndResize } from '$lib/utils/image'
 	import routes from '$lib/routes'
-
-	let picture = $profile.avatar
-	let name = $profile.name
-	let saving = false
-
-	let pictureFiles: FileList | undefined = undefined
-	async function resizePersonaPicture(p?: File) {
-		try {
-			picture = p ? await adapters.uploadPicture(await clipAndResize(p, 200, 200)) : picture
-		} catch (error) {
-			console.error(error)
-		}
-	}
-	$: resizePersonaPicture(pictureFiles && pictureFiles[0])
-
-	async function saveProfile() {
-		saving = true
-		try {
-			await adapters.saveUserProfile(name, picture)
-		} catch (error) {
-			console.error('failed to save profile: ', error)
-		}
-		saving = false
-	}
 </script>
 
 <Header title="Create new identity">

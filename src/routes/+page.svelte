@@ -20,7 +20,6 @@
 	import { chats } from '$lib/stores/chat'
 
 	import { formatDateAndTime, formatAddress } from '$lib/utils/format'
-	import adapters from '$lib/adapters'
 	import ROUTES from '$lib/routes'
 </script>
 

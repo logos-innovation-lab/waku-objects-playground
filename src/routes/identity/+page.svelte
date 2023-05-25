@@ -1,7 +1,6 @@
 <script lang="ts">
 	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
 	import Renew from '$lib/components/icons/renew.svelte'
-	import Image from '$lib/components/icons/image.svelte'
 	import User from '$lib/components/icons/user.svelte'
 
 	import Container from '$lib/components/container.svelte'
