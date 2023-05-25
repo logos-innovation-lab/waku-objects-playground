@@ -107,6 +107,7 @@
 	<ul class="chats">
 		{#each [...$chats.chats] as [id, chat]}
 			{@const lastMessage = chat.messages[chat.messages.length - 1]}
+			{@const myMessage = lastMessage.fromAddress === $profile.address}
 			{#if lastMessage}
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<li on:click={() => goto(ROUTES.CHAT(id))}>
@@ -125,12 +126,8 @@
 										{formatDateAndTime(lastMessage.timestamp)}
 									</span>
 								</div>
-								<p
-									class={`message text-serif ${
-										lastMessage.fromAddress === $profile.address ? 'my-message' : ''
-									}`}
-								>
-									{lastMessage.fromAddress === $profile.address ? 'You: ' : ''}
+								<p class={`message text-serif ${myMessage ? 'my-message' : ''}`}>
+									{myMessage ? 'You: ' : ''}
 									{lastMessage.text.substring(0, 50)}
 								</p>
 							</div>
