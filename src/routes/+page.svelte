@@ -30,7 +30,7 @@
 		</div>
 	</Container>
 {:else if !$profile.address}
-	<Container align="center" gap={12} justify="center" grow>
+	<Container align="center" alignItems="center" gap={12} justify="center" grow>
 		<div class="chatbot">
 			<div>
 				<ChatBot size={32} />

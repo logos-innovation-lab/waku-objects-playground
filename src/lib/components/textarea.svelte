@@ -53,6 +53,7 @@
 
 			&:disabled {
 				background-color: var(--gray10);
+				border-color: transparent;
 			}
 
 			&:focus {

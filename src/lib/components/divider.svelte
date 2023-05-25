@@ -1,8 +1,14 @@
 <script lang="ts">
 	export let pad = 0
+	export let padTop: number | undefined = undefined
+	export let padBottom: number | undefined = undefined
 </script>
 
-<hr style={`margin-block: ${pad}px`} />
+<hr
+	style={`margin-block: ${pad}px; ${padTop !== undefined ? 'margin-top: ' + padTop + 'px' : ''} ${
+		padBottom !== undefined ? 'margin-bottom: ' + padBottom + 'px' : ''
+	}`}
+/>
 
 <style lang="scss">
 	hr {
