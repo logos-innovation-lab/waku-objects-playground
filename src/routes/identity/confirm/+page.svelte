@@ -22,7 +22,7 @@
 		If you need to recover your identity, you will need your recovery phrase. Back it up now, or
 		later from your identity settings page.
 	</p>
-	<Button on:click={() => goto(routes.HOME)}>
+	<Button on:click={() => goto(routes.IDENTITY_BACKUP)}>
 		<DocumentSigned />
 		Backup recovery phrase
 	</Button>

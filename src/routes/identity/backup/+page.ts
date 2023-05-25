@@ -1,12 +1,14 @@
 import { goto } from '$app/navigation'
+import adapters from '$lib/adapters'
 import routes from '$lib/routes'
 import { profile } from '$lib/stores/profile'
+import type { PageLoad } from './$types'
 
 // This prevents the load function from running on server
 // https://kit.svelte.dev/docs/load#page-data
 export const ssr = false
 
-export async function load() {
+export const load = (async () => {
 	const promise = new Promise<void>((resolve) => {
 		let unsubscribe: (() => void) | undefined = undefined
 		unsubscribe = profile.subscribe((p) => {
@@ -14,8 +16,8 @@ export async function load() {
 
 			if (unsubscribe) unsubscribe()
 
-			if (p.address) {
-				// Already have account, redirecting to home page
+			// If user is not logged in, redirect to home page
+			if (!p.address) {
 				goto(routes.HOME)
 			}
 			resolve()
@@ -23,4 +25,8 @@ export async function load() {
 	})
 
 	await promise
-}
+
+	return {
+		mnemonics: adapters.getMnemonics(),
+	}
+}) satisfies PageLoad

@@ -1,16 +1,25 @@
 <script lang="ts">
+	import copy from 'copy-to-clipboard'
+
+	import Close from '$lib/components/icons/close.svelte'
+	import Copy from '$lib/components/icons/copy.svelte'
+	import Checkmark from '$lib/components/icons/checkmark.svelte'
+
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'
-
-	import { goto } from '$app/navigation'
-	import routes from '$lib/routes'
-	import Close from '$lib/components/icons/close.svelte'
-	import Copy from '$lib/components/icons/copy.svelte'
 	import Textarea from '$lib/components/textarea.svelte'
 
-	// TODO: get actual seed phrase
-	let seed = 'CURRENTLY HARD CODED ----- behave mushroom guard venue soup witness someone'
+	import type { PageData } from './$types'
+
+	export let data: PageData
+
+	let copied = false
+
+	function copyToClipboard() {
+		copy(data.mnemonics)
+		copied = true
+	}
 </script>
 
 <Header title="Backup recovery phrase">
@@ -23,11 +32,15 @@
 	<p class="text-lg description">
 		Anyone with your recovery phrase will be able to access your identity and account
 	</p>
-	<Textarea label="Recovery phrase" rows={4} nonEditable placeholder={seed} />
-	<!-- TODO: fix button action -->
-	<Button on:click={() => goto(routes.HOME)}>
-		<Copy />
-		Copy
+	<Textarea label="Recovery phrase" rows={4} nonEditable placeholder={data.mnemonics} />
+	<Button on:click={copyToClipboard}>
+		{#if copied}
+			<Checkmark />
+			Copied
+		{:else}
+			<Copy />
+			Copy
+		{/if}
 	</Button>
 </Container>
 

@@ -18,6 +18,7 @@ export interface Adapter {
 	hasWallet(): boolean
 	disconnectWallet(): Promise<void>
 	saveUserProfile(name?: string, avatar?: string): Promise<void>
+	getMnemonics(): string
 
 	uploadPicture(picture: string): Promise<string>
 	getPicture(cid: string): string

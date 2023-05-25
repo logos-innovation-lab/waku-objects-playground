@@ -192,6 +192,14 @@ export default class FirebaseAdapter implements Adapter {
 		)
 	}
 
+	getMnemonics(): string {
+		const phrase = this.wallet?.mnemonic?.phrase
+		if (!phrase) {
+			throw 'No mnemonic found in wallet'
+		}
+		return phrase
+	}
+
 	async getContact(address: string): Promise<Contact> {
 		const contactDoc = doc(db, `users/${address}`)
 		const contact = await getDoc(contactDoc)
