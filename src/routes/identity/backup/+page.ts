@@ -2,13 +2,13 @@ import { goto } from '$app/navigation'
 import adapters from '$lib/adapters'
 import routes from '$lib/routes'
 import { profile } from '$lib/stores/profile'
+import type { PageLoad } from './$types'
 
 // This prevents the load function from running on server
 // https://kit.svelte.dev/docs/load#page-data
 export const ssr = false
 
-/** @type {import('./$types').PageLoad} */
-export async function load() {
+export const load = (async () => {
 	const promise = new Promise<void>((resolve) => {
 		let unsubscribe: (() => void) | undefined = undefined
 		unsubscribe = profile.subscribe((p) => {
@@ -29,4 +29,4 @@ export async function load() {
 	return {
 		mnemonics: adapters.getMnemonics(),
 	}
-}
+}) satisfies PageLoad

@@ -6,7 +6,6 @@ import { profile } from '$lib/stores/profile'
 // https://kit.svelte.dev/docs/load#page-data
 export const ssr = false
 
-/** @type {import('./$types').PageLoad} */
 export async function load() {
 	const promise = new Promise<void>((resolve) => {
 		let unsubscribe: (() => void) | undefined = undefined
