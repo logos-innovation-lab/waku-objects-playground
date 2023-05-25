@@ -27,7 +27,15 @@ export function getFromLocalStorage<T extends JSONdecoded>(
 		return
 	}
 
-	const parsed = JSON.parse(data)
+	let parsed: unknown
+
+	try {
+		parsed = JSON.parse(data)
+	} catch (error) {
+		console.error(`Error getting from local storage: JSON parse error`, error)
+		return
+	}
+
 	const parseData = schema.safeParse(parsed)
 
 	if (!parseData.success) {
