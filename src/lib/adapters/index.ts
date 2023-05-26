@@ -7,7 +7,7 @@ export interface Contact {
 	avatar?: string
 }
 
-export interface Adapter {
+export interface AdapterBase {
 	// This is run when the app is mounted and should start app wide subscriptions
 	start?: () => Promise<void> | void
 	// This is run when the app unmounts and should clear subscriptions
@@ -17,11 +17,14 @@ export interface Adapter {
 	restoreWallet(mnemonic: string): Promise<void>
 	hasWallet(): boolean
 	disconnectWallet(): Promise<void>
-	saveUserProfile(name?: string, avatar?: string): Promise<void>
 	getMnemonics(): string
 
 	uploadPicture(picture: string): Promise<string>
 	getPicture(cid: string): string
+}
+
+export interface Adapter extends AdapterBase {
+	saveUserProfile(name?: string, avatar?: string): Promise<void>
 
 	startChat(chat: DraftChat): Promise<string>
 	sendChatMessage(chatId: string, text: string): Promise<void>

@@ -9,7 +9,6 @@ import {
 	where,
 	getDoc,
 } from 'firebase/firestore'
-import { Wallet, HDNodeWallet } from 'ethers'
 import type { Adapter, Contact } from '..'
 
 // Stores
@@ -19,36 +18,14 @@ import { profile } from '$lib/stores/profile'
 import { contacts, type User } from '$lib/stores/users'
 
 import { ChatDbSchema, UserDbSchema } from './schemas'
-import { Mnemonic12Schema, type Mnemonic12 } from '$lib/utils/schemas'
 
 import { formatAddress } from '$lib/utils/format'
-import { getFromLocalStorage, removeFromLocalStorage, saveToLocalStorage } from '../utils'
-import { db, ipfs, IPFS_GATEWAY } from './connections'
+import { db } from './connections'
+import Base from '../base'
 
-async function logIn(wallet: HDNodeWallet): Promise<void> {
-	const address = await wallet.getAddress()
-	const userDoc = doc(db, `users/${address}`)
-
-	await setDoc(userDoc, { address, lastSignIn: Date.now() }, { merge: true })
-	const user = await getDoc(userDoc)
-
-	// FIXME: type this properly
-	const { name } = user.data() as { name: string }
-	profile.update((state) => ({ ...state, address, name, loading: false }))
-}
-
-export default class FirebaseAdapter implements Adapter {
-	private wallet: HDNodeWallet | undefined
-	private subscriptions: Array<() => unknown> = []
-	private userSubscriptions: Array<() => unknown> = []
-
+export default class FirebaseAdapter extends Base implements Adapter {
 	start() {
-		const mnemonic = getFromLocalStorage<Mnemonic12>('mnemonic', Mnemonic12Schema)
-		if (mnemonic) {
-			this.restoreWallet(mnemonic)
-		} else {
-			profile.update((state) => ({ ...state, loading: false }))
-		}
+		super.start()
 
 		const unsubscribeUser = profile.subscribe(async (p) => {
 			if (p.address && this.userSubscriptions.length === 0) {
@@ -151,53 +128,26 @@ export default class FirebaseAdapter implements Adapter {
 	}
 
 	stop() {
-		this.subscriptions.forEach((s) => s())
-		this.userSubscriptions.forEach((s) => s())
+		super.stop()
 	}
 
-	async createWallet(): Promise<void> {
-		this.wallet = Wallet.createRandom()
+	async restoreWallet(mnemonic: string): Promise<void> {
+		await super.restoreWallet(mnemonic)
 
-		const phrase = this.wallet.mnemonic?.phrase
-		if (!phrase) {
-			console.error('No mnemonic found in wallet')
+		if (!this.wallet) {
+			console.error('No wallet found')
 			return
 		}
-		saveToLocalStorage('mnemonic', phrase)
-	}
 
-	restoreWallet(mnemonic: string): Promise<void> {
-		// Create a new wallet from the mnemonic
-		this.wallet = Wallet.fromPhrase(mnemonic)
+		const address = await this.wallet.getAddress()
+		const userDoc = doc(db, `users/${address}`)
 
-		const phrase = this.wallet.mnemonic?.phrase
-		if (!phrase) {
-			console.error('No mnemonic found in wallet')
-			return Promise.resolve()
-		}
-		saveToLocalStorage('mnemonic', phrase)
+		await setDoc(userDoc, { address, lastSignIn: Date.now() }, { merge: true })
+		const user = await getDoc(userDoc)
 
-		return logIn(this.wallet)
-	}
-	disconnectWallet(): Promise<void> {
-		this.wallet = undefined
-		removeFromLocalStorage('mnemonic')
-
-		return Promise.resolve()
-	}
-
-	hasWallet() {
-		return (
-			Boolean(this.wallet) || getFromLocalStorage<Mnemonic12>('mnemonic', Mnemonic12Schema) !== null
-		)
-	}
-
-	getMnemonics(): string {
-		const phrase = this.wallet?.mnemonic?.phrase
-		if (!phrase) {
-			throw 'No mnemonic found in wallet'
-		}
-		return phrase
+		// FIXME: type this properly
+		const { name } = user.data() as { name: string }
+		profile.update((state) => ({ ...state, address, name, loading: false }))
 	}
 
 	async getContact(address: string): Promise<Contact> {
@@ -212,12 +162,12 @@ export default class FirebaseAdapter implements Adapter {
 
 		const userDoc = doc(db, `users/${address}`)
 
-		const data: Partial<Contact> = {}
+		const data: Partial<Contact> = { address }
 		if (avatar) data.avatar = avatar
 		if (name) data.name = name
 
-		setDoc(userDoc, { address, ...data }, { merge: true })
-		profile.update((state) => ({ ...state, address, name, avatar }))
+		setDoc(userDoc, data, { merge: true })
+		profile.update((state) => ({ ...state, ...data }))
 	}
 
 	async startChat(chat: DraftChat): Promise<string> {
@@ -240,16 +190,5 @@ export default class FirebaseAdapter implements Adapter {
 
 		const chatDoc = doc(db, `chats/${chatId}`)
 		setDoc(chatDoc, { messages: arrayUnion(message), lastMessage: text }, { merge: true })
-	}
-
-	async uploadPicture(picture: string): Promise<string> {
-		const blob = await (await fetch(picture)).blob()
-		const res = await ipfs.add(blob)
-
-		return res.cid.toString()
-	}
-
-	getPicture(cid: string): string {
-		return `${IPFS_GATEWAY}/${cid}`
 	}
 }
