@@ -28,7 +28,7 @@
 	$: $walletStore.wallet?.getAddress().then((a) => (myAddress = a))
 
 	let div: HTMLElement
-	let autoscroll: boolean = true
+	let autoscroll = true
 
 	beforeUpdate(() => {
 		autoscroll = div && div.offsetHeight + div.scrollTop > div.scrollHeight - 20
