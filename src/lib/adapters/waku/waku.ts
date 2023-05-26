@@ -12,6 +12,7 @@ import { type LightNode, Protocols, type Callback, type StoreQueryOptions } from
 
 const peerMultiaddr = multiaddr(
     '/dns4/ws.waku.apyos.dev/tcp/443/wss/p2p/16Uiu2HAm5wH4dPAV6zDfrBHkWt9Wu9iiXT4ehHdUArDUbEevzmBY'
+    // '/ip4/127.0.0.1/tcp/8000/wss/p2p/16Uiu2HAkvxqFicgLvsTUqKiX5ZUozN9c7aA82msxXo9qftZsMdGB'
 )
 
 const topicApp = 'wakuobjects-playground'
