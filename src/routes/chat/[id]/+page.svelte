@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { beforeUpdate, afterUpdate, onMount } from 'svelte'
 	import { page } from '$app/stores'
 
 	import Add from '$lib/components/icons/add.svelte'
@@ -22,9 +23,6 @@
 	import adapters from '$lib/adapters'
 	import ROUTES from '$lib/routes'
 	import { walletStore } from '$lib/stores/wallet'
-	import { beforeUpdate } from 'svelte'
-	import { afterUpdate } from 'svelte'
-	import { onMount } from 'svelte/internal'
 
 	let myAddress: string | undefined = undefined
 	$: $walletStore.wallet?.getAddress().then((a) => (myAddress = a))
@@ -39,7 +37,7 @@
 	afterUpdate(() => {
 		if (autoscroll) div.scrollTo(0, div.scrollHeight)
 	})
-	
+
 	onMount(() => {
 		div && div.scrollTo(0, div.scrollHeight)
 	})
