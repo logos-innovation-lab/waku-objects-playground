@@ -84,7 +84,7 @@
 		<Renew />
 		Change picture
 	</InputFile>
-	<Textarea bind:value={name} label="Display name" />
+	<Textarea autofocus bind:value={name} label="Display name" />
 </Container>
 <Container grow justify="flex-end">
 	<Button variant="strong" disabled={isCreatingIdentity || !name || saving} on:click={saveProfile}>
