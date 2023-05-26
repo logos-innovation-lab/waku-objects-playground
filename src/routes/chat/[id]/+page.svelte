@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { beforeUpdate, afterUpdate, onMount } from 'svelte'
 	import { page } from '$app/stores'
 
 	import Add from '$lib/components/icons/add.svelte'
@@ -25,6 +26,21 @@
 
 	let myAddress: string | undefined = undefined
 	$: $walletStore.wallet?.getAddress().then((a) => (myAddress = a))
+
+	let div: HTMLElement
+	let autoscroll = true
+
+	beforeUpdate(() => {
+		autoscroll = div && div.offsetHeight + div.scrollTop > div.scrollHeight - 20
+	})
+
+	afterUpdate(() => {
+		if (autoscroll) div.scrollTo(0, div.scrollHeight)
+	})
+
+	onMount(() => {
+		div && div.scrollTo(0, div.scrollHeight)
+	})
 
 	const cards = [
 		{
@@ -73,7 +89,7 @@
 				{$chats.chats.get($page.params.id)?.name}
 			</svelte:fragment>
 		</Header>
-		<div class="chat-messages">
+		<div class="chat-messages" bind:this={div}>
 			<Container>
 				<div class="messages">
 					<div class="messages-inner">
