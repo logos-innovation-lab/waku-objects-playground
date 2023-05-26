@@ -1,6 +1,9 @@
 <script lang="ts">
+	import copy from 'copy-to-clipboard'
+
 	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
 	import Copy from '$lib/components/icons/copy.svelte'
+	import Checkmark from '$lib/components/icons/checkmark.svelte'
 
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
@@ -13,6 +16,14 @@
 	import { profile } from '$lib/stores/profile'
 	import { goto } from '$app/navigation'
 	import routes from '$lib/routes'
+
+	let copied = false
+	function copyAddressToClipboard() {
+		if ($profile.address === undefined) return
+
+		copy($profile.address)
+		copied = true
+	}
 </script>
 
 <Header title="Account">
@@ -35,9 +46,14 @@
 	</Container>
 	<Container gap={6}>
 		<Textarea bind:value={$profile.address} nonEditable label="Account address" rows={2} />
-		<Button>
-			<Copy />
-			Copy
+		<Button on:click={copyAddressToClipboard}>
+			{#if copied}
+				<Checkmark />
+				Copied
+			{:else}
+				<Copy />
+				Copy
+			{/if}
 		</Button>
 	</Container>
 	<Divider pad={12} />
