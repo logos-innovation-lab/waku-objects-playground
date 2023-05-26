@@ -29,7 +29,6 @@ export default class FirebaseAdapter implements Adapter {
 	protected userSubscriptions: Array<() => unknown> = []
 
 	async onLogIn(wallet: HDNodeWallet) {
-		console.log('called onLogIn')
 		const address = await wallet.getAddress()
 		const userDoc = doc(db, `users/${address}`)
 
@@ -134,7 +133,6 @@ export default class FirebaseAdapter implements Adapter {
 
 	async saveUserProfile(wallet: HDNodeWallet, name?: string, avatar?: string): Promise<void> {
 		const address = await wallet.getAddress()
-		if (!address) throw new Error('Not signed in')
 
 		const userDoc = doc(db, `users/${address}`)
 
