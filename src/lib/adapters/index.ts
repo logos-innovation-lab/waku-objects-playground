@@ -1,6 +1,7 @@
 import type { DraftChat } from '$lib/stores/chat'
 import type { HDNodeWallet } from 'ethers'
 import FirebaseAdapter from './firebase'
+import WakuAdapter from './waku'
 
 export interface Contact {
 	address: string

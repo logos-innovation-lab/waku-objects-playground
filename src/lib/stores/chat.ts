@@ -4,7 +4,7 @@ import type { User } from './users'
 export interface Message {
 	timestamp: number
 	text: string
-	fromAddress?: string
+	fromAddress: string
 }
 
 export interface DraftChat {

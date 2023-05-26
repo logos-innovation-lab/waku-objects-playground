@@ -4,8 +4,8 @@ import {
     waitForRemotePeer,
     createEncoder,
     createDecoder,
-    type Decoder,
     type DecodedMessage,
+    PageDirection,
 } from "@waku/core"
 import { multiaddr } from '@multiformats/multiaddr'
 import { type LightNode, Protocols, type Callback, type StoreQueryOptions } from "@waku/interfaces"
@@ -14,7 +14,16 @@ const peerMultiaddr = multiaddr(
     '/dns4/ws.waku.apyos.dev/tcp/443/wss/p2p/16Uiu2HAm5wH4dPAV6zDfrBHkWt9Wu9iiXT4ehHdUArDUbEevzmBY'
 )
 
-const topicBase = '/wakuobjects/1/chat-message/proto/'
+const topicApp = 'wakuobjects-playground'
+const topicVersion = '1'
+
+export function getTopic(contentTopic: string, id: string) {
+    return `/${topicApp}/${topicVersion}/${contentTopic}/${id}`
+}
+
+export function privateMessageTopic(id: string) {
+    return getTopic('private-message', id)
+}
 
 export async function connectWaku() {
     const waku = await createLightNode()
@@ -25,20 +34,66 @@ export async function connectWaku() {
     return waku
 }
 
-export async function subscribe(waku: LightNode, id: string, callback: Callback<DecodedMessage>) {
-    const contentTopic = topicBase + id
-    const messageDecoder = createDecoder(contentTopic)
-    await readStore(waku, messageDecoder)
-    const unsubscribe = await waku.filter.subscribe([messageDecoder], callback);
+export async function subscribe(waku: LightNode, contentTopic: string, id: string, callback: Callback<DecodedMessage>) {
+    const messageDecoder = createDecoder(getTopic(contentTopic, id))
+    const unsubscribe = await waku.filter.subscribe([messageDecoder], callback)
+
     return unsubscribe
 }
 
 export async function readProfile(waku: LightNode, id: string) {
-    const profileDecoder = createDecoder(topicBase + 'profile' + id)
-    return await readStore(waku, profileDecoder)
+    return await readStore(waku, getTopic('profile', id))
 }
 
-async function readStore(waku: LightNode, decoder: Decoder, storeQueryOptions?: StoreQueryOptions) {
+export async function storeDocument(waku: LightNode, contentTopicName: string, id: string, document: unknown) {
+    const contentTopic = getTopic(contentTopicName, id)
+    const encoder = createEncoder({ contentTopic })
+    const json = JSON.stringify(document)
+    const payload = utils.utf8ToBytes(json)
+
+    return await waku.lightPush.send(encoder, { payload })
+}
+
+export async function readLatestDocument(waku: LightNode, contentTopic: string, id: string): Promise<unknown | undefined> {
+    const storeQueryOptions: StoreQueryOptions = {
+        pageDirection: PageDirection.BACKWARD,
+        pageSize: 1,
+    }
+    const topic = getTopic(contentTopic, id)
+
+    const decodedMessages = await readStore(waku, topic, storeQueryOptions)
+    for await (const messagePromises of decodedMessages) {
+        for (const messagePromise of messagePromises) {
+            const message = await messagePromise
+            if (message) {
+                const decodedPayload = decodeMessagePayload(message)
+                
+                return JSON.parse(decodedPayload)
+            } else {
+                return
+            }
+        }
+    }
+}
+
+export async function parseQueryResults<T>(results: AsyncGenerator<Promise<DecodedMessage | undefined>[]>): Promise<T[]> {
+    const typedResults: T[] = []
+    for await (const messagePromises of results) {
+        for (const messagePromise of messagePromises) {
+            const message = await messagePromise
+            if (message) {
+                const decodedPayload = decodeMessagePayload(message)
+                
+                const typedPayload = JSON.parse(decodedPayload) as T
+                typedResults.push(typedPayload)
+            }
+        }
+    }
+    return typedResults
+}
+
+export async function readStore(waku: LightNode, contentTopic: string, storeQueryOptions?: StoreQueryOptions) {
+    const decoder = createDecoder(contentTopic)
     return waku.store.queryGenerator([decoder], storeQueryOptions)
 }
 
@@ -49,17 +104,12 @@ export function decodeMessagePayload(wakuMessage: DecodedMessage): string {
 export async function sendMessage(
     waku: LightNode,
     id: string,
-    message: string,
+    message: unknown,
 ) {
-    // Post the metadata on Waku
-    const payload = utils.utf8ToBytes(message)
-
-    const contentTopic = topicBase + id
+    const json = JSON.stringify(message)
+    const payload = utils.utf8ToBytes(json)
+    const contentTopic = getTopic('private-message', id)
     const encoder = createEncoder({ contentTopic });
 
-    // Send the message
-    await waku.lightPush.send(encoder, { payload })
-
-    // Return message
-    return message
+    return await waku.lightPush.send(encoder, { payload })
 }
