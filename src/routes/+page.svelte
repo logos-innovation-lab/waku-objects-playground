@@ -19,7 +19,6 @@
 	import { profile } from '$lib/stores/profile'
 	import { chats } from '$lib/stores/chat'
 
-	import { formatDateAndTime } from '$lib/utils/format'
 	import ROUTES from '$lib/routes'
 	import { walletStore } from '$lib/stores/wallet'
 
@@ -125,9 +124,6 @@
 										<Badge dark>
 											{chat.messages.length}
 										</Badge>
-									</span>
-									<span class="timestamp">
-										{formatDateAndTime(lastMessage.timestamp)}
 									</span>
 								</div>
 								<p class={`message text-serif ${myMessage ? 'my-message' : ''}`}>
