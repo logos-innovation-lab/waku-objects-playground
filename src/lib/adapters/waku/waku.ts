@@ -1,26 +1,30 @@
-import { createLightNode } from "@waku/create"
-import * as utils from "@waku/utils/bytes"
+import { createLightNode } from '@waku/create'
+import * as utils from '@waku/utils/bytes'
 import {
     waitForRemotePeer,
     createEncoder,
     createDecoder,
     type DecodedMessage,
     PageDirection,
-} from "@waku/core"
+} from '@waku/core'
 import { multiaddr } from '@multiformats/multiaddr'
-import { type LightNode, Protocols, type Callback, type StoreQueryOptions } from "@waku/interfaces"
+import { type LightNode, Protocols, type Callback, type StoreQueryOptions } from '@waku/interfaces'
 
 const peerMultiaddr = multiaddr(
     '/dns4/ws.waku.apyos.dev/tcp/443/wss/p2p/16Uiu2HAm5wH4dPAV6zDfrBHkWt9Wu9iiXT4ehHdUArDUbEevzmBY'
     // '/ip4/127.0.0.1/tcp/8000/wss/p2p/16Uiu2HAkvxqFicgLvsTUqKiX5ZUozN9c7aA82msxXo9qftZsMdGB'
 )
 
+type ContentTopic = 'private-message' | 'profile' | 'contact' | 'chats'
+type QueryResult = AsyncGenerator<Promise<DecodedMessage | undefined>[]>
+
 const topicApp = 'wakuobjects-playground'
 const topicVersion = '1'
 
-export function getTopic(contentTopic: string, id: string) {
+export function getTopic(contentTopic: ContentTopic, id: string) {
     return `/${topicApp}/${topicVersion}/${contentTopic}/${id}`
 }
+
 
 export function privateMessageTopic(id: string) {
     return getTopic('private-message', id)
@@ -35,7 +39,7 @@ export async function connectWaku() {
     return waku
 }
 
-export async function subscribe(waku: LightNode, contentTopic: string, id: string, callback: Callback<DecodedMessage>) {
+export async function subscribe(waku: LightNode, contentTopic: ContentTopic, id: string, callback: Callback<DecodedMessage>) {
     const messageDecoder = createDecoder(getTopic(contentTopic, id))
     const unsubscribe = await waku.filter.subscribe([messageDecoder], callback)
 
@@ -46,7 +50,7 @@ export async function readProfile(waku: LightNode, id: string) {
     return await readStore(waku, getTopic('profile', id))
 }
 
-export async function storeDocument(waku: LightNode, contentTopicName: string, id: string, document: unknown) {
+export async function storeDocument(waku: LightNode, contentTopicName: ContentTopic, id: string, document: unknown) {
     const contentTopic = getTopic(contentTopicName, id)
     const encoder = createEncoder({ contentTopic })
     const json = JSON.stringify(document)
@@ -55,7 +59,7 @@ export async function storeDocument(waku: LightNode, contentTopicName: string, i
     return await waku.lightPush.send(encoder, { payload })
 }
 
-export async function readLatestDocument(waku: LightNode, contentTopic: string, id: string): Promise<unknown | undefined> {
+export async function readLatestDocument(waku: LightNode, contentTopic: ContentTopic, id: string): Promise<unknown | undefined> {
     const storeQueryOptions: StoreQueryOptions = {
         pageDirection: PageDirection.BACKWARD,
         pageSize: 1,
@@ -77,7 +81,7 @@ export async function readLatestDocument(waku: LightNode, contentTopic: string, 
     }
 }
 
-export async function parseQueryResults<T>(results: AsyncGenerator<Promise<DecodedMessage | undefined>[]>): Promise<T[]> {
+export async function parseQueryResults<T>(results: QueryResult): Promise<T[]> {
     const typedResults: T[] = []
     for await (const messagePromises of results) {
         for (const messagePromise of messagePromises) {
@@ -93,7 +97,7 @@ export async function parseQueryResults<T>(results: AsyncGenerator<Promise<Decod
     return typedResults
 }
 
-export async function readStore(waku: LightNode, contentTopic: string, storeQueryOptions?: StoreQueryOptions) {
+export async function readStore(waku: LightNode, contentTopic: string, storeQueryOptions?: StoreQueryOptions): Promise<QueryResult> {
     const decoder = createDecoder(contentTopic)
     return waku.store.queryGenerator([decoder], storeQueryOptions)
 }

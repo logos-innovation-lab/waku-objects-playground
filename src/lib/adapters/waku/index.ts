@@ -1,11 +1,12 @@
 import { profile, type Profile } from '$lib/stores/profile'
 import type { Adapter } from '..'
-import { chats, type DraftChat, type Chat, type Message } from '$lib/stores/chat'
+import { chats, type DraftChat, type Chat, type Message, type ChatData } from '$lib/stores/chat'
 import { get } from 'svelte/store'
 import { contacts, type ContactData, type User } from '$lib/stores/users'
-import type { LightNode } from "@waku/interfaces"
+import type { LightNode } from '@waku/interfaces'
 import { connectWaku, decodeMessagePayload, privateMessageTopic, readLatestDocument, sendMessage, storeDocument, subscribe } from './waku'
 import Base from '../base'
+import type { DecodedMessage } from '@waku/core'
 
 function addMessageToChat(message: Message) {
 	chats.update((state) => {
@@ -28,7 +29,7 @@ function addMessageToChat(message: Message) {
 }
 
 async function lookupUserFromContacts(waku: LightNode, address: string): Promise<User | undefined> {
-	const contactsData = await readLatestDocument(waku, 'contacts', address) as ContactData
+	const contactsData = await readLatestDocument(waku, 'contact', address) as ContactData
 	return contactsData.contacts.get(address)
 }
 
@@ -42,7 +43,7 @@ export default class WakuAdapter extends Base implements Adapter {
 			if (this.waku && this.wallet && p.address && this.userSubscriptions.length === 0) {
 				const address = this.wallet.address
 
-				const subscribeChats = await subscribe(this.waku, 'private-message', address , (msg) => {
+				const subscribeChats = await subscribe(this.waku, 'private-message', address , (msg: DecodedMessage) => {
 					const decodedPayload = decodeMessagePayload(msg)
 					const chatMessage = JSON.parse(decodedPayload) as Message
 					addMessageToChat(chatMessage)
@@ -66,10 +67,16 @@ export default class WakuAdapter extends Base implements Adapter {
 
 		const profileData = await readLatestDocument(this.waku, 'profile', address) as Profile
 		const name = profileData?.name
-		profile.update((state) => ({ ...state, address, name, loading: false}))	
+		console.debug({ profileData })
+		profile.update((state) => ({ ...state, address, name, loading: false }))	
 
-		const contactsData = await readLatestDocument(this.waku, 'contacts', address) as ContactData
-		contacts.update(() => ({ ...contactsData }))
+		const contactsData = await readLatestDocument(this.waku, 'contact', address) as ContactData
+		console.debug({ contactsData })
+
+		contacts.update(() => ({ contacts: contactsData?.contacts ?? new Map<string, User>(), loading: false }))
+
+		const chatData = await readLatestDocument(this.waku, 'chats', address) as ChatData
+		chats.update((state) => ({ ...state, ...chatData, loading: false }))
 	}
 
 	async saveUserProfile(name?: string, avatar?: string): Promise<void> {
