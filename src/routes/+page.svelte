@@ -19,17 +19,21 @@
 	import { profile } from '$lib/stores/profile'
 	import { chats } from '$lib/stores/chat'
 
-	import { formatDateAndTime, formatAddress } from '$lib/utils/format'
+	import { formatDateAndTime } from '$lib/utils/format'
 	import ROUTES from '$lib/routes'
+	import { walletStore } from '$lib/stores/wallet'
+
+	let myAddress: string | undefined = undefined
+	$: $walletStore.wallet?.getAddress().then((a) => (myAddress = a))
 </script>
 
-{#if $profile.loading}
+{#if $profile.loading || $walletStore.loading}
 	<Container align="center" grow gap={6} justify="center">
 		<div class="center">
 			<h2>Loading...</h2>
 		</div>
 	</Container>
-{:else if !$profile.address}
+{:else if !$walletStore.wallet}
 	<Container align="center" alignItems="center" gap={12} justify="center" grow pad={24}>
 		<div class="chatbot">
 			<div>
@@ -72,7 +76,7 @@
 				<svelte:fragment slot="avatar">
 					<Avatar size={48} picture={$profile.avatar} />
 				</svelte:fragment>
-				{$profile.name ?? formatAddress($profile.address)}
+				{$profile.name}
 			</Button>
 		</svelte:fragment>
 	</Header>
@@ -100,14 +104,14 @@
 				<svelte:fragment slot="avatar">
 					<Avatar size={48} picture={$profile.avatar} />
 				</svelte:fragment>
-				{$profile.name ?? formatAddress($profile.address)}
+				{$profile.name}
 			</Button>
 		</svelte:fragment>
 	</Header>
 	<ul class="chats">
 		{#each [...$chats.chats] as [id, chat]}
 			{@const lastMessage = chat.messages[chat.messages.length - 1]}
-			{@const myMessage = lastMessage.fromAddress === $profile.address}
+			{@const myMessage = lastMessage.fromAddress === myAddress}
 			{#if lastMessage}
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<li on:click={() => goto(ROUTES.CHAT(id))}>

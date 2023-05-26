@@ -1,7 +1,6 @@
 import { writable, type Writable } from 'svelte/store'
 
 export interface Profile {
-	address?: string
 	name?: string
 	avatar?: string
 	loading: boolean

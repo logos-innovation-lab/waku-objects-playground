@@ -9,7 +9,7 @@
 	import { goto } from '$app/navigation'
 	import routes from '$lib/routes'
 	import Textarea from '$lib/components/textarea.svelte'
-	import adapters from '$lib/adapters'
+	import { walletStore } from '$lib/stores/wallet'
 
 	let phrase = ''
 	let restoring = false
@@ -19,7 +19,7 @@
 		restoring = true
 
 		try {
-			await adapters.restoreWallet(phrase)
+			walletStore.restoreWallet(phrase)
 
 			goto(routes.HOME)
 		} catch (error) {

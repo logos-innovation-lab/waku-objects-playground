@@ -5,11 +5,25 @@
 	import '@fontsource/source-sans-pro/700.css'
 	import './styles.css'
 
-	import { onDestroy } from 'svelte'
+	import { onDestroy, onMount } from 'svelte'
 	import adapter from '$lib/adapters'
+	import { walletStore } from '$lib/stores/wallet'
+
+	let unsubscribeWalletStore: (() => void) | undefined = undefined
+
+	onMount(() => {
+		unsubscribeWalletStore = walletStore.subscribe(({ wallet }) => {
+			if (wallet) {
+				adapter.onLogIn(wallet)
+			} else {
+				adapter.onLogOut()
+			}
+		})
+	})
 
 	onDestroy(() => {
-		if (typeof adapter.stop === 'function') adapter.stop()
+		if ($walletStore.wallet) adapter.onLogOut()
+		if (unsubscribeWalletStore) unsubscribeWalletStore()
 	})
 </script>
 

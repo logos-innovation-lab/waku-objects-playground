@@ -1,7 +1,6 @@
 import { goto } from '$app/navigation'
-import adapters from '$lib/adapters'
 import routes from '$lib/routes'
-import { profile } from '$lib/stores/profile'
+import { walletStore } from '$lib/stores/wallet'
 import type { PageLoad } from './$types'
 
 // This prevents the load function from running on server
@@ -11,13 +10,13 @@ export const ssr = false
 export const load = (async () => {
 	const promise = new Promise<void>((resolve) => {
 		let unsubscribe: (() => void) | undefined = undefined
-		unsubscribe = profile.subscribe((p) => {
+		unsubscribe = walletStore.subscribe((p) => {
 			if (p.loading) return
 
 			if (unsubscribe) unsubscribe()
 
 			// If user is not logged in, redirect to home page
-			if (!p.address) {
+			if (!p.wallet) {
 				goto(routes.HOME)
 			}
 			resolve()
@@ -27,6 +26,6 @@ export const load = (async () => {
 	await promise
 
 	return {
-		mnemonics: adapters.getMnemonics(),
+		mnemonics: walletStore.getMnemonics(),
 	}
 }) satisfies PageLoad

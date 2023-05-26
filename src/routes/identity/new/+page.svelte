@@ -14,11 +14,14 @@
 	import { goto } from '$app/navigation'
 	import { clipAndResize } from '$lib/utils/image'
 	import routes from '$lib/routes'
+	import { HDNodeWallet, Wallet } from 'ethers'
+	import { walletStore } from '$lib/stores/wallet'
 
 	let picture = ''
 	let name = ''
 	let saving = false
 	let isCreatingIdentity = false
+	let wallet: HDNodeWallet | undefined = undefined
 
 	createIdentity()
 
@@ -35,7 +38,10 @@
 	async function saveProfile() {
 		saving = true
 		try {
-			await adapters.saveUserProfile(name, picture)
+			if (!wallet) throw new Error('no wallet')
+
+			await adapters.saveUserProfile(wallet, name, picture)
+			walletStore.saveWallet(wallet)
 			goto(routes.IDENTITY_CONFIRM)
 		} catch (error) {
 			console.error('failed to save profile: ', error)
@@ -46,7 +52,7 @@
 	async function createIdentity() {
 		isCreatingIdentity = true
 		try {
-			await adapters.createWallet()
+			wallet = Wallet.createRandom()
 		} catch (e) {
 			console.error(e)
 		}

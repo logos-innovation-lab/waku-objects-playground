@@ -18,10 +18,13 @@
 	import DropdownItem from '$lib/components/dropdown-item.svelte'
 
 	import { goto } from '$app/navigation'
-	import { profile } from '$lib/stores/profile'
 	import { chats } from '$lib/stores/chat'
 	import adapters from '$lib/adapters'
 	import ROUTES from '$lib/routes'
+	import { walletStore } from '$lib/stores/wallet'
+
+	let myAddress: string | undefined = undefined
+	$: $walletStore.wallet?.getAddress().then((a) => (myAddress = a))
 
 	const cards = [
 		{
@@ -44,11 +47,13 @@
 	$: messages = $chats.chats.get($page.params.id)?.messages || []
 	let loading = false
 	let text = ''
-	$: if ($profile.address === undefined) goto(ROUTES.HOME)
+	$: if ($walletStore.wallet === undefined) goto(ROUTES.HOME)
 
 	const sendMessage = async () => {
 		loading = true
-		await adapters.sendChatMessage($page.params.id, text)
+		const wallet = $walletStore.wallet
+		if (!wallet) throw new Error('no wallet')
+		await adapters.sendChatMessage(wallet, $page.params.id, text)
 		text = ''
 		loading = false
 	}
@@ -77,7 +82,7 @@
 							{#if message.text.length > 0}
 								<div
 									class={`message ${
-										message.fromAddress !== $profile.address ? 'their-message' : 'my-message'
+										message.fromAddress !== myAddress ? 'their-message' : 'my-message'
 									}`}
 								>
 									<div class="message-content">
