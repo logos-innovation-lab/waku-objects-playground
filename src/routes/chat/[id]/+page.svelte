@@ -22,9 +22,27 @@
 	import adapters from '$lib/adapters'
 	import ROUTES from '$lib/routes'
 	import { walletStore } from '$lib/stores/wallet'
+	import { beforeUpdate } from 'svelte'
+	import { afterUpdate } from 'svelte'
+	import { onMount } from 'svelte/internal'
 
 	let myAddress: string | undefined = undefined
 	$: $walletStore.wallet?.getAddress().then((a) => (myAddress = a))
+
+	let div: HTMLElement
+	let autoscroll: boolean = true
+
+	beforeUpdate(() => {
+		autoscroll = div && div.offsetHeight + div.scrollTop > div.scrollHeight - 20
+	})
+
+	afterUpdate(() => {
+		if (autoscroll) div.scrollTo(0, div.scrollHeight)
+	})
+	
+	onMount(() => {
+		div && div.scrollTo(0, div.scrollHeight)
+	})
 
 	const cards = [
 		{
@@ -73,7 +91,7 @@
 				{$chats.chats.get($page.params.id)?.name}
 			</svelte:fragment>
 		</Header>
-		<div class="chat-messages">
+		<div class="chat-messages" bind:this={div}>
 			<Container>
 				<div class="messages">
 					<div class="messages-inner">
