@@ -119,12 +119,16 @@
 		</p>
 	</Container>
 	<Container align="center" gap={12} pad={24}>
-		<!-- TODO: add action to buttons -->
 		<Button on:click={() => goto(routes.IDENTITY_BACKUP)}>
 			<DocumentSigned />
 			Backup recovery phrase
 		</Button>
-		<Button>
+		<Button
+			on:click={async () => {
+				await adapters.disconnectWallet()
+				goto(routes.HOME)
+			}}
+		>
 			<Logout />
 			Disconnect identity from device
 		</Button>

@@ -51,6 +51,7 @@ export default class Base implements AdapterBase {
 	disconnectWallet(): Promise<void> {
 		this.wallet = undefined
 		removeFromLocalStorage('mnemonic')
+		profile.set({ loading: false })
 
 		return Promise.resolve()
 	}
