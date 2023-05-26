@@ -1,4 +1,5 @@
 import type { DraftChat } from '$lib/stores/chat'
+import type { HDNodeWallet } from 'ethers'
 import FirebaseAdapter from './firebase'
 
 export interface Contact {
@@ -7,27 +8,16 @@ export interface Contact {
 	avatar?: string
 }
 
-export interface AdapterBase {
-	// This is run when the app is mounted and should start app wide subscriptions
-	start?: () => Promise<void> | void
-	// This is run when the app unmounts and should clear subscriptions
-	stop?: () => Promise<void> | void
+export interface Adapter {
+	onLogIn: (wallet: HDNodeWallet) => Promise<void>
+	onLogOut: () => void
+	saveUserProfile(wallet: HDNodeWallet, name?: string, avatar?: string): Promise<void>
 
-	createWallet(): Promise<void>
-	restoreWallet(mnemonic: string): Promise<void>
-	hasWallet(): boolean
-	disconnectWallet(): Promise<void>
-	getMnemonics(): string
+	startChat(wallet: HDNodeWallet, chat: DraftChat): Promise<string>
+	sendChatMessage(wallet: HDNodeWallet, chatId: string, text: string): Promise<void>
 
 	uploadPicture(picture: string): Promise<string>
 	getPicture(cid: string): string
-}
-
-export interface Adapter extends AdapterBase {
-	saveUserProfile(name?: string, avatar?: string): Promise<void>
-
-	startChat(chat: DraftChat): Promise<string>
-	sendChatMessage(chatId: string, text: string): Promise<void>
 }
 
 export default new FirebaseAdapter() as Adapter

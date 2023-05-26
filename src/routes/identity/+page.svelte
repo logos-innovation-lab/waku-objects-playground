@@ -19,6 +19,8 @@
 	import { onDestroy } from 'svelte'
 	import DocumentSigned from '$lib/components/icons/document-signed.svelte'
 	import Logout from '$lib/components/icons/logout.svelte'
+	import { walletStore } from '$lib/stores/wallet'
+	import { get } from 'svelte/store'
 
 	let avatar = $profile.avatar
 	let name = $profile.name
@@ -47,11 +49,17 @@
 	}
 	let timer: ReturnType<typeof setTimeout> | undefined
 
+	function saveProfileNow() {
+		const wallet = get(walletStore).wallet
+		if (!wallet) return console.error('no wallet')
+		adapters.saveUserProfile(wallet, name, avatar)
+	}
+
 	// Debounce saving profile
 	function debounceSaveProfile() {
 		if (timer) clearTimeout(timer)
 		timer = setTimeout(() => {
-			adapters.saveUserProfile(name, avatar)
+			saveProfileNow()
 			timer = undefined
 		}, 1000)
 	}
@@ -59,7 +67,7 @@
 	onDestroy(() => {
 		if (timer) {
 			clearTimeout(timer)
-			adapters.saveUserProfile(name, avatar)
+			saveProfileNow()
 		}
 	})
 </script>
@@ -125,7 +133,7 @@
 		</Button>
 		<Button
 			on:click={async () => {
-				await adapters.disconnectWallet()
+				walletStore.disconnectWallet()
 				goto(routes.HOME)
 			}}
 		>

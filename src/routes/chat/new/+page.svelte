@@ -25,34 +25,40 @@
 	import ROUTES from '$lib/routes'
 	import Textarea from '$lib/components/textarea.svelte'
 	import type { DraftChat } from '$lib/stores/chat'
+	import { walletStore } from '$lib/stores/wallet'
 
 	// Not logged in users should be redirected to home page
-	$: if (!$profile.address) goto(ROUTES.HOME)
+	$: if (!$walletStore.wallet) goto(ROUTES.HOME)
 
 	let participants: string[] = []
 	let chatName = ''
 	let loading = false
 	let state: 'edit-participants' | 'edit-name' | 'send-message' = 'edit-participants'
+	let myAddress: string | undefined = undefined
+	$: $walletStore.wallet?.getAddress().then((a) => (myAddress = a))
 
 	const startChat = async () => {
-		if (participants.length === 0 || !$profile.address) return
+		const wallet = $walletStore.wallet
+		if (participants.length === 0 || !wallet) return
 		loading = true
 		const chat: DraftChat = {
 			name: chatName,
-			users: [...participants, $profile.address],
+			users: [...participants, await wallet.getAddress()],
 			messages: [],
 		}
-		const chatId = await adapters.startChat(chat)
+		const chatId = await adapters.startChat(wallet, chat)
 		loading = false
 		goto(ROUTES.CHAT(chatId))
 	}
 
 	let text = ''
-	$: if ($profile.address === undefined) goto(ROUTES.HOME)
+	$: if ($walletStore.wallet === undefined) goto(ROUTES.HOME)
 
 	const sendMessage = async () => {
 		loading = true
-		await adapters.sendChatMessage($page.params.id, text)
+		const wallet = $walletStore.wallet
+		if (!wallet) return
+		await adapters.sendChatMessage(wallet, $page.params.id, text)
 		text = ''
 		loading = false
 	}
@@ -94,7 +100,7 @@
 		<p class="text-lg text-bold">Contact list</p>
 		<span>(for now this is all registered users)</span>
 		<ul>
-			{#each [...$contacts.contacts].filter(([address]) => !participants.includes(address) && address !== $profile.address) as [address, contact]}
+			{#each [...$contacts.contacts].filter(async ([address]) => !participants.includes(address) && address !== myAddress) as [address, contact]}
 				<li>
 					<div>
 						<Button on:click={() => (participants = [...participants, address])}>

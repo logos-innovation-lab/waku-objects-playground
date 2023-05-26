@@ -9,10 +9,8 @@ import {
 	where,
 	getDoc,
 } from 'firebase/firestore'
-import type { Adapter, Contact } from '..'
 
 // Stores
-import { get, type Unsubscriber } from 'svelte/store'
 import { chats, type DraftChat, type Chat, type Message } from '$lib/stores/chat'
 import { profile } from '$lib/stores/profile'
 import { contacts, type User } from '$lib/stores/users'
@@ -20,126 +18,18 @@ import { contacts, type User } from '$lib/stores/users'
 import { ChatDbSchema, UserDbSchema } from './schemas'
 
 import { formatAddress } from '$lib/utils/format'
-import { db } from './connections'
-import Base from '../base'
+import { db, ipfs, IPFS_GATEWAY } from './connections'
 
-export default class FirebaseAdapter extends Base implements Adapter {
-	start() {
-		super.start()
+import type { HDNodeWallet } from 'ethers'
+import type { Unsubscriber } from 'svelte/store'
+import type { Adapter, Contact } from '..'
 
-		const unsubscribeUser = profile.subscribe(async (p) => {
-			if (p.address && this.userSubscriptions.length === 0) {
-				const profileSnapshot = doc(db, `users/${p.address}`)
-				const subscribeProfile = onSnapshot(profileSnapshot, (res) => {
-					const parseRes = UserDbSchema.safeParse(res.data())
-					if (parseRes.success) {
-						const user: User = parseRes.data
-						profile.update((state) => ({ ...state, ...user, loading: false }))
-					} else {
-						console.error(parseRes.error.issues)
-					}
-				})
-				this.userSubscriptions.push(subscribeProfile)
+export default class FirebaseAdapter implements Adapter {
+	protected subscriptions: Array<() => unknown> = []
+	protected userSubscriptions: Array<() => unknown> = []
 
-				const chatsSnapshot = query(
-					collection(db, `chats`),
-					where('users', 'array-contains', p.address),
-				)
-				const subscribeChats = onSnapshot(chatsSnapshot, async (res) => {
-					// Need to wait for contacts to be loaded before processing chats
-					let unsubscribe: Unsubscriber | undefined
-					const contactsPromise = new Promise<Map<string, User>>((resolve, reject) => {
-						unsubscribe = contacts.subscribe((c) => {
-							if (c.loading === false) {
-								resolve(c.contacts)
-							}
-							if (c.error) {
-								reject(c.error)
-							}
-						})
-					})
-					try {
-						const cnts = await contactsPromise
-						unsubscribe && unsubscribe()
-
-						const newChats = new Map<string, Chat>()
-						res.docs.forEach((d) => {
-							const parseRes = ChatDbSchema.safeParse(d.data())
-
-							if (parseRes.success) {
-								const users: User[] = []
-								parseRes.data.users.forEach((a) => {
-									const user = cnts.get(a)
-									if (user) users.push(user)
-									else console.error(`Could not find user with address ${a}`)
-								})
-								const chat: Chat = {
-									messages: parseRes.data.messages,
-									name: parseRes.data.name,
-									users,
-									chatId: d.id,
-								}
-
-								// If there are two participants, use the other user name/address as chat name
-								if ((!chat.name || chat.name === '') && chat.users.length === 2) {
-									const otherUser = chat.users.find((other) => other.address !== p.address)
-									if (!otherUser) return
-
-									chat.name = otherUser.name ?? formatAddress(otherUser.address)
-								}
-
-								newChats.set(d.id, chat)
-							} else {
-								console.error(parseRes.error.issues)
-							}
-						})
-						chats.update((state) => ({ ...state, chats: newChats, loading: false }))
-					} catch (error) {
-						console.error('Error loading chats', error)
-					}
-				})
-				this.userSubscriptions.push(subscribeChats)
-
-				// const contactsCollection = collection(db, `users/${p.address}/contacts`) // FIXME: revert to this
-				const contactsCollection = collection(db, `users`)
-				const subscribeUsers = onSnapshot(contactsCollection, (res) => {
-					const cnts = new Map<string, User>()
-					res.docs.forEach((d) => {
-						const parseRes = UserDbSchema.safeParse(d.data())
-						if (parseRes.success) {
-							const user: User = parseRes.data
-							cnts.set(user.address, user)
-						} else {
-							console.error(parseRes.error.issues)
-						}
-					})
-					contacts.set({ contacts: cnts, loading: false })
-				})
-				this.userSubscriptions.push(subscribeUsers)
-			}
-
-			if (!p.address && this.userSubscriptions.length !== 0) {
-				this.userSubscriptions.forEach((s) => s())
-				this.userSubscriptions = []
-				contacts.set({ contacts: new Map<string, User>(), loading: true })
-			}
-		})
-		this.subscriptions.push(unsubscribeUser)
-	}
-
-	stop() {
-		super.stop()
-	}
-
-	async restoreWallet(mnemonic: string): Promise<void> {
-		await super.restoreWallet(mnemonic)
-
-		if (!this.wallet) {
-			console.error('No wallet found')
-			return
-		}
-
-		const address = await this.wallet.getAddress()
+	async onLogIn(wallet: HDNodeWallet) {
+		const address = await wallet.getAddress()
 		const userDoc = doc(db, `users/${address}`)
 
 		await setDoc(userDoc, { address, lastSignIn: Date.now() }, { merge: true })
@@ -148,17 +38,101 @@ export default class FirebaseAdapter extends Base implements Adapter {
 		// FIXME: type this properly
 		const { name } = user.data() as { name: string }
 		profile.update((state) => ({ ...state, address, name, loading: false }))
+
+		const profileSnapshot = doc(db, `users/${address}`)
+		const subscribeProfile = onSnapshot(profileSnapshot, (res) => {
+			const parseRes = UserDbSchema.safeParse(res.data())
+			if (parseRes.success) {
+				const user: User = parseRes.data
+				profile.update((state) => ({ ...state, ...user, loading: false }))
+			} else {
+				console.error(parseRes.error.issues)
+			}
+		})
+		this.userSubscriptions.push(subscribeProfile)
+
+		const chatsSnapshot = query(collection(db, `chats`), where('users', 'array-contains', address))
+		const subscribeChats = onSnapshot(chatsSnapshot, async (res) => {
+			// Need to wait for contacts to be loaded before processing chats
+			let unsubscribe: Unsubscriber | undefined
+			const contactsPromise = new Promise<Map<string, User>>((resolve, reject) => {
+				unsubscribe = contacts.subscribe((c) => {
+					if (c.loading === false) {
+						resolve(c.contacts)
+					}
+					if (c.error) {
+						reject(c.error)
+					}
+				})
+			})
+			try {
+				const cnts = await contactsPromise
+				unsubscribe && unsubscribe()
+
+				const newChats = new Map<string, Chat>()
+				res.docs.forEach((d) => {
+					const parseRes = ChatDbSchema.safeParse(d.data())
+
+					if (parseRes.success) {
+						const users: User[] = []
+						parseRes.data.users.forEach((a) => {
+							const user = cnts.get(a)
+							if (user) users.push(user)
+							else console.error(`Could not find user with address ${a}`)
+						})
+						const chat: Chat = {
+							messages: parseRes.data.messages,
+							name: parseRes.data.name,
+							users,
+							chatId: d.id,
+						}
+
+						// If there are two participants, use the other user name/address as chat name
+						if ((!chat.name || chat.name === '') && chat.users.length === 2) {
+							const otherUser = chat.users.find((other) => other.address !== address)
+							if (!otherUser) return
+
+							chat.name = otherUser.name ?? formatAddress(otherUser.address)
+						}
+
+						newChats.set(d.id, chat)
+					} else {
+						console.error(parseRes.error.issues)
+					}
+				})
+				chats.update((state) => ({ ...state, chats: newChats, loading: false }))
+			} catch (error) {
+				console.error('Error loading chats', error)
+			}
+		})
+		this.userSubscriptions.push(subscribeChats)
+
+		const contactsCollection = collection(db, `users`)
+		const subscribeUsers = onSnapshot(contactsCollection, (res) => {
+			const cnts = new Map<string, User>()
+			res.docs.forEach((d) => {
+				const parseRes = UserDbSchema.safeParse(d.data())
+				if (parseRes.success) {
+					const user: User = parseRes.data
+					cnts.set(user.address, user)
+				} else {
+					console.error(parseRes.error.issues)
+				}
+			})
+			contacts.set({ contacts: cnts, loading: false })
+		})
+		this.userSubscriptions.push(subscribeUsers)
 	}
 
-	async getContact(address: string): Promise<Contact> {
-		const contactDoc = doc(db, `users/${address}`)
-		const contact = await getDoc(contactDoc)
-		return contact.data() as Contact // FIXME: type this properly
+	onLogOut() {
+		this.userSubscriptions.forEach((s) => s())
+		this.userSubscriptions = []
+		profile.set({ loading: false })
+		contacts.set({ contacts: new Map<string, User>(), loading: true })
 	}
 
-	async saveUserProfile(name?: string, avatar?: string): Promise<void> {
-		const address = await this.wallet?.getAddress()
-		if (!address) throw new Error('Not signed in')
+	async saveUserProfile(wallet: HDNodeWallet, name?: string, avatar?: string): Promise<void> {
+		const address = await wallet.getAddress()
 
 		const userDoc = doc(db, `users/${address}`)
 
@@ -170,15 +144,15 @@ export default class FirebaseAdapter extends Base implements Adapter {
 		profile.update((state) => ({ ...state, ...data }))
 	}
 
-	async startChat(chat: DraftChat): Promise<string> {
+	async startChat(_wallet: HDNodeWallet, chat: DraftChat): Promise<string> {
 		const chatCollection = collection(db, `/chats`)
 		const chatDoc = await addDoc(chatCollection, chat)
 
 		return chatDoc.id
 	}
 
-	async sendChatMessage(chatId: string, text: string): Promise<void> {
-		const fromAddress = get(profile).address
+	async sendChatMessage(wallet: HDNodeWallet, chatId: string, text: string): Promise<void> {
+		const fromAddress = await wallet.getAddress()
 
 		if (!fromAddress) throw new Error('ChatId or address is missing')
 
@@ -190,5 +164,16 @@ export default class FirebaseAdapter extends Base implements Adapter {
 
 		const chatDoc = doc(db, `chats/${chatId}`)
 		setDoc(chatDoc, { messages: arrayUnion(message), lastMessage: text }, { merge: true })
+	}
+
+	async uploadPicture(picture: string): Promise<string> {
+		const blob = await (await fetch(picture)).blob()
+		const res = await ipfs.add(blob)
+
+		return res.cid.toString()
+	}
+
+	getPicture(cid: string): string {
+		return `${IPFS_GATEWAY}/${cid}`
 	}
 }

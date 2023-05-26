@@ -16,12 +16,15 @@
 	import { profile } from '$lib/stores/profile'
 	import { goto } from '$app/navigation'
 	import routes from '$lib/routes'
+	import { walletStore } from '$lib/stores/wallet'
 
 	let copied = false
+	let address: string | undefined = undefined
+	$: $walletStore.wallet?.getAddress().then((a) => (address = a))
 	function copyAddressToClipboard() {
-		if ($profile.address === undefined) return
+		if (address === undefined) return
 
-		copy($profile.address)
+		copy(address)
 		copied = true
 	}
 </script>
@@ -45,7 +48,7 @@
 		<p class="text-lg">This address is used to send and receive tokens with Waku objects</p>
 	</Container>
 	<Container gap={6}>
-		<Textarea bind:value={$profile.address} nonEditable label="Account address" rows={2} />
+		<Textarea bind:value={address} nonEditable label="Account address" rows={2} />
 		<Button on:click={copyAddressToClipboard}>
 			{#if copied}
 				<Checkmark />
