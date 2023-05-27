@@ -8,7 +8,7 @@ import {
     PageDirection,
 } from '@waku/core'
 import { multiaddr } from '@multiformats/multiaddr'
-import { type LightNode, Protocols, type Callback, type StoreQueryOptions } from '@waku/interfaces'
+import { type LightNode, Protocols, type Callback, type StoreQueryOptions, type Unsubscribe } from '@waku/interfaces'
 
 const peerMultiaddr = multiaddr(
     '/dns4/ws.waku.apyos.dev/tcp/443/wss/p2p/16Uiu2HAm5wH4dPAV6zDfrBHkWt9Wu9iiXT4ehHdUArDUbEevzmBY'
@@ -39,7 +39,7 @@ export async function connectWaku() {
     return waku
 }
 
-export async function subscribe(waku: LightNode, contentTopic: ContentTopic, id: string, callback: Callback<DecodedMessage>) {
+export async function subscribe(waku: LightNode, contentTopic: ContentTopic, id: string, callback: Callback<DecodedMessage>): Promise<Unsubscribe> {
     const messageDecoder = createDecoder(getTopic(contentTopic, id))
     const unsubscribe = await waku.filter.subscribe([messageDecoder], callback)
 

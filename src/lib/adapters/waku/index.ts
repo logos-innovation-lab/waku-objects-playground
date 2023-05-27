@@ -1,12 +1,12 @@
 import { profile, type Profile } from '$lib/stores/profile'
 import type { Adapter } from '..'
 import { chats, type DraftChat, type Chat, type Message, type ChatData } from '$lib/stores/chat'
-import { get } from 'svelte/store'
 import { contacts, type ContactData, type User } from '$lib/stores/users'
 import type { LightNode } from '@waku/interfaces'
 import { connectWaku, decodeMessagePayload, privateMessageTopic, readLatestDocument, sendMessage, storeDocument, subscribe } from './waku'
-import Base from '../base'
 import type { DecodedMessage } from '@waku/core'
+import type { HDNodeWallet } from 'ethers'
+import { ipfs, IPFS_GATEWAY } from '../firebase/connections'
 
 function addMessageToChat(message: Message) {
 	chats.update((state) => {
@@ -33,36 +33,12 @@ async function lookupUserFromContacts(waku: LightNode, address: string): Promise
 	return contactsData.contacts.get(address)
 }
 
-export default class WakuAdapter extends Base implements Adapter {
+export default class WakuAdapter implements Adapter {
 	private waku: LightNode | undefined
+	private subscriptions: Array<() => void> = []
 
-	start() {
-		super.start()
-
-		const unsubscribeUser = profile.subscribe(async (p) => {
-			if (this.waku && this.wallet && p.address && this.userSubscriptions.length === 0) {
-				const address = this.wallet.address
-
-				const subscribeChats = await subscribe(this.waku, 'private-message', address , (msg: DecodedMessage) => {
-					const decodedPayload = decodeMessagePayload(msg)
-					const chatMessage = JSON.parse(decodedPayload) as Message
-					addMessageToChat(chatMessage)
-				})
-				this.userSubscriptions.push(subscribeChats)
-			}
-		})
-		this.subscriptions.push(unsubscribeUser)
-	}
-
-	async restoreWallet(mnemonic: string): Promise<void> {
-		await super.restoreWallet(mnemonic)
-
-		if (!this.wallet) {
-			console.error('No wallet found')
-			return
-		}
-
-		const address = this.wallet.address
+	async onLogIn(wallet: HDNodeWallet): Promise<void> {
+		const address = wallet.address
 		this.waku = await connectWaku()
 
 		const profileData = await readLatestDocument(this.waku, 'profile', address) as Profile
@@ -77,15 +53,25 @@ export default class WakuAdapter extends Base implements Adapter {
 
 		const chatData = await readLatestDocument(this.waku, 'chats', address) as ChatData
 		chats.update((state) => ({ ...state, ...chatData, loading: false }))
+
+		const subscribeChats = await subscribe(this.waku, 'private-message', address , (msg: DecodedMessage) => {
+			const decodedPayload = decodeMessagePayload(msg)
+			const chatMessage = JSON.parse(decodedPayload) as Message
+			addMessageToChat(chatMessage)
+		})
+		this.subscriptions.push(subscribeChats)
 	}
 
-	async saveUserProfile(name?: string, avatar?: string): Promise<void> {
-		if (!this.wallet) {
-			console.error('No wallet found')
-			return
-		}
+	async onLogOut() {
+		this.subscriptions.forEach((s) => s())
+		this.subscriptions = []
+		profile.set({ loading: false })
+		contacts.set({ contacts: new Map<string, User>(), loading: true })
+	}
 
-		const address = this.wallet.address
+	async saveUserProfile(wallet: HDNodeWallet, name?: string, avatar?: string): Promise<void> {
+		
+		const address = wallet.address
 		if (!this.waku) {
 			return
 		}
@@ -100,15 +86,12 @@ export default class WakuAdapter extends Base implements Adapter {
 		}
 	}
 
-	async startChat(chat: DraftChat): Promise<string> {
-		if (!this.wallet) {
-			throw 'No wallet found'
-		}
+	async startChat(wallet: HDNodeWallet, chat: DraftChat): Promise<string> {
 		if (!this.waku) {
 			throw 'no waku'
 		}
 
-		const address = this.wallet.address
+		const address = wallet.address
 
 		if (chat.users.length !== 2) {
 			throw 'invalid chat'
@@ -145,8 +128,8 @@ export default class WakuAdapter extends Base implements Adapter {
 		return chatId
 	}
 
-	async sendChatMessage(chatId: string, text: string): Promise<void> {
-		const fromAddress = get(profile).address
+	async sendChatMessage(wallet: HDNodeWallet, chatId: string, text: string): Promise<void> {
+		const fromAddress = wallet.address
 
 		if (!fromAddress) throw new Error('ChatId or address is missing')
 
@@ -162,4 +145,16 @@ export default class WakuAdapter extends Base implements Adapter {
 		addMessageToChat(message)
 		await sendMessage(this.waku, privateMessageTopic(chatId), message)
 	}
+
+	async uploadPicture(picture: string): Promise<string> {
+		const blob = await (await fetch(picture)).blob()
+		const res = await ipfs.add(blob)
+
+		return res.cid.toString()
+	}
+
+	getPicture(cid: string): string {
+		return `${IPFS_GATEWAY}/${cid}`
+	}
+
 }
