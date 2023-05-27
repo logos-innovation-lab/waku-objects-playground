@@ -21,7 +21,7 @@
 		"@total-typescript/ts-reset": "^0.4.2",
 		"@typescript-eslint/eslint-plugin": "^5.58.0",
 		"@typescript-eslint/parser": "^5.58.0",
-		"@waku/core": "^0.0.17",
+		"@waku/core": "^0.0.18",
 		"@waku/create": "^0.0.13",
 		"@waku/interfaces": "^0.0.13",
 		"@waku/utils": "^0.0.5",

@@ -23,8 +23,8 @@ devDependencies:
     specifier: ^5.58.0
     version: 5.58.0(eslint@8.38.0)(typescript@5.0.4)
   '@waku/core':
-    specifier: ^0.0.17
-    version: 0.0.17(@multiformats/multiaddr@12.1.3)(libp2p@0.42.2)
+    specifier: ^0.0.18
+    version: 0.0.18(@multiformats/multiaddr@12.1.3)(libp2p@0.42.2)
   '@waku/create':
     specifier: ^0.0.13
     version: 0.0.13(@multiformats/multiaddr@12.1.3)
@@ -2108,6 +2108,33 @@ packages:
       - supports-color
     dev: true
 
+  /@waku/core@0.0.18(@multiformats/multiaddr@12.1.3)(libp2p@0.42.2):
+    resolution: {integrity: sha512-aP6ewp9M3OBAGndfrW4NQ+YrakPG8w0XMA31bU8vok9TULC17+TJ3TL1lJZfzhHiUC5ukSZRjnjtdXuHQQGsfw==}
+    engines: {node: '>=16'}
+    peerDependencies:
+      '@multiformats/multiaddr': ^12.0.0
+      libp2p: ^0.42.2
+    peerDependenciesMeta:
+      '@multiformats/multiaddr':
+        optional: true
+    dependencies:
+      '@multiformats/multiaddr': 12.1.3
+      '@noble/hashes': 1.3.0
+      '@waku/interfaces': 0.0.13
+      '@waku/proto': 0.0.4(uint8arraylist@2.4.3)
+      '@waku/utils': 0.0.6
+      debug: 4.3.4
+      it-all: 3.0.2
+      it-length-prefixed: 9.0.1
+      it-pipe: 2.0.5
+      libp2p: 0.42.2
+      p-event: 5.0.1
+      uint8arraylist: 2.4.3
+      uuid: 9.0.0
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
   /@waku/create@0.0.13(@multiformats/multiaddr@12.1.3):
     resolution: {integrity: sha512-OIpDtw1t2EDiYoZu8Ikwk1HSZDk93qOUpXLkYdW9ZuhGYC0r+JXdDeEuk9sXrGozDYvVb+DjVvjf29B50oMHHA==}
     engines: {node: '>=16'}
@@ -2178,6 +2205,16 @@ packages:
 
   /@waku/utils@0.0.5:
     resolution: {integrity: sha512-/o4dKDG6utY3boiIWLHLd2xlrYN9PKK+K1ozrUFtisWzyhSVpvJRfv9ExaYGcYIhOW7Mr2fn4HKXd3/2tbnAoA==}
+    engines: {node: '>=16'}
+    dependencies:
+      debug: 4.3.4
+      uint8arrays: 4.0.3
+    transitivePeerDependencies:
+      - supports-color
+    dev: true
+
+  /@waku/utils@0.0.6:
+    resolution: {integrity: sha512-hyHeP3PLMoxWzg/ghQpagNZAm5G0nncuJSE1n/ml+4oeY5+oimF4Qh6PGXxakjJYKY5+JWN7Y3OHj+CO2cbKnA==}
     engines: {node: '>=16'}
     dependencies:
       debug: 4.3.4
