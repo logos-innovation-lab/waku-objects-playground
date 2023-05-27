@@ -3,7 +3,15 @@ import type { Adapter } from '..'
 import { chats, type DraftChat, type Chat, type Message, type ChatData } from '$lib/stores/chat'
 import { contacts, type ContactData, type User } from '$lib/stores/users'
 import type { LightNode } from '@waku/interfaces'
-import { connectWaku, decodeMessagePayload, privateMessageTopic, readLatestDocument, sendMessage, storeDocument, subscribe } from './waku'
+import {
+	connectWaku,
+	decodeMessagePayload,
+	privateMessageTopic,
+	readLatestDocument,
+	sendMessage,
+	storeDocument,
+	subscribe,
+} from './waku'
 import type { DecodedMessage } from '@waku/core'
 import type { HDNodeWallet } from 'ethers'
 import { ipfs, IPFS_GATEWAY } from '../firebase/connections'
@@ -17,7 +25,7 @@ function addMessageToChat(message: Message) {
 		const newChats = new Map<string, Chat>(state.chats)
 		const chat = newChats.get(message.fromAddress)
 		if (chat) {
-			chat.messages = [...chat.messages, ]
+			chat.messages = [...chat.messages]
 		}
 
 		return {
@@ -29,7 +37,7 @@ function addMessageToChat(message: Message) {
 }
 
 async function lookupUserFromContacts(waku: LightNode, address: string): Promise<User | undefined> {
-	const contactsData = await readLatestDocument(waku, 'contact', address) as ContactData
+	const contactsData = (await readLatestDocument(waku, 'contact', address)) as ContactData
 	return contactsData.contacts.get(address)
 }
 
@@ -41,24 +49,32 @@ export default class WakuAdapter implements Adapter {
 		const address = wallet.address
 		this.waku = await connectWaku()
 
-		const profileData = await readLatestDocument(this.waku, 'profile', address) as Profile
+		const profileData = (await readLatestDocument(this.waku, 'profile', address)) as Profile
 		const name = profileData?.name
 		console.debug({ profileData })
-		profile.update((state) => ({ ...state, address, name, loading: false }))	
+		profile.update((state) => ({ ...state, address, name, loading: false }))
 
-		const contactsData = await readLatestDocument(this.waku, 'contact', address) as ContactData
+		const contactsData = (await readLatestDocument(this.waku, 'contact', address)) as ContactData
 		console.debug({ contactsData })
 
-		contacts.update(() => ({ contacts: contactsData?.contacts ?? new Map<string, User>(), loading: false }))
+		contacts.update(() => ({
+			contacts: contactsData?.contacts ?? new Map<string, User>(),
+			loading: false,
+		}))
 
-		const chatData = await readLatestDocument(this.waku, 'chats', address) as ChatData
+		const chatData = (await readLatestDocument(this.waku, 'chats', address)) as ChatData
 		chats.update((state) => ({ ...state, ...chatData, loading: false }))
 
-		const subscribeChats = await subscribe(this.waku, 'private-message', address , (msg: DecodedMessage) => {
-			const decodedPayload = decodeMessagePayload(msg)
-			const chatMessage = JSON.parse(decodedPayload) as Message
-			addMessageToChat(chatMessage)
-		})
+		const subscribeChats = await subscribe(
+			this.waku,
+			'private-message',
+			address,
+			(msg: DecodedMessage) => {
+				const decodedPayload = decodeMessagePayload(msg)
+				const chatMessage = JSON.parse(decodedPayload) as Message
+				addMessageToChat(chatMessage)
+			},
+		)
 		this.subscriptions.push(subscribeChats)
 	}
 
@@ -70,12 +86,11 @@ export default class WakuAdapter implements Adapter {
 	}
 
 	async saveUserProfile(wallet: HDNodeWallet, name?: string, avatar?: string): Promise<void> {
-		
 		const address = wallet.address
 		if (!this.waku) {
 			return
 		}
-		const data = await readLatestDocument(this.waku, 'profile', address) as Profile
+		const data = (await readLatestDocument(this.waku, 'profile', address)) as Profile
 
 		if (avatar) data.avatar = avatar
 		if (name) data.name = name
@@ -114,17 +129,17 @@ export default class WakuAdapter implements Adapter {
 			const chat = {
 				chatId: chatId,
 				messages: [],
-				users: [user, {address}]
+				users: [user, { address }],
 			}
 			newChats.set(chatId, chat)
-	
+
 			return {
 				...state,
 				chats: newChats,
 				loading: false,
 			}
 		})
-	
+
 		return chatId
 	}
 
@@ -156,5 +171,4 @@ export default class WakuAdapter implements Adapter {
 	getPicture(cid: string): string {
 		return `${IPFS_GATEWAY}/${cid}`
 	}
-
 }
