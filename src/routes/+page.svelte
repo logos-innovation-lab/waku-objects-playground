@@ -21,9 +21,6 @@
 
 	import ROUTES from '$lib/routes'
 	import { walletStore } from '$lib/stores/wallet'
-
-	let myAddress: string | undefined = undefined
-	$: $walletStore.wallet?.getAddress().then((a) => (myAddress = a))
 </script>
 
 {#if $profile.loading || $walletStore.loading}
@@ -110,7 +107,7 @@
 	<ul class="chats">
 		{#each [...$chats.chats] as [id, chat]}
 			{@const lastMessage = chat.messages[chat.messages.length - 1]}
-			{@const myMessage = lastMessage.fromAddress === myAddress}
+			{@const myMessage = lastMessage.fromAddress === $walletStore.wallet.address}
 			{#if lastMessage}
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<li on:click={() => goto(ROUTES.CHAT(id))}>
