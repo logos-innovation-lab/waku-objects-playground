@@ -29,7 +29,7 @@ export default class FirebaseAdapter implements Adapter {
 	protected userSubscriptions: Array<() => unknown> = []
 
 	async onLogIn(wallet: HDNodeWallet) {
-		const address = await wallet.getAddress()
+		const { address } = wallet
 		const userDoc = doc(db, `users/${address}`)
 
 		await setDoc(userDoc, { address, lastSignIn: Date.now() }, { merge: true })
@@ -132,7 +132,7 @@ export default class FirebaseAdapter implements Adapter {
 	}
 
 	async saveUserProfile(wallet: HDNodeWallet, name?: string, avatar?: string): Promise<void> {
-		const address = await wallet.getAddress()
+		const { address } = wallet
 
 		const userDoc = doc(db, `users/${address}`)
 
@@ -152,7 +152,7 @@ export default class FirebaseAdapter implements Adapter {
 	}
 
 	async sendChatMessage(wallet: HDNodeWallet, chatId: string, text: string): Promise<void> {
-		const fromAddress = await wallet.getAddress()
+		const fromAddress = wallet.address
 
 		if (!fromAddress) throw new Error('ChatId or address is missing')
 

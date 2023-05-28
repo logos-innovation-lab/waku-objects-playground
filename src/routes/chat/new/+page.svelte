@@ -34,8 +34,6 @@
 	let chatName = ''
 	let loading = false
 	let state: 'edit-participants' | 'edit-name' | 'send-message' = 'edit-participants'
-	let myAddress: string | undefined = undefined
-	$: $walletStore.wallet?.getAddress().then((a) => (myAddress = a))
 
 	const startChat = async () => {
 		const wallet = $walletStore.wallet
@@ -43,7 +41,7 @@
 		loading = true
 		const chat: DraftChat = {
 			name: chatName,
-			users: [...participants, await wallet.getAddress()],
+			users: [...participants, wallet.address],
 			messages: [],
 		}
 		const chatId = await adapters.startChat(wallet, chat)
@@ -100,7 +98,7 @@
 		<p class="text-lg text-bold">Contact list</p>
 		<span>(for now this is all registered users)</span>
 		<ul>
-			{#each [...$contacts.contacts].filter(async ([address]) => !participants.includes(address) && address !== myAddress) as [address, contact]}
+			{#each [...$contacts.contacts].filter(async ([address]) => !participants.includes(address) && address !== $walletStore.wallet?.address) as [address, contact]}
 				<li>
 					<div>
 						<Button on:click={() => (participants = [...participants, address])}>

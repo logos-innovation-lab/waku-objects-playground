@@ -19,9 +19,8 @@
 	import { walletStore } from '$lib/stores/wallet'
 
 	let copied = false
-	let address: string | undefined = undefined
-	$: $walletStore.wallet?.getAddress().then((a) => (address = a))
 	function copyAddressToClipboard() {
+		const address = $walletStore.wallet?.address
 		if (address === undefined) return
 
 		copy(address)
@@ -48,7 +47,7 @@
 		<p class="text-lg">This address is used to send and receive tokens with Waku objects</p>
 	</Container>
 	<Container gap={6}>
-		<Textarea bind:value={address} nonEditable label="Account address" rows={2} />
+		<Textarea value={$walletStore.wallet?.address} nonEditable label="Account address" rows={2} />
 		<Button on:click={copyAddressToClipboard}>
 			{#if copied}
 				<Checkmark />

@@ -24,9 +24,6 @@
 	import ROUTES from '$lib/routes'
 	import { walletStore } from '$lib/stores/wallet'
 
-	let myAddress: string | undefined = undefined
-	$: $walletStore.wallet?.getAddress().then((a) => (myAddress = a))
-
 	let div: HTMLElement
 	let autoscroll = true
 
@@ -98,7 +95,9 @@
 							{#if message.text.length > 0}
 								<div
 									class={`message ${
-										message.fromAddress !== myAddress ? 'their-message' : 'my-message'
+										message.fromAddress !== $walletStore.wallet?.address
+											? 'their-message'
+											: 'my-message'
 									}`}
 								>
 									<div class="message-content">
