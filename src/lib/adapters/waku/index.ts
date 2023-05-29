@@ -45,7 +45,6 @@ function createChat(chatId: string, user: User, address: string): string {
 }
 
 function addMessageToChat(chatId: string, message: Message) {
-	console.debug({ chatId, message })
 	chats.update((state) => {
 		if (!state.chats.has(chatId)) {
 			return state
@@ -66,10 +65,10 @@ function addMessageToChat(chatId: string, message: Message) {
 }
 
 async function readChats(waku: LightNode, address: string): Promise<ChatData> {
-	const chatDataChats = await readLatestDocument(waku, 'chats', address) as [string, Chat][]
+	const chatDataChats = (await readLatestDocument(waku, 'chats', address)) as [string, Chat][]
 	return {
 		loading: false,
-		chats: new Map(chatDataChats)
+		chats: new Map(chatDataChats),
 	}
 }
 
@@ -124,15 +123,14 @@ export default class WakuAdapter implements Adapter {
 		}))
 
 		const chatData = await readChats(this.waku, address)
-		console.debug({ chatData })
 		chats.update((state) => ({ ...state, ...chatData, loading: false }))
-		
+
 		// the adapter is stored to maintain a copy of the chats so that we don't have to lookup the users
 		// from the waku store each time a message arrives
 
 		// eslint-disable-next-line @typescript-eslint/no-this-alias
 		const adapter = this
-		const subscribeChatStore = chats.subscribe(async chats => {
+		const subscribeChatStore = chats.subscribe(async (chats) => {
 			if (!adapter.waku) {
 				return
 			}
@@ -196,20 +194,17 @@ export default class WakuAdapter implements Adapter {
 		if (!this.waku) {
 			throw 'no waku'
 		}
-
-		const address = wallet.address
-		console.debug({ address, chat })
-
 		if (chat.users.length !== 2) {
 			throw 'invalid chat'
 		}
+
 		const chatId = chat.users[0]
 		const user = await lookupUserFromContacts(this.waku, chatId)
 		if (!user) {
 			throw 'invalid user'
 		}
 
-		console.debug({ chatId, chat })
+		const address = wallet.address
 		createChat(chatId, user, address)
 
 		return chatId

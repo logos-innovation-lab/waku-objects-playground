@@ -31,10 +31,6 @@ export function getTopic(contentTopic: ContentTopic, id: string | '' = '') {
 	return `/${topicApp}/${topicVersion}/${contentTopic}/${id}`
 }
 
-export function privateMessageTopic(id: string) {
-	return getTopic('private-message', id)
-}
-
 export async function connectWaku() {
 	const waku = await createLightNode()
 	await waku.start()
