@@ -6,8 +6,10 @@ import type { LightNode } from '@waku/interfaces'
 import {
 	connectWaku,
 	decodeMessagePayload,
+	parseQueryResults,
 	privateMessageTopic,
 	readLatestDocument,
+	readStore,
 	sendMessage,
 	storeDocument,
 	subscribe,
@@ -16,16 +18,17 @@ import type { DecodedMessage } from '@waku/core'
 import type { HDNodeWallet } from 'ethers'
 import { ipfs, IPFS_GATEWAY } from '../firebase/connections'
 
-function addMessageToChat(message: Message) {
+function addMessageToChat(chatId: string, message: Message) {
+	console.debug({ chatId, message })
 	chats.update((state) => {
-		if (!state.chats.has(message.fromAddress)) {
+		if (!state.chats.has(chatId)) {
 			return state
 		}
 
 		const newChats = new Map<string, Chat>(state.chats)
-		const chat = newChats.get(message.fromAddress)
+		const chat = newChats.get(chatId)
 		if (chat) {
-			chat.messages = [...chat.messages]
+			chat.messages = [...chat.messages, message]
 		}
 
 		return {
@@ -36,9 +39,19 @@ function addMessageToChat(message: Message) {
 	})
 }
 
+/*
+ * Temporary helper function to read all users from the waku store, so that contacts are discoverable.
+ * This functionality can be removed once the invite system is working.
+ */
+async function readAllUsers(waku: LightNode): Promise<User[]> {
+	const results = await readStore(waku, 'all-users')
+	const users = (await parseQueryResults(results)) as User[]
+	return users
+}
+
 async function lookupUserFromContacts(waku: LightNode, address: string): Promise<User | undefined> {
-	const contactsData = (await readLatestDocument(waku, 'contact', address)) as ContactData
-	return contactsData.contacts.get(address)
+	const users = await readAllUsers(waku)
+	return users.find((user) => user.address === address)
 }
 
 export default class WakuAdapter implements Adapter {
@@ -50,15 +63,24 @@ export default class WakuAdapter implements Adapter {
 		this.waku = await connectWaku()
 
 		const profileData = (await readLatestDocument(this.waku, 'profile', address)) as Profile
-		const name = profileData?.name
-		console.debug({ profileData })
-		profile.update((state) => ({ ...state, address, name, loading: false }))
+		profile.update((state) => ({ ...state, ...profileData, address, loading: false }))
 
-		const contactsData = (await readLatestDocument(this.waku, 'contact', address)) as ContactData
-		console.debug({ contactsData })
+		const allUsers = await readAllUsers(this.waku)
+		if (!allUsers.find((user) => user.address === address)) {
+			// save it in the waku store so that other users can find
+			// this can be removed once the invite system is in place
+			const selfUser: User = {
+				...profileData,
+				address,
+			}
+			await storeDocument(this.waku, 'all-users', '', selfUser)
+		}
+		const globalContacts = new Map<string, User>(
+			allUsers.filter((user) => user.address !== address).map((user) => [user.address, user]),
+		)
 
 		contacts.update(() => ({
-			contacts: contactsData?.contacts ?? new Map<string, User>(),
+			contacts: new Map<string, User>(globalContacts),
 			loading: false,
 		}))
 
@@ -72,7 +94,7 @@ export default class WakuAdapter implements Adapter {
 			(msg: DecodedMessage) => {
 				const decodedPayload = decodeMessagePayload(msg)
 				const chatMessage = JSON.parse(decodedPayload) as Message
-				addMessageToChat(chatMessage)
+				addMessageToChat(chatMessage.fromAddress, chatMessage)
 			},
 		)
 		this.subscriptions.push(subscribeChats)
@@ -88,15 +110,21 @@ export default class WakuAdapter implements Adapter {
 	async saveUserProfile(wallet: HDNodeWallet, name?: string, avatar?: string): Promise<void> {
 		const address = wallet.address
 		if (!this.waku) {
-			return
+			this.waku = await connectWaku()
 		}
-		const data = (await readLatestDocument(this.waku, 'profile', address)) as Profile
+		let updatedProfile: Profile = {
+			loading: false,
+		}
+		const storedProfile = (await readLatestDocument(this.waku, 'profile', address)) as Profile
+		updatedProfile = {
+			...storedProfile,
+		}
 
-		if (avatar) data.avatar = avatar
-		if (name) data.name = name
+		if (avatar) updatedProfile.avatar = avatar
+		if (name) updatedProfile.name = name
 
 		if (avatar || name) {
-			await storeDocument(this.waku, 'profile', address, data)
+			await storeDocument(this.waku, 'profile', address, updatedProfile)
 			profile.update((state) => ({ ...state, address, name, avatar }))
 		}
 	}
@@ -107,6 +135,7 @@ export default class WakuAdapter implements Adapter {
 		}
 
 		const address = wallet.address
+		console.debug({ address, chat })
 
 		if (chat.users.length !== 2) {
 			throw 'invalid chat'
@@ -117,15 +146,17 @@ export default class WakuAdapter implements Adapter {
 			throw 'invalid user'
 		}
 
+		console.debug({ chatId, chat })
+
 		chats.update((state) => {
 			if (state.chats.has(chatId)) {
 				return state
 			}
-
-			const newChats = new Map<string, Chat>(state.chats)
 			if (!user) {
 				return state
 			}
+
+			const newChats = new Map<string, Chat>(state.chats)
 			const chat = {
 				chatId: chatId,
 				messages: [],
@@ -144,21 +175,19 @@ export default class WakuAdapter implements Adapter {
 	}
 
 	async sendChatMessage(wallet: HDNodeWallet, chatId: string, text: string): Promise<void> {
+		if (!this.waku) {
+			throw 'no waku'
+		}
+
 		const fromAddress = wallet.address
-
-		if (!fromAddress) throw new Error('ChatId or address is missing')
-
 		const message: Message = {
 			timestamp: Date.now(),
 			text,
 			fromAddress,
 		}
 
-		if (!this.waku) {
-			throw 'no waku'
-		}
-		addMessageToChat(message)
-		await sendMessage(this.waku, privateMessageTopic(chatId), message)
+		addMessageToChat(chatId, message)
+		await sendMessage(this.waku, chatId, message)
 	}
 
 	async uploadPicture(picture: string): Promise<string> {

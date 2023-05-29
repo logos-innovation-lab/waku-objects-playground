@@ -21,13 +21,13 @@ const peerMultiaddr = multiaddr(
 	// '/ip4/127.0.0.1/tcp/8000/wss/p2p/16Uiu2HAkvxqFicgLvsTUqKiX5ZUozN9c7aA82msxXo9qftZsMdGB'
 )
 
-type ContentTopic = 'private-message' | 'profile' | 'contact' | 'chats'
+type ContentTopic = 'private-message' | 'profile' | 'contact' | 'chats' | 'all-users'
 type QueryResult = AsyncGenerator<Promise<DecodedMessage | undefined>[]>
 
 const topicApp = 'wakuobjects-playground'
 const topicVersion = '1'
 
-export function getTopic(contentTopic: ContentTopic, id: string) {
+export function getTopic(contentTopic: ContentTopic, id: string | '' = '') {
 	return `/${topicApp}/${topicVersion}/${contentTopic}/${id}`
 }
 
@@ -56,14 +56,10 @@ export async function subscribe(
 	return unsubscribe
 }
 
-export async function readProfile(waku: LightNode, id: string) {
-	return await readStore(waku, getTopic('profile', id))
-}
-
 export async function storeDocument(
 	waku: LightNode,
 	contentTopicName: ContentTopic,
-	id: string,
+	id: string | '',
 	document: unknown,
 ) {
 	const contentTopic = getTopic(contentTopicName, id)
@@ -83,9 +79,7 @@ export async function readLatestDocument(
 		pageDirection: PageDirection.BACKWARD,
 		pageSize: 1,
 	}
-	const topic = getTopic(contentTopic, id)
-
-	const decodedMessages = await readStore(waku, topic, storeQueryOptions)
+	const decodedMessages = await readStore(waku, contentTopic, id, storeQueryOptions)
 	for await (const messagePromises of decodedMessages) {
 		for (const messagePromise of messagePromises) {
 			const message = await messagePromise
@@ -118,10 +112,12 @@ export async function parseQueryResults<T>(results: QueryResult): Promise<T[]> {
 
 export async function readStore(
 	waku: LightNode,
-	contentTopic: string,
+	contentTopic: ContentTopic,
+	id: string | '' = '',
 	storeQueryOptions?: StoreQueryOptions,
 ): Promise<QueryResult> {
-	const decoder = createDecoder(contentTopic)
+	const topic = getTopic(contentTopic, id)
+	const decoder = createDecoder(topic)
 	return waku.store.queryGenerator([decoder], storeQueryOptions)
 }
 

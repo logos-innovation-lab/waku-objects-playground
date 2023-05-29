@@ -21,4 +21,4 @@ export interface Adapter {
 	getPicture(cid: string): string
 }
 
-export default new FirebaseAdapter() as Adapter
+export default new WakuAdapter() as Adapter
