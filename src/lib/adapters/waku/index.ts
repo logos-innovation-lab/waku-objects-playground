@@ -1,13 +1,12 @@
 import { profile, type Profile } from '$lib/stores/profile'
 import type { Adapter } from '..'
 import { chats, type DraftChat, type Chat, type Message, type ChatData } from '$lib/stores/chat'
-import { contacts, type ContactData, type User } from '$lib/stores/users'
+import { contacts, type User } from '$lib/stores/users'
 import type { LightNode } from '@waku/interfaces'
 import {
 	connectWaku,
 	decodeMessagePayload,
 	parseQueryResults,
-	privateMessageTopic,
 	readLatestDocument,
 	readStore,
 	sendMessage,
@@ -17,6 +16,33 @@ import {
 import type { DecodedMessage } from '@waku/core'
 import type { HDNodeWallet } from 'ethers'
 import { ipfs, IPFS_GATEWAY } from '../firebase/connections'
+
+function createChat(chatId: string, user: User, address: string): string {
+	chats.update((state) => {
+		if (state.chats.has(chatId)) {
+			return state
+		}
+		if (!user) {
+			return state
+		}
+
+		const newChats = new Map<string, Chat>(state.chats)
+		const chat = {
+			chatId: chatId,
+			messages: [],
+			users: [user, { address }],
+			name: user.name ?? user.address,
+		}
+		newChats.set(chatId, chat)
+
+		return {
+			...state,
+			chats: newChats,
+			loading: false,
+		}
+	})
+	return chatId
+}
 
 function addMessageToChat(chatId: string, message: Message) {
 	console.debug({ chatId, message })
@@ -39,6 +65,18 @@ function addMessageToChat(chatId: string, message: Message) {
 	})
 }
 
+async function readChats(waku: LightNode, address: string): Promise<ChatData> {
+	const chatDataChats = await readLatestDocument(waku, 'chats', address) as [string, Chat][]
+	return {
+		loading: false,
+		chats: new Map(chatDataChats)
+	}
+}
+
+async function storeChats(waku: LightNode, address: string, chatData: ChatData) {
+	await storeDocument(waku, 'chats', address, Array.from(chatData.chats.entries()))
+}
+
 /*
  * Temporary helper function to read all users from the waku store, so that contacts are discoverable.
  * This functionality can be removed once the invite system is working.
@@ -57,6 +95,7 @@ async function lookupUserFromContacts(waku: LightNode, address: string): Promise
 export default class WakuAdapter implements Adapter {
 	private waku: LightNode | undefined
 	private subscriptions: Array<() => void> = []
+	private chats = new Map<string, Chat>()
 
 	async onLogIn(wallet: HDNodeWallet): Promise<void> {
 		const address = wallet.address
@@ -84,16 +123,40 @@ export default class WakuAdapter implements Adapter {
 			loading: false,
 		}))
 
-		const chatData = (await readLatestDocument(this.waku, 'chats', address)) as ChatData
+		const chatData = await readChats(this.waku, address)
+		console.debug({ chatData })
 		chats.update((state) => ({ ...state, ...chatData, loading: false }))
+		
+		// the adapter is stored to maintain a copy of the chats so that we don't have to lookup the users
+		// from the waku store each time a message arrives
+
+		// eslint-disable-next-line @typescript-eslint/no-this-alias
+		const adapter = this
+		const subscribeChatStore = chats.subscribe(async chats => {
+			if (!adapter.waku) {
+				return
+			}
+			adapter.chats = chats.chats
+			await storeChats(adapter.waku, address, chats)
+		})
+		this.subscriptions.push(subscribeChatStore)
 
 		const subscribeChats = await subscribe(
 			this.waku,
 			'private-message',
 			address,
-			(msg: DecodedMessage) => {
+			async (msg: DecodedMessage) => {
 				const decodedPayload = decodeMessagePayload(msg)
 				const chatMessage = JSON.parse(decodedPayload) as Message
+				if (!adapter.chats.has(chatMessage.fromAddress)) {
+					if (!adapter.waku) {
+						return
+					}
+					const user = await lookupUserFromContacts(adapter.waku, chatMessage.fromAddress)
+					if (user) {
+						createChat(chatMessage.fromAddress, user, address)
+					}
+				}
 				addMessageToChat(chatMessage.fromAddress, chatMessage)
 			},
 		)
@@ -147,29 +210,7 @@ export default class WakuAdapter implements Adapter {
 		}
 
 		console.debug({ chatId, chat })
-
-		chats.update((state) => {
-			if (state.chats.has(chatId)) {
-				return state
-			}
-			if (!user) {
-				return state
-			}
-
-			const newChats = new Map<string, Chat>(state.chats)
-			const chat = {
-				chatId: chatId,
-				messages: [],
-				users: [user, { address }],
-			}
-			newChats.set(chatId, chat)
-
-			return {
-				...state,
-				chats: newChats,
-				loading: false,
-			}
-		})
+		createChat(chatId, user, address)
 
 		return chatId
 	}
