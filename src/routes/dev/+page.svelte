@@ -6,19 +6,19 @@
 	import Dropdown from '$lib/components/dropdown.svelte'
 	import DropdownItem from '$lib/components/dropdown-item.svelte'
 	import Select from '$lib/components/select.svelte'
-    import { saveToLocalStorage } from '$lib/utils/localstorage'
-	
+	import { saveToLocalStorage } from '$lib/utils/localstorage'
+
 	function changeAdapter(adapterName: AdapterName) {
 		saveToLocalStorage('adapter', adapterName)
 		location.reload()
 	}
 </script>
 
-<Header title="DEV DASHBOARD"/>
+<Header title="DEV DASHBOARD" />
 <Container>
 	<section>
 		<Dropdown>
-            <Select slot="button" label="Adapter" value={adapterName} />
+			<Select slot="button" label="Adapter" value={adapterName} />
 
 			{#each adapters as adapter}
 				<DropdownItem active={adapterName === adapter} onClick={() => changeAdapter(adapter)}

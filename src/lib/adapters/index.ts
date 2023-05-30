@@ -22,7 +22,6 @@ export interface Adapter {
 	getPicture(cid: string): string
 }
 
-
 const DEFAULT_ADAPTER = 'firebase'
 
 export const adapters = ['firebase', 'waku'] as const

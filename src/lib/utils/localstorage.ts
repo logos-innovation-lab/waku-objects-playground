@@ -11,7 +11,7 @@ export async function saveToLocalStorage<T extends JSONdecoded>(key: string, dat
 export function getFromLocalStorage<T extends JSONdecoded>(key: string, defaultValue: T): T {
 	if (browser && localStorage) {
 		const data = localStorage.getItem(key)
-		return data ? JSON.parse(data) as T : defaultValue
+		return data ? (JSON.parse(data) as T) : defaultValue
 	}
 
 	return defaultValue
