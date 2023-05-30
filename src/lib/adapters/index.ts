@@ -1,6 +1,8 @@
 import type { DraftChat } from '$lib/stores/chat'
 import type { HDNodeWallet } from 'ethers'
+import { getFromLocalStorage } from '$lib/utils/localstorage'
 import FirebaseAdapter from './firebase'
+import WakuAdapter from './waku'
 
 export interface Contact {
 	address: string
@@ -20,4 +22,25 @@ export interface Adapter {
 	getPicture(cid: string): string
 }
 
-export default new FirebaseAdapter() as Adapter
+const DEFAULT_ADAPTER = 'firebase'
+
+export const adapters = ['firebase', 'waku'] as const
+export type AdapterName = (typeof adapters)[number]
+export const adapterName: AdapterName = getFromLocalStorage<AdapterName>(
+	'adapter',
+	DEFAULT_ADAPTER as AdapterName,
+)
+
+let adapter: Adapter
+switch (adapterName) {
+	case 'firebase':
+		adapter = new FirebaseAdapter()
+		break
+	case 'waku':
+		adapter = new WakuAdapter()
+		break
+	default:
+		throw new Error(`Invalid adapter ${adapterName}`)
+}
+
+export default adapter

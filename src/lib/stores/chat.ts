@@ -4,7 +4,7 @@ import type { User } from './users'
 export interface Message {
 	timestamp: number
 	text: string
-	fromAddress?: string
+	fromAddress: string
 }
 
 export interface DraftChat {
@@ -20,7 +20,7 @@ export interface Chat {
 	name?: string
 }
 
-interface ChatData {
+export interface ChatData {
 	loading: boolean
 	chats: Map<string, Chat>
 	error?: Error
