@@ -41,7 +41,7 @@
 </script>
 
 <Header title="Invite to chat">
-	<Button slot="left" variant="icon" on:click={() => goto(routes.HOME)}>
+	<Button slot="left" variant="icon" on:click={() => history.back()}>
 		<ChevronLeft />
 	</Button>
 </Header>
