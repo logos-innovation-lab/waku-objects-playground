@@ -4,6 +4,9 @@
 	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
 	import Checkmark from '$lib/components/icons/checkmark.svelte'
 	import CopyLink from '$lib/components/icons/copy-link.svelte'
+	import ChatBot from '$lib/components/icons/chat-bot.svelte'
+	import UserFollow from '$lib/components/icons/user-follow.svelte'
+	import Login from '$lib/components/icons/login.svelte'
 
 	import Button from '$lib/components/button.svelte'
 	import Container from '$lib/components/container.svelte'
@@ -13,9 +16,10 @@
 	import { goto } from '$app/navigation'
 	import routes from '$lib/routes'
 	import { page } from '$app/stores'
-	import { walletStore } from '$lib/stores/wallet'
-	import adapters from '$lib/adapters'
 	import type { DraftChat } from '$lib/stores/chat'
+	import { walletStore } from '$lib/stores/wallet'
+	import { profile } from '$lib/stores/profile'
+	import adapters from '$lib/adapters'
 
 	let copied = false
 	let loading = false
@@ -46,17 +50,10 @@
 	</Button>
 </Header>
 
-{#if $walletStore.loading}
+{#if $walletStore.loading || $profile.loading}
 	<Container align="center" grow gap={6} justify="center">
 		<div class="center">
 			<h2>Loading...</h2>
-		</div>
-	</Container>
-{:else if !$walletStore.wallet}
-	<Container align="center" grow gap={6} justify="center">
-		<div class="center">
-			<h2>Connect your wallet to start chatting</h2>
-			<p>TODO: there should be some create identity flow</p>
 		</div>
 	</Container>
 {:else if $walletStore.wallet?.address === $page.params.address}
@@ -83,6 +80,23 @@
 		<Button on:click={startChat}>
 			<CopyLink />
 			Start new chat
+		</Button>
+	</Container>
+{:else}
+	<Container align="center" alignItems="center" gap={12} justify="center" grow pad={24}>
+		<div class="chatbot">
+			<div>
+				<ChatBot size={32} />
+			</div>
+			<p class="text-lg text-bold">Waku chats</p>
+		</div>
+		<Button on:click={() => goto(routes.IDENTITY_NEW)}>
+			<UserFollow />
+			Create new identity
+		</Button>
+		<Button on:click={() => goto(routes.IDENTITY_CONNECT)}>
+			<Login />
+			Connect existing identity
 		</Button>
 	</Container>
 {/if}
