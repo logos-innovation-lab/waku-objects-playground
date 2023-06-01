@@ -59,10 +59,11 @@
 		</div>
 	</Container>
 {:else if $chats.chats.size === 0}
+	{@const address = $walletStore.wallet.address}
 	<Header>
 		<svelte:fragment slot="left">
 			<div class="header-btns">
-				<Button variant="icon" on:click={() => goto(ROUTES.CHAT_NEW)}>
+				<Button variant="icon" on:click={() => goto(ROUTES.INVITE(address))}>
 					<NewChat size={24} />
 				</Button>
 			</div>
@@ -80,17 +81,18 @@
 		<p class="text-lg text-bold">No active chats</p>
 		<p class="text-lg">Invite someone to chat</p>
 		<div class="btn-spacing">
-			<Button on:click={() => goto(ROUTES.CHAT_NEW)}>
+			<Button on:click={() => goto(ROUTES.INVITE(address))}>
 				<AddComment />
 				Invite to chat
 			</Button>
 		</div>
 	</Container>
 {:else}
+	{@const address = $walletStore.wallet.address}
 	<Header>
 		<svelte:fragment slot="left">
 			<div class="header-btns">
-				<Button variant="icon" on:click={() => goto(ROUTES.CHAT_NEW)}>
+				<Button variant="icon" on:click={() => goto(ROUTES.INVITE(address))}>
 					<NewChat size={24} />
 				</Button>
 			</div>

@@ -61,7 +61,7 @@
 </script>
 
 <Header title="Create new identity">
-	<Button slot="left" variant="icon" on:click={() => goto(routes.HOME)}>
+	<Button slot="left" variant="icon" on:click={() => history.back()}>
 		<ChevronLeft />
 	</Button>
 </Header>

@@ -6,8 +6,6 @@
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'
 
-	import { goto } from '$app/navigation'
-	import routes from '$lib/routes'
 	import Textarea from '$lib/components/textarea.svelte'
 	import { walletStore } from '$lib/stores/wallet'
 
@@ -21,7 +19,7 @@
 		try {
 			walletStore.restoreWallet(phrase)
 
-			goto(routes.HOME)
+			history.back()
 		} catch (error) {
 			console.error(error)
 		}

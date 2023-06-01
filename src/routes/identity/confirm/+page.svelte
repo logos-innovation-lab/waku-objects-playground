@@ -28,7 +28,8 @@
 	</Button>
 </Container>
 <Container pad={24}>
-	<Button variant="strong" on:click={() => goto(routes.HOME)}>
+	<!-- This goes back 2 pages so that user gets to the page where he started the create wallet flow -->
+	<Button variant="strong" on:click={() => history.go(-2)}>
 		<Checkmark />
 		I understand
 	</Button>
