@@ -1,8 +1,9 @@
 <script lang="ts">
 	import Container from '$lib/components/container.svelte'
-	export let name = ''
-	export let token = ''
-	export let amount = 0
+	export let name: string
+	export let token: string
+	export let amount: bigint
+	export let decimals: number
 </script>
 
 <div class="asset root">
@@ -14,7 +15,7 @@
 			</span>
 		</div>
 		<div class="text-lg">
-			{amount}
+			{(Number(amount)/10**decimals).toFixed(2)}
 			{token}
 		</div>
 	</Container>

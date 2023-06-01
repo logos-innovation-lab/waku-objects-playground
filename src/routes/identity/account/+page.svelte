@@ -17,6 +17,7 @@
 	import { goto } from '$app/navigation'
 	import routes from '$lib/routes'
 	import { walletStore } from '$lib/stores/wallet'
+	import { balanceStore } from '$lib/stores/balances'
 
 	let copied = false
 	function copyAddressToClipboard() {
@@ -64,10 +65,9 @@
 	</Container>
 	<Divider pad={12} padBottom={0} />
 	<div class="assets">
-		<Asset name="Ethereum" token="ETH" amount={0.011741} />
-		<Asset name="Dai Stablecoin" token="DAI" amount={50} />
-		<Asset name="Tether" token="USDT" amount={17} />
-		<Asset name="USD Coin" token="USDC" amount={45} />
+		{#each $balanceStore.balances as balance }
+		<Asset name={balance.name} token={balance.symbol} amount={balance.amount} decimals={balance.decimals} />
+		{/each}
 	</div>
 {/if}
 
