@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { onDestroy, onMount } from 'svelte'
+
 	export let value = ''
 	export let placeholder = ''
 	export let label = ''
@@ -6,25 +8,65 @@
 	export let pad = 0
 	export let nonEditable = false
 	export let rows = 1
+
+	let placeholderHeight: number
+	let textarea: HTMLTextAreaElement
+
+	const resizeEvents = ['change']
+	const delayedResizeEvents = ['cut', 'paste', 'drop', 'keydown']
+
+	function resize() {
+		textarea.style.height = 'auto'
+		textarea.style.height = `${Math.max(placeholderHeight, textarea.scrollHeight)}px`
+	}
+
+	function delayedResize() {
+		setTimeout(resize, 0)
+	}
+
+	// The resize mechanism is heavily inspired by https://stackoverflow.com/a/5346855
+	onMount(() => {
+		resizeEvents.forEach((eventName) => textarea.addEventListener(eventName, resize))
+		delayedResizeEvents.forEach((eventName) => textarea.addEventListener(eventName, delayedResize))
+		resize()
+	})
+
+	// This cleans up all the listeners from the textarea element when the component is about to be destroyed
+	onDestroy(() => {
+		if (!textarea) return
+
+		resizeEvents.forEach((eventName) => textarea.removeEventListener(eventName, resize))
+		delayedResizeEvents.forEach((eventName) =>
+			textarea.removeEventListener(eventName, delayedResize),
+		)
+	})
 </script>
 
-<label class="textarea text-sm" style={`padding-block: ${pad}px`}>
+<label class="textarea" style={`padding-block: ${pad}px`}>
 	{#if label !== ''}
-		<span>{label}</span>
+		<span class="text-sm">{label}</span>
 	{/if}
-	<!-- TODO: allow textarea height to increase according to entered text -->
-	<!-- svelte-ignore a11y-autofocus -->
-	<textarea
-		class="text-lg"
-		bind:value
-		on:keydown
-		on:keypress
-		on:keyup
-		{autofocus}
-		{placeholder}
-		disabled={nonEditable}
-		{rows}
-	/>
+	<div class="area-placeholder">
+		<div
+			bind:clientHeight={placeholderHeight}
+			class={`placeholder-text ${value != '' ? 'hide' : ''} `}
+		>
+			{placeholder}
+		</div>
+		<!-- svelte-ignore a11y-autofocus -->
+		<textarea
+			bind:value
+			bind:this={textarea}
+			on:keydown
+			on:keypress
+			on:keyup
+			class={`text-lg ${value != '' ? 'content' : ''}`}
+			disabled={nonEditable}
+			{autofocus}
+			{placeholder}
+			{rows}
+		/>
+	</div>
 </label>
 
 <style lang="scss">
@@ -35,34 +77,62 @@
 		gap: var(--spacing-6);
 		width: 100%;
 		color: var(--gray40);
+		background-color: transparent;
 
 		span {
 			margin-left: var(--spacing-12);
 			text-align: left;
 		}
 
-		textarea {
-			color: var(--gray50);
-			width: 100%;
-			border: 1px solid var(--gray20);
-			border-radius: var(--border-radius);
-			padding: 11px var(--spacing-12);
-			margin: 0;
-			min-height: 1px;
-			resize: none;
-
-			&:disabled {
-				background-color: var(--gray10);
-				border-color: transparent;
-			}
-
-			&:focus {
-				color: var(--black);
-			}
-		}
-
 		::placeholder {
 			color: var(--gray40);
+		}
+	}
+
+	.area-placeholder {
+		position: relative;
+		width: 100%;
+		height: fit-content;
+		border-radius: var(--border-radius);
+
+		.placeholder-text {
+			font-size: var(--font-size-lg);
+			color: var(--grey-300);
+			width: 100%;
+			height: fit-content;
+			min-height: 48px;
+			padding: 11px var(--spacing-12);
+
+			&.hide {
+				display: none;
+			}
+		}
+	}
+	textarea {
+		position: absolute;
+		inset: 0;
+		border: none;
+		resize: none;
+		border: 1px solid var(--gray20);
+		border-radius: var(--border-radius);
+		padding: 11px var(--spacing-12);
+		max-height: 120px;
+		min-height: 48px;
+
+		&:focus,
+		&.content {
+			outline: none;
+			color: var(--black);
+		}
+
+		&:disabled {
+			background-color: var(--gray10);
+			border-color: transparent;
+		}
+
+		&.content {
+			position: static;
+			width: 100%;
 		}
 	}
 </style>
