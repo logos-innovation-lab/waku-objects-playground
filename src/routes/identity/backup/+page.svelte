@@ -32,7 +32,7 @@
 	<p class="text-lg description">
 		Anyone with your recovery phrase will be able to access your identity and account
 	</p>
-	<Textarea label="Recovery phrase" rows={4} nonEditable placeholder={data.mnemonics} />
+	<Textarea label="Recovery phrase" disabled placeholder={data.mnemonics} />
 	<Button on:click={copyToClipboard}>
 		{#if copied}
 			<Checkmark />

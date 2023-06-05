@@ -5,6 +5,7 @@
 	import AddComment from '$lib/components/icons/add-comment.svelte'
 	import ChatBot from '$lib/components/icons/chat-bot.svelte'
 	import Login from '$lib/components/icons/login.svelte'
+	import WakuLogo from '$lib/components/icons/waku-logo.svelte'
 	import NewChat from '$lib/components/icons/add-comment.svelte'
 	import UserFollow from '$lib/components/icons/user-follow.svelte'
 
@@ -33,7 +34,7 @@
 	<Container align="center" alignItems="center" gap={12} justify="center" grow pad={24}>
 		<div class="chatbot">
 			<div>
-				<ChatBot size={32} />
+				<WakuLogo size={48} />
 			</div>
 			<p class="text-lg text-bold">Waku chats</p>
 		</div>
