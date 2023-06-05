@@ -47,7 +47,7 @@
 		<p class="text-lg">This address is used to send and receive tokens with Waku objects</p>
 	</Container>
 	<Container gap={6}>
-		<Textarea value={$walletStore.wallet?.address} nonEditable label="Account address" rows={2} />
+		<Textarea value={$walletStore.wallet?.address} disabled label="Account address" rows={2} />
 		<Button on:click={copyAddressToClipboard}>
 			{#if copied}
 				<Checkmark />

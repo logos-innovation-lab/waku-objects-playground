@@ -1,12 +1,12 @@
 <script lang="ts">
 	import { onDestroy, onMount } from 'svelte'
 
+	export let label = ''
 	export let value = ''
 	export let placeholder = ''
-	export let label = ''
 	export let autofocus = false
+	export let disabled = false
 	export let pad = 0
-	export let nonEditable = false
 	export let rows = 1
 
 	let placeholderHeight: number
@@ -42,7 +42,7 @@
 	})
 </script>
 
-<label class="textarea" style={`padding-block: ${pad}px`}>
+<label class="label" style={`padding-block: ${pad}px`}>
 	{#if label !== ''}
 		<span class="text-sm">{label}</span>
 	{/if}
@@ -61,7 +61,7 @@
 			on:keypress
 			on:keyup
 			class={`text-lg ${value != '' ? 'content' : ''}`}
-			disabled={nonEditable}
+			{disabled}
 			{autofocus}
 			{placeholder}
 			{rows}
@@ -70,7 +70,7 @@
 </label>
 
 <style lang="scss">
-	label.textarea {
+	label.label {
 		display: flex;
 		flex-direction: column;
 		align-items: flex-start;
@@ -101,7 +101,9 @@
 			width: 100%;
 			height: fit-content;
 			min-height: 48px;
-			padding: 11px var(--spacing-12);
+			padding: var(--spacing-12);
+			text-align: left;
+			line-height: 24px;
 
 			&.hide {
 				display: none;
@@ -134,5 +136,8 @@
 			position: static;
 			width: 100%;
 		}
+	}
+	::-webkit-scrollbar {
+		display: none;
 	}
 </style>

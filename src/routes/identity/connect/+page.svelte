@@ -44,7 +44,6 @@
 		bind:value={phrase}
 		label="Recovery phrase"
 		placeholder="Paste or type recovery phrase here..."
-		rows={4}
 	/>
 </Container>
 <Container>
