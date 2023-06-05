@@ -4,8 +4,17 @@ import { getFromLocalStorage, removeFromLocalStorage, saveToLocalStorage } from 
 import { writable, get } from 'svelte/store'
 import type { Writable } from 'svelte/store'
 
+export interface Token {
+	name: string
+	symbol: string
+	amount: bigint
+	decimals: number
+	image: string
+}
+
 export interface WalletState {
 	wallet?: HDNodeWallet
+	balances?: Token[]
 	loading: boolean
 	error?: Error
 }

@@ -53,3 +53,7 @@ export function formatDateAndTime(timestamp: number) {
 	// return `${dateString} • ${dateTime}`
 	return `${dateString} ${dateTime}`
 }
+
+export function formatTokenAmount(amount: bigint, decimals: number, precision = 2): string {
+	return (Number(amount / 10n ** BigInt(decimals - precision)) / 10 ** precision).toFixed(precision)
+}
