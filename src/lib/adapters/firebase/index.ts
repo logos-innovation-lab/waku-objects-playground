@@ -7,7 +7,6 @@ import {
 	query,
 	arrayUnion,
 	where,
-	getDoc,
 } from 'firebase/firestore'
 
 // Stores
@@ -15,31 +14,31 @@ import { chats, type DraftChat, type Chat, type Message } from '$lib/stores/chat
 import { profile } from '$lib/stores/profile'
 import { contacts, type User } from '$lib/stores/users'
 
-import { ChatDbSchema, UserDbSchema } from './schemas'
+import { ChatDbSchema, TokenDbSchema, UserDbSchema, type ProfileDb, type TokenDb } from './schemas'
 
 import { formatAddress } from '$lib/utils/format'
 import { db, ipfs, IPFS_GATEWAY } from './connections'
 
 import type { HDNodeWallet } from 'ethers'
 import type { Unsubscriber } from 'svelte/store'
-import type { Adapter, Contact } from '..'
+import type { Adapter } from '..'
+import { balanceStore, type Token } from '$lib/stores/balances'
 
 export default class FirebaseAdapter implements Adapter {
 	protected subscriptions: Array<() => unknown> = []
 	protected userSubscriptions: Array<() => unknown> = []
 
 	async onLogIn(wallet: HDNodeWallet) {
+		profile.set({ loading: true })
+		contacts.update((state) => ({ ...state, loading: true }))
+		balanceStore.update((state) => ({ ...state, loading: true }))
+
 		const { address } = wallet
-		const userDoc = doc(db, `users/${address}`)
-
-		await setDoc(userDoc, { address, lastSignIn: Date.now() }, { merge: true })
-		const user = await getDoc(userDoc)
-
-		// FIXME: type this properly
-		const { name } = user.data() as { name: string }
-		profile.update((state) => ({ ...state, address, name, loading: false }))
 
 		const profileSnapshot = doc(db, `users/${address}`)
+		const profileData: Partial<ProfileDb> = { address, lastSignIn: Date.now() }
+		await setDoc(profileSnapshot, profileData, { merge: true })
+
 		const subscribeProfile = onSnapshot(profileSnapshot, (res) => {
 			const parseRes = UserDbSchema.safeParse(res.data())
 			if (parseRes.success) {
@@ -122,13 +121,30 @@ export default class FirebaseAdapter implements Adapter {
 			contacts.set({ contacts: cnts, loading: false })
 		})
 		this.userSubscriptions.push(subscribeUsers)
+
+		const balanceCollection = collection(db, `users/${address}/balances`)
+		const subscribeBalances = onSnapshot(balanceCollection, (res) => {
+			const balances: Token[] = []
+			res.docs.forEach((d) => {
+				const parseRes = TokenDbSchema.safeParse(d.data())
+				if (parseRes.success) {
+					const token: Token = parseRes.data
+					balances.push(token)
+				} else {
+					console.error(parseRes.error.issues)
+				}
+			})
+			balanceStore.set({ balances, loading: false })
+		})
+		this.userSubscriptions.push(subscribeBalances)
 	}
 
 	onLogOut() {
 		this.userSubscriptions.forEach((s) => s())
 		this.userSubscriptions = []
 		profile.set({ loading: false })
-		contacts.set({ contacts: new Map<string, User>(), loading: true })
+		contacts.set({ contacts: new Map<string, User>(), loading: false })
+		balanceStore.set({ loading: false, balances: [] })
 	}
 
 	async saveUserProfile(wallet: HDNodeWallet, name?: string, avatar?: string): Promise<void> {
@@ -136,7 +152,7 @@ export default class FirebaseAdapter implements Adapter {
 
 		const userDoc = doc(db, `users/${address}`)
 
-		const data: Partial<Contact> = { address }
+		const data: Partial<ProfileDb> = { address }
 		if (avatar) data.avatar = avatar
 		if (name) data.name = name
 
@@ -175,5 +191,36 @@ export default class FirebaseAdapter implements Adapter {
 
 	getPicture(cid: string): string {
 		return `${IPFS_GATEWAY}/${cid}`
+	}
+
+	/**
+	 * THIS IS JUST FOR DEV PURPOSES
+	 */
+	initializeBalances(wallet: HDNodeWallet): void {
+		const { address } = wallet
+
+		if (!address) throw new Error('Address is missing')
+
+		const ethDoc = doc(db, `users/${address}/balances/eth`)
+		const ethData: Omit<TokenDb, 'amount'> & { amount: string } = {
+			name: 'Ether',
+			symbol: 'ETH',
+			decimals: 18,
+			amount: 50000000000000000000n.toString(),
+			image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+		}
+
+		setDoc(ethDoc, ethData, { merge: true })
+
+		const daiDoc = doc(db, `users/${address}/balances/dai`)
+		const daiData: Omit<TokenDb, 'amount'> & { amount: string } = {
+			name: 'Dai',
+			symbol: 'DAI',
+			decimals: 18,
+			amount: 7843900000000000000000n.toString(),
+			image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png',
+		}
+
+		setDoc(daiDoc, daiData, { merge: true })
 	}
 }

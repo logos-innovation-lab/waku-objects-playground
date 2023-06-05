@@ -4,18 +4,19 @@
 	export let token: string
 	export let amount: bigint
 	export let decimals: number
+	export let image: string
 </script>
 
 <div class="asset root">
 	<Container justify="space-between" align="center" alignItems="center" direction="row">
 		<div class="token">
-			<img src="https://picsum.photos/48/48" alt={`${name} logo`} />
+			<img src={image} alt={`${name} logo`} />
 			<span class="text-lg text-bold">
 				{name}
 			</span>
 		</div>
 		<div class="text-lg">
-			{(Number(amount)/10**decimals).toFixed(2)}
+			{(Number(amount) / 10 ** decimals).toFixed(2)}
 			{token}
 		</div>
 	</Container>

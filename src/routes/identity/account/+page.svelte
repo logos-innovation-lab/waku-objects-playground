@@ -65,8 +65,14 @@
 	</Container>
 	<Divider pad={12} padBottom={0} />
 	<div class="assets">
-		{#each $balanceStore.balances as balance }
-		<Asset name={balance.name} token={balance.symbol} amount={balance.amount} decimals={balance.decimals} />
+		{#each $balanceStore.balances as balance}
+			<Asset
+				name={balance.name}
+				token={balance.symbol}
+				amount={balance.amount}
+				decimals={balance.decimals}
+				image={balance.image}
+			/>
 		{/each}
 	</div>
 {/if}
