@@ -17,7 +17,7 @@
 
 	function resize() {
 		textarea.style.height = 'auto'
-		textarea.style.height = `${Math.max(placeholderHeight, textarea.scrollHeight)}px`
+		textarea.style.height = `${Math.max(placeholderHeight, textarea.scrollHeight) + 2}px`
 	}
 
 	function delayedResize() {
@@ -136,8 +136,5 @@
 			position: static;
 			width: 100%;
 		}
-	}
-	::-webkit-scrollbar {
-		display: none;
 	}
 </style>
