@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Container from '$lib/components/container.svelte'
+	import { formatTokenAmount } from '$lib/utils/format'
 	export let name: string
 	export let token: string
 	export let amount: bigint
@@ -16,7 +17,7 @@
 			</span>
 		</div>
 		<div class="text-lg">
-			{(Number(amount) / 10 ** decimals).toFixed(2)}
+			{formatTokenAmount(amount, decimals)}
 			{token}
 		</div>
 	</Container>
