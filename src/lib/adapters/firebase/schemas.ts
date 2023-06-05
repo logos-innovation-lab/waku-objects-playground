@@ -15,7 +15,6 @@ export const UserDbSchema = z.object({
 	address: AddressSchema,
 	name: z.string().optional(),
 	avatar: z.string().optional(),
-	balances: z.array(TokenDbSchema),
 })
 export type UserDb = z.infer<typeof UserDbSchema>
 
