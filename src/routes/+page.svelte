@@ -61,7 +61,7 @@
 	</Container>
 {:else if $chats.chats.size === 0}
 	{@const address = $walletStore.wallet.address}
-	<Header>
+	<Header mainContent="right">
 		<svelte:fragment slot="left">
 			<div class="header-btns">
 				<Button variant="icon" on:click={() => goto(ROUTES.INVITE(address))}>
@@ -70,7 +70,7 @@
 			</div>
 		</svelte:fragment>
 		<svelte:fragment slot="right">
-			<Button variant="account" on:click={() => goto(ROUTES.IDENTITY)}>
+			<Button align="right" variant="account" on:click={() => goto(ROUTES.IDENTITY)}>
 				<svelte:fragment slot="avatar">
 					<Avatar size={48} picture={$profile.avatar} />
 				</svelte:fragment>
@@ -90,7 +90,7 @@
 	</Container>
 {:else}
 	{@const address = $walletStore.wallet.address}
-	<Header>
+	<Header mainContent="right">
 		<svelte:fragment slot="left">
 			<div class="header-btns">
 				<Button variant="icon" on:click={() => goto(ROUTES.INVITE(address))}>
@@ -99,7 +99,7 @@
 			</div>
 		</svelte:fragment>
 		<svelte:fragment slot="right">
-			<Button variant="account" on:click={() => goto(ROUTES.IDENTITY)}>
+			<Button align="right" variant="account" on:click={() => goto(ROUTES.IDENTITY)}>
 				<svelte:fragment slot="avatar">
 					<Avatar size={48} picture={$profile.avatar} />
 				</svelte:fragment>
