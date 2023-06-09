@@ -60,7 +60,12 @@
 			image: '',
 			title: 'Hello World',
 			description: 'Say hello',
-			onClick: () => { state = 'chat'; createObject(HELLO_WORLD_OBJECT_ID, { /* TODO empty */ })}
+			onClick: () => {
+				state = 'chat'
+				createObject(HELLO_WORLD_OBJECT_ID, {
+					/* TODO empty */
+				})
+			},
 		},
 	]
 
@@ -83,7 +88,8 @@
 
 	const createObject = async <T>(objectId: string, t: T) => {
 		// TODO random
-		const genRanHex = (size: number) => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+		const genRanHex = (size: number) =>
+			[...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')
 		const instanceId = genRanHex(12)
 		console.debug('createObject', { objectId, t })
 		await sendData(objectId, instanceId, t)
@@ -140,7 +146,7 @@
 									</div>
 								</div>
 							{:else if message.type === 'data'}
-								<WakuObject message={message} />
+								<WakuObject {message} />
 							{/if}
 						{/each}
 						{#if object}

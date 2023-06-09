@@ -1,6 +1,6 @@
 import { profile, type Profile } from '$lib/stores/profile'
 import type { Adapter } from '..'
-import { chats, type DraftChat, type Chat, type Message, type ChatData, type DataMessage } from '$lib/stores/chat'
+import { chats, type DraftChat, type Chat, type Message, type ChatData } from '$lib/stores/chat'
 import { contacts, type User } from '$lib/stores/users'
 import type { LightNode } from '@waku/interfaces'
 import {
@@ -227,7 +227,13 @@ export default class WakuAdapter implements Adapter {
 		await sendMessage(this.waku, chatId, message)
 	}
 
-	async sendData(wallet: HDNodeWallet, chatId: string, objectId: string, instanceId: string, data: unknown): Promise<void> {
+	async sendData(
+		wallet: HDNodeWallet,
+		chatId: string,
+		objectId: string,
+		instanceId: string,
+		data: unknown,
+	): Promise<void> {
 		if (!this.waku) {
 			throw 'no waku'
 		}

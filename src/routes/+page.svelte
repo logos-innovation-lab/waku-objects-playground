@@ -108,7 +108,7 @@
 	</Header>
 	<ul class="chats">
 		{#each [...$chats.chats] as [id, chat]}
-			{@const userMessages = chat.messages.filter(message => message.type === 'user')}
+			{@const userMessages = chat.messages.filter((message) => message.type === 'user')}
 			{@const lastMessage = userMessages[userMessages.length - 1]}
 			{@const myMessage = lastMessage.fromAddress === $walletStore.wallet.address}
 			{#if lastMessage && lastMessage.type === 'user'}

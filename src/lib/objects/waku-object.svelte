@@ -21,10 +21,9 @@
 	}`}
 >
 	<div class="message-content">
-        <svelte:component this={component} {message} />
+		<svelte:component this={component} {message} />
 	</div>
 </div>
-
 
 <style lang="scss">
 	.message {

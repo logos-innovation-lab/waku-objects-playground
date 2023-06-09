@@ -39,8 +39,8 @@ export const ChatDbSchema = z.object({
 				objectId: z.string(),
 				instanceId: z.string(),
 				data: z.unknown(),
-			})
-		])
+			}),
+		]),
 	),
 	users: z.array(AddressSchema),
 	name: z.string().optional(),

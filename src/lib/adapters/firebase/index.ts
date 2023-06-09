@@ -10,7 +10,13 @@ import {
 } from 'firebase/firestore'
 
 // Stores
-import { chats, type DraftChat, type Chat, type Message, type UserMessage, type DataMessage } from '$lib/stores/chat'
+import {
+	chats,
+	type DraftChat,
+	type Chat,
+	type UserMessage,
+	type DataMessage,
+} from '$lib/stores/chat'
 import { profile } from '$lib/stores/profile'
 import { contacts, type User } from '$lib/stores/users'
 
@@ -102,7 +108,7 @@ export default class FirebaseAdapter implements Adapter {
 						const lastMessage = parseRes.data.messages.slice(-1)[0]
 						if (lastMessage && lastMessage.type === 'data') {
 							const data = lastMessage.data
-							objectStore.update(state => {
+							objectStore.update((state) => {
 								const key = objectKey(lastMessage.objectId, lastMessage.instanceId)
 								const newObjects = new Map<string, unknown>(state.objects)
 								newObjects.set(key, data)
@@ -113,7 +119,6 @@ export default class FirebaseAdapter implements Adapter {
 								}
 							})
 						}
-
 					} else {
 						console.error(parseRes.error.issues)
 					}
@@ -202,7 +207,13 @@ export default class FirebaseAdapter implements Adapter {
 		setDoc(chatDoc, { messages: arrayUnion(message), lastMessage: text }, { merge: true })
 	}
 
-	async sendData(wallet: HDNodeWallet, chatId: string, objectId: string, instanceId: string, data: unknown): Promise<void> {
+	async sendData(
+		wallet: HDNodeWallet,
+		chatId: string,
+		objectId: string,
+		instanceId: string,
+		data: unknown,
+	): Promise<void> {
 		const fromAddress = wallet.address
 
 		if (!fromAddress) throw new Error('ChatId or address is missing')
@@ -217,9 +228,8 @@ export default class FirebaseAdapter implements Adapter {
 		}
 
 		const chatDoc = doc(db, `chats/${chatId}`)
-		setDoc(chatDoc, { messages: arrayUnion(message), }, { merge: true })
+		setDoc(chatDoc, { messages: arrayUnion(message) }, { merge: true })
 	}
-
 
 	async uploadPicture(picture: string): Promise<string> {
 		const blob = await (await fetch(picture)).blob()

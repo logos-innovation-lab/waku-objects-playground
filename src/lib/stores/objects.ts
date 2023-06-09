@@ -1,4 +1,4 @@
-import { writable, type Writable } from "svelte/store"
+import { writable, type Writable } from 'svelte/store'
 
 export interface ObjectState {
 	loading: boolean
@@ -7,20 +7,17 @@ export interface ObjectState {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface ObjectStore extends Writable<ObjectState> {
-
-}
+interface ObjectStore extends Writable<ObjectState> {}
 
 export function objectKey(objectId: string, instanceId: string): string {
-    return `${objectId}/${instanceId}`
+	return `${objectId}/${instanceId}`
 }
-
 
 export function createObjectStore(): ObjectStore {
 	const store = writable<ObjectState>({ loading: true, objects: new Map<string, unknown>() })
-    return {
-        ...store,
-    }
+	return {
+		...store,
+	}
 }
 
 export const objectStore = createObjectStore()
