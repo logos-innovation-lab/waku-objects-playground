@@ -1,6 +1,6 @@
 import { profile, type Profile } from '$lib/stores/profile'
 import type { Adapter } from '..'
-import { chats, type DraftChat, type Chat, type Message, type ChatData } from '$lib/stores/chat'
+import { chats, type DraftChat, type Chat, type Message, type ChatData, type DataMessage } from '$lib/stores/chat'
 import { contacts, type User } from '$lib/stores/users'
 import type { LightNode } from '@waku/interfaces'
 import {
@@ -16,6 +16,7 @@ import {
 import type { DecodedMessage } from '@waku/core'
 import type { HDNodeWallet } from 'ethers'
 import { ipfs, IPFS_GATEWAY } from '../firebase/connections'
+import { get } from 'svelte/store'
 
 function createChat(chatId: string, user: User, address: string): string {
 	chats.update((state) => {
@@ -94,7 +95,6 @@ async function lookupUserFromContacts(waku: LightNode, address: string): Promise
 export default class WakuAdapter implements Adapter {
 	private waku: LightNode | undefined
 	private subscriptions: Array<() => void> = []
-	private chats = new Map<string, Chat>()
 
 	async onLogIn(wallet: HDNodeWallet): Promise<void> {
 		const address = wallet.address
@@ -134,7 +134,6 @@ export default class WakuAdapter implements Adapter {
 			if (!adapter.waku) {
 				return
 			}
-			adapter.chats = chats.chats
 			await storeChats(adapter.waku, address, chats)
 		})
 		this.subscriptions.push(subscribeChatStore)
@@ -146,7 +145,8 @@ export default class WakuAdapter implements Adapter {
 			async (msg: DecodedMessage) => {
 				const decodedPayload = decodeMessagePayload(msg)
 				const chatMessage = JSON.parse(decodedPayload) as Message
-				if (!adapter.chats.has(chatMessage.fromAddress)) {
+				const chatsMap = get(chats).chats
+				if (!chatsMap.has(chatMessage.fromAddress)) {
 					if (!adapter.waku) {
 						return
 					}
@@ -217,12 +217,32 @@ export default class WakuAdapter implements Adapter {
 
 		const fromAddress = wallet.address
 		const message: Message = {
+			type: 'user',
 			timestamp: Date.now(),
 			text,
 			fromAddress,
 		}
 
 		addMessageToChat(chatId, message)
+		await sendMessage(this.waku, chatId, message)
+	}
+
+	async sendData(wallet: HDNodeWallet, chatId: string, objectId: string, instanceId: string, data: unknown): Promise<void> {
+		if (!this.waku) {
+			throw 'no waku'
+		}
+
+		const fromAddress = wallet.address
+		const message: Message = {
+			type: 'data',
+			timestamp: Date.now(),
+			fromAddress,
+			objectId,
+			instanceId,
+			data,
+		}
+
+		// TODO addDataMessage(chatId, message)
 		await sendMessage(this.waku, chatId, message)
 	}
 

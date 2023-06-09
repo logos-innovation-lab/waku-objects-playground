@@ -17,6 +17,8 @@
 	import Dropdown from '$lib/components/dropdown.svelte'
 	import DropdownItem from '$lib/components/dropdown-item.svelte'
 	import Close from '$lib/components/icons/close.svelte'
+	import WakuObject from '$lib/objects/waku-object.svelte'
+	import { HELLO_WORLD_OBJECT_ID } from '$lib/objects/hello-world'
 
 	import { goto } from '$app/navigation'
 	import { chats } from '$lib/stores/chat'
@@ -34,7 +36,7 @@
 	})
 
 	afterUpdate(() => {
-		if (autoscroll) div.scrollTo(0, div.scrollHeight)
+		if (autoscroll) div && div.scrollTo(0, div.scrollHeight)
 	})
 
 	onMount(() => {
@@ -54,6 +56,12 @@
 			description: 'Send funds to anyone in the chat from your wallet.',
 			onClick: () => goto(ROUTES.SEND_TRANSACTION),
 		},
+		{
+			image: '',
+			title: 'Hello World',
+			description: 'Say hello',
+			onClick: () => { state = 'chat'; createObject(HELLO_WORLD_OBJECT_ID, { /* TODO empty */ })}
+		},
 	]
 
 	let state: 'waku' | 'chat' = 'chat'
@@ -69,6 +77,23 @@
 		const wallet = $walletStore.wallet
 		if (!wallet) throw new Error('no wallet')
 		await adapters.sendChatMessage(wallet, $page.params.id, text)
+		text = ''
+		loading = false
+	}
+
+	const createObject = async <T>(objectId: string, t: T) => {
+		// TODO random
+		const genRanHex = (size: number) => [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+		const instanceId = genRanHex(12)
+		console.debug('createObject', { objectId, t })
+		await sendData(objectId, instanceId, t)
+	}
+
+	const sendData = async (objectId: string, instanceId: string, data: unknown) => {
+		loading = true
+		const wallet = $walletStore.wallet
+		if (!wallet) throw new Error('no wallet')
+		await adapters.sendData(wallet, $page.params.id, objectId, instanceId, data)
 		text = ''
 		loading = false
 	}
@@ -102,7 +127,7 @@
 					<div class="messages-inner">
 						<!-- Chat bubbles -->
 						{#each messages as message}
-							{#if message.text.length > 0}
+							{#if message.type === 'user' && message.text.length > 0}
 								<div
 									class={`message ${
 										message.fromAddress !== $walletStore.wallet?.address
@@ -114,6 +139,8 @@
 										<div class="message-text text-lg">{message.text}</div>
 									</div>
 								</div>
+							{:else if message.type === 'data'}
+								<WakuObject message={message} />
 							{/if}
 						{/each}
 						{#if object}

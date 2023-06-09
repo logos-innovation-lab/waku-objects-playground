@@ -17,6 +17,7 @@ export interface Adapter {
 
 	startChat(wallet: HDNodeWallet, chat: DraftChat): Promise<string>
 	sendChatMessage(wallet: HDNodeWallet, chatId: string, text: string): Promise<void>
+	sendData(wallet: HDNodeWallet, chatId: string, objectId: string, instanceId: string, data: unknown): Promise<void>
 
 	uploadPicture(picture: string): Promise<string>
 	getPicture(cid: string): string
