@@ -1,9 +1,10 @@
 <script lang="ts">
 	export let variant: '' | 'icon' | 'strong' | 'account' = ''
 	export let disabled: boolean | undefined = undefined
+	export let align: 'center' | 'left' | 'right' | 'block' = 'center'
 </script>
 
-<button type="button" {disabled} class={variant} on:click>
+<button type="button" {disabled} class={`${variant} ${align}`} on:click>
 	{#if variant === 'account'}
 		<div class="avatar">
 			<slot name="avatar" />
@@ -21,17 +22,32 @@
 		font-size: var(--font-size-normal);
 		font-weight: var(--font-weight-500);
 		line-height: 20px;
-		margin: 0;
 		padding: 11px;
 		overflow-wrap: normal;
 		cursor: pointer;
-		display: flex;
+		display: inline-flex;
 		justify-content: center;
 		flex-direction: row;
 		align-items: center;
+		margin-block: 0;
 		gap: var(--spacing-6);
-		margin-inline: auto;
 		white-space: nowrap;
+
+		&.block {
+			margin: 0;
+		}
+
+		&.center {
+			margin-inline: auto;
+		}
+
+		&.left {
+			margin-left: 0;
+		}
+
+		&.right {
+			margin-right: 0;
+		}
 
 		&:active {
 			background-color: var(--gray20);
