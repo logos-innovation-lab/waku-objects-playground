@@ -23,6 +23,8 @@
 	import adapters from '$lib/adapters'
 	import ROUTES from '$lib/routes'
 	import { walletStore } from '$lib/stores/wallet'
+	import { browser } from '$app/environment'
+	import { profile } from '$lib/stores/profile'
 
 	let div: HTMLElement
 	let autoscroll = true
@@ -60,7 +62,7 @@
 	$: messages = $chats.chats.get($page.params.id)?.messages || []
 	let loading = false
 	let text = ''
-	$: if ($walletStore.wallet === undefined) goto(ROUTES.HOME)
+	$: if (browser && !$walletStore.loading && $walletStore.wallet === undefined) goto(ROUTES.HOME)
 
 	const sendMessage = async () => {
 		loading = true
@@ -74,7 +76,15 @@
 	let chatImg = $chats.chats.get($page.params.id)?.users[0].avatar
 </script>
 
-{#if state === 'chat'}
+{#if $walletStore.loading || $profile.loading}
+	<Container align="center" grow gap={6} justify="center" pad={24}>
+		<h2>Loading...</h2>
+	</Container>
+{:else if $walletStore.error || $profile.error}
+	<Container align="center" grow gap={6} justify="center" pad={24}>
+		<h2>Failed to load chat: {$profile.error?.message ?? $walletStore.error?.message}</h2>
+	</Container>
+{:else if state === 'chat'}
 	<div class="chat">
 		<Header>
 			<Button variant="icon" slot="left" on:click={() => goto(ROUTES.HOME)}>
