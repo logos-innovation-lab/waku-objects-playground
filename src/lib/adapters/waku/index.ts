@@ -17,6 +17,7 @@ import type { DecodedMessage } from '@waku/core'
 import type { HDNodeWallet } from 'ethers'
 import { ipfs, IPFS_GATEWAY } from '../firebase/connections'
 import { get } from 'svelte/store'
+import { objectKey, objectStore } from '$lib/stores/objects'
 
 function createChat(chatId: string, user: User, address: string): string {
 	chats.update((state) => {
@@ -156,6 +157,21 @@ export default class WakuAdapter implements Adapter {
 					}
 				}
 				addMessageToChat(chatMessage.fromAddress, chatMessage)
+
+				if (chatMessage && chatMessage.type === 'data') {
+					const data = chatMessage.data
+					objectStore.update((state) => {
+						const key = objectKey(chatMessage.objectId, chatMessage.instanceId)
+						const newObjects = new Map<string, unknown>(state.objects)
+						newObjects.set(key, data)
+						return {
+							...state,
+							objects: newObjects,
+							loading: false,
+						}
+					})
+				}
+
 			},
 		)
 		this.subscriptions.push(subscribeChats)
@@ -248,7 +264,7 @@ export default class WakuAdapter implements Adapter {
 			data,
 		}
 
-		// TODO addDataMessage(chatId, message)
+		addMessageToChat(chatId, message)
 		await sendMessage(this.waku, chatId, message)
 	}
 
