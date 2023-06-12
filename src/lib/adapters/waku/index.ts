@@ -64,6 +64,20 @@ function addMessageToChat(chatId: string, message: Message) {
 			loading: false,
 		}
 	})
+
+	if (message && message.type === 'data') {
+		const data = message.data
+		objectStore.update((state) => {
+			const key = objectKey(message.objectId, message.instanceId)
+			const newObjects = new Map<string, unknown>(state.objects)
+			newObjects.set(key, data)
+			return {
+				...state,
+				objects: newObjects,
+				loading: false,
+			}
+		})
+	}
 }
 
 async function readChats(waku: LightNode, address: string): Promise<ChatData> {
@@ -157,21 +171,6 @@ export default class WakuAdapter implements Adapter {
 					}
 				}
 				addMessageToChat(chatMessage.fromAddress, chatMessage)
-
-				if (chatMessage && chatMessage.type === 'data') {
-					const data = chatMessage.data
-					objectStore.update((state) => {
-						const key = objectKey(chatMessage.objectId, chatMessage.instanceId)
-						const newObjects = new Map<string, unknown>(state.objects)
-						newObjects.set(key, data)
-						return {
-							...state,
-							objects: newObjects,
-							loading: false,
-						}
-					})
-				}
-
 			},
 		)
 		this.subscriptions.push(subscribeChats)
