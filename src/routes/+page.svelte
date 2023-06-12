@@ -3,7 +3,6 @@
 
 	// Icons
 	import AddComment from '$lib/components/icons/add-comment.svelte'
-	import ChatBot from '$lib/components/icons/chat-bot.svelte'
 	import Login from '$lib/components/icons/login.svelte'
 	import WakuLogo from '$lib/components/icons/waku-logo.svelte'
 	import NewChat from '$lib/components/icons/add-comment.svelte'
