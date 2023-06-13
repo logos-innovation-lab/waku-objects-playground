@@ -78,9 +78,6 @@ export default class FirebaseAdapter implements Adapter {
 				const newChats = new Map<string, Chat>()
 				res.docs.forEach((d) => {
 					const parseRes = ChatDbSchema.passthrough().safeParse(d.data())
-
-					console.debug({ parseRes })
-
 					if (parseRes.success) {
 						const users: User[] = []
 						parseRes.data.users.forEach((a) => {
