@@ -21,7 +21,7 @@ const peerMultiaddr = multiaddr(
 	'/dns4/ws.waku-1.apyos.dev/tcp/443/wss/p2p/16Uiu2HAm8gXHntr3SB5sde11pavjptaoiqyvwoX3GyEZWKMPiuBu',
 )
 
-type ContentTopic = 'private-message' | 'profile' | 'contact' | 'chats' | 'all-users'
+type ContentTopic = 'private-message' | 'profile' | 'contact' | 'chats' | 'all-users' | 'objects'
 type QueryResult = AsyncGenerator<Promise<DecodedMessage | undefined>[]>
 
 const topicApp = 'wakuobjects-playground'

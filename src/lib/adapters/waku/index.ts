@@ -17,7 +17,7 @@ import type { DecodedMessage } from '@waku/core'
 import type { HDNodeWallet } from 'ethers'
 import { ipfs, IPFS_GATEWAY } from '../firebase/connections'
 import { get } from 'svelte/store'
-import { objectKey, objectStore } from '$lib/stores/objects'
+import { objectKey, objectStore, type ObjectState } from '$lib/stores/objects'
 
 function createChat(chatId: string, user: User, address: string): string {
 	chats.update((state) => {
@@ -90,6 +90,21 @@ async function readChats(waku: LightNode, address: string): Promise<ChatData> {
 
 async function storeChats(waku: LightNode, address: string, chatData: ChatData) {
 	await storeDocument(waku, 'chats', address, Array.from(chatData.chats.entries()))
+}
+
+async function readObjectStore(waku: LightNode, address: string): Promise<ObjectState> {
+	const objectStoreData = (await readLatestDocument(waku, 'objects', address)) as [
+		string,
+		unknown,
+	][]
+	return {
+		loading: false,
+		objects: new Map(objectStoreData),
+	}
+}
+
+async function storeObjectStore(waku: LightNode, address: string, objectStore: ObjectState) {
+	await storeDocument(waku, 'objects', address, Array.from(objectStore.objects))
 }
 
 /*
@@ -174,6 +189,17 @@ export default class WakuAdapter implements Adapter {
 			},
 		)
 		this.subscriptions.push(subscribeChats)
+
+		const objects = await readObjectStore(this.waku, address)
+		objectStore.update((state) => ({ ...state, ...objects, loading: false }))
+
+		const subscribeObjectStore = objectStore.subscribe(async (objects) => {
+			if (!adapter.waku) {
+				return
+			}
+			await storeObjectStore(adapter.waku, address, objects)
+		})
+		this.subscriptions.push(subscribeObjectStore)
 	}
 
 	async onLogOut() {
