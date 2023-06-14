@@ -25,11 +25,22 @@ export type ProfileDb = z.infer<typeof ProfileDbSchema>
 
 export const ChatDbSchema = z.object({
 	messages: z.array(
-		z.object({
-			timestamp: z.number().int().positive(),
-			text: z.string(),
-			fromAddress: AddressSchema,
-		}),
+		z.union([
+			z.object({
+				type: z.literal('user'),
+				timestamp: z.number().int().positive(),
+				text: z.string(),
+				fromAddress: AddressSchema,
+			}),
+			z.object({
+				type: z.literal('data'),
+				timestamp: z.number().int().positive(),
+				fromAddress: AddressSchema,
+				objectId: z.string(),
+				instanceId: z.string(),
+				data: z.unknown(),
+			}),
+		]),
 	),
 	users: z.array(AddressSchema),
 	name: z.string().optional(),

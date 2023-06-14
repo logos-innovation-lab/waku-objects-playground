@@ -17,11 +17,11 @@ import {
 } from '@waku/interfaces'
 
 const peerMultiaddr = multiaddr(
-	'/dns4/ws.waku.apyos.dev/tcp/443/wss/p2p/16Uiu2HAm5wH4dPAV6zDfrBHkWt9Wu9iiXT4ehHdUArDUbEevzmBY',
-	// '/ip4/127.0.0.1/tcp/8000/wss/p2p/16Uiu2HAkvxqFicgLvsTUqKiX5ZUozN9c7aA82msxXo9qftZsMdGB'
+	// '/dns4/ws.waku.apyos.dev/tcp/443/wss/p2p/16Uiu2HAm5wH4dPAV6zDfrBHkWt9Wu9iiXT4ehHdUArDUbEevzmBY',
+	'/dns4/ws.waku-1.apyos.dev/tcp/443/wss/p2p/16Uiu2HAm8gXHntr3SB5sde11pavjptaoiqyvwoX3GyEZWKMPiuBu',
 )
 
-type ContentTopic = 'private-message' | 'profile' | 'contact' | 'chats' | 'all-users'
+type ContentTopic = 'private-message' | 'profile' | 'contact' | 'chats' | 'all-users' | 'objects'
 type QueryResult = AsyncGenerator<Promise<DecodedMessage | undefined>[]>
 
 const topicApp = 'wakuobjects-playground'

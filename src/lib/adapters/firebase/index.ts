@@ -10,7 +10,13 @@ import {
 } from 'firebase/firestore'
 
 // Stores
-import { chats, type DraftChat, type Chat, type Message } from '$lib/stores/chat'
+import {
+	chats,
+	type DraftChat,
+	type Chat,
+	type UserMessage,
+	type DataMessage,
+} from '$lib/stores/chat'
 import { profile } from '$lib/stores/profile'
 import { contacts, type User } from '$lib/stores/users'
 
@@ -23,6 +29,7 @@ import type { HDNodeWallet } from 'ethers'
 import type { Unsubscriber } from 'svelte/store'
 import type { Adapter } from '..'
 import { balanceStore, type Token } from '$lib/stores/balances'
+import { objectKey, objectStore } from '$lib/stores/objects'
 
 export default class FirebaseAdapter implements Adapter {
 	protected subscriptions: Array<() => unknown> = []
@@ -70,8 +77,7 @@ export default class FirebaseAdapter implements Adapter {
 
 				const newChats = new Map<string, Chat>()
 				res.docs.forEach((d) => {
-					const parseRes = ChatDbSchema.safeParse(d.data())
-
+					const parseRes = ChatDbSchema.passthrough().safeParse(d.data())
 					if (parseRes.success) {
 						const users: User[] = []
 						parseRes.data.users.forEach((a) => {
@@ -95,6 +101,21 @@ export default class FirebaseAdapter implements Adapter {
 						}
 
 						newChats.set(d.id, chat)
+
+						const lastMessage = parseRes.data.messages.slice(-1)[0]
+						if (lastMessage && lastMessage.type === 'data') {
+							const data = lastMessage.data
+							objectStore.update((state) => {
+								const key = objectKey(lastMessage.objectId, lastMessage.instanceId)
+								const newObjects = new Map<string, unknown>(state.objects)
+								newObjects.set(key, data)
+								return {
+									...state,
+									objects: newObjects,
+									loading: false,
+								}
+							})
+						}
 					} else {
 						console.error(parseRes.error.issues)
 					}
@@ -172,14 +193,39 @@ export default class FirebaseAdapter implements Adapter {
 
 		if (!fromAddress) throw new Error('ChatId or address is missing')
 
-		const message: Message = {
+		const message: UserMessage = {
+			type: 'user',
 			timestamp: Date.now(),
-			text,
 			fromAddress,
+			text,
 		}
 
 		const chatDoc = doc(db, `chats/${chatId}`)
 		setDoc(chatDoc, { messages: arrayUnion(message), lastMessage: text }, { merge: true })
+	}
+
+	async sendData(
+		wallet: HDNodeWallet,
+		chatId: string,
+		objectId: string,
+		instanceId: string,
+		data: unknown,
+	): Promise<void> {
+		const fromAddress = wallet.address
+
+		if (!fromAddress) throw new Error('ChatId or address is missing')
+
+		const message: DataMessage = {
+			type: 'data',
+			timestamp: Date.now(),
+			fromAddress,
+			objectId,
+			instanceId,
+			data,
+		}
+
+		const chatDoc = doc(db, `chats/${chatId}`)
+		setDoc(chatDoc, { messages: arrayUnion(message) }, { merge: true })
 	}
 
 	async uploadPicture(picture: string): Promise<string> {

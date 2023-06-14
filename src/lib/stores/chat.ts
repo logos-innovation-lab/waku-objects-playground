@@ -1,11 +1,23 @@
 import { writable, type Writable } from 'svelte/store'
 import type { User } from './users'
 
-export interface Message {
+export interface UserMessage {
+	type: 'user'
 	timestamp: number
-	text: string
 	fromAddress: string
+	text: string
 }
+
+export interface DataMessage {
+	type: 'data'
+	timestamp: number
+	fromAddress: string
+	objectId: string
+	instanceId: string
+	data?: unknown
+}
+
+export type Message = UserMessage | DataMessage
 
 export interface DraftChat {
 	messages: Message[]

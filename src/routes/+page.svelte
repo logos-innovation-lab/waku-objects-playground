@@ -108,9 +108,10 @@
 	</Header>
 	<ul class="chats">
 		{#each [...$chats.chats] as [id, chat]}
-			{@const lastMessage = chat.messages[chat.messages.length - 1]}
+			{@const userMessages = chat.messages.filter((message) => message.type === 'user')}
+			{@const lastMessage = userMessages[userMessages.length - 1]}
 			{@const myMessage = lastMessage.fromAddress === $walletStore.wallet.address}
-			{#if lastMessage}
+			{#if lastMessage && lastMessage.type === 'user'}
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<li on:click={() => goto(ROUTES.CHAT(id))}>
 					<Container grow>
