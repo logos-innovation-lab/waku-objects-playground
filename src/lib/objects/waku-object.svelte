@@ -7,6 +7,7 @@
 	import adapter from '$lib/adapters'
 	import { page } from '$app/stores'
 	import { profile } from '$lib/stores/profile'
+	import type { WakuObjectArgs } from '.'
 
 	export let message: DataMessage
 
@@ -28,7 +29,7 @@
 	const chatId = $page.params.id
 	const name = $profile.name || address
 
-	let args = {
+	let args: WakuObjectArgs = {
 		name,
 		store,
 		address,
