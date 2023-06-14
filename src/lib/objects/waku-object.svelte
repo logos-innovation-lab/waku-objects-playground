@@ -3,6 +3,10 @@
 	import { walletStore } from '$lib/stores/wallet'
 	import { HELLO_WORLD_OBJECT_ID } from './hello-world'
 	import HelloWorld from './hello-world/hello-world.svelte'
+	import { objectKey, objectStore } from '$lib/stores/objects'
+	import adapter from '$lib/adapters'
+	import { page } from '$app/stores'
+	import { profile } from '$lib/stores/profile'
 
 	export let message: DataMessage
 
@@ -13,6 +17,27 @@
 		}
 	}
 	const component = selectComponent()
+
+	let store = $objectStore.objects.get(objectKey(message.objectId, message.instanceId))
+	$: store = store
+	const wallet = $walletStore.wallet
+	if (!wallet) {
+		throw 'no wallet'
+	}
+	const address = wallet.address
+	const chatId = $page.params.id
+	const name = $profile.name || address
+
+	let args = {
+		name,
+		store,
+		address,
+		send: (data: unknown) =>
+			adapter.sendData(wallet, chatId, message.objectId, message.instanceId, data),
+	}
+	$: args = args
+
+	console.debug({ wallet, chatId, args, message, $objectStore, store })
 </script>
 
 <div
@@ -21,7 +46,7 @@
 	}`}
 >
 	<div class="message-content">
-		<svelte:component this={component} {message} />
+		<svelte:component this={component} {message} {args} />
 	</div>
 </div>
 
