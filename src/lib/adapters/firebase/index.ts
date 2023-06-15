@@ -102,7 +102,7 @@ export default class FirebaseAdapter implements Adapter {
 
 						newChats.set(d.id, chat)
 
-						parseRes.data.messages.forEach(message => {
+						parseRes.data.messages.forEach((message) => {
 							if (message && message.type === 'data') {
 								const data = message.data
 								objectStore.update((state) => {
