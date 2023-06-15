@@ -48,7 +48,6 @@ function createChat(chatId: string, user: User, address: string): string {
 
 function addMessageToChat(chatId: string, message: Message) {
 	if (message && message.type === 'data') {
-		console.log('addMessageToChat', { message })
 		const data = message.data
 		objectStore.update((state) => {
 			const key = objectKey(message.objectId, message.instanceId)
