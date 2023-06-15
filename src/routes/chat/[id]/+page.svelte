@@ -57,7 +57,7 @@
 			onClick: () => goto(ROUTES.SEND_TRANSACTION),
 		},
 		{
-			image: '',
+			image: 'https://picsum.photos/200',
 			title: 'Hello World',
 			description: 'Say hello',
 			onClick: () => {

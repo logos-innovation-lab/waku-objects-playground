@@ -8,12 +8,12 @@
 	export let message: DataMessage
 	export let args: WakuObjectArgs
 
-	const helloWorldStore = args.store as HelloWorldStore
-	const address = args.address
+	$: helloWorldStore = args.store as HelloWorldStore | undefined
+	$: address = args.address
 </script>
 
 {#if address === message?.fromAddress}
-	<HelloWorldSender name={helloWorldStore.name} />
+	<HelloWorldSender name={helloWorldStore?.name} />
 {:else}
-	<HelloWorldReceiver name={helloWorldStore.name} send={args.send} ownName={args.name} />
+	<HelloWorldReceiver name={helloWorldStore?.name} send={args.send} ownName={args.name} />
 {/if}

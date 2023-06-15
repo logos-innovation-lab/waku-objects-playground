@@ -19,8 +19,8 @@
 	}
 	const component = selectComponent()
 
-	let store = $objectStore.objects.get(objectKey(message.objectId, message.instanceId))
-	$: store = store
+	let store: unknown
+	$: store = $objectStore.objects.get(objectKey(message.objectId, message.instanceId))
 	const wallet = $walletStore.wallet
 	if (!wallet) {
 		throw 'no wallet'
@@ -29,16 +29,14 @@
 	const chatId = $page.params.id
 	const name = $profile.name || address
 
-	let args: WakuObjectArgs = {
+	let args: WakuObjectArgs
+	$: args = {
 		name,
 		store,
 		address,
 		send: (data: unknown) =>
 			adapter.sendData(wallet, chatId, message.objectId, message.instanceId, data),
 	}
-	$: args = args
-
-	console.debug({ wallet, chatId, args, message, $objectStore, store })
 </script>
 
 <div
