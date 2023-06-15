@@ -91,7 +91,6 @@
 		const genRanHex = (size: number) =>
 			[...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')
 		const instanceId = genRanHex(12)
-		console.debug('createObject', { objectId, t })
 		await sendData(objectId, instanceId, t)
 	}
 

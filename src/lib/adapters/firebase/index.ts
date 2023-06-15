@@ -225,8 +225,6 @@ export default class FirebaseAdapter implements Adapter {
 			data,
 		}
 
-		console.debug({ message })
-
 		const chatDoc = doc(db, `chats/${chatId}`)
 		setDoc(chatDoc, { messages: arrayUnion(message) }, { merge: true })
 	}

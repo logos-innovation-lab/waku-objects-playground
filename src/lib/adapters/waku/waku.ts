@@ -37,9 +37,6 @@ export async function connectWaku() {
 	await waku.dial(peerMultiaddr)
 	await waitForRemotePeer(waku, [Protocols.Filter, Protocols.LightPush, Protocols.Store])
 
-	// TODO REMOVE DEBUG
-	setInterval(() => console.debug(new Date().toISOString()), 60 * 1000)
-
 	return waku
 }
 
