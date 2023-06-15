@@ -57,7 +57,7 @@
 			onClick: () => goto(ROUTES.SEND_TRANSACTION),
 		},
 		{
-			image: '',
+			image: 'https://picsum.photos/200',
 			title: 'Hello World',
 			description: 'Say hello',
 			onClick: () => {
@@ -91,7 +91,6 @@
 		const genRanHex = (size: number) =>
 			[...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')
 		const instanceId = genRanHex(12)
-		console.debug('createObject', { objectId, t })
 		await sendData(objectId, instanceId, t)
 	}
 
