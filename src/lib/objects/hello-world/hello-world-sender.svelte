@@ -1,11 +1,12 @@
 <script lang="ts">
+	export let instanceId: string
 	export let name: string | undefined
 </script>
 
 {#if name}
-	Hello from {name}
+	{instanceId}: Hello from {name}
 {:else}
-	Hello World
+	{instanceId}: Hello World
 {/if}
 
 <style lang="scss">

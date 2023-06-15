@@ -32,11 +32,16 @@
 	let args: WakuObjectArgs
 	$: args = {
 		name,
-		store,
 		address,
+		store,
+		updateStore: (updater) => {
+			$objectStore.objects.set(objectKey(message.objectId, message.instanceId), updater(store))
+		},
 		send: (data: unknown) =>
 			adapter.sendData(wallet, chatId, message.objectId, message.instanceId, data),
 	}
+
+	$: console.debug({ message, args, $objectStore })
 </script>
 
 <div

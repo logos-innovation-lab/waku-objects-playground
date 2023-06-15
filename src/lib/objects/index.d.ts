@@ -1,6 +1,9 @@
 export interface WakuObjectArgs {
-	address: string
-	name: string
-	store: unknown
+	readonly address: string
+	readonly name: string
+
+	readonly store: unknown
+	updateStore: (updater: (state: unknown) => unknown) => void
+
 	send: (data: unknown) => Promise<void>
 }

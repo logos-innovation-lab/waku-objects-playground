@@ -46,3 +46,6 @@ export const ChatDbSchema = z.object({
 	name: z.string().optional(),
 })
 export type ChatDb = z.infer<typeof ChatDbSchema>
+
+export const ObjectDbSchema = z.unknown()
+export type ObjectDb = z.infer<typeof UserDbSchema>
