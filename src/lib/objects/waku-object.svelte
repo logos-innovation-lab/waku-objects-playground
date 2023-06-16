@@ -45,7 +45,9 @@
 	}`}
 >
 	<div class="message-content">
-		<svelte:component this={component} {message} {args} />
+		<div class="message-text text-lg">
+			<svelte:component this={component} {message} {args} />
+		</div>
 	</div>
 </div>
 

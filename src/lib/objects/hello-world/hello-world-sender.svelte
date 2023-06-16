@@ -2,13 +2,11 @@
 	export let name: string | undefined
 </script>
 
-<div>
-	{#if name}
-		Hello from {name}
-	{:else}
-		Hello World
-	{/if}
-</div>
+{#if name}
+	Hello from {name}
+{:else}
+	Hello World
+{/if}
 
 <style lang="scss">
 </style>
