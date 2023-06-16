@@ -44,7 +44,7 @@
 		message.fromAddress !== $walletStore.wallet?.address ? 'their-message' : 'my-message'
 	}`}
 >
-	<div class="message-content">
+	<div class="message-content message-text text-lg">
 		<svelte:component this={component} {message} {args} />
 	</div>
 </div>

@@ -10,13 +10,11 @@
 	}
 </script>
 
-<div>
-	{#if name}
-		Sent 'Hello from {name}'
-	{:else}
-		<Button variant="strong" on:click={sendName}>Send Hello!</Button>
-	{/if}
-</div>
+{#if name}
+	Sent 'Hello from {name}'
+{:else}
+	<Button variant="strong" on:click={sendName}>Send Hello!</Button>
+{/if}
 
 <style lang="scss">
 </style>
