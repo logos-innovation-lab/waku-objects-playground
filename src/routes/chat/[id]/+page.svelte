@@ -140,8 +140,8 @@
 											: 'my-message'
 									}`}
 								>
-									<div class="message-content">
-										<div class="message-text text-lg">{message.text}</div>
+									<div class="message-content message-text text-lg">
+										{message.text}
 									</div>
 								</div>
 							{:else if message.type === 'data'}
@@ -150,42 +150,34 @@
 						{/each}
 						{#if object}
 							<div class={`message their-message`}>
-								<div class="message-content">
-									<div class="message-text text-lg message-object-request">
-										<div class="req-title">Requestd transaction</div>
-										<div class="req-amt">0.00057 ETH</div>
-										<div class="req-converted">Approx. 50 USD</div>
-										<div class="req-status">pending</div>
-										<Button><Checkmark />Pay now</Button>
-									</div>
+								<div class="message-content message-text text-lg message-object-request">
+									<div class="req-title">Requestd transaction</div>
+									<div class="req-amt">0.00057 ETH</div>
+									<div class="req-converted">Approx. 50 USD</div>
+									<div class="req-status">pending</div>
+									<Button><Checkmark />Pay now</Button>
 								</div>
 							</div>
 							<div class={`message`}>
-								<div class="message-content">
-									<div class="message-text text-lg message-object-request">
-										<div class="req-title">Requestd transaction</div>
-										<div class="req-amt">0.00057 ETH</div>
-										<div class="req-converted">Approx. 50 USD</div>
-										<div class="req-status">pending</div>
-										<Button><Edit />Edit</Button>
-									</div>
+								<div class="message-content message-text text-lg message-object-request">
+									<div class="req-title">Requestd transaction</div>
+									<div class="req-amt">0.00057 ETH</div>
+									<div class="req-converted">Approx. 50 USD</div>
+									<div class="req-status">pending</div>
+									<Button><Edit />Edit</Button>
 								</div>
 							</div>
 
 							<div class={`message their-message`}>
-								<div class="message-content">
-									<div class="message-text text-lg message-object-confirmation">
-										<div class="conf-link">Requested transaction 0.00057 ETH</div>
-										<div class="conf-status">Transaction confirmed</div>
-									</div>
+								<div class="message-content message-text text-lg message-object-confirmation">
+									<div class="conf-link">Requested transaction 0.00057 ETH</div>
+									<div class="conf-status">Transaction confirmed</div>
 								</div>
 							</div>
 							<div class={`message`}>
-								<div class="message-content">
-									<div class="message-text text-lg message-object-confirmation">
-										<div class="conf-link">Requested transaction 0.00057 ETH</div>
-										<div class="conf-status">Transaction confirmed</div>
-									</div>
+								<div class="message-content message-text text-lg message-object-confirmation">
+									<div class="conf-link">Requested transaction 0.00057 ETH</div>
+									<div class="conf-status">Transaction confirmed</div>
 								</div>
 							</div>
 						{/if}
