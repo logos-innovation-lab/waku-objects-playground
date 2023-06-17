@@ -104,10 +104,10 @@
 	}
 
 	let chatImg: string | undefined = undefined
+	const otherUser = $chats.chats
+		.get($page.params.id)
+		?.users.find((m) => m.address !== $walletStore.wallet?.address)
 	$: if ($chats.chats.get($page.params.id)?.users.length === 2) {
-		const otherUser = $chats.chats
-			.get($page.params.id)
-			?.users.find((m) => m.address !== $walletStore.wallet?.address)
 		chatImg = otherUser?.avatar
 	}
 </script>
@@ -128,7 +128,7 @@
 			</Button>
 			<svelte:fragment slot="chat">
 				<Avatar picture={chatImg ? chatImg : ''} />
-				{$chats.chats.get($page.params.id)?.name}
+				{otherUser?.name}
 			</svelte:fragment>
 		</Header>
 		<div class="chat-messages" bind:this={div}>
