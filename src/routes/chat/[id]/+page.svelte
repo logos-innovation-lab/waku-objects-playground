@@ -103,7 +103,14 @@
 		loading = false
 	}
 
-	let chatImg = $chats.chats.get($page.params.id)?.users[0].avatar
+	let chatImg: string | undefined = undefined
+	if ($chats.chats.get($page.params.id)?.users.length === 2) {
+		$chats.chats.get($page.params.id)?.users.forEach((member) => {
+			if (member.address !== $walletStore.wallet?.address) {
+				chatImg = member.avatar
+			}
+		})
+	}
 </script>
 
 {#if $walletStore.loading || $profile.loading}
@@ -121,7 +128,6 @@
 				<ChevronLeft />
 			</Button>
 			<svelte:fragment slot="chat">
-				<!-- TODO: display chatter's profile image, if existing (currently placeholder) -->
 				<Avatar picture={chatImg ? chatImg : ''} />
 				{$chats.chats.get($page.params.id)?.name}
 			</svelte:fragment>

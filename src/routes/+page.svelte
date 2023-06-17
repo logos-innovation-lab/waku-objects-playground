@@ -116,7 +116,14 @@
 				<li on:click={() => goto(ROUTES.CHAT(id))}>
 					<Container grow>
 						<div class="chat">
-							<Avatar size={70} picture={chat.users[0].avatar} />
+							<!-- TODO: WHAT TO DO ABOUT THE AVATAR IF IT'S A CHAT WITH MULTIPLE PEOPLE? -->
+							{#if chat.users.length === 2}
+								{#each chat.users as member}
+									{#if address !== member.address}
+										<Avatar size={70} picture={member.avatar} />
+									{/if}
+								{/each}
+							{/if}
 							<div class="content">
 								<div class="user-info">
 									<span class="username text-lg text-bold">
