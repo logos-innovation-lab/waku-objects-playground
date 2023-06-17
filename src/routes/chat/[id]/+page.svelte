@@ -104,12 +104,11 @@
 	}
 
 	let chatImg: string | undefined = undefined
-	if ($chats.chats.get($page.params.id)?.users.length === 2) {
-		$chats.chats.get($page.params.id)?.users.forEach((member) => {
-			if (member.address !== $walletStore.wallet?.address) {
-				chatImg = member.avatar
-			}
-		})
+	$: if ($chats.chats.get($page.params.id)?.users.length === 2) {
+		const otherUser = $chats.chats
+			.get($page.params.id)
+			?.users.find((m) => m.address !== $walletStore.wallet?.address)
+		chatImg = otherUser?.avatar
 	}
 </script>
 
