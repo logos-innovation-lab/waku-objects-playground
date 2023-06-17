@@ -111,23 +111,20 @@
 			{@const userMessages = chat.messages.filter((message) => message.type === 'user')}
 			{@const lastMessage = userMessages[userMessages.length - 1]}
 			{@const myMessage = lastMessage.fromAddress === $walletStore.wallet.address}
+			{@const otherUser = chat.users.find((m) => m.address !== $walletStore.wallet?.address)}
 			{#if lastMessage && lastMessage.type === 'user'}
 				<!-- svelte-ignore a11y-click-events-have-key-events -->
 				<li on:click={() => goto(ROUTES.CHAT(id))}>
 					<Container grow>
 						<div class="chat">
-							<!-- TODO: WHAT TO DO ABOUT THE AVATAR IF IT'S A CHAT WITH MULTIPLE PEOPLE? -->
+							<!-- TODO: WHAT HAPPENS TO THE AVATAR IF IT'S A GROUP CHAT? -->
 							{#if chat.users.length === 2}
-								{#each chat.users as member}
-									{#if address !== member.address}
-										<Avatar size={70} picture={member.avatar} />
-									{/if}
-								{/each}
+								<Avatar size={70} picture={otherUser?.avatar} />
 							{/if}
 							<div class="content">
 								<div class="user-info">
 									<span class="username text-lg text-bold">
-										{chat.name ?? 'Unnamed chat'}
+										{otherUser?.name}
 										<Badge dark>
 											{chat.messages.length}
 										</Badge>
