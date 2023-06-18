@@ -103,13 +103,9 @@
 		loading = false
 	}
 
-	let chatImg: string | undefined = undefined
-	const otherUser = $chats.chats
+	$: otherUser = $chats.chats
 		.get($page.params.id)
 		?.users.find((m) => m.address !== $walletStore.wallet?.address)
-	$: if ($chats.chats.get($page.params.id)?.users.length === 2) {
-		chatImg = otherUser?.avatar
-	}
 </script>
 
 {#if $walletStore.loading || $profile.loading}
@@ -127,7 +123,7 @@
 				<ChevronLeft />
 			</Button>
 			<svelte:fragment slot="chat">
-				<Avatar picture={chatImg ? chatImg : ''} />
+				<Avatar picture={otherUser.avatar ?? ''} />
 				{otherUser?.name}
 			</svelte:fragment>
 		</Header>
