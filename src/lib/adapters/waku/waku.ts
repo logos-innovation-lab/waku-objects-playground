@@ -1,12 +1,12 @@
-import { createLightNode } from '@waku/create'
-import * as utils from '@waku/utils/bytes'
 import {
+	createLightNode,
 	waitForRemotePeer,
 	createEncoder,
 	createDecoder,
+	utf8ToBytes,
+	bytesToUtf8,
 	type DecodedMessage,
-	PageDirection,
-} from '@waku/core'
+} from '@waku/sdk'
 import { multiaddr } from '@multiformats/multiaddr'
 import {
 	type LightNode,
@@ -14,6 +14,7 @@ import {
 	type Callback,
 	type StoreQueryOptions,
 	type Unsubscribe,
+	PageDirection,
 } from '@waku/interfaces'
 
 const peerMultiaddr = multiaddr(
@@ -61,7 +62,7 @@ export async function storeDocument(
 	const contentTopic = getTopic(contentTopicName, id)
 	const encoder = createEncoder({ contentTopic })
 	const json = JSON.stringify(document)
-	const payload = utils.utf8ToBytes(json)
+	const payload = utf8ToBytes(json)
 
 	return await waku.lightPush.send(encoder, { payload })
 }
@@ -118,12 +119,12 @@ export async function readStore(
 }
 
 export function decodeMessagePayload(wakuMessage: DecodedMessage): string {
-	return utils.bytesToUtf8(wakuMessage.payload)
+	return bytesToUtf8(wakuMessage.payload)
 }
 
 export async function sendMessage(waku: LightNode, id: string, message: unknown) {
 	const json = JSON.stringify(message)
-	const payload = utils.utf8ToBytes(json)
+	const payload = utf8ToBytes(json)
 	const contentTopic = getTopic('private-message', id)
 	const encoder = createEncoder({ contentTopic })
 

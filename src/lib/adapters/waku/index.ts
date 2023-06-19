@@ -3,6 +3,7 @@ import type { Adapter } from '..'
 import { chats, type DraftChat, type Chat, type Message, type ChatData } from '$lib/stores/chat'
 import { contacts, type User } from '$lib/stores/users'
 import type { LightNode } from '@waku/interfaces'
+import type { DecodedMessage } from '@waku/sdk'
 import {
 	connectWaku,
 	decodeMessagePayload,
@@ -13,7 +14,6 @@ import {
 	storeDocument,
 	subscribe,
 } from './waku'
-import type { DecodedMessage } from '@waku/core'
 import type { HDNodeWallet } from 'ethers'
 import { ipfs, IPFS_GATEWAY } from '../firebase/connections'
 import { get } from 'svelte/store'
