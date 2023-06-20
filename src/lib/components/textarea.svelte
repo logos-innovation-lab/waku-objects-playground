@@ -7,16 +7,16 @@
 	export let autofocus = false
 	export let disabled = false
 	export let pad = 0
-	export let rows = 1
+	export let height = 46
 
 	let placeholderHeight: number
 	let textarea: HTMLTextAreaElement
 
 	const resizeEvents = ['change']
-	const delayedResizeEvents = ['cut', 'paste', 'drop', 'keydown']
+	const delayedResizeEvents = ['change', 'cut', 'paste', 'drop', 'keydown']
 
 	function resize() {
-		textarea.style.height = 'auto'
+		textarea.style.height = height + 'px'
 		textarea.style.height = `${Math.max(placeholderHeight, textarea.scrollHeight) + 2}px`
 	}
 
@@ -42,14 +42,14 @@
 	})
 </script>
 
-<label class="label" style={`padding-block: ${pad}px`}>
+<label class="label text-lg" style={`padding-block: ${pad}px`}>
 	{#if label !== ''}
 		<span class="text-sm">{label}</span>
 	{/if}
-	<div class="area-placeholder">
+	<div class="area-placeholder text-lg">
 		<div
 			bind:clientHeight={placeholderHeight}
-			class={`placeholder-text ${value != '' ? 'hide' : ''} `}
+			class={`text-lg placeholder-text ${value != '' ? 'hide' : ''} `}
 		>
 			{placeholder}
 		</div>
@@ -64,7 +64,7 @@
 			{disabled}
 			{autofocus}
 			{placeholder}
-			{rows}
+			rows="1"
 		/>
 	</div>
 </label>
@@ -94,8 +94,11 @@
 		width: 100%;
 		height: fit-content;
 		border-radius: var(--border-radius);
+		line-height: 1px;
 
 		.placeholder-text {
+			position: absolute;
+			opacity: 0;
 			font-size: var(--font-size-lg);
 			color: var(--grey-300);
 			width: 100%;
@@ -111,8 +114,6 @@
 		}
 	}
 	textarea {
-		position: absolute;
-		inset: 0;
 		border: none;
 		resize: none;
 		border: 1px solid var(--gray20);
@@ -120,6 +121,7 @@
 		padding: 11px var(--spacing-12);
 		max-height: 120px;
 		min-height: 48px;
+		width: 100%;
 
 		&:focus,
 		&.content {

@@ -10,6 +10,7 @@
 	import Button from '$lib/components/button.svelte'
 	import InputFile from '$lib/components/input-file.svelte'
 	import Textarea from '$lib/components/textarea.svelte'
+	import InputField from '$lib/components/input-field.svelte'
 
 	import adapters from '$lib/adapters'
 	import { profile } from '$lib/stores/profile'
@@ -105,7 +106,7 @@
 			Change picture
 		</InputFile>
 		<div class="displayname">
-			<Textarea bind:value={name} label="Display name" />
+			<InputField autofocus bind:value={name} />
 		</div>
 	</Container>
 	<div class="account">
