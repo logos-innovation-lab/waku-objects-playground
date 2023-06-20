@@ -9,7 +9,6 @@
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'
 	import InputFile from '$lib/components/input-file.svelte'
-	import Textarea from '$lib/components/textarea.svelte'
 	import InputField from '$lib/components/input-field.svelte'
 
 	import adapters from '$lib/adapters'
