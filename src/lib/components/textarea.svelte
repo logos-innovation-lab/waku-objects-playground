@@ -6,6 +6,7 @@
 	export let placeholder = ''
 	export let autofocus = false
 	export let disabled = false
+	export let readonly = false
 	export let pad = 0
 	export let height = 46
 
@@ -64,6 +65,7 @@
 			{disabled}
 			{autofocus}
 			{placeholder}
+			{readonly}
 			rows="1"
 		/>
 	</div>
@@ -129,7 +131,8 @@
 			color: var(--black);
 		}
 
-		&:disabled {
+		&:disabled,
+		&:read-only {
 			background-color: var(--gray10);
 			border-color: transparent;
 		}
