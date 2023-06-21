@@ -86,6 +86,7 @@ async function readObjectStore(waku: LightNode, address: string): Promise<Object
 	return {
 		loading: false,
 		objects: new Map(objectStoreData),
+		lastUpdated: Date.now(),
 	}
 }
 
@@ -293,4 +294,16 @@ export default class WakuAdapter implements Adapter {
 	getPicture(cid: string): string {
 		return `${IPFS_GATEWAY}/${cid}`
 	}
+
+	updateStore(
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		wallet: HDNodeWallet,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		objectId: string,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		instanceId: string,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		updater: (state: unknown) => unknown,
+		// eslint-disable-next-line @typescript-eslint/no-empty-function
+	): void {}
 }

@@ -1,23 +1,16 @@
 <script lang="ts">
 	import type { DataMessage } from '$lib/stores/chat'
 	import { walletStore } from '$lib/stores/wallet'
-	import { HELLO_WORLD_OBJECT_ID } from './hello-world'
-	import HelloWorld from './hello-world/hello-world.svelte'
 	import { objectKey, objectStore } from '$lib/stores/objects'
 	import adapter from '$lib/adapters'
 	import { page } from '$app/stores'
 	import { profile } from '$lib/stores/profile'
 	import type { WakuObjectArgs } from '.'
+	import { lookup } from './lookup'
 
 	export let message: DataMessage
 
-	function selectComponent() {
-		switch (message.objectId) {
-			case HELLO_WORLD_OBJECT_ID:
-				return HelloWorld
-		}
-	}
-	const component = selectComponent()
+	const component = lookup(message.objectId)?.wakuObject
 
 	let store: unknown
 	$: store = $objectStore.objects.get(objectKey(message.objectId, message.instanceId))
@@ -35,7 +28,7 @@
 		address,
 		store,
 		updateStore: (updater) => {
-			$objectStore.objects.set(objectKey(message.objectId, message.instanceId), updater(store))
+			adapter.updateStore(wallet, message.objectId, message.instanceId, updater)
 		},
 		send: (data: unknown) =>
 			adapter.sendData(wallet, chatId, message.objectId, message.instanceId, data),

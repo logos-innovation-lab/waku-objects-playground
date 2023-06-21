@@ -33,10 +33,11 @@ import { formatAddress } from '$lib/utils/format'
 import { db, ipfs, IPFS_GATEWAY } from './connections'
 
 import type { HDNodeWallet } from 'ethers'
-import type { Unsubscriber } from 'svelte/store'
+import { get, type Unsubscriber } from 'svelte/store'
 import type { Adapter } from '..'
 import { balanceStore, type Token } from '$lib/stores/balances'
-import { objectStore } from '$lib/stores/objects'
+import { objectKey, objectStore } from '$lib/stores/objects'
+import { lookup } from '$lib/objects/lookup'
 
 export default class FirebaseAdapter implements Adapter {
 	protected subscriptions: Array<() => unknown> = []
@@ -63,6 +64,21 @@ export default class FirebaseAdapter implements Adapter {
 			}
 		})
 		this.userSubscriptions.push(subscribeProfile)
+
+		const objectCollection = collection(db, `users/${address}/objects`)
+		const subscribeObjects = onSnapshot(objectCollection, (res) => {
+			const objects = new Map<string, unknown>()
+			res.docs.forEach((d) => {
+				const parseRes = ObjectDbSchema.safeParse(d.data())
+				if (parseRes.success) {
+					objects.set(d.id, parseRes.data)
+				} else {
+					console.error(parseRes.error.issues)
+				}
+			})
+			objectStore.set({ objects, loading: false, lastUpdated: Date.now() })
+		})
+		this.userSubscriptions.push(subscribeObjects)
 
 		const chatsSnapshot = query(collection(db, `chats`), where('users', 'array-contains', address))
 		const subscribeChats = onSnapshot(chatsSnapshot, async (res) => {
@@ -107,6 +123,29 @@ export default class FirebaseAdapter implements Adapter {
 							chat.name = otherUser.name ?? formatAddress(otherUser.address)
 						}
 
+						// update the object store if there is an incoming data message
+						parseRes.data.messages.forEach((message) => {
+							console.debug('onSnapshot', { message })
+							if (message.type === 'data') {
+								const descriptor = lookup(message.objectId)
+								const key = objectKey(message.objectId, message.instanceId)
+								const wakuObjectStore = get(objectStore)
+
+								if (
+									descriptor &&
+									descriptor.onMessage &&
+									wakuObjectStore.lastUpdated < message.timestamp
+								) {
+									const objects = wakuObjectStore.objects
+									const newStore = descriptor.onMessage(objects.get(key), message)
+
+									const objectDb = doc(db, `users/${address}/objects/${key}`)
+									// eslint-disable-next-line @typescript-eslint/no-explicit-any
+									setDoc(objectDb, newStore as any, { merge: true })
+								}
+							}
+						})
+
 						newChats.set(d.id, chat)
 					} else {
 						console.error(parseRes.error.issues)
@@ -150,21 +189,6 @@ export default class FirebaseAdapter implements Adapter {
 			balanceStore.set({ balances, loading: false })
 		})
 		this.userSubscriptions.push(subscribeBalances)
-
-		const objectCollection = collection(db, `users/${address}/objects`)
-		const subscribeObjects = onSnapshot(objectCollection, (res) => {
-			const objects = new Map<string, unknown>()
-			res.docs.forEach((d) => {
-				const parseRes = ObjectDbSchema.safeParse(d.data())
-				if (parseRes.success) {
-					objects.set(d.id, parseRes.data)
-				} else {
-					console.error(parseRes.error.issues)
-				}
-			})
-			objectStore.set({ objects, loading: false })
-		})
-		this.userSubscriptions.push(subscribeObjects)
 	}
 
 	onLogOut() {
@@ -275,5 +299,24 @@ export default class FirebaseAdapter implements Adapter {
 		}
 
 		setDoc(daiDoc, daiData, { merge: true })
+	}
+
+	updateStore(
+		wallet: HDNodeWallet,
+		objectId: string,
+		instanceId: string,
+		updater: (state: unknown) => unknown,
+	): void {
+		const { address } = wallet
+		const key = objectKey(objectId, instanceId)
+		const objectDb = doc(db, `users/${address}/objects/${key}`)
+
+		const wakuObjectStore = get(objectStore)
+
+		const objects = wakuObjectStore.objects
+		const newStore = updater(objects.get(key))
+
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		setDoc(objectDb, newStore as any, { merge: true })
 	}
 }

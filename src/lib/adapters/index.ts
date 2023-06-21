@@ -27,6 +27,13 @@ export interface Adapter {
 
 	uploadPicture(picture: string): Promise<string>
 	getPicture(cid: string): string
+
+	updateStore(
+		wallet: HDNodeWallet,
+		objectId: string,
+		instanceId: string,
+		updater: (state: unknown) => unknown,
+	): void
 }
 
 const DEFAULT_ADAPTER = 'firebase'
