@@ -12,6 +12,7 @@
 <input
 	class="text-lg"
 	style={`padding-block: ${pad}px`}
+	type="text"
 	{disabled}
 	{autofocus}
 	{placeholder}
@@ -30,10 +31,6 @@
 		max-height: 120px;
 		min-height: 48px;
 		width: 100%;
-
-		// @supports (-moz-appearance: none) {
-		// 	overflow: hidden;
-		// }
 
 		&:focus {
 			outline: none;
