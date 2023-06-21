@@ -17,7 +17,7 @@
 	const delayedResizeEvents = ['change', 'cut', 'paste', 'drop', 'keydown']
 
 	function resize() {
-		textarea.style.height = height + 'px'
+		textarea.style.height = `${height}px`
 		textarea.style.height = `${Math.max(placeholderHeight, textarea.scrollHeight) + 2}px`
 	}
 
