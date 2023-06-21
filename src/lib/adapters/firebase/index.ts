@@ -301,12 +301,12 @@ export default class FirebaseAdapter implements Adapter {
 		setDoc(daiDoc, daiData, { merge: true })
 	}
 
-	updateStore(
+	async updateStore(
 		wallet: HDNodeWallet,
 		objectId: string,
 		instanceId: string,
 		updater: (state: unknown) => unknown,
-	): void {
+	): Promise<void> {
 		const { address } = wallet
 		const key = objectKey(objectId, instanceId)
 		const objectDb = doc(db, `users/${address}/objects/${key}`)

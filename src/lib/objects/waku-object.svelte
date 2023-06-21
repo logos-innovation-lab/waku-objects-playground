@@ -33,8 +33,6 @@
 		send: (data: unknown) =>
 			adapter.sendData(wallet, chatId, message.objectId, message.instanceId, data),
 	}
-
-	$: console.debug({ message, args, $objectStore })
 </script>
 
 <div

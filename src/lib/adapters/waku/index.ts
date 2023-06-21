@@ -17,7 +17,8 @@ import {
 import type { HDNodeWallet } from 'ethers'
 import { ipfs, IPFS_GATEWAY } from '../firebase/connections'
 import { get } from 'svelte/store'
-import { objectStore, type ObjectState } from '$lib/stores/objects'
+import { objectStore, type ObjectState, objectKey } from '$lib/stores/objects'
+import { lookup } from '$lib/objects/lookup'
 
 function createChat(chatId: string, user: User, address: string): string {
 	chats.update((state) => {
@@ -160,17 +161,43 @@ export default class WakuAdapter implements Adapter {
 			'private-message',
 			address,
 			async (msg: DecodedMessage) => {
+				if (!adapter.waku) {
+					return
+				}
+
 				const decodedPayload = decodeMessagePayload(msg)
 				const chatMessage = JSON.parse(decodedPayload) as Message
-				console.debug('receive', { chatMessage })
 				const chatsMap = get(chats).chats
+
 				if (!chatsMap.has(chatMessage.fromAddress)) {
-					if (!adapter.waku) {
-						return
-					}
 					const user = await lookupUserFromContacts(adapter.waku, chatMessage.fromAddress)
 					if (user) {
 						createChat(chatMessage.fromAddress, user, address)
+					}
+				}
+
+				if (chatMessage.type === 'data') {
+					const descriptor = lookup(chatMessage.objectId)
+					const key = objectKey(chatMessage.objectId, chatMessage.instanceId)
+					const wakuObjectStore = get(objectStore)
+
+					if (
+						descriptor &&
+						descriptor.onMessage &&
+						wakuObjectStore.lastUpdated < chatMessage.timestamp
+					) {
+						const objects = wakuObjectStore.objects
+						const newStore = descriptor.onMessage(objects.get(key), chatMessage)
+						const newObjects = new Map(objects)
+						newObjects.set(key, newStore)
+						objectStore.update((state) => ({
+							...state,
+							objects: newObjects,
+							lastUpdated: chatMessage.timestamp,
+						}))
+
+						const updatedObjectStore = get(objectStore)
+						await storeObjectStore(adapter.waku, wallet.address, updatedObjectStore)
 					}
 				}
 				addMessageToChat(chatMessage.fromAddress, chatMessage)
@@ -179,7 +206,6 @@ export default class WakuAdapter implements Adapter {
 		this.subscriptions.push(subscribeChats)
 
 		const objects = await readObjectStore(this.waku, address)
-		console.debug({ objects })
 		objectStore.update((state) => ({ ...state, ...objects, loading: false }))
 
 		const subscribeObjectStore = objectStore.subscribe(async (objects) => {
@@ -278,8 +304,6 @@ export default class WakuAdapter implements Adapter {
 			data,
 		}
 
-		console.debug('sendData', { message })
-
 		addMessageToChat(chatId, message)
 		await sendMessage(this.waku, chatId, message)
 	}
@@ -295,15 +319,27 @@ export default class WakuAdapter implements Adapter {
 		return `${IPFS_GATEWAY}/${cid}`
 	}
 
-	updateStore(
+	async updateStore(
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		wallet: HDNodeWallet,
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		objectId: string,
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		instanceId: string,
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		updater: (state: unknown) => unknown,
-		// eslint-disable-next-line @typescript-eslint/no-empty-function
-	): void {}
+	): Promise<void> {
+		if (!this.waku) {
+			throw 'no waku'
+		}
+
+		const key = objectKey(objectId, instanceId)
+		const wakuObjectStore = get(objectStore)
+
+		const objects = wakuObjectStore.objects
+		const newStore = updater(objects.get(key))
+		const newObjects = new Map(objects)
+		newObjects.set(key, newStore)
+		objectStore.update((state) => ({ ...state, objects: newObjects, lastUpdated: Date.now() }))
+
+		const updatedObjectStore = get(objectStore)
+		await storeObjectStore(this.waku, wallet.address, updatedObjectStore)
+	}
 }

@@ -33,7 +33,7 @@ export interface Adapter {
 		objectId: string,
 		instanceId: string,
 		updater: (state: unknown) => unknown,
-	): void
+	): Promise<void>
 }
 
 const DEFAULT_ADAPTER = 'firebase'
