@@ -39,8 +39,9 @@
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
-		height: 100vh;
-		height: 100dvh;
+		min-height: 100vh;
+		min-height: 100dvh;
+		height: 100%;
 		width: 100vw;
 		background-color: var(--black);
 	}
@@ -48,6 +49,8 @@
 	.wrapper {
 		max-width: 412px;
 		width: 100%;
+		min-height: 100vh;
+		min-height: 100dvh;
 		height: 100%;
 		background-color: white;
 		position: relative;
