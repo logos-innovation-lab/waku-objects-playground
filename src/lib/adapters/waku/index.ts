@@ -47,7 +47,9 @@ function createChat(chatId: string, user: User, address: string): string {
 	return chatId
 }
 
-function addMessageToChat(chatId: string, message: Message) {
+function addMessageToChat(address: string, chatId: string, message: Message) {
+	executeOnMessage(address, message)
+
 	chats.update((state) => {
 		if (!state.chats.has(chatId)) {
 			return state
@@ -65,6 +67,26 @@ function addMessageToChat(chatId: string, message: Message) {
 			loading: false,
 		}
 	})
+}
+
+function executeOnMessage(address: string, chatMessage: Message) {
+	if (chatMessage.type === 'data') {
+		const descriptor = lookup(chatMessage.objectId)
+		const key = objectKey(chatMessage.objectId, chatMessage.instanceId)
+		const wakuObjectStore = get(objectStore)
+
+		if (descriptor && descriptor.onMessage && wakuObjectStore.lastUpdated < chatMessage.timestamp) {
+			const objects = wakuObjectStore.objects
+			const newStore = descriptor.onMessage(address, objects.get(key), chatMessage)
+			const newObjects = new Map(objects)
+			newObjects.set(key, newStore)
+			objectStore.update((state) => ({
+				...state,
+				objects: newObjects,
+				lastUpdated: chatMessage.timestamp,
+			}))
+		}
+	}
 }
 
 async function readChats(waku: LightNode, address: string): Promise<ChatData> {
@@ -176,31 +198,7 @@ export default class WakuAdapter implements Adapter {
 					}
 				}
 
-				if (chatMessage.type === 'data') {
-					const descriptor = lookup(chatMessage.objectId)
-					const key = objectKey(chatMessage.objectId, chatMessage.instanceId)
-					const wakuObjectStore = get(objectStore)
-
-					if (
-						descriptor &&
-						descriptor.onMessage &&
-						wakuObjectStore.lastUpdated < chatMessage.timestamp
-					) {
-						const objects = wakuObjectStore.objects
-						const newStore = descriptor.onMessage(address, objects.get(key), chatMessage)
-						const newObjects = new Map(objects)
-						newObjects.set(key, newStore)
-						objectStore.update((state) => ({
-							...state,
-							objects: newObjects,
-							lastUpdated: chatMessage.timestamp,
-						}))
-
-						const updatedObjectStore = get(objectStore)
-						await storeObjectStore(adapter.waku, wallet.address, updatedObjectStore)
-					}
-				}
-				addMessageToChat(chatMessage.fromAddress, chatMessage)
+				addMessageToChat(address, chatMessage.fromAddress, chatMessage)
 			},
 		)
 		this.subscriptions.push(subscribeChats)
@@ -279,7 +277,7 @@ export default class WakuAdapter implements Adapter {
 			fromAddress,
 		}
 
-		addMessageToChat(chatId, message)
+		addMessageToChat(fromAddress, chatId, message)
 		await sendMessage(this.waku, chatId, message)
 	}
 
@@ -304,7 +302,7 @@ export default class WakuAdapter implements Adapter {
 			data,
 		}
 
-		addMessageToChat(chatId, message)
+		addMessageToChat(fromAddress, chatId, message)
 		await sendMessage(this.waku, chatId, message)
 	}
 
