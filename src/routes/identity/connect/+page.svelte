@@ -41,9 +41,11 @@
 		</p>
 	</div>
 	<Textarea
+		autofocus
 		bind:value={phrase}
 		label="Recovery phrase"
 		placeholder="Paste or type recovery phrase here..."
+		height={120}
 	/>
 </Container>
 <Container>

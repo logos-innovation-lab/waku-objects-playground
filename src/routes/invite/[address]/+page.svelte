@@ -60,7 +60,7 @@
 	<Container gap={6} grow justify="center" align="center" pad={24}>
 		<p class="text-lg text-bold">Share link</p>
 		<p class="text-lg description">Share the link below with anyone to start a new chat together</p>
-		<Textarea rows={4} disabled placeholder={$page.url.href} />
+		<Textarea readonly placeholder={$page.url.href} />
 		<Button on:click={copyToClipboard}>
 			{#if copied}
 				<Checkmark />

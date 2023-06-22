@@ -8,7 +8,7 @@
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
 	import InputFile from '$lib/components/input-file.svelte'
-	import Textarea from '$lib/components/textarea.svelte'
+	import InputField from '$lib/components/input-field.svelte'
 
 	import adapters from '$lib/adapters'
 	import { goto } from '$app/navigation'
@@ -84,7 +84,7 @@
 		<Renew />
 		Change picture
 	</InputFile>
-	<Textarea autofocus bind:value={name} label="Display name" />
+	<InputField autofocus bind:value={name} placeholder="Display name" />
 </Container>
 <Container grow justify="flex-end">
 	<Button variant="strong" disabled={isCreatingIdentity || !name || saving} on:click={saveProfile}>
