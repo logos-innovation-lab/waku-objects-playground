@@ -14,6 +14,6 @@ export interface WakuObjectArgs {
 interface WakuObjectDescriptor {
 	readonly objectId: string
 	readonly wakuObject: ComponentType
-	onMessage?: (store: unknown, message: DataMessage) => unknown
+	onMessage?: (address: string, store: unknown, message: DataMessage) => unknown
 	// TODO onTransaction: (store: unknown, transaction: Transaction) => unknown
 }
