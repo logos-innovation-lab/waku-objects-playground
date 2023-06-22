@@ -13,7 +13,13 @@
 </script>
 
 {#if address === message?.fromAddress}
-	<HelloWorldSender name={helloWorldStore?.name} />
+	<HelloWorldSender instanceId={message.instanceId} name={helloWorldStore?.name} />
 {:else}
-	<HelloWorldReceiver name={helloWorldStore?.name} send={args.send} ownName={args.name} />
+	<HelloWorldReceiver
+		instanceId={message.instanceId}
+		name={helloWorldStore?.name}
+		send={args.send}
+		updateStore={args.updateStore}
+		ownName={args.name}
+	/>
 {/if}
