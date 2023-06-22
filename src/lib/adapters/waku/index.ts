@@ -187,7 +187,7 @@ export default class WakuAdapter implements Adapter {
 						wakuObjectStore.lastUpdated < chatMessage.timestamp
 					) {
 						const objects = wakuObjectStore.objects
-						const newStore = descriptor.onMessage(objects.get(key), chatMessage)
+						const newStore = descriptor.onMessage(address, objects.get(key), chatMessage)
 						const newObjects = new Map(objects)
 						newObjects.set(key, newStore)
 						objectStore.update((state) => ({

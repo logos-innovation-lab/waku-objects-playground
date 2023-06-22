@@ -137,7 +137,7 @@ export default class FirebaseAdapter implements Adapter {
 									wakuObjectStore.lastUpdated < message.timestamp
 								) {
 									const objects = wakuObjectStore.objects
-									const newStore = descriptor.onMessage(objects.get(key), message)
+									const newStore = descriptor.onMessage(address, objects.get(key), message)
 
 									const objectDb = doc(db, `users/${address}/objects/${key}`)
 									// eslint-disable-next-line @typescript-eslint/no-explicit-any
