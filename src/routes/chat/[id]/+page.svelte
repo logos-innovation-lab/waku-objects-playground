@@ -326,7 +326,6 @@
 		display: inline-block;
 		font-family: var(--font-serif);
 		background-color: var(--white);
-		// border: 1px solid var(--gray10);
 	}
 
 	.their-message {
@@ -336,13 +335,7 @@
 		.message-content {
 			text-align: left;
 		}
-
-		// .message-text {
-		// border-bottom-right-radius: var(--spacing-24);
-		// border-bottom-left-radius: 0;
-		// border: 1px solid var(--gray20);
 	}
-	// }
 
 	.message-object-request {
 		font-size: var(--font-size-sm);
@@ -382,6 +375,8 @@
 	.chat {
 		display: flex;
 		flex-direction: column;
+		min-height: 100dvh;
+		min-height: 100vh;
 		height: 100%;
 		background-color: var(--gray10);
 	}
