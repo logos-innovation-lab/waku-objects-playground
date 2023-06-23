@@ -7,7 +7,6 @@
 	import Checkmark from '$lib/components/icons/checkmark.svelte'
 	import ArrowUp from '$lib/components/icons/arrow-up.svelte'
 	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
-	import ChevronRight from '$lib/components/icons/chevron-right.svelte'
 
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
@@ -16,9 +15,7 @@
 	import Avatar from '$lib/components/avatar.svelte'
 	import Dropdown from '$lib/components/dropdown.svelte'
 	import DropdownItem from '$lib/components/dropdown-item.svelte'
-	import Close from '$lib/components/icons/close.svelte'
 	import WakuObject from '$lib/objects/waku-object.svelte'
-	import { HELLO_WORLD_OBJECT_ID } from '$lib/objects/hello-world'
 
 	import { goto } from '$app/navigation'
 	import { chats } from '$lib/stores/chat'
@@ -43,33 +40,6 @@
 		div && div.scrollTo(0, div.scrollHeight)
 	})
 
-	const objects = [
-		{
-			image: 'https://picsum.photos/200',
-			title: 'Request transaction',
-			description: 'Request a transaction in the chat to your prefered wallet',
-			onClick: () => goto(ROUTES.REQUEST_TRANSACTION),
-		},
-		{
-			image: 'https://picsum.photos/200',
-			title: 'Send transaction',
-			description: 'Send funds to anyone in the chat from your wallet.',
-			onClick: () => goto(ROUTES.SEND_TRANSACTION),
-		},
-		{
-			image: 'https://picsum.photos/200',
-			title: 'Hello World',
-			description: 'Say hello',
-			onClick: () => {
-				state = 'chat'
-				createObject(HELLO_WORLD_OBJECT_ID, {
-					/* TODO empty */
-				})
-			},
-		},
-	]
-
-	let state: 'waku' | 'chat' = 'chat'
 	let object = false
 
 	$: messages = $chats.chats.get($page.params.id)?.messages || []
@@ -82,23 +52,6 @@
 		const wallet = $walletStore.wallet
 		if (!wallet) throw new Error('no wallet')
 		await adapters.sendChatMessage(wallet, $page.params.id, text)
-		text = ''
-		loading = false
-	}
-
-	const createObject = async <T>(objectId: string, t: T) => {
-		// TODO random
-		const genRanHex = (size: number) =>
-			[...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')
-		const instanceId = genRanHex(12)
-		await sendData(objectId, instanceId, t)
-	}
-
-	const sendData = async (objectId: string, instanceId: string, data: unknown) => {
-		loading = true
-		const wallet = $walletStore.wallet
-		if (!wallet) throw new Error('no wallet')
-		await adapters.sendData(wallet, $page.params.id, objectId, instanceId, data)
 		text = ''
 		loading = false
 	}
@@ -116,7 +69,7 @@
 	<Container align="center" grow gap={6} justify="center" pad={24}>
 		<h2>Failed to load chat: {$profile.error?.message ?? $walletStore.error?.message}</h2>
 	</Container>
-{:else if state === 'chat'}
+{:else}
 	<div class="chat">
 		<Header>
 			<Button variant="icon" slot="left" on:click={() => goto(ROUTES.HOME)}>
@@ -195,7 +148,9 @@
 						</Button>
 						<DropdownItem onClick={() => console.log('Pic from Cam')}>Pic from Cam</DropdownItem>
 						<DropdownItem onClick={() => console.log('Pic from Lib')}>Pic from Lib</DropdownItem>
-						<DropdownItem onClick={() => (state = 'waku')}>Waku Object</DropdownItem>
+						<DropdownItem onClick={() => goto(ROUTES.OBJECTS($page.params.id))}
+							>Waku Object</DropdownItem
+						>
 					</Dropdown>
 					<Textarea
 						placeholder="Message"
@@ -222,36 +177,6 @@
 			</Container>
 		</div>
 	</div>
-{:else if state === 'waku'}
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<Header mainContent="left">
-		<svelte:fragment slot="left">
-			<div class="gray">
-				<ArrowUp /> to {$chats.chats.get($page.params.id)?.name}
-			</div>
-		</svelte:fragment>
-		<svelte:fragment slot="right">
-			<Button variant="icon" on:click={() => (state = 'chat')}>
-				<Close />
-			</Button>
-		</svelte:fragment>
-	</Header>
-	<div bind:this={div}>
-		{#each objects as object}
-			<div class="object" {...object}>
-				<Container direction="row" gap={12} alignItems="center">
-					<img class="img" src={object.image} alt="object logo" />
-					<p>
-						<span class="text-bold text-lg">{object.title}</span>
-						{object.description}
-					</p>
-					<Button variant="icon" on:click={object.onClick}>
-						<ChevronRight />
-					</Button>
-				</Container>
-			</div>
-		{/each}
-	</div>
 {/if}
 
 <style lang="scss">
@@ -263,27 +188,6 @@
 		font-weight: var(--font-weight-500);
 		:global(svg) {
 			fill: var(--gray40);
-		}
-	}
-	.object {
-		padding: var(--spacing-12) 0 var(--spacing-12) var(--spacing-12);
-		border-bottom: var(--border);
-
-		.img {
-			width: 70px;
-		}
-		img {
-			width: 70px;
-			height: 70px;
-			aspect-ratio: 1;
-			border-radius: 18px;
-		}
-		span {
-			display: block;
-			margin-bottom: var(--spacing-6);
-		}
-		p {
-			flex-grow: 1;
 		}
 	}
 	.messages {
