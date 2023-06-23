@@ -3,6 +3,7 @@ import type { HDNodeWallet } from 'ethers'
 import { getFromLocalStorage } from '$lib/utils/localstorage'
 import FirebaseAdapter from './firebase'
 import WakuAdapter from './waku'
+import type { Token } from '$lib/stores/balances'
 
 export interface Contact {
 	address: string
@@ -34,6 +35,20 @@ export interface Adapter {
 		instanceId: string,
 		updater: (state: unknown) => unknown,
 	): Promise<void>
+	sendTransaction(
+		instanceId: string,
+		wallet: HDNodeWallet,
+		to: string,
+		amount: bigint,
+		token: Token,
+		fee: Token,
+	): Promise<string>
+	estimateTransaction(
+		wallet: HDNodeWallet,
+		to: string,
+		amount: bigint,
+		token: Token,
+	): Promise<Token>
 }
 
 const DEFAULT_ADAPTER = 'firebase'

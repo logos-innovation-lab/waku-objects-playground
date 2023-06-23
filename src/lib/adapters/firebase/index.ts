@@ -7,6 +7,7 @@ import {
 	query,
 	arrayUnion,
 	where,
+	getDoc,
 } from 'firebase/firestore'
 
 // Stores
@@ -323,5 +324,58 @@ export default class FirebaseAdapter implements Adapter {
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		setDoc(objectDb, newStore as any, { merge: true })
+	}
+	async sendTransaction(
+		instanceId: string,
+		wallet: HDNodeWallet,
+		to: string,
+		amount: bigint,
+		token: Token,
+		fee: Token,
+	): Promise<string> {
+		const { address } = wallet
+
+		if (!address) throw new Error('Address is missing')
+
+		const tx = {
+			from: address,
+			to,
+			amount: amount.toString(),
+			token: token.symbol,
+			timestamp: Date.now(),
+			feeAmount: fee.amount.toString(),
+			feeToken: fee.symbol,
+		}
+
+		const txCollection = collection(db, `/object/${instanceId}/transactions`)
+		const res = await addDoc(txCollection, tx)
+		return res.id
+	}
+
+	estimateTransaction(): Promise<Token> {
+		return Promise.resolve({
+			name: 'Ether',
+			symbol: 'ETH',
+			amount: 123000000000000000n,
+			decimals: 18,
+		})
+	}
+
+	async addWakuDoc(wallet: HDNodeWallet, wakuObject: any): Promise<string> {
+		const { address } = wallet
+
+		if (!address) throw new Error('Address is missing')
+
+		const wakuObjectCollection = collection(db, `/object`)
+		const ref = await addDoc(wakuObjectCollection, wakuObject)
+		return ref.id
+	}
+
+	async getWakuObjectData(id: string) {
+		const wakuObjectDoc = doc(db, `object/${id}`)
+		const wakuObjectData = await getDoc(wakuObjectDoc)
+		if (wakuObjectData.exists()) {
+			return wakuObjectData.data()
+		}
 	}
 }

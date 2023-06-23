@@ -13,7 +13,7 @@
 	import Avatar from '$lib/components/avatar.svelte'
 	import Dropdown from '$lib/components/dropdown.svelte'
 	import DropdownItem from '$lib/components/dropdown-item.svelte'
-	import WakuObject from '$lib/objects/waku-object.svelte'
+	import WakuObject from '$lib/objects/chat.svelte'
 
 	import { goto } from '$app/navigation'
 	import { chats } from '$lib/stores/chat'

@@ -19,6 +19,7 @@ import { ipfs, IPFS_GATEWAY } from '../firebase/connections'
 import { get } from 'svelte/store'
 import { objectStore, type ObjectState, objectKey } from '$lib/stores/objects'
 import { lookup } from '$lib/objects/lookup'
+import type { Token } from '$lib/stores/balances'
 
 function createChat(chatId: string, user: User, address: string): string {
 	chats.update((state) => {
@@ -339,5 +340,24 @@ export default class WakuAdapter implements Adapter {
 
 		const updatedObjectStore = get(objectStore)
 		await storeObjectStore(this.waku, wallet.address, updatedObjectStore)
+	}
+
+	sendTransaction(
+		instanceId: string,
+		wallet: HDNodeWallet,
+		to: string,
+		amount: bigint,
+		token: Token,
+		fee: Token,
+	): Promise<string> {
+		throw new Error('Method not implemented.')
+	}
+	estimateTransaction(
+		wallet: HDNodeWallet,
+		to: string,
+		amount: bigint,
+		token: Token,
+	): Promise<Token> {
+		throw new Error('Method not implemented.')
 	}
 }
