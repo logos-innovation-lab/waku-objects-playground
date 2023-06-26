@@ -54,3 +54,7 @@ export function removeFromLocalStorage(key: string) {
 
 	localStorage.removeItem(key)
 }
+
+export function sleep(ms: number) {
+	return new Promise((resolve) => setTimeout(resolve, ms))
+}
