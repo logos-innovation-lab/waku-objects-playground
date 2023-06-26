@@ -33,11 +33,12 @@ import { formatAddress } from '$lib/utils/format'
 import { db, ipfs, IPFS_GATEWAY } from './connections'
 
 import type { HDNodeWallet } from 'ethers'
-import { get, type Unsubscriber } from 'svelte/store'
 import type { Adapter } from '..'
 import { balanceStore, type Token } from '$lib/stores/balances'
 import { objectKey, objectStore } from '$lib/stores/objects'
 import { lookup } from '$lib/objects/lookup'
+import { type Unsubscriber, get } from 'svelte/store'
+import { sleep } from '../utils'
 
 export default class FirebaseAdapter implements Adapter {
 	protected subscriptions: Array<() => unknown> = []
@@ -84,10 +85,10 @@ export default class FirebaseAdapter implements Adapter {
 		const subscribeChats = onSnapshot(chatsSnapshot, async (res) => {
 			// Need to wait for contacts to be loaded before processing chats
 			let unsubscribe: Unsubscriber | undefined
-			const contactsPromise = new Promise<Map<string, User>>((resolve, reject) => {
+			const contactsPromise = new Promise<void>((resolve, reject) => {
 				unsubscribe = contacts.subscribe((c) => {
 					if (c.loading === false) {
-						resolve(c.contacts)
+						resolve()
 					}
 					if (c.error) {
 						reject(c.error)
@@ -95,7 +96,9 @@ export default class FirebaseAdapter implements Adapter {
 				})
 			})
 			try {
-				const cnts = await contactsPromise
+				await contactsPromise
+				await sleep(100) // This needs to be here as sometimes the contacts are not yet populated even though loading is false
+				const cnts = get(contacts).contacts
 				unsubscribe && unsubscribe()
 
 				const newChats = new Map<string, Chat>()
@@ -186,6 +189,8 @@ export default class FirebaseAdapter implements Adapter {
 					console.error(parseRes.error.issues)
 				}
 			})
+			// TODO: Handle this better, every new signed in user should have some balances set
+			if (balances.length === 0) this.initializeBalances(wallet)
 			balanceStore.set({ balances, loading: false })
 		})
 		this.userSubscriptions.push(subscribeBalances)
