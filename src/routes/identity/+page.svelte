@@ -8,6 +8,7 @@
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'
+	import ButtonBlock from '$lib/components/button-block.svelte'
 	import InputFile from '$lib/components/input-file.svelte'
 	import InputField from '$lib/components/input-field.svelte'
 
@@ -108,18 +109,18 @@
 			<InputField autofocus bind:value={name} />
 		</div>
 	</Container>
-	<div class="account">
+	<ButtonBlock borderTop borderBottom on:click={() => goto(routes.IDENTITY_ACCOUNT)}>
 		<Container direction="row" justify="space-between" align="center" alignItems="center">
 			<div class="wallet">
 				<Wallet size={20} /> Account
 			</div>
 			<div>
-				<Button variant="icon" on:click={() => goto(routes.IDENTITY_ACCOUNT)}>
+				<Button variant="icon">
 					<ChevronRight />
 				</Button>
 			</div>
 		</Container>
-	</div>
+	</ButtonBlock>
 	<Container align="center" gap={12} pad={24}>
 		<p>
 			If you disconnect or need to recover access to your identity you will need your recovery
@@ -180,16 +181,11 @@
 		margin-top: var(--spacing-6);
 	}
 
-	.account {
-		border-top: 1px solid var(--gray20);
-		border-bottom: 1px solid var(--gray20);
-
-		.wallet {
-			display: flex;
-			justify-content: flex-start;
-			align-items: center;
-			gap: var(--spacing-6);
-			padding-left: var(--spacing-12);
-		}
+	.wallet {
+		display: flex;
+		justify-content: flex-start;
+		align-items: center;
+		gap: var(--spacing-12);
+		padding-left: var(--spacing-12);
 	}
 </style>
