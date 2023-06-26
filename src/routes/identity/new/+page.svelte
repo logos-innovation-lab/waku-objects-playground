@@ -84,7 +84,7 @@
 		<Renew />
 		Change picture
 	</InputFile>
-	<InputField autofocus bind:value={name} placeholder="Display name" />
+	<InputField autofocus bind:value={name} label="Display name" />
 </Container>
 <Container grow justify="flex-end">
 	<Button variant="strong" disabled={isCreatingIdentity || !name || saving} on:click={saveProfile}>

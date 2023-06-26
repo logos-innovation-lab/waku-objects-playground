@@ -35,15 +35,15 @@
 	</Button>
 </Header>
 {#if $profile.loading}
-	<Container align="center" grow gap={6} justify="center" pad={24}>
+	<Container align="center" grow gap={6} justify="center" padX={24}>
 		<h2>Loading...</h2>
 	</Container>
 {:else if $profile.error}
-	<Container align="center" grow gap={6} justify="center" pad={24}>
+	<Container align="center" grow gap={6} justify="center" padX={24}>
 		<h2>Failed to load profile: {$profile.error.message}</h2>
 	</Container>
 {:else}
-	<Container gap={6} align="center" pad={24}>
+	<Container gap={6} align="center" padX={24}>
 		<p class="text-lg text-bold pad">Address</p>
 		<p class="text-lg">This address is used to send and receive tokens with Waku objects</p>
 	</Container>
@@ -60,7 +60,7 @@
 		</Button>
 	</Container>
 	<Divider pad={12} />
-	<Container align="center" direction="row" gap={6} justify="center" pad={24}>
+	<Container align="center" direction="row" gap={6} justify="center" padX={24}>
 		Assets <Badge dark>{$balanceStore.balances.length}</Badge>
 	</Container>
 	<Divider pad={12} padBottom={0} />

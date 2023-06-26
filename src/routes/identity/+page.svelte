@@ -79,11 +79,11 @@
 	</Button>
 </Header>
 {#if $profile.loading}
-	<Container align="center" grow gap={6} justify="center" pad={24}>
+	<Container align="center" grow gap={6} justify="center" padX={24}>
 		<h2>Loading...</h2>
 	</Container>
 {:else if $profile.error}
-	<Container align="center" grow gap={6} justify="center" pad={24}>
+	<Container align="center" grow gap={6} justify="center" padX={24}>
 		<h2>Failed to load profile: {$profile.error.message}</h2>
 	</Container>
 {:else}
@@ -106,7 +106,7 @@
 			Change picture
 		</InputFile>
 		<div class="displayname">
-			<InputField autofocus bind:value={name} />
+			<InputField autofocus bind:value={name} label="Display name" />
 		</div>
 	</Container>
 	<ButtonBlock borderTop borderBottom on:click={() => goto(routes.IDENTITY_ACCOUNT)}>
@@ -121,13 +121,13 @@
 			</div>
 		</Container>
 	</ButtonBlock>
-	<Container align="center" gap={12} pad={24}>
+	<Container align="center" gap={12} padX={24} padY={24}>
 		<p>
 			If you disconnect or need to recover access to your identity you will need your recovery
 			phrase
 		</p>
 	</Container>
-	<Container align="center" gap={12} pad={24}>
+	<Container align="center" gap={12} padX={24} padY={0}>
 		<Button on:click={() => goto(routes.IDENTITY_BACKUP)}>
 			<DocumentSigned />
 			Backup recovery phrase
@@ -179,6 +179,7 @@
 
 	.displayname {
 		margin-top: var(--spacing-6);
+		margin-bottom: var(--spacing-12);
 	}
 
 	.wallet {
