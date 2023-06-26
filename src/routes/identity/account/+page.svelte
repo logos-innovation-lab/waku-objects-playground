@@ -27,6 +27,10 @@
 		copy(address)
 		copied = true
 	}
+	let assetCount = 0
+	$balanceStore.balances.forEach(() => {
+		assetCount++
+	})
 </script>
 
 <Header title="Account">
@@ -61,7 +65,7 @@
 	</Container>
 	<Divider pad={12} />
 	<Container align="center" direction="row" gap={6} justify="center" pad={24}>
-		Assets <Badge dark>4</Badge>
+		Assets <Badge dark>{assetCount}</Badge>
 	</Container>
 	<Divider pad={12} padBottom={0} />
 	<div class="assets">
