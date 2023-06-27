@@ -2,7 +2,6 @@
 	import { page } from '$app/stores'
 
 	import ArrowUp from '$lib/components/icons/arrow-up.svelte'
-	import ChevronRight from '$lib/components/icons/chevron-right.svelte'
 
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
@@ -17,6 +16,8 @@
 	import { walletStore } from '$lib/stores/wallet'
 	import { browser } from '$app/environment'
 	import { profile } from '$lib/stores/profile'
+	import ObjectLink from '$lib/components/object-link.svelte'
+	import ButtonBlock from '$lib/components/button-block.svelte'
 
 	const objects = [
 		{
@@ -69,47 +70,59 @@
 		?.users.find((m) => m.address !== $walletStore.wallet?.address)
 </script>
 
-{#if $walletStore.loading || $profile.loading}
-	<Container align="center" grow gap={6} justify="center" padX={24}>
-		<h2>Loading...</h2>
-	</Container>
-{:else if $walletStore.error || $profile.error}
-	<Container align="center" grow gap={6} justify="center" padX={24}>
-		<h2>Failed to load chat: {$profile.error?.message ?? $walletStore.error?.message}</h2>
-	</Container>
-{:else}
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<Header mainContent="left">
-		<svelte:fragment slot="left">
-			<div class="gray">
-				<ArrowUp /> to {otherUser?.name}
-			</div>
-		</svelte:fragment>
-		<svelte:fragment slot="right">
-			<Button variant="icon" on:click={() => history.back()}>
-				<Close />
-			</Button>
-		</svelte:fragment>
-	</Header>
-	<div>
-		{#each objects as object}
-			<div class="object" {...object}>
-				<Container direction="row" gap={12} alignItems="center">
-					<img class="img" src={object.image} alt="object logo" />
-					<p>
-						<span class="text-bold text-lg">{object.title}</span>
-						{object.description}
-					</p>
-					<Button variant="icon" on:click={object.onClick}>
-						<ChevronRight />
+<div class="main">
+	{#if $walletStore.loading || $profile.loading}
+		<Container align="center" grow gap={6} justify="center" padX={24}>
+			<h2>Loading...</h2>
+		</Container>
+	{:else if $walletStore.error || $profile.error}
+		<Container align="center" grow gap={6} justify="center" padX={24}>
+			<h2>Failed to load chat: {$profile.error?.message ?? $walletStore.error?.message}</h2>
+		</Container>
+	{:else}
+		<ButtonBlock on:click={() => history.back()}>
+			<Header mainContent="left">
+				<svelte:fragment slot="left">
+					<div class="gray">
+						<ArrowUp /> to {otherUser?.name}
+					</div>
+				</svelte:fragment>
+				<svelte:fragment slot="right">
+					<Button variant="icon">
+						<Close />
 					</Button>
-				</Container>
-			</div>
-		{/each}
-	</div>
-{/if}
+				</svelte:fragment>
+			</Header>
+		</ButtonBlock>
+		<div class="object-list">
+			{#each objects as object}
+				<div class="object" {...object}>
+					<ObjectLink
+						on:click={object.onClick}
+						imgSrc={object.image}
+						title={object.title}
+						description={object.description}
+					/>
+				</div>
+			{/each}
+		</div>
+	{/if}
+</div>
 
 <style lang="scss">
+	.main {
+		min-height: 100dvh;
+		min-height: 100vh;
+		height: 100%;
+		background-color: var(--gray10);
+	}
+
+	.object-list {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-12);
+		padding: var(--spacing-12);
+	}
 	.gray {
 		display: flex;
 		align-items: center;
@@ -120,27 +133,7 @@
 			fill: var(--gray40);
 		}
 	}
-	.object {
-		padding: var(--spacing-12) 0 var(--spacing-12) var(--spacing-12);
-		border-bottom: var(--border);
 
-		.img {
-			width: 70px;
-		}
-		img {
-			width: 70px;
-			height: 70px;
-			aspect-ratio: 1;
-			border-radius: 18px;
-		}
-		span {
-			display: block;
-			margin-bottom: var(--spacing-6);
-		}
-		p {
-			flex-grow: 1;
-		}
-	}
 	.messages {
 		flex-grow: 1;
 	}
