@@ -3,8 +3,6 @@
 	import { page } from '$app/stores'
 
 	import Add from '$lib/components/icons/add.svelte'
-	import Edit from '$lib/components/icons/edit.svelte'
-	import Checkmark from '$lib/components/icons/checkmark.svelte'
 	import ArrowUp from '$lib/components/icons/arrow-up.svelte'
 	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
 
@@ -24,6 +22,7 @@
 	import { walletStore } from '$lib/stores/wallet'
 	import { browser } from '$app/environment'
 	import { profile } from '$lib/stores/profile'
+	import ChatMessage from '$lib/components/chat-message.svelte'
 
 	let div: HTMLElement
 	let autoscroll = true
@@ -39,8 +38,6 @@
 	onMount(() => {
 		div && div.scrollTo(0, div.scrollHeight)
 	})
-
-	let object = false
 
 	$: messages = $chats.chats.get($page.params.id)?.messages || []
 	let loading = false
@@ -87,54 +84,16 @@
 						<!-- Chat bubbles -->
 						{#each messages as message}
 							{#if message.type === 'user' && message.text.length > 0}
-								<div
-									class={`message ${
-										message.fromAddress !== $walletStore.wallet?.address
-											? 'their-message'
-											: 'my-message'
-									}`}
+								<ChatMessage
+									myMessage={message.fromAddress === $walletStore.wallet?.address ? true : false}
+									bubble
 								>
-									<div class="message-content message-text text-lg">
-										{message.text}
-									</div>
-								</div>
+									{message.text}
+								</ChatMessage>
 							{:else if message.type === 'data'}
 								<WakuObject {message} />
 							{/if}
 						{/each}
-						{#if object}
-							<div class={`message their-message`}>
-								<div class="message-content message-text text-lg message-object-request">
-									<div class="req-title">Requestd transaction</div>
-									<div class="req-amt">0.00057 ETH</div>
-									<div class="req-converted">Approx. 50 USD</div>
-									<div class="req-status">pending</div>
-									<Button><Checkmark />Pay now</Button>
-								</div>
-							</div>
-							<div class={`message`}>
-								<div class="message-content message-text text-lg message-object-request">
-									<div class="req-title">Requestd transaction</div>
-									<div class="req-amt">0.00057 ETH</div>
-									<div class="req-converted">Approx. 50 USD</div>
-									<div class="req-status">pending</div>
-									<Button><Edit />Edit</Button>
-								</div>
-							</div>
-
-							<div class={`message their-message`}>
-								<div class="message-content message-text text-lg message-object-confirmation">
-									<div class="conf-link">Requested transaction 0.00057 ETH</div>
-									<div class="conf-status">Transaction confirmed</div>
-								</div>
-							</div>
-							<div class={`message`}>
-								<div class="message-content message-text text-lg message-object-confirmation">
-									<div class="conf-link">Requested transaction 0.00057 ETH</div>
-									<div class="conf-status">Transaction confirmed</div>
-								</div>
-							</div>
-						{/if}
 					</div>
 				</div>
 			</Container>
@@ -180,100 +139,12 @@
 {/if}
 
 <style lang="scss">
-	.gray {
-		display: flex;
-		align-items: center;
-		gap: var(--spacing-6);
-		color: var(--gray40);
-		font-weight: var(--font-weight-500);
-		:global(svg) {
-			fill: var(--gray40);
-		}
-	}
 	.messages {
 		flex-grow: 1;
 	}
 	.messages-inner {
 		padding-top: var(--spacing-48);
 		overflow-y: auto;
-	}
-
-	.message {
-		display: flex;
-		gap: var(--spacing-6);
-		flex-direction: column;
-		align-items: flex-end;
-		max-width: 75%;
-		margin-right: auto;
-		margin-left: 0;
-		&:not(:last-child) {
-			margin-bottom: var(--spacing-12);
-		}
-
-		&.my-message {
-			font-style: italic;
-			margin-left: auto;
-			margin-right: 0;
-		}
-	}
-	.message-content {
-		display: flex;
-		flex-direction: row;
-		gap: var(--spacing-6);
-		align-items: flex-end;
-		text-align: right;
-	}
-
-	.message-text {
-		padding: var(--spacing-12);
-		border-radius: var(--border-radius);
-		display: inline-block;
-		font-family: var(--font-serif);
-		background-color: var(--white);
-	}
-
-	.their-message {
-		align-items: flex-start;
-		text-align: left;
-
-		.message-content {
-			text-align: left;
-		}
-	}
-
-	.message-object-request {
-		font-size: var(--font-size-sm);
-		.req-title {
-			margin-bottom: var(--spacing-12);
-		}
-		.req-amt {
-			font-size: var(--font-size-xl);
-			font-weight: var(--font-weight-600);
-		}
-		.req-converted {
-			margin-bottom: var(--spacing-12);
-		}
-		.req-status {
-			display: inline-block;
-			background-color: #d8d8d8;
-			border-radius: 21px;
-			text-transform: uppercase;
-			font-size: 10px;
-			padding: var(--spacing-6);
-			margin-bottom: var(--spacing-12);
-		}
-	}
-
-	.message-object-confirmation {
-		font-size: var(--font-size-sm);
-
-		.conf-link {
-			font-style: italic;
-			color: var(--gray20);
-			text-decoration: underline;
-			margin-bottom: var(--spacing-12);
-			cursor: pointer;
-		}
 	}
 
 	.chat {
