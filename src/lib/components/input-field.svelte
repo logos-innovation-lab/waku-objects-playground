@@ -1,29 +1,47 @@
 <script lang="ts">
 	export let value = ''
-	export let placeholder = ''
+	export let placeholder: string | undefined = undefined
 	export let autofocus = false
 	export let disabled = false
 	export let pad = 0
+	export let label: string | undefined = undefined
 
 	let inputField: HTMLInputElement
 </script>
 
-<!-- svelte-ignore a11y-autofocus -->
-<input
-	class="text-lg"
-	style={`padding-block: ${pad}px`}
-	type="text"
-	{disabled}
-	{autofocus}
-	{placeholder}
-	bind:value
-	bind:this={inputField}
-	on:keydown
-	on:keypress
-	on:keyup
-/>
+<div class="input-wrapper">
+	{#if label !== undefined && label !== ''}
+		<span class="text-sm">{label}</span>
+	{/if}
+	<!-- svelte-ignore a11y-autofocus -->
+	<input
+		class="text-lg"
+		style={`padding-block: ${pad}px`}
+		type="text"
+		{disabled}
+		{autofocus}
+		{placeholder}
+		bind:value
+		bind:this={inputField}
+		on:keydown
+		on:keypress
+		on:keyup
+	/>
+</div>
 
 <style lang="scss">
+	.input-wrapper {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-6);
+	}
+
+	span {
+		margin-inline: 13px;
+		text-align: left;
+		color: var(--gray40);
+	}
+
 	input {
 		border: 1px solid var(--gray20);
 		border-radius: var(--border-radius);

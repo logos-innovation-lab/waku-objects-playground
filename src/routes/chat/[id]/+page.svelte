@@ -62,11 +62,11 @@
 </script>
 
 {#if $walletStore.loading || $profile.loading}
-	<Container align="center" grow gap={6} justify="center" pad={24}>
+	<Container align="center" grow gap={6} justify="center" padX={24}>
 		<h2>Loading...</h2>
 	</Container>
 {:else if $walletStore.error || $profile.error}
-	<Container align="center" grow gap={6} justify="center" pad={24}>
+	<Container align="center" grow gap={6} justify="center" padX={24}>
 		<h2>Failed to load chat: {$profile.error?.message ?? $walletStore.error?.message}</h2>
 	</Container>
 {:else}

@@ -30,7 +30,7 @@
 		</div>
 	</Container>
 {:else if !$walletStore.wallet}
-	<Container align="center" alignItems="center" gap={12} justify="center" grow pad={24}>
+	<Container align="center" alignItems="center" gap={12} justify="center" grow padX={24}>
 		<div class="chatbot">
 			<div>
 				<WakuLogo size={48} />
@@ -47,13 +47,13 @@
 		</Button>
 	</Container>
 {:else if $chats.loading}
-	<Container align="center" grow gap={6} justify="center" pad={24}>
+	<Container align="center" grow gap={6} justify="center" padX={24}>
 		<div class="center">
 			<h2>Loading...</h2>
 		</div>
 	</Container>
 {:else if $chats.error}
-	<Container align="center" grow gap={6} justify="center" pad={24}>
+	<Container align="center" grow gap={6} justify="center" padX={24}>
 		<div class="center">
 			<h2>Failed to load chats: {$chats.error.message}</h2>
 		</div>
@@ -77,7 +77,7 @@
 			</Button>
 		</svelte:fragment>
 	</Header>
-	<Container align="center" grow gap={6} justify="center" pad={24}>
+	<Container align="center" grow gap={6} justify="center" padX={24}>
 		<p class="text-lg text-bold">No active chats</p>
 		<p class="text-lg">Invite someone to chat</p>
 		<div class="btn-spacing">

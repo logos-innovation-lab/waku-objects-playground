@@ -57,7 +57,7 @@
 		</div>
 	</Container>
 {:else if $walletStore.wallet?.address === $page.params.address}
-	<Container gap={6} grow justify="center" align="center" pad={24}>
+	<Container gap={6} grow justify="center" align="center" padX={24}>
 		<p class="text-lg text-bold">Share link</p>
 		<p class="text-lg description">Share the link below with anyone to start a new chat together</p>
 		<Textarea readonly placeholder={$page.url.href} />
@@ -72,7 +72,7 @@
 		</Button>
 	</Container>
 {:else if $walletStore.wallet}
-	<Container gap={6} grow justify="center" align="center" pad={24}>
+	<Container gap={6} grow justify="center" align="center" padX={24}>
 		<p class="text-lg text-bold">Start chatting</p>
 		<p class="text-lg description">
 			Click the button below to start a new chat with {$page.params.address}
@@ -83,7 +83,7 @@
 		</Button>
 	</Container>
 {:else}
-	<Container align="center" alignItems="center" gap={12} justify="center" grow pad={24}>
+	<Container align="center" alignItems="center" gap={12} justify="center" grow padX={24}>
 		<div class="chatbot">
 			<div>
 				<ChatBot size={32} />

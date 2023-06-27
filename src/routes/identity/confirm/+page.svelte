@@ -16,7 +16,7 @@
 		<ChevronLeft />
 	</Button>
 </Header>
-<Container gap={6} grow justify="center" align="center" pad={24}>
+<Container gap={6} grow justify="center" align="center" padX={24}>
 	<p class="text-lg text-bold">How to recover your identity</p>
 	<p class="text-lg description">
 		If you need to recover your identity, you will need your recovery phrase. Back it up now, or
@@ -27,7 +27,7 @@
 		Backup recovery phrase
 	</Button>
 </Container>
-<Container pad={24}>
+<Container padX={24}>
 	<!-- This goes back 2 pages so that user gets to the page where he started the create wallet flow -->
 	<Button variant="strong" on:click={() => history.go(-2)}>
 		<Checkmark />

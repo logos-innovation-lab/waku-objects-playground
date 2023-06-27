@@ -6,14 +6,15 @@
 	export let alignItems: 'left' | 'right' | 'center' | 'none' = 'none'
 	export let grow: boolean | undefined = undefined
 	export let sticky: 'top' | 'bottom' | 'none' = 'none'
-	export let pad = 12
+	export let padX = 12
+	export let padY = 12
 </script>
 
 <div
 	class={`container text-${align} items-${alignItems} ${
 		sticky !== 'none' ? 'sticky-' + { sticky } : ''
 	} ${direction} ${justify} ${grow ? 'grow' : ''}`}
-	style={`gap: ${gap}px; padding-inline: ${pad}px;`}
+	style={`gap: ${gap}px; padding-inline: ${padX}px; padding-block: ${padY}px;`}
 >
 	<slot />
 </div>
