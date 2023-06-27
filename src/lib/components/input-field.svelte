@@ -1,16 +1,16 @@
 <script lang="ts">
 	export let value = ''
-	export let placeholder = ''
+	export let placeholder: string | undefined = undefined
 	export let autofocus = false
 	export let disabled = false
 	export let pad = 0
-	export let label = ''
+	export let label: string | undefined = undefined
 
 	let inputField: HTMLInputElement
 </script>
 
 <div class="input-wrapper">
-	{#if label !== ''}
+	{#if label !== undefined && label !== ''}
 		<span class="text-sm">{label}</span>
 	{/if}
 	<!-- svelte-ignore a11y-autofocus -->
