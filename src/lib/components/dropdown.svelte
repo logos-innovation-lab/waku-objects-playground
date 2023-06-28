@@ -53,18 +53,21 @@
 
 		ul {
 			position: absolute;
-			inset: 100% 0 auto auto;
+			inset: calc(100% + var(--spacing-6)) 0 auto auto;
 			width: max-content;
 			max-width: 450px;
 			z-index: 100;
 			overflow: hidden;
+			border-radius: var(--border-radius);
+			box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.25);
+			backdrop-filter: blur(var(--blur));
 
 			&.hidden {
 				display: none;
 			}
 
 			&.up {
-				inset: auto auto 48px 0;
+				inset: auto 0 50px auto;
 			}
 		}
 	}
