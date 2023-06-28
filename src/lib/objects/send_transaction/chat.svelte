@@ -6,12 +6,12 @@
 	import { formatTokenAmount } from '$lib/utils/format'
 	import ChatMessage from '$lib/components/chat-message.svelte'
 
-	export let message: DataMessage | undefined = undefined
+	export let message: DataMessage
 	export let args: WakuObjectArgs
 
 	// Don't need to do this, everything should be in the message itself
 	let store: SendTransaction
-	$: {
+	$: if (args.store) {
 		const res = SendTransactionSchema.safeParse(args.store)
 		if (res.success) {
 			store = res.data
@@ -20,8 +20,8 @@
 		}
 	}
 	let data: MessageDataSend
-	$: {
-		const res = MessageDataSendSchema.safeParse(message?.data)
+	$: if (message?.data) {
+		const res = MessageDataSendSchema.safeParse(message.data)
 		if (res.success) {
 			data = res.data
 		} else {
@@ -31,7 +31,9 @@
 </script>
 
 <ChatMessage myMessage bubble>
-	{#if !store || !data}
+	{#if !args.store || !message.data}
+		Loading...
+	{:else if !store || !data}
 		<!-- This is an error state -->
 		Failed to parse store or message data. Check console for details.
 	{:else if data.from === store.from}
