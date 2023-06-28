@@ -27,16 +27,29 @@
 	let div: HTMLElement
 	let autoscroll = true
 
+	console.log(`initial value of autoscroll: ${autoscroll}`)
+
 	beforeUpdate(() => {
-		autoscroll = div && div.offsetHeight + div.scrollTop > div.scrollHeight - 20
+		if (div) {
+			autoscroll = div.offsetHeight + div.scrollTop > div.scrollHeight - 20
+			console.log(`beforeUpdate autoscroll: ${autoscroll}`)
+		}
 	})
 
 	afterUpdate(() => {
-		if (autoscroll) div && div.scrollTo(0, div.scrollHeight)
+		if (div) {
+			console.log(`afterUpdate autoscroll: ${autoscroll}`)
+			console.log(`afterUpdate div scrollheight: ${div.scrollHeight}`)
+			if (autoscroll) div && div.scrollTo(0, div.scrollHeight)
+		}
 	})
 
 	onMount(() => {
 		div && div.scrollTo(0, div.scrollHeight)
+		if (div) {
+			console.log(`onMount autoscroll: ${autoscroll}`)
+			console.log(`on Mount div scrollheight: ${div.scrollHeight}`)
+		}
 	})
 
 	$: messages = $chats.chats.get($page.params.id)?.messages || []
