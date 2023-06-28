@@ -6,7 +6,7 @@ export interface Token {
 	symbol: string
 	amount: bigint
 	decimals: number
-	image: string
+	image?: string
 	address?: string // if not set, it is the native token
 }
 

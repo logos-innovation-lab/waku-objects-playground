@@ -1,7 +1,8 @@
 import { browser } from '$app/environment'
 
-export function formatAddress(address: string, digits = 4) {
-	return `${address.substring(0, digits + 2)}`
+export function formatAddress(address: string, prefix = 4, suffix = 0) {
+	if (suffix) return `${address.substring(0, prefix + 2)}...${address.substring(-suffix, suffix)}`
+	return `${address.substring(0, prefix + 2)}`
 }
 
 export function formatDateFromNow(timestamp: number) {

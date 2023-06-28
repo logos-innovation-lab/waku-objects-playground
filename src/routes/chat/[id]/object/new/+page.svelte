@@ -18,6 +18,7 @@
 	import { profile } from '$lib/stores/profile'
 	import ObjectLink from '$lib/components/object-link.svelte'
 	import ButtonBlock from '$lib/components/button-block.svelte'
+	import { SEND_TRANSACTION_OBJECT_ID } from '$lib/objects/send_transaction'
 
 	const objects = [
 		{
@@ -30,7 +31,9 @@
 			image: 'https://picsum.photos/200',
 			title: 'Send transaction',
 			description: 'Send funds to anyone in the chat from your wallet.',
-			onClick: () => goto(ROUTES.SEND_TRANSACTION),
+			onClick: () => {
+				goto(ROUTES.OBJECT_NEW($page.params.id, SEND_TRANSACTION_OBJECT_ID))
+			},
 		},
 		{
 			image: 'https://picsum.photos/200',

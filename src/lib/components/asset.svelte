@@ -5,7 +5,7 @@
 	export let token: string
 	export let amount: bigint
 	export let decimals: number
-	export let image: string
+	export let image: string | undefined = undefined
 </script>
 
 <div class="asset root">

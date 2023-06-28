@@ -7,6 +7,7 @@ import {
 	query,
 	arrayUnion,
 	where,
+	getDoc,
 } from 'firebase/firestore'
 
 // Stores
@@ -323,5 +324,69 @@ export default class FirebaseAdapter implements Adapter {
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		setDoc(objectDb, newStore as any, { merge: true })
+	}
+	async sendTransaction(
+		wallet: HDNodeWallet,
+		to: string,
+		token: Token,
+		fee: Token,
+	): Promise<string> {
+		const { address } = wallet
+
+		if (!address) throw new Error('Address is missing')
+
+		const tx = {
+			from: address,
+			to,
+			token: {
+				amount: token.amount.toString(),
+				name: token.name,
+				symbol: token.symbol,
+				decimals: token.decimals,
+			},
+			timestamp: Date.now(),
+			fee: {
+				amount: fee.amount.toString(),
+				symbol: fee.symbol,
+				name: fee.name,
+				decimals: fee.decimals,
+			},
+		}
+
+		// Update balances
+		const balanceFromDoc = doc(db, `users/${address}/balances/${token.symbol.toLowerCase()}`)
+		const balanceToDoc = doc(db, `users/${to}/balances/${token.symbol.toLowerCase()}`)
+		const feeDoc = doc(db, `users/${address}/balances/${fee.symbol.toLowerCase()}`)
+		const balanceFrom = (await getDoc(balanceFromDoc)).data()
+		const balanceTo = (await getDoc(balanceToDoc)).data()
+		if (!balanceFrom || !balanceTo) throw new Error('Balance not found')
+		setDoc(
+			balanceFromDoc,
+			{ amount: (BigInt(balanceFrom.amount) - token.amount).toString() },
+			{ merge: true },
+		)
+		setDoc(
+			balanceToDoc,
+			{ amount: (BigInt(balanceTo.amount) + token.amount).toString() },
+			{ merge: true },
+		)
+
+		// Calculate and deduct fee
+		const feeToken = (await getDoc(feeDoc)).data()
+		if (!feeToken) throw new Error('Fee not found')
+		setDoc(feeDoc, { amount: (BigInt(feeToken.amount) - fee.amount).toString() }, { merge: true })
+
+		const txCollection = collection(db, `transactions`)
+		const res = await addDoc(txCollection, tx)
+		return res.id
+	}
+
+	estimateTransaction(): Promise<Token> {
+		return Promise.resolve({
+			name: 'Ether',
+			symbol: 'ETH',
+			amount: 123000000000000000n,
+			decimals: 18,
+		})
 	}
 }

@@ -9,6 +9,8 @@ export default {
 	CHAT: (id: string) => `/chat/${id}`,
 	INVITE: (address: string) => `/invite/${address}`,
 	OBJECTS: (id: string) => `/chat/${id}/object/new`,
+	OBJECT_NEW: (id: string, objectId: string, view?: string) =>
+		`/chat/${id}/object/${objectId}/new${view ? `/${view}` : ''}`,
 
 	REQUEST_TRANSACTION: '/request-transaction',
 	SEND_TRANSACTION: '/send-transaction',
