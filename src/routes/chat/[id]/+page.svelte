@@ -101,7 +101,8 @@
 		<div class="chat-input-wrapper">
 			<Container>
 				<div class="chat-input">
-					<Dropdown up>
+					<Dropdown up left>
+						<!-- TODO: make button "active" while dropdown is open -->
 						<Button variant="icon" slot="button">
 							<Add />
 						</Button>

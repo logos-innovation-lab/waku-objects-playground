@@ -4,10 +4,9 @@
 
 	const dispatch = createEventDispatcher()
 
-	let cls: string | undefined = undefined
-	export { cls as class }
 	export let disabled: boolean | undefined = undefined
 	export let up: boolean | undefined = undefined
+	export let left: boolean | undefined = false
 
 	let showDropdown = false
 	let dropdownElement: HTMLElement
@@ -40,8 +39,8 @@
 		<slot name="button" disabled />
 	</div>
 
-	<div class={`root ${cls}`}>
-		<ul class={`${showDropdown ? '' : 'hidden'} ${up ? 'up' : ''} ${cls}`}>
+	<div class={`root`}>
+		<ul class={`${showDropdown ? '' : 'hidden'} ${up ? 'up' : ''} ${left ? 'left' : ''}`}>
 			<slot />
 		</ul>
 	</div>
@@ -68,6 +67,10 @@
 
 			&.up {
 				inset: auto 0 50px auto;
+			}
+
+			&.left {
+				inset: auto auto 50px 0;
 			}
 		}
 	}
