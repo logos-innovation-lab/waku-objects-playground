@@ -4,6 +4,7 @@
 	import type { SendTransaction } from './schemas'
 	import type { DataMessage } from '$lib/stores/chat'
 	import { formatTokenAmount } from '$lib/utils/format'
+	import ChatMessage from '$lib/components/chat-message.svelte'
 
 	export let message: DataMessage | undefined = undefined
 	export let args: WakuObjectArgs
@@ -29,13 +30,15 @@
 	}
 </script>
 
-{#if !store}
-	<!-- This is an error state -->
-	<p>no store</p>
-{:else if data.from === store.from}
-	You sent {formatTokenAmount(BigInt(data.token.amount), data.token.decimals)}
-	{data.token.symbol} to {data.to}
-{:else}
-	You received {formatTokenAmount(BigInt(data.token.amount), data.token.decimals)}
-	{data.token.symbol} from {data.from}
-{/if}
+<ChatMessage myMessage bubble>
+	{#if !store || !data}
+		<!-- This is an error state -->
+		Failed to parse store or message data. Check console for details.
+	{:else if data.from === store.from}
+		You sent {formatTokenAmount(BigInt(data.token.amount), data.token.decimals)}
+		{data.token.symbol} to {data.to}
+	{:else}
+		You received {formatTokenAmount(BigInt(data.token.amount), data.token.decimals)}
+		{data.token.symbol} from {data.from}
+	{/if}
+</ChatMessage>
