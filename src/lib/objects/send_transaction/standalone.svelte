@@ -29,23 +29,32 @@
 	let fee: Token | undefined = undefined
 	$: if (!token) token = store.nativeToken
 	$: if (args.estimateTransaction && amount && token) {
-		args.estimateTransaction(store.toUser.address, BigInt(amount), token).then((f) => (fee = f))
+		const tokenToTransfer = { ...token, amount: BigInt(Number(amount) * 10 ** token.decimals) }
+		args.estimateTransaction(store.toUser.address, tokenToTransfer).then((f) => (fee = f))
 	}
 	$: if (!amount && store.view === 'overview') history.back()
 
-	function sendTransaction() {
+	async function sendTransaction() {
 		if (args.sendTransaction && fee) {
+			const tokenToTransfer = { ...token, amount: BigInt(Number(amount) * 10 ** token.decimals) }
+
+			const tx = await args.sendTransaction(store.toUser.address, tokenToTransfer, fee)
 			// FIXME: check the amount is actually number and convert to some bigint mechanism which does not lose precision
 			args.send({
-				amount: (Number(amount) * 10 ** token.decimals).toString(),
-				token: token.symbol,
 				from: store.fromUser.address,
 				to: store.toUser.address,
-				fee: fee.amount.toString(),
-				feeToken: fee.symbol,
+				token: {
+					amount: tokenToTransfer.amount.toString(),
+					symbol: tokenToTransfer.symbol,
+					decimals: tokenToTransfer.decimals,
+				},
+				fee: {
+					amount: fee.amount.toString(),
+					symbol: fee.symbol,
+					decimals: fee.decimals,
+				},
+				tx,
 			})
-
-			args.sendTransaction(store.toUser.address, BigInt(amount), token, fee)
 			history.go(-3)
 		}
 	}
@@ -138,7 +147,7 @@
 	<Container grow justify="flex-end">
 		<Button
 			variant="strong"
-			disabled={!amount}
+			disabled={!amount || Number(amount) > Number(formatTokenAmount(token.amount, token.decimals))}
 			on:click={() => args.onViewChange && args.onViewChange('overview')}
 		>
 			<ArrowRight />

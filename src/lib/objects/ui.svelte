@@ -34,16 +34,16 @@
 		adapter.updateStore($walletStore.wallet, objectId, instanceId, updater)
 	}
 
-	function sendTransaction(to: string, amount: bigint, token: Token, fee: Token) {
+	function sendTransaction(to: string, token: Token, fee: Token) {
 		const wallet = $walletStore.wallet
 		if (!wallet) throw new Error('no wallet')
-		return adapter.sendTransaction(instanceId, wallet, to, amount, token, fee)
+		return adapter.sendTransaction(wallet, to, token, fee)
 	}
 
 	function estimateTransaction(to: string, amount: bigint, token: Token) {
 		const wallet = $walletStore.wallet
 		if (!wallet) throw new Error('no wallet')
-		return adapter.estimateTransaction(wallet, to, amount, token)
+		return adapter.estimateTransaction(wallet, to, token)
 	}
 
 	// TODO: handle when there is not wallet (redirect to login)

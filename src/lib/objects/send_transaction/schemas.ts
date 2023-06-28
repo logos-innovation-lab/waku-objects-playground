@@ -2,13 +2,18 @@ import z from 'zod'
 import { AddressSchema, TokenSchema, UserSchema } from '../schemas'
 
 export const SendTransactionSchema = z.object({
-	token: z.string(),
-	amount: z.string(),
+	token: z.object({
+		amount: z.string(),
+		symbol: z.string(),
+		decimals: z.number().int().positive(),
+	}),
 	to: AddressSchema,
 	from: AddressSchema,
-	fee: z.string(),
-	feeToken: z.string(),
-	transactions: z.array(z.string()).optional(),
+	fee: z.object({
+		amount: z.string(),
+		symbol: z.string(),
+		decimals: z.number().int().positive(),
+	}),
 })
 export type SendTransaction = z.infer<typeof SendTransactionSchema>
 
@@ -28,11 +33,18 @@ export const TransactionSchema = z.object({
 export type Transaction = z.infer<typeof TransactionSchema>
 
 export const MessageDataSendSchema = z.object({
-	amount: z.string(),
-	fee: z.string(),
-	feeToken: z.string(),
-	from: z.string(),
-	to: z.string(),
-	token: z.string(),
+	token: z.object({
+		amount: z.string(),
+		symbol: z.string(),
+		decimals: z.number().int().positive(),
+	}),
+	to: AddressSchema,
+	from: AddressSchema,
+	fee: z.object({
+		amount: z.string(),
+		symbol: z.string(),
+		decimals: z.number().int().positive(),
+	}),
+	tx: z.string(),
 })
 export type MessageDataSend = z.infer<typeof MessageDataSendSchema>

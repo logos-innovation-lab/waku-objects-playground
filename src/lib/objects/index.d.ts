@@ -10,8 +10,8 @@ export interface WakuObjectArgs {
 	updateStore: (updater: (state: unknown) => unknown) => void
 
 	send: (data: unknown) => Promise<void>
-	sendTransaction?: (to: string, amount: bigint, token: Token, fee: Token) => Promise<string>
-	estimateTransaction?: (to: string, amount: bigint, token: Token) => Promise<Token>
+	sendTransaction?: (to: string, token: Token, fee: Token) => Promise<string>
+	estimateTransaction?: (to: string, token: Token) => Promise<Token>
 	onViewChange?: (view: string) => void
 }
 

@@ -35,20 +35,8 @@ export interface Adapter {
 		instanceId: string,
 		updater: (state: unknown) => unknown,
 	): Promise<void>
-	sendTransaction(
-		instanceId: string,
-		wallet: HDNodeWallet,
-		to: string,
-		amount: bigint,
-		token: Token,
-		fee: Token,
-	): Promise<string>
-	estimateTransaction(
-		wallet: HDNodeWallet,
-		to: string,
-		amount: bigint,
-		token: Token,
-	): Promise<Token>
+	sendTransaction(wallet: HDNodeWallet, to: string, token: Token, fee: Token): Promise<string>
+	estimateTransaction(wallet: HDNodeWallet, to: string, token: Token): Promise<Token>
 }
 
 const DEFAULT_ADAPTER = 'firebase'

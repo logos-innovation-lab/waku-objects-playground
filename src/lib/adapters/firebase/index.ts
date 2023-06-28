@@ -326,10 +326,8 @@ export default class FirebaseAdapter implements Adapter {
 		setDoc(objectDb, newStore as any, { merge: true })
 	}
 	async sendTransaction(
-		instanceId: string,
 		wallet: HDNodeWallet,
 		to: string,
-		amount: bigint,
 		token: Token,
 		fee: Token,
 	): Promise<string> {
@@ -340,14 +338,45 @@ export default class FirebaseAdapter implements Adapter {
 		const tx = {
 			from: address,
 			to,
-			amount: amount.toString(),
-			token: token.symbol,
+			token: {
+				amount: token.amount.toString(),
+				name: token.name,
+				symbol: token.symbol,
+				decimals: token.decimals,
+			},
 			timestamp: Date.now(),
-			feeAmount: fee.amount.toString(),
-			feeToken: fee.symbol,
+			fee: {
+				amount: fee.amount.toString(),
+				symbol: fee.symbol,
+				name: fee.name,
+				decimals: fee.decimals,
+			},
 		}
 
-		const txCollection = collection(db, `/object/${instanceId}/transactions`)
+		// Update balances
+		const balanceFromDoc = doc(db, `users/${address}/balances/${token.symbol.toLowerCase()}`)
+		const balanceToDoc = doc(db, `users/${to}/balances/${token.symbol.toLowerCase()}`)
+		const feeDoc = doc(db, `users/${address}/balances/${fee.symbol.toLowerCase()}`)
+		const balanceFrom = (await getDoc(balanceFromDoc)).data()
+		const balanceTo = (await getDoc(balanceToDoc)).data()
+		if (!balanceFrom || !balanceTo) throw new Error('Balance not found')
+		setDoc(
+			balanceFromDoc,
+			{ amount: (BigInt(balanceFrom.amount) - token.amount).toString() },
+			{ merge: true },
+		)
+		setDoc(
+			balanceToDoc,
+			{ amount: (BigInt(balanceTo.amount) + token.amount).toString() },
+			{ merge: true },
+		)
+
+		// Calculate and deduct fee
+		const feeToken = (await getDoc(feeDoc)).data()
+		if (!feeToken) throw new Error('Fee not found')
+		setDoc(feeDoc, { amount: (BigInt(feeToken.amount) - fee.amount).toString() }, { merge: true })
+
+		const txCollection = collection(db, `transactions`)
 		const res = await addDoc(txCollection, tx)
 		return res.id
 	}
@@ -359,23 +388,5 @@ export default class FirebaseAdapter implements Adapter {
 			amount: 123000000000000000n,
 			decimals: 18,
 		})
-	}
-
-	async addWakuDoc(wallet: HDNodeWallet, wakuObject: any): Promise<string> {
-		const { address } = wallet
-
-		if (!address) throw new Error('Address is missing')
-
-		const wakuObjectCollection = collection(db, `/object`)
-		const ref = await addDoc(wakuObjectCollection, wakuObject)
-		return ref.id
-	}
-
-	async getWakuObjectData(id: string) {
-		const wakuObjectDoc = doc(db, `object/${id}`)
-		const wakuObjectData = await getDoc(wakuObjectDoc)
-		if (wakuObjectData.exists()) {
-			return wakuObjectData.data()
-		}
 	}
 }

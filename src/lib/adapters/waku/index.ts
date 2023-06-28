@@ -342,22 +342,16 @@ export default class WakuAdapter implements Adapter {
 		await storeObjectStore(this.waku, wallet.address, updatedObjectStore)
 	}
 
-	sendTransaction(
-		instanceId: string,
-		wallet: HDNodeWallet,
-		to: string,
-		amount: bigint,
-		token: Token,
-		fee: Token,
-	): Promise<string> {
+	sendTransaction(wallet: HDNodeWallet, to: string, token: Token, fee: Token): Promise<string> {
+		console.log('Method not implemented.', { wallet, to, token, fee })
 		throw new Error('Method not implemented.')
 	}
-	estimateTransaction(
-		wallet: HDNodeWallet,
-		to: string,
-		amount: bigint,
-		token: Token,
-	): Promise<Token> {
+	estimateTransaction(wallet: HDNodeWallet, to: string, token: Token): Promise<Token> {
+		console.log('Method not implemented.', {
+			wallet,
+			to,
+			token,
+		})
 		throw new Error('Method not implemented.')
 	}
 }

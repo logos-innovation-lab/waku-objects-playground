@@ -1,4 +1,3 @@
-import z from 'zod'
 import type { WakuObjectDescriptor } from '..'
 import ChatComponent from './chat.svelte'
 import StandaloneComponent from './standalone.svelte'
