@@ -21,6 +21,7 @@
 	import { walletStore } from '$lib/stores/wallet'
 	import { profile } from '$lib/stores/profile'
 	import adapters from '$lib/adapters'
+	import Renew from '$lib/components/icons/renew.svelte'
 
 	let copied = false
 	let loading = false
@@ -58,20 +59,30 @@
 		</div>
 	</Container>
 {:else if $walletStore.wallet?.address === $page.params.address}
-	<Container gap={6} grow justify="flex-start" align="center" padX={24}>
+	<Container gap={12} grow justify="flex-start" align="center" padX={24} padY={24}>
 		<p class="text-lg text-bold">Show QR code or share link below</p>
-		<QRCode content={$page.url.href} size={'256'} />
-		<p class="text-lg description">Share the link below with anyone to start a new chat together</p>
-		<Textarea readonly placeholder={$page.url.href} />
-		<Button on:click={copyToClipboard}>
-			{#if copied}
-				<Checkmark />
-				Copied
-			{:else}
-				<CopyLink />
-				Copy link
-			{/if}
-		</Button>
+		<div class="qr">
+			<QRCode content={$page.url.href} size={'250'} padding={'0'} />
+		</div>
+		<div class="link">
+			<Textarea label="Invitation link" readonly placeholder={$page.url.href} height={96} />
+		</div>
+		<div class="btns">
+			<Button on:click={copyToClipboard} variant="strong">
+				{#if copied}
+					<Checkmark />
+					Copied
+				{:else}
+					<CopyLink />
+					Copy link
+				{/if}
+			</Button>
+			<!-- TODO: add action to "Renew link" button -->
+			<Button>
+				<Renew />
+				Renew link
+			</Button>
+		</div>
 	</Container>
 {:else if $walletStore.wallet}
 	<Container gap={6} grow justify="center" align="center" padX={24}>
@@ -104,4 +115,14 @@
 {/if}
 
 <style lang="scss">
+	.qr {
+		padding-block: 7px;
+	}
+	.link {
+		width: calc(100% + var(--spacing-24));
+	}
+	.btns {
+		display: flex;
+		gap: var(--spacing-12);
+	}
 </style>
