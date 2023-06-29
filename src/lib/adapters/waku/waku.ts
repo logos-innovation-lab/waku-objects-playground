@@ -22,7 +22,15 @@ const peerMultiaddr = multiaddr(
 	'/dns4/ws.waku-1.apyos.dev/tcp/443/wss/p2p/16Uiu2HAm8gXHntr3SB5sde11pavjptaoiqyvwoX3GyEZWKMPiuBu',
 )
 
-type ContentTopic = 'private-message' | 'profile' | 'contact' | 'chats' | 'all-users' | 'objects'
+type ContentTopic =
+	| 'private-message'
+	| 'profile'
+	| 'contact'
+	| 'chats'
+	| 'all-users'
+	| 'objects'
+	| 'balances'
+	| 'transactions'
 type QueryResult = AsyncGenerator<Promise<DecodedMessage | undefined>[]>
 
 const topicApp = 'wakuobjects-playground'
@@ -82,6 +90,10 @@ export async function readLatestDocument(
 			const message = await messagePromise
 			if (message) {
 				const decodedPayload = decodeMessagePayload(message)
+				// TODO HACK
+				if (!decodedPayload || decodedPayload === 'undefined') {
+					return
+				}
 
 				return JSON.parse(decodedPayload)
 			} else {

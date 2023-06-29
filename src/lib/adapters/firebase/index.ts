@@ -279,7 +279,7 @@ export default class FirebaseAdapter implements Adapter {
 	/**
 	 * THIS IS JUST FOR DEV PURPOSES
 	 */
-	initializeBalances(wallet: HDNodeWallet): void {
+	async initializeBalances(wallet: HDNodeWallet): Promise<void> {
 		const { address } = wallet
 
 		if (!address) throw new Error('Address is missing')

@@ -11,7 +11,6 @@
 	import { walletStore } from '$lib/stores/wallet'
 	import Button from '$lib/components/button.svelte'
 	import { balanceStore } from '$lib/stores/balances'
-	import type FirebaseAdapter from '$lib/adapters/firebase'
 
 	function changeAdapter(adapterName: AdapterName) {
 		saveToLocalStorage('adapter', adapterName)
@@ -21,8 +20,10 @@
 	function initializeBalances() {
 		const wallet = $walletStore.wallet
 
-		if (!wallet) return
-		;(adapter as unknown as FirebaseAdapter).initializeBalances(wallet)
+		if (!wallet) {
+			return
+		}
+		adapter.initializeBalances(wallet)
 	}
 </script>
 
@@ -40,22 +41,20 @@
 		</Dropdown>
 	</section>
 	<Divider />
-	{#if adapterName === 'firebase'}
-		<section>
-			<Button disabled={!$walletStore.wallet} on:click={initializeBalances}
-				>Initialize token balances</Button
-			>
-			{#each $balanceStore.balances as balance}
-				<Asset
-					name={balance.name}
-					token={balance.symbol}
-					amount={balance.amount}
-					decimals={balance.decimals}
-					image={balance.image}
-				/>
-			{/each}
-		</section>
-	{/if}
+	<section>
+		<Button disabled={!$walletStore.wallet} on:click={initializeBalances}
+			>Initialize token balances</Button
+		>
+		{#each $balanceStore.balances as balance}
+			<Asset
+				name={balance.name}
+				token={balance.symbol}
+				amount={balance.amount}
+				decimals={balance.decimals}
+				image={balance.image}
+			/>
+		{/each}
+	</section>
 </Container>
 
 <style lang="scss">
