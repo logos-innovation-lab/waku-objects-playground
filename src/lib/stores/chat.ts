@@ -8,13 +8,13 @@ export interface UserMessage {
 	text: string
 }
 
-export interface DataMessage {
+export interface DataMessage<T = unknown> {
 	type: 'data'
 	timestamp: number
 	fromAddress: string
 	objectId: string
 	instanceId: string
-	data?: unknown
+	data?: T
 }
 
 export type Message = UserMessage | DataMessage

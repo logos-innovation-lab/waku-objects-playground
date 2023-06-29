@@ -9,12 +9,16 @@
 	import ArrowRight from '$lib/components/icons/arrow-right.svelte'
 	import { formatAddress, formatTokenAmount } from '$lib/utils/format'
 	import type { WakuObjectArgs } from '..'
-	import { SendTransactionStandaloneSchema, type SendTransactionStandalone } from './schemas'
+	import {
+		SendTransactionStandaloneSchema,
+		type SendTransactionStandalone,
+		type MessageDataSend,
+	} from './schemas'
 	import type { Token } from '../schemas'
 	import CaretDown from '$lib/components/icons/caret-down.svelte'
 	import WarningAltFilled from '$lib/components/icons/warning-alt-filled.svelte'
 
-	export let args: WakuObjectArgs
+	export let args: WakuObjectArgs<MessageDataSend, MessageDataSend>
 
 	let store: SendTransactionStandalone
 	$: {
