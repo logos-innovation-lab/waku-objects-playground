@@ -9,7 +9,7 @@
 	export let args: WakuObjectArgs
 
 	$: helloWorldStore = args.store as HelloWorldStore | undefined
-	$: address = args.address
+	$: address = args.profile.address
 </script>
 
 {#if address === message?.fromAddress}
@@ -20,6 +20,6 @@
 		name={helloWorldStore?.name}
 		send={args.send}
 		updateStore={args.updateStore}
-		ownName={args.name}
+		ownName={args.profile.name || 'Anonymous'}
 	/>
 {/if}

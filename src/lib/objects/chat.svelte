@@ -7,8 +7,10 @@
 	import { profile } from '$lib/stores/profile'
 	import type { WakuObjectArgs } from '.'
 	import { lookup } from './lookup'
+	import type { User } from './schemas'
 
 	export let message: DataMessage
+	export let users: User[]
 
 	const component = lookup(message.objectId)?.wakuObject
 
@@ -18,21 +20,30 @@
 	if (!wallet) {
 		throw 'no wallet'
 	}
-	const address = wallet.address
 	const chatId = $page.params.id
-	const name = $profile.name || address
+	const address = wallet.address
+
+	let userProfile: User
+	$: if (address && !$profile.loading) {
+		userProfile = {
+			address,
+			name: $profile.name,
+			avatar: $profile.avatar,
+		}
+	}
 
 	let args: WakuObjectArgs
-	$: args = {
-		name,
-		address,
-		store,
-		updateStore: (updater) => {
-			adapter.updateStore(wallet, message.objectId, message.instanceId, updater)
-		},
-		send: (data: unknown) =>
-			adapter.sendData(wallet, chatId, message.objectId, message.instanceId, data),
-	}
+	$: if (userProfile)
+		args = {
+			profile: userProfile,
+			users,
+			store,
+			updateStore: (updater) => {
+				adapter.updateStore(wallet, message.objectId, message.instanceId, updater)
+			},
+			send: (data: unknown) =>
+				adapter.sendData(wallet, chatId, message.objectId, message.instanceId, data),
+		}
 </script>
 
 <svelte:component this={component} {message} {args} />

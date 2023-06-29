@@ -1,10 +1,11 @@
 import type { Token } from '$lib/stores/balances'
 import type { DataMessage } from '$lib/stores/chat'
 import type { ComponentType } from 'svelte'
+import type { User } from './schemas'
 
 export interface WakuObjectArgs<StoreType = unknown, DataMessageType = unknown> {
-	readonly address: string
-	readonly name: string
+	readonly profile: User
+	readonly users: User[]
 
 	readonly store: StoreType
 	updateStore: (updater: (state: StoreType) => StoreType) => void
