@@ -45,21 +45,22 @@
 
 	afterUpdate(() => {
 		if (browser && div && autoscroll) {
-			window.scrollTo(0, div.scrollHeight)
+			window.scrollTo({
+				top: div.scrollHeight,
+				behavior: 'smooth',
+			})
 		}
 	})
 
 	onMount(() => {
 		if (browser && div) {
 			// It can not be done in onMount because the div is not yet rendered
-			setTimeout(
-				() =>
-					window.scrollTo({
-						top: div.scrollHeight,
-						behavior: 'instant',
-					}),
-				0,
-			)
+			setTimeout(() => {
+				window.scrollTo({
+					top: div.scrollHeight,
+					behavior: 'auto',
+				})
+			}, 0)
 		}
 	})
 
