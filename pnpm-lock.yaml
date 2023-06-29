@@ -1,6 +1,9 @@
 lockfileVersion: '6.0'
 
 devDependencies:
+  '@bonosoft/sveltekit-qrcode':
+    specifier: ^0.0.3
+    version: 0.0.3(svelte@3.58.0)
   '@fontsource/source-sans-pro':
     specifier: ^4.5.11
     version: 4.5.11
@@ -121,6 +124,14 @@ packages:
 
   /@adraffy/ens-normalize@1.9.0:
     resolution: {integrity: sha512-iowxq3U30sghZotgl4s/oJRci6WPBfNO5YYgk2cIOMCHr3LeGPcsZjCEr+33Q4N+oV3OABDAtA+pyvWjbvBifQ==}
+    dev: true
+
+  /@bonosoft/sveltekit-qrcode@0.0.3(svelte@3.58.0):
+    resolution: {integrity: sha512-o5b4HQXbzjTKRBaoe47u3v24fRQnxTAuSpUUCxK4lKGf6HNKL5OS7zRIyhrXcWu80auyhh6xbJc21GjwI+tFZw==}
+    peerDependencies:
+      svelte: ^3.54.0
+    dependencies:
+      svelte: 3.58.0
     dev: true
 
   /@chainsafe/is-ip@2.0.1:

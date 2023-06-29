@@ -1,5 +1,6 @@
 <script lang="ts">
 	import copy from 'copy-to-clipboard'
+	import QRCode from '@bonosoft/sveltekit-qrcode'
 
 	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
 	import Checkmark from '$lib/components/icons/checkmark.svelte'
@@ -57,8 +58,9 @@
 		</div>
 	</Container>
 {:else if $walletStore.wallet?.address === $page.params.address}
-	<Container gap={6} grow justify="center" align="center" padX={24}>
-		<p class="text-lg text-bold">Share link</p>
+	<Container gap={6} grow justify="flex-start" align="center" padX={24}>
+		<p class="text-lg text-bold">Show QR code or share link below</p>
+		<QRCode content={$page.url.href} size={'256'} />
 		<p class="text-lg description">Share the link below with anyone to start a new chat together</p>
 		<Textarea readonly placeholder={$page.url.href} />
 		<Button on:click={copyToClipboard}>
