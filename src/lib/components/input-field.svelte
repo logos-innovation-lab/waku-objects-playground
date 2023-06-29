@@ -59,5 +59,9 @@
 			background-color: var(--gray10);
 			border-color: transparent;
 		}
+
+		&::placeholder {
+			opacity: 0.5;
+		}
 	}
 </style>

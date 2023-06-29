@@ -48,8 +48,8 @@
 	--font-weight-700: 700;
 
 	--border-radius: var(--spacing-24);
-
 	--border: 1px solid var(--gray10);
+	--blur: 3px;
 
 	/* INPUT */
 	--input-bg: var(--gray10);

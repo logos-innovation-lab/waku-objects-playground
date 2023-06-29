@@ -3,7 +3,7 @@
 	import Button from '$lib/components/button.svelte'
 	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
 	import Container from '$lib/components/container.svelte'
-	import Input from '$lib/components/input.svelte'
+	import Input from '$lib/components/input-field.svelte'
 	import Dropdown from '$lib/components/dropdown.svelte'
 	import DropdownItem from '$lib/components/dropdown-item.svelte'
 	import ArrowRight from '$lib/components/icons/arrow-right.svelte'
@@ -11,6 +11,8 @@
 	import type { WakuObjectArgs } from '..'
 	import { SendTransactionStandaloneSchema, type SendTransactionStandalone } from './schemas'
 	import type { Token } from '../schemas'
+	import CaretDown from '$lib/components/icons/caret-down.svelte'
+	import WarningAltFilled from '$lib/components/icons/warning-alt-filled.svelte'
 
 	export let args: WakuObjectArgs
 
@@ -125,26 +127,37 @@
 		</Button>
 	</Header>
 
-	<Container gap={6}>
+	<Container gap={24} grow justify="center" padX={24}>
 		<p>How much would you like to send?</p>
-		<Input bind:value={amount} />
-		<Dropdown>
-			<Button slot="button">{token.symbol}</Button>
-			{#each store.tokens as t}
-				<DropdownItem
-					onClick={() => {
-						token = t
-					}}>{t.symbol}</DropdownItem
-				>
-			{/each}
-		</Dropdown>
-		<p>x EUR</p>
-		<p>
+		<div class="amt-drop">
+			<div class="drop">
+				<Input bind:value={amount} placeholder="0" />
+				<Dropdown>
+					<Button slot="button">{token.symbol} <CaretDown /></Button>
+					{#each store.tokens as t}
+						<DropdownItem
+							onClick={() => {
+								token = t
+							}}>{t.symbol}</DropdownItem
+						>
+					{/each}
+				</Dropdown>
+			</div>
+			<p class="fiat text-sm">x EUR {amount ? 'now' : ''}</p>
+		</div>
+		<p
+			class={`balance ${
+				Number(amount) > Number(formatTokenAmount(token.amount, token.decimals)) ? 'text-bold' : ''
+			}`}
+		>
+			{#if Number(amount) > Number(formatTokenAmount(token.amount, token.decimals))}
+				<WarningAltFilled />
+			{/if}
 			You have {formatTokenAmount(token.amount, token.decimals)}
 			{token.symbol} in your account.
 		</p>
 	</Container>
-	<Container grow justify="flex-end">
+	<Container justify="flex-end">
 		<Button
 			variant="strong"
 			disabled={!amount || Number(amount) > Number(formatTokenAmount(token.amount, token.decimals))}
@@ -155,7 +168,7 @@
 	</Container>
 {/if}
 
-<style>
+<style lang="scss">
 	.column {
 		display: flex;
 		flex-direction: column;
@@ -171,8 +184,24 @@
 		padding: 12px;
 		border-radius: 24px;
 	}
-	.label {
-		font-size: 14px;
-		color: #7c7c7c;
+	:global(.input-wrapper) {
+		flex-grow: 1;
+	}
+	.amt-drop {
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-12);
+
+		.drop {
+			display: flex;
+			flex-direction: row;
+			gap: var(--spacing-6);
+			margin-inline: calc(var(--spacing-12) * -1);
+		}
+	}
+	.balance {
+		display: flex;
+		align-items: center;
+		gap: var(--spacing-6);
 	}
 </style>

@@ -14,7 +14,7 @@
 
 <style lang="scss">
 	li {
-		padding: var(--spacing-12);
+		padding: 14px;
 		list-style: none;
 		cursor: pointer;
 		position: relative;
@@ -22,10 +22,7 @@
 		justify-content: space-between;
 		align-items: center;
 		gap: var(--spacing-24);
-		font-family: var(--font-serif);
-		font-size: var(--font-size-normal);
 		background-color: var(--white);
-		border: 1px solid var(--gray20);
 
 		&.danger {
 			color: var(--color-red);
@@ -41,7 +38,7 @@
 		}
 
 		&:not(:last-child) {
-			border-bottom: 1px solid var(--grey-200);
+			border-bottom: 1px solid var(--gray20);
 		}
 	}
 </style>
