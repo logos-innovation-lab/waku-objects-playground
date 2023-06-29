@@ -27,28 +27,39 @@
 	let div: HTMLElement
 	let autoscroll = true
 
-	console.log(`initial value of autoscroll: ${autoscroll}`)
-
 	beforeUpdate(() => {
-		if (div) {
-			autoscroll = div.offsetHeight + div.scrollTop > div.scrollHeight - 20
-			console.log(`beforeUpdate autoscroll: ${autoscroll}`)
+		if (browser && window) {
+			let body = document.body
+			let html = document.documentElement
+
+			let height = Math.max(
+				body.scrollHeight,
+				body.offsetHeight,
+				html.clientHeight,
+				html.scrollHeight,
+				html.offsetHeight,
+			)
+			autoscroll = height <= window.scrollY + window.innerHeight
 		}
 	})
 
 	afterUpdate(() => {
-		if (div) {
-			console.log(`afterUpdate autoscroll: ${autoscroll}`)
-			console.log(`afterUpdate div scrollheight: ${div.scrollHeight}`)
-			if (autoscroll) div && div.scrollTo(0, div.scrollHeight)
+		if (browser && div && autoscroll) {
+			window.scrollTo(0, div.scrollHeight)
 		}
 	})
 
 	onMount(() => {
-		div && div.scrollTo(0, div.scrollHeight)
-		if (div) {
-			console.log(`onMount autoscroll: ${autoscroll}`)
-			console.log(`on Mount div scrollheight: ${div.scrollHeight}`)
+		if (browser && div) {
+			// It can not be done in onMount because the div is not yet rendered
+			setTimeout(
+				() =>
+					window.scrollTo({
+						top: div.scrollHeight,
+						behavior: 'instant',
+					}),
+				0,
+			)
 		}
 	})
 
