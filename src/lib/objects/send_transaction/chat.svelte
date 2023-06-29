@@ -6,8 +6,8 @@
 	import { formatTokenAmount } from '$lib/utils/format'
 	import ChatMessage from '$lib/components/chat-message.svelte'
 
-	export let message: DataMessage
-	export let args: WakuObjectArgs
+	export let message: DataMessage<MessageDataSend>
+	export let args: WakuObjectArgs<MessageDataSend, MessageDataSend>
 
 	// Don't need to do this, everything should be in the message itself
 	let store: SendTransaction
