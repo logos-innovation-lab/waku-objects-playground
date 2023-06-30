@@ -21,7 +21,6 @@
 	import { walletStore } from '$lib/stores/wallet'
 	import { profile } from '$lib/stores/profile'
 	import adapters from '$lib/adapters'
-	import Renew from '$lib/components/icons/renew.svelte'
 
 	let copied = false
 	let loading = false
@@ -67,22 +66,15 @@
 		<div class="link">
 			<Textarea label="Invitation link" readonly placeholder={$page.url.href} height={96} />
 		</div>
-		<div class="btns">
-			<Button on:click={copyToClipboard} variant="strong">
-				{#if copied}
-					<Checkmark />
-					Copied
-				{:else}
-					<CopyLink />
-					Copy link
-				{/if}
-			</Button>
-			<!-- TODO: add action to "Renew link" button -->
-			<Button>
-				<Renew />
-				Renew link
-			</Button>
-		</div>
+		<Button on:click={copyToClipboard} variant="strong">
+			{#if copied}
+				<Checkmark />
+				Copied
+			{:else}
+				<CopyLink />
+				Copy link
+			{/if}
+		</Button>
 	</Container>
 {:else if $walletStore.wallet}
 	<Container gap={6} grow justify="center" align="center" padX={24}>
@@ -120,9 +112,5 @@
 	}
 	.link {
 		width: calc(100% + var(--spacing-24));
-	}
-	.btns {
-		display: flex;
-		gap: var(--spacing-12);
 	}
 </style>
