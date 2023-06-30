@@ -106,7 +106,14 @@
 			</div>
 			<div class="secondary text-sm">≈ 1.56 EUR now</div>
 		</ReadonlyText>
-		<p>
+		<p
+			class={`balance ${
+				Number(amount) > Number(formatTokenAmount(token.amount, token.decimals)) ? 'text-bold' : ''
+			}`}
+		>
+			{#if Number(amount) > Number(formatTokenAmount(token.amount, token.decimals))}
+				<WarningAltFilled />
+			{/if}
 			You have {formatTokenAmount(store.nativeToken.amount, store.nativeToken.decimals)} ETH in your
 			account.
 		</p>
