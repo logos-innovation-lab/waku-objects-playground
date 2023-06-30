@@ -58,12 +58,15 @@
 		</div>
 	</Container>
 {:else if $walletStore.wallet?.address === $page.params.address}
-	<Container gap={6} grow justify="flex-start" align="center" padX={24}>
+	<Container gap={12} grow justify="flex-start" align="center" padX={24} padY={24}>
 		<p class="text-lg text-bold">Show QR code or share link below</p>
-		<QRCode content={$page.url.href} size={'256'} />
-		<p class="text-lg description">Share the link below with anyone to start a new chat together</p>
-		<Textarea readonly placeholder={$page.url.href} />
-		<Button on:click={copyToClipboard}>
+		<div class="qr">
+			<QRCode content={$page.url.href} size={'250'} padding={'0'} />
+		</div>
+		<div class="link">
+			<Textarea label="Invitation link" readonly placeholder={$page.url.href} height={96} />
+		</div>
+		<Button on:click={copyToClipboard} variant="strong">
 			{#if copied}
 				<Checkmark />
 				Copied
@@ -104,4 +107,10 @@
 {/if}
 
 <style lang="scss">
+	.qr {
+		padding-block: 7px;
+	}
+	.link {
+		width: calc(100% + var(--spacing-24));
+	}
 </style>
