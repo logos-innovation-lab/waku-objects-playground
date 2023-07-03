@@ -69,9 +69,8 @@
 		loading = false
 	}
 
-	$: otherUser = $chats.chats
-		.get($page.params.id)
-		?.users.find((m) => m.address !== $walletStore.wallet?.address)
+	$: chat = $chats.chats.get($page.params.id)
+	$: otherUser = chat?.users.find((m) => m.address !== $walletStore.wallet?.address)
 </script>
 
 {#if $walletStore.loading || $profile.loading}
@@ -81,6 +80,10 @@
 {:else if $walletStore.error || $profile.error}
 	<Container align="center" grow gap={6} justify="center" padX={24}>
 		<h2>Failed to load chat: {$profile.error?.message ?? $walletStore.error?.message}</h2>
+	</Container>
+{:else if !chat}
+	<Container align="center" grow gap={6} justify="center" padX={24}>
+		<h2>Chat not found</h2>
 	</Container>
 {:else}
 	<div class="chat">
@@ -107,7 +110,7 @@
 									{message.text}
 								</ChatMessage>
 							{:else if message.type === 'data'}
-								<WakuObject {message} />
+								<WakuObject {message} users={chat.users} />
 							{/if}
 						{/each}
 					</div>

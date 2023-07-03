@@ -28,15 +28,16 @@
 			console.error(res.error)
 		}
 	}
+	$: myMessage = data?.from === args.profile.address
 </script>
 
-<ChatMessage myMessage bubble>
+<ChatMessage {myMessage} bubble>
 	{#if !args.store || !message.data}
 		Loading...
 	{:else if !store || !data}
 		<!-- This is an error state -->
 		Failed to parse store or message data. Check console for details.
-	{:else if data.from === store.from}
+	{:else if myMessage}
 		You sent {formatTokenAmount(BigInt(data.token.amount), data.token.decimals)}
 		{data.token.symbol} to {data.to}
 	{:else}
