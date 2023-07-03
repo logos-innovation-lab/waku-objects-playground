@@ -119,33 +119,6 @@ async function storeObjectStore(waku: LightNode, address: string, objectStore: O
 	await storeDocument(waku, 'objects', address, Array.from(objectStore.objects))
 }
 
-async function readBalances(waku: LightNode, address: string): Promise<BalanceState> {
-	const balancesRaw = (await readLatestDocument(waku, 'balances', address)) as TokenDb[] | undefined
-	const balances: Token[] = []
-	if (balancesRaw) {
-		balancesRaw.forEach((balanceRaw) => {
-			const balance = TokenDbSchema.safeParse(balanceRaw)
-			if (balance.success) {
-				balances.push(balance.data)
-			}
-		})
-	}
-
-	return {
-		loading: false,
-		balances,
-	}
-}
-
-async function storeBalances(waku: LightNode, address: string, balanceState: BalanceState) {
-	return await storeDocument(
-		waku,
-		'balances',
-		address,
-		balanceState.balances.map((token) => ({ ...token, amount: token.amount.toString() })),
-	)
-}
-
 /*
  * Temporary helper function to read all users from the waku store, so that contacts are discoverable.
  * This functionality can be removed once the invite system is working.
@@ -243,16 +216,7 @@ export default class WakuAdapter implements Adapter {
 		})
 		this.subscriptions.push(subscribeObjectStore)
 
-		const balanceState = await readBalances(this.waku, address)
-		balanceStore.set(balanceState)
-
-		const subscribeBalanceStore = balanceStore.subscribe(async (balanceState) => {
-			if (!adapter.waku) {
-				return
-			}
-			await storeBalances(adapter.waku, address, balanceState)
-		})
-		this.subscriptions.push(subscribeBalanceStore)
+		this.initializeBalances(wallet)
 	}
 
 	async onLogOut() {
@@ -415,11 +379,9 @@ export default class WakuAdapter implements Adapter {
 
 		// Update balances
 		const balanceFromDoc = get(balanceStore)
-		const balanceToDoc = await readBalances(this.waku, to)
 		const balanceFrom = balanceFromDoc.balances.find((balance) => balance.symbol === token.symbol)
-		const balanceTo = balanceToDoc.balances.find((balance) => balance.symbol === token.symbol)
 		const feeFrom = balanceFromDoc.balances.find((balance) => balance.symbol === fee.symbol)
-		if (!balanceFrom || !balanceTo || !feeFrom) throw new Error('Balance not found')
+		if (!balanceFrom || !feeFrom) throw new Error('Balance not found')
 
 		if (balanceFrom.amount - token.amount >= 0 && feeFrom.amount - fee.amount >= 0) {
 			balanceStore.update((prevState) => ({
@@ -441,19 +403,6 @@ export default class WakuAdapter implements Adapter {
 			}))
 		}
 
-		await storeBalances(this.waku, to, {
-			...balanceToDoc,
-			balances: balanceToDoc.balances.map((b) => {
-				if (b.symbol === token.symbol) {
-					return {
-						...b,
-						amount: b.amount + token.amount,
-					}
-				}
-				return b
-			}),
-		})
-
 		await storeDocument(this.waku, 'transactions', '', tx)
 
 		return ''
@@ -471,7 +420,7 @@ export default class WakuAdapter implements Adapter {
 	/**
 	 * THIS IS JUST FOR DEV PURPOSES
 	 */
-	async initializeBalances(wallet: HDNodeWallet): Promise<void> {
+	initializeBalances(wallet: HDNodeWallet): void {
 		const { address } = wallet
 
 		if (!address) throw new Error('Address is missing')
@@ -498,11 +447,5 @@ export default class WakuAdapter implements Adapter {
 			loading: false,
 		}
 		balanceStore.set(balancesState)
-
-		if (!this.waku) {
-			this.waku = await connectWaku()
-		}
-
-		storeBalances(this.waku, address, balancesState)
 	}
 }
