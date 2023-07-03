@@ -28,7 +28,7 @@
 	let autoscroll = true
 
 	beforeUpdate(() => {
-		if (browser && window && dev) {
+		if (browser && window && div) {
 			const height = div.scrollHeight
 			autoscroll = height <= window.scrollY + window.innerHeight
 		}
