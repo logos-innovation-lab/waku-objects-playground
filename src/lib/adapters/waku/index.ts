@@ -19,8 +19,7 @@ import { ipfs, IPFS_GATEWAY } from '../firebase/connections'
 import { get } from 'svelte/store'
 import { objectStore, type ObjectState, objectKey } from '$lib/stores/objects'
 import { lookup } from '$lib/objects/lookup'
-import { balanceStore, type BalanceState, type Token } from '$lib/stores/balances'
-import { TokenDbSchema, type TokenDb } from '../firebase/schemas'
+import { balanceStore, type Token } from '$lib/stores/balances'
 
 function createChat(chatId: string, user: User, address: string): string {
 	chats.update((state) => {
