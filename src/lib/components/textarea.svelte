@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onDestroy, onMount } from 'svelte'
+	import { afterUpdate } from 'svelte'
 
 	export let label = ''
 	export let value = ''
@@ -13,33 +13,14 @@
 	let placeholderHeight: number
 	let textarea: HTMLTextAreaElement
 
-	const resizeEvents = ['change']
-	const delayedResizeEvents = ['change', 'cut', 'paste', 'drop', 'keydown']
-
 	function resize() {
-		textarea.style.height = `${height}px`
-		textarea.style.height = `${Math.max(placeholderHeight, textarea.scrollHeight) + 2}px`
+		// The empty value check needs to be there to ensure correct resizing as sometimes scrollHeight can stay bigger than the actual content
+		const newHeight = Math.max(height, placeholderHeight, value === '' ? 0 : textarea.scrollHeight)
+		textarea.style.height = `${newHeight + 2}px`
 	}
 
-	function delayedResize() {
-		setTimeout(resize, 0)
-	}
-
-	// The resize mechanism is heavily inspired by https://stackoverflow.com/a/5346855
-	onMount(() => {
-		resizeEvents.forEach((eventName) => textarea.addEventListener(eventName, resize))
-		delayedResizeEvents.forEach((eventName) => textarea.addEventListener(eventName, delayedResize))
+	afterUpdate(() => {
 		resize()
-	})
-
-	// This cleans up all the listeners from the textarea element when the component is about to be destroyed
-	onDestroy(() => {
-		if (!textarea) return
-
-		resizeEvents.forEach((eventName) => textarea.removeEventListener(eventName, resize))
-		delayedResizeEvents.forEach((eventName) =>
-			textarea.removeEventListener(eventName, delayedResize),
-		)
 	})
 </script>
 

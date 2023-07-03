@@ -141,7 +141,7 @@
 								e.preventDefault()
 							}
 							// When shift+enter is pressed, add a newline
-							if (e.key === 'Enter' && (e.altKey || e.ctrlKey)) {
+							else if (e.key === 'Enter' && (e.altKey || e.ctrlKey)) {
 								text += '\n'
 								e.preventDefault()
 							}
