@@ -28,17 +28,8 @@
 	let autoscroll = true
 
 	beforeUpdate(() => {
-		if (browser && window) {
-			let body = document.body
-			let html = document.documentElement
-
-			let height = Math.max(
-				body.scrollHeight,
-				body.offsetHeight,
-				html.clientHeight,
-				html.scrollHeight,
-				html.offsetHeight,
-			)
+		if (browser && window && dev) {
+			const height = div.scrollHeight
 			autoscroll = height <= window.scrollY + window.innerHeight
 		}
 	})
