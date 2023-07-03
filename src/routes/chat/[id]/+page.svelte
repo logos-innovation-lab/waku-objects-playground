@@ -28,15 +28,31 @@
 	let autoscroll = true
 
 	beforeUpdate(() => {
-		autoscroll = div && div.offsetHeight + div.scrollTop > div.scrollHeight - 20
+		if (browser && window && div) {
+			const height = div.scrollHeight
+			autoscroll = height <= window.scrollY + window.innerHeight
+		}
 	})
 
 	afterUpdate(() => {
-		if (autoscroll) div && div.scrollTo(0, div.scrollHeight)
+		if (browser && div && autoscroll) {
+			window.scrollTo({
+				top: div.scrollHeight,
+				behavior: 'smooth',
+			})
+		}
 	})
 
 	onMount(() => {
-		div && div.scrollTo(0, div.scrollHeight)
+		if (browser && div) {
+			// It can not be done in onMount because the div is not yet rendered
+			setTimeout(() => {
+				window.scrollTo({
+					top: div.scrollHeight,
+					behavior: 'auto',
+				})
+			}, 0)
+		}
 	})
 
 	$: messages = $chats.chats.get($page.params.id)?.messages || []
