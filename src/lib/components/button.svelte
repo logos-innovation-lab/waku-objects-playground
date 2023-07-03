@@ -66,8 +66,8 @@
 			border-color: var(--transparent);
 
 			:global(svg) {
-				width: 24px;
-				height: 24px;
+				width: 20px;
+				height: 20px;
 			}
 		}
 
@@ -77,16 +77,16 @@
 
 			:global(svg) {
 				fill: var(--gray10);
-				width: 24px;
-				height: 24px;
+				width: 20px;
+				height: 20px;
 			}
 
 			&:active {
 				background-color: var(--black);
 				:global(svg) {
 					fill: var(--white);
-					width: 24px;
-					height: 24px;
+					width: 20px;
+					height: 20px;
 				}
 			}
 
@@ -95,7 +95,7 @@
 			}
 		}
 
-		&.center:not(.nopad) {
+		&.center {
 			margin-inline: auto;
 		}
 

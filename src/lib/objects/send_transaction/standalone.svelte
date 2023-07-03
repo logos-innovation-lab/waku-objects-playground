@@ -1,12 +1,19 @@
 <script lang="ts">
+	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
+	import ArrowRight from '$lib/components/icons/arrow-right.svelte'
+	import CaretDown from '$lib/components/icons/caret-down.svelte'
+	import WarningAltFilled from '$lib/components/icons/warning-alt-filled.svelte'
+	import Edit from '$lib/components/icons/edit.svelte'
+	import ArrowUp from '$lib/components/icons/arrow-up.svelte'
+
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'
-	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
+	import ReadonlyText from '$lib/components/readonly-text.svelte'
 	import Container from '$lib/components/container.svelte'
 	import Input from '$lib/components/input-field.svelte'
 	import Dropdown from '$lib/components/dropdown.svelte'
 	import DropdownItem from '$lib/components/dropdown-item.svelte'
-	import ArrowRight from '$lib/components/icons/arrow-right.svelte'
+
 	import { formatAddress, formatTokenAmount } from '$lib/utils/format'
 	import type { WakuObjectArgs } from '..'
 	import {
@@ -15,8 +22,6 @@
 		type MessageDataSend,
 	} from './schemas'
 	import type { Token } from '../schemas'
-	import CaretDown from '$lib/components/icons/caret-down.svelte'
-	import WarningAltFilled from '$lib/components/icons/warning-alt-filled.svelte'
 
 	export let args: WakuObjectArgs<MessageDataSend, MessageDataSend>
 
@@ -75,54 +80,51 @@
 		</Button>
 	</Header>
 
-	<Container gap={6}>
-		<div class="column">
-			<div class="label">Amount</div>
-			<div class="row grey">
-				<div class="column">
-					<div>{amount} {token.symbol}</div>
-					<div>≈ 13.91 EUR now</div>
-				</div>
-				<div><Button on:click={() => history.back()}>edit</Button></div>
-			</div>
-		</div>
-		<div class="column">
-			<div class="label">From</div>
-			<div class="column grey">
-				<div>Your account</div>
-				<div>{formatAddress(store.fromUser.address, 4, 4)}</div>
-			</div>
-		</div>
-		<div class="column">
-			<div class="label">To</div>
-			<div class="column grey">
-				<div>{store.toUser.name}</div>
-				<div>{formatAddress(store.toUser.address, 4, 4)}</div>
-			</div>
-		</div>
-		<div class="column">
-			<div class="label">Transaction fee (max)</div>
-			<div class="column grey">
+	<Container gap={6} direction="column" grow justify="center" padX={24}>
+		<ReadonlyText label="Amount">
+			<div class="row">
 				<div>
-					{fee ? `${formatTokenAmount(fee.amount, fee.decimals)} ${fee.symbol}` : 'unknown'}
+					<div class="text-lg">{amount} {token.symbol}</div>
+					<div class="secondary text-sm">≈ 13.91 EUR now</div>
 				</div>
-				<div>≈ 1.56 EUR now</div>
+				<Button variant="icon" align="right" on:click={() => history.back()}>
+					<Edit />
+				</Button>
 			</div>
-		</div>
-		<p>
+		</ReadonlyText>
+		<ReadonlyText label="From">
+			<div class="text-lg">Your account</div>
+			<div class="secondary text-sm">{formatAddress(store.fromUser.address, 4, 4)}</div>
+		</ReadonlyText>
+		<ReadonlyText label="To">
+			<div class="text-lg">{store.toUser.name}'s account</div>
+			<div class="secondary text-sm">{formatAddress(store.toUser.address, 4, 4)}</div>
+		</ReadonlyText>
+		<ReadonlyText label="Transaction fee (max)">
+			<div class="text-lg">
+				{fee ? `${formatTokenAmount(fee.amount, fee.decimals)} ${fee.symbol}` : 'unknown'}
+			</div>
+			<div class="secondary text-sm">≈ 1.56 EUR now</div>
+		</ReadonlyText>
+		<p
+			class={`balance ${
+				Number(amount) > Number(formatTokenAmount(token.amount, token.decimals)) ? 'text-bold' : ''
+			}`}
+		>
+			{#if Number(amount) > Number(formatTokenAmount(token.amount, token.decimals))}
+				<WarningAltFilled />
+			{/if}
 			You have {formatTokenAmount(store.nativeToken.amount, store.nativeToken.decimals)} ETH in your
 			account.
 		</p>
 	</Container>
-	<Container grow justify="flex-end">
-		<div class="row">
-			<div>{store.toUser.name ?? formatAddress(store.toUser.address, 4, 4)}</div>
-			<div>
-				<Button variant="strong" disabled={!amount} on:click={sendTransaction}>
-					<ArrowRight /> Send now
-				</Button>
-			</div>
+	<Container direction="row" justify="space-between" alignItems="center" padX={24}>
+		<div class="secondary text-normal">
+			{store.toUser.name ?? formatAddress(store.toUser.address, 4, 4)}
 		</div>
+		<Button variant="strong" align="right" disabled={!amount} on:click={sendTransaction}>
+			<ArrowUp /> Send now
+		</Button>
 	</Container>
 {:else}
 	<Header title="Send transaction">
@@ -173,9 +175,8 @@
 {/if}
 
 <style lang="scss">
-	.column {
-		display: flex;
-		flex-direction: column;
+	.secondary {
+		color: var(--gray40);
 	}
 	.row {
 		display: flex;
@@ -183,11 +184,7 @@
 		justify-content: space-between;
 		align-items: center;
 	}
-	.grey {
-		background-color: #f3f3f3;
-		padding: 12px;
-		border-radius: 24px;
-	}
+
 	:global(.input-wrapper) {
 		flex-grow: 1;
 	}
