@@ -37,6 +37,9 @@ export interface Adapter {
 	): Promise<void>
 	sendTransaction(wallet: HDNodeWallet, to: string, token: Token, fee: Token): Promise<string>
 	estimateTransaction(wallet: HDNodeWallet, to: string, token: Token): Promise<Token>
+
+	// THIS IS JUST FOR DEV PURPOSES
+	initializeBalances(wallet: HDNodeWallet): void
 }
 
 const DEFAULT_ADAPTER = 'firebase'

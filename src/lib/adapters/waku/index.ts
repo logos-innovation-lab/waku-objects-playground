@@ -19,7 +19,7 @@ import { ipfs, IPFS_GATEWAY } from '../firebase/connections'
 import { get } from 'svelte/store'
 import { objectStore, type ObjectState, objectKey } from '$lib/stores/objects'
 import { lookup } from '$lib/objects/lookup'
-import type { Token } from '$lib/stores/balances'
+import { balanceStore, type Token } from '$lib/stores/balances'
 
 function createChat(chatId: string, user: User, address: string): string {
 	chats.update((state) => {
@@ -214,6 +214,8 @@ export default class WakuAdapter implements Adapter {
 			await storeObjectStore(adapter.waku, address, objects)
 		})
 		this.subscriptions.push(subscribeObjectStore)
+
+		this.initializeBalances(wallet)
 	}
 
 	async onLogOut() {
@@ -342,16 +344,107 @@ export default class WakuAdapter implements Adapter {
 		await storeObjectStore(this.waku, wallet.address, updatedObjectStore)
 	}
 
-	sendTransaction(wallet: HDNodeWallet, to: string, token: Token, fee: Token): Promise<string> {
-		console.log('Method not implemented.', { wallet, to, token, fee })
-		throw new Error('Method not implemented.')
-	}
-	estimateTransaction(wallet: HDNodeWallet, to: string, token: Token): Promise<Token> {
-		console.log('Method not implemented.', {
-			wallet,
+	async sendTransaction(
+		wallet: HDNodeWallet,
+		to: string,
+		token: Token,
+		fee: Token,
+	): Promise<string> {
+		const { address } = wallet
+
+		if (!address) throw new Error('Address is missing')
+
+		if (!this.waku) {
+			throw 'no waku'
+		}
+
+		const tx = {
+			from: address,
 			to,
-			token,
-		})
-		throw new Error('Method not implemented.')
+			token: {
+				amount: token.amount.toString(),
+				name: token.name,
+				symbol: token.symbol,
+				decimals: token.decimals,
+			},
+			timestamp: Date.now(),
+			fee: {
+				amount: fee.amount.toString(),
+				symbol: fee.symbol,
+				name: fee.name,
+				decimals: fee.decimals,
+			},
+		}
+
+		// Update balances
+		const balanceFromDoc = get(balanceStore)
+		const balanceFrom = balanceFromDoc.balances.find((balance) => balance.symbol === token.symbol)
+		const feeFrom = balanceFromDoc.balances.find((balance) => balance.symbol === fee.symbol)
+		if (!balanceFrom || !feeFrom) throw new Error('Balance not found')
+
+		if (balanceFrom.amount - token.amount >= 0 && feeFrom.amount - fee.amount >= 0) {
+			balanceStore.update((prevState) => ({
+				...prevState,
+				balances: prevState.balances.map((b) => {
+					if (b.symbol === token.symbol) {
+						return {
+							...b,
+							amount: b.amount - token.amount,
+						}
+					} else if (b.symbol === fee.symbol) {
+						return {
+							...b,
+							amount: b.amount - fee.amount,
+						}
+					}
+					return b
+				}),
+			}))
+		}
+
+		await storeDocument(this.waku, 'transactions', '', tx)
+
+		return ''
+	}
+
+	async estimateTransaction(): Promise<Token> {
+		return {
+			name: 'Ether',
+			symbol: 'ETH',
+			amount: 123000000000000000n,
+			decimals: 18,
+		}
+	}
+
+	/**
+	 * THIS IS JUST FOR DEV PURPOSES
+	 */
+	initializeBalances(wallet: HDNodeWallet): void {
+		const { address } = wallet
+
+		if (!address) throw new Error('Address is missing')
+
+		const ethData = {
+			name: 'Ether',
+			symbol: 'ETH',
+			decimals: 18,
+			amount: 50000000000000000000n,
+			image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
+		}
+
+		const daiData = {
+			name: 'Dai',
+			symbol: 'DAI',
+			decimals: 18,
+			amount: 7843900000000000000000n,
+			image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png',
+		}
+
+		const balances = [ethData, daiData]
+		const balancesState = {
+			balances,
+			loading: false,
+		}
+		balanceStore.set(balancesState)
 	}
 }
