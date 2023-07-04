@@ -4,13 +4,13 @@ import { getFromLocalStorage, removeFromLocalStorage, saveToLocalStorage } from 
 import { writable, get } from 'svelte/store'
 import type { Writable } from 'svelte/store'
 
-export interface WalletState {
+interface WalletState {
 	wallet?: HDNodeWallet
 	loading: boolean
 	error?: Error
 }
 
-export interface WalletStore extends Writable<WalletState> {
+interface WalletStore extends Writable<WalletState> {
 	getMnemonics: () => string
 	hasWallet: () => boolean
 	disconnectWallet: () => void

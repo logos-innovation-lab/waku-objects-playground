@@ -7,7 +7,7 @@ export interface Profile {
 	error?: Error
 }
 
-export type ProfileStore = Writable<Profile>
+type ProfileStore = Writable<Profile>
 
 function createProfileStore(): ProfileStore {
 	return writable<Profile>({ loading: true })

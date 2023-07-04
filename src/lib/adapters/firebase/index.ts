@@ -42,7 +42,6 @@ import { type Unsubscriber, get } from 'svelte/store'
 import { sleep } from '../utils'
 
 export default class FirebaseAdapter implements Adapter {
-	protected subscriptions: Array<() => unknown> = []
 	protected userSubscriptions: Array<() => unknown> = []
 
 	async onLogIn(wallet: HDNodeWallet) {

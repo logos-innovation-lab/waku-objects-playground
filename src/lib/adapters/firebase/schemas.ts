@@ -16,11 +16,7 @@ export const UserDbSchema = z.object({
 	name: z.string().optional(),
 	avatar: z.string().optional(),
 })
-export type UserDb = z.infer<typeof UserDbSchema>
-
-export const ProfileDbSchema = z
-	.object({ lastSignIn: z.number().int().positive() })
-	.merge(UserDbSchema)
+const ProfileDbSchema = z.object({ lastSignIn: z.number().int().positive() }).merge(UserDbSchema)
 export type ProfileDb = z.infer<typeof ProfileDbSchema>
 
 export const ChatDbSchema = z.object({
@@ -45,7 +41,5 @@ export const ChatDbSchema = z.object({
 	users: z.array(AddressSchema),
 	name: z.string().optional(),
 })
-export type ChatDb = z.infer<typeof ChatDbSchema>
 
 export const ObjectDbSchema = z.unknown()
-export type ObjectDb = z.infer<typeof UserDbSchema>

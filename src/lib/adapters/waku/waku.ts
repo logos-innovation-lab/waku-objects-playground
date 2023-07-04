@@ -36,7 +36,7 @@ type QueryResult = AsyncGenerator<Promise<DecodedMessage | undefined>[]>
 const topicApp = 'wakuobjects-playground'
 const topicVersion = '1'
 
-export function getTopic(contentTopic: ContentTopic, id: string | '' = '') {
+function getTopic(contentTopic: ContentTopic, id: string | '' = '') {
 	return `/${topicApp}/${topicVersion}/${contentTopic}/${id}`
 }
 

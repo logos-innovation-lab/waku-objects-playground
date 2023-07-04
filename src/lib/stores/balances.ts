@@ -10,13 +10,13 @@ export interface Token {
 	address?: string // if not set, it is the native token
 }
 
-export interface BalanceState {
+interface BalanceState {
 	balances: Token[]
 	loading: boolean
 	error?: Error
 }
 
-export type BalanceStore = Writable<BalanceState>
+type BalanceStore = Writable<BalanceState>
 
 function createBalanceStore(): BalanceStore {
 	const store = writable<BalanceState>({ loading: true, balances: [] })

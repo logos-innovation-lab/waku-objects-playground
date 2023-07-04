@@ -6,13 +6,13 @@ export interface User {
 	avatar?: string
 }
 
-export interface ContactData {
+interface ContactData {
 	loading: boolean
 	contacts: Map<string, User>
 	error?: Error
 }
 
-export type ContactsStore = Writable<ContactData>
+type ContactsStore = Writable<ContactData>
 
 function createContactStore(): ContactsStore {
 	const store = writable<ContactData>({ loading: true, contacts: new Map<string, User>() })

@@ -26,12 +26,6 @@ export const SendTransactionStandaloneSchema = z.object({
 })
 export type SendTransactionStandalone = z.infer<typeof SendTransactionStandaloneSchema>
 
-export const TransactionSchema = z.object({
-	txHash: z.string().optional(),
-	status: z.enum(['confirmed', 'pending', 'failed']),
-})
-export type Transaction = z.infer<typeof TransactionSchema>
-
 export const MessageDataSendSchema = z.object({
 	token: z.object({
 		amount: z.string(),

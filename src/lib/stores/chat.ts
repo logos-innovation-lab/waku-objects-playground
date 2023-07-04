@@ -38,7 +38,7 @@ export interface ChatData {
 	error?: Error
 }
 
-export type ChatStore = Writable<ChatData>
+type ChatStore = Writable<ChatData>
 
 function createChatStore(): ChatStore {
 	const store = writable<ChatData>({ loading: true, chats: new Map<string, Chat>() })
