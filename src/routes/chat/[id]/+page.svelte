@@ -107,7 +107,7 @@
 									myMessage={message.fromAddress === $walletStore.wallet?.address ? true : false}
 									bubble
 								>
-									{message.text}
+									{@html message.text.replaceAll('\n', '</br>')}
 								</ChatMessage>
 							{:else if message.type === 'data'}
 								<WakuObject {message} users={chat.users} />
