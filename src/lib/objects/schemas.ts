@@ -1,6 +1,5 @@
+import { AddressSchema } from '$lib/utils/schemas'
 import z from 'zod'
-
-export const AddressSchema = z.string().regex(/^0x[a-fA-F0-9]{40}$/)
 
 export const TokenSchema = z.object({
 	name: z.string(),

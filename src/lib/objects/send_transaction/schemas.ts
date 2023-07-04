@@ -1,5 +1,6 @@
 import z from 'zod'
-import { AddressSchema, TokenSchema, UserSchema } from '../schemas'
+import { TokenSchema, UserSchema } from '../schemas'
+import { AddressSchema } from '$lib/utils/schemas'
 
 export const SendTransactionSchema = z.object({
 	token: z.object({
