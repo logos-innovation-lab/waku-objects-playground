@@ -18,6 +18,7 @@
 	import routes from '$lib/routes'
 	import { walletStore } from '$lib/stores/wallet'
 	import { balanceStore } from '$lib/stores/balances'
+	import { getBalance } from '$lib/adapters/transaction'
 
 	let copied = false
 	function copyAddressToClipboard() {
@@ -26,6 +27,28 @@
 
 		copy(address)
 		copied = true
+	}
+
+	async function getBalances() {
+		const address = $walletStore.wallet?.address
+		if (address === undefined) return
+
+		const balance = await getBalance(address)
+		console.debug({ balance, $balanceStore })
+
+		balanceStore.update((balanceState) => ({
+			...balanceState,
+			balances: balanceState.balances.map((value) => {
+				if (value.address) {
+					return value
+				} else {
+					return {
+						...value,
+						amount: balance,
+					}
+				}
+			}),
+		}))
 	}
 </script>
 
@@ -63,6 +86,8 @@
 	<Container align="center" direction="row" gap={6} justify="center" padX={24}>
 		Assets <Badge dark>{$balanceStore.balances.length}</Badge>
 	</Container>
+	<Button on:click={getBalances}>Fetch balances</Button>
+
 	<Divider pad={12} padBottom={0} />
 	<div class="assets">
 		{#each $balanceStore.balances as balance}

@@ -40,6 +40,7 @@ import { objectKey, objectStore } from '$lib/stores/objects'
 import { lookup } from '$lib/objects/lookup'
 import { type Unsubscriber, get } from 'svelte/store'
 import { sleep } from '../utils'
+import { sendTransaction } from '../transaction'
 
 export default class FirebaseAdapter implements Adapter {
 	protected userSubscriptions: Array<() => unknown> = []
@@ -301,6 +302,7 @@ export default class FirebaseAdapter implements Adapter {
 			decimals: 18,
 			amount: 7843900000000000000000n.toString(),
 			image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png',
+			address: '0x0000000000000000000000000000000000000000',
 		}
 
 		setDoc(daiDoc, daiData, { merge: true })
@@ -334,23 +336,7 @@ export default class FirebaseAdapter implements Adapter {
 
 		if (!address) throw new Error('Address is missing')
 
-		const tx = {
-			from: address,
-			to,
-			token: {
-				amount: token.amount.toString(),
-				name: token.name,
-				symbol: token.symbol,
-				decimals: token.decimals,
-			},
-			timestamp: Date.now(),
-			fee: {
-				amount: fee.amount.toString(),
-				symbol: fee.symbol,
-				name: fee.name,
-				decimals: fee.decimals,
-			},
-		}
+		/*
 
 		// Update balances
 		const balanceFromDoc = doc(db, `users/${address}/balances/${token.symbol.toLowerCase()}`)
@@ -373,11 +359,32 @@ export default class FirebaseAdapter implements Adapter {
 		// Calculate and deduct fee
 		const feeToken = (await getDoc(feeDoc)).data()
 		if (!feeToken) throw new Error('Fee not found')
-		setDoc(feeDoc, { amount: (BigInt(feeToken.amount) - fee.amount).toString() }, { merge: true })
+		setDoc(feeDoc, { amount: (BigInt(feeToken.amount) - fee.amount).toString() }, { merge: true })	
+		*/
+
+		const tx = await sendTransaction(wallet, to, token.amount, fee.amount)
 
 		const txCollection = collection(db, `transactions`)
-		const res = await addDoc(txCollection, tx)
-		return res.id
+		const txData = {
+			from: address,
+			to,
+			token: {
+				amount: token.amount.toString(),
+				name: token.name,
+				symbol: token.symbol,
+				decimals: token.decimals,
+			},
+			timestamp: Date.now(),
+			fee: {
+				amount: fee.amount.toString(),
+				symbol: fee.symbol,
+				name: fee.name,
+				decimals: fee.decimals,
+			},
+		}
+
+		const res = await addDoc(txCollection, txData)
+		return tx.hash
 	}
 
 	estimateTransaction(): Promise<Token> {
