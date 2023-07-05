@@ -1,6 +1,7 @@
 <script lang="ts">
 	export let label: string | undefined = undefined
 	export let marginBottom = 24
+	export let overflow = true
 </script>
 
 <div class={`readonly`} style={`margin-bottom: ${marginBottom}px;`}>
@@ -9,7 +10,7 @@
 			{label}
 		</div>
 	{/if}
-	<div class="main">
+	<div class={`main ${overflow ? 'overflow' : ''}`}>
 		<slot />
 	</div>
 </div>
@@ -24,9 +25,12 @@
 		background-color: var(--gray10);
 		padding: var(--spacing-12);
 		border-radius: var(--border-radius);
-		width: calc(100% + var(--spacing-24));
-		margin-left: calc(-1 * var(--spacing-12));
-		margin-right: calc(-1 * var(--spacing-12));
+
+		&.overflow {
+			width: calc(100% + var(--spacing-24));
+			margin-left: calc(-1 * var(--spacing-12));
+			margin-right: calc(-1 * var(--spacing-12));
+		}
 	}
 
 	.label {

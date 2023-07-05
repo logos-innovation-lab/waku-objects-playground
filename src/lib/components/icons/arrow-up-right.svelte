@@ -1,0 +1,11 @@
+<script lang="ts">
+	import type { IconProps } from '$lib/types'
+
+	type $$Props = IconProps
+
+	export let size = 20
+</script>
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width={size} height={size}>
+	<path d="M10 6L10 8 22.59 8 6 24.59 7.41 26 24 9.41 24 22 26 22 26 6 10 6z" />
+</svg>
