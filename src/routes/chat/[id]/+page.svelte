@@ -125,8 +125,12 @@
 						<Button variant="icon" slot="button">
 							<Add />
 						</Button>
-						<DropdownItem onClick={() => console.log('Pic from Cam')}>Pic from Cam</DropdownItem>
-						<DropdownItem onClick={() => console.log('Pic from Lib')}>Pic from Lib</DropdownItem>
+						<DropdownItem disabled onClick={() => console.log('Pic from Cam')}
+							>Pic from Cam</DropdownItem
+						>
+						<DropdownItem disabled onClick={() => console.log('Pic from Lib')}
+							>Pic from Lib</DropdownItem
+						>
 						<DropdownItem onClick={() => goto(ROUTES.OBJECTS($page.params.id))}
 							>Waku Object</DropdownItem
 						>

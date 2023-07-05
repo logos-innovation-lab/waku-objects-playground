@@ -37,7 +37,7 @@
 		}
 
 		&.disabled {
-			color: var(--grey-200);
+			color: var(--gray20);
 			cursor: not-allowed;
 		}
 
