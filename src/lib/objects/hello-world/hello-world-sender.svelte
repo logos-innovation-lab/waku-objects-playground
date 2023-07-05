@@ -14,6 +14,3 @@
 		{instanceId}: Hello World
 	</ChatMessage>
 {/if}
-
-<style lang="scss">
-</style>
