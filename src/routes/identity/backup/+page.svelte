@@ -10,9 +10,7 @@
 	import Button from '$lib/components/button.svelte'
 	import Textarea from '$lib/components/textarea.svelte'
 
-	import type { PageData } from './$types'
-
-	export let data: PageData
+	export let data
 
 	let copied = false
 
