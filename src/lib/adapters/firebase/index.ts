@@ -182,6 +182,7 @@ export default class FirebaseAdapter implements Adapter {
 		const subscribeBalances = onSnapshot(balanceCollection, (res) => {
 			const balances: Token[] = []
 			res.docs.forEach((d) => {
+				console.debug({ d, data: d.data() })
 				const parseRes = TokenDbSchema.safeParse(d.data())
 				if (parseRes.success) {
 					const token: Token = parseRes.data
@@ -310,6 +311,22 @@ export default class FirebaseAdapter implements Adapter {
 		setDoc(daiDoc, daiData, { merge: true })
 	}
 
+	async updateBalance(address: string, token: Token): Promise<void> {
+		if (token.address) {
+			// only native token is supported for now
+			return
+		}
+
+		const nativeTokenAmount = await getBalance(address)
+
+		const ethDoc = doc(db, `users/${address}/balances/${token.symbol.toLowerCase()}`)
+		const ethData: { amount: string } = {
+			amount: nativeTokenAmount.toString(),
+		}
+
+		setDoc(ethDoc, ethData, { merge: true })
+	}
+
 	async updateStore(
 		wallet: HDNodeWallet,
 		objectId: string,
@@ -328,6 +345,7 @@ export default class FirebaseAdapter implements Adapter {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		setDoc(objectDb, newStore as any, { merge: true })
 	}
+
 	async sendTransaction(
 		wallet: HDNodeWallet,
 		to: string,
@@ -366,13 +384,7 @@ export default class FirebaseAdapter implements Adapter {
 
 		const tx = await sendTransaction(wallet, to, token.amount, fee.amount)
 
-		const nativeTokenAmount = await getBalance(address)
-		const ethDoc = doc(db, `users/${address}/balances/eth`)
-		const ethData: { amount: string } = {
-			amount: nativeTokenAmount.toString(),
-		}
-
-		setDoc(ethDoc, ethData, { merge: true })
+		await this.updateBalance(wallet.address, token)
 
 		const txCollection = collection(db, `transactions`)
 		const txData = {
