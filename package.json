@@ -30,6 +30,7 @@
 		"eslint-plugin-svelte3": "^4.0.0",
 		"ethers": "^6.6.2",
 		"firebase": "^9.23.0",
+		"hardhat": "^2.16.1",
 		"ipfs-http-client": "^60.0.0",
 		"knip": "^2.14.3",
 		"prettier": "^2.8.8",
