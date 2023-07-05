@@ -3,10 +3,12 @@
 	export let borderBottom = false
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <div
 	class={`block-btn ${borderTop ? 'borderTop' : ''} ${borderBottom ? 'borderBottom' : ''} `}
 	on:click
+	on:keypress
+	role="button"
+	tabindex={0}
 >
 	<slot />
 </div>

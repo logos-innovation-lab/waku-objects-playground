@@ -8,8 +8,13 @@
 	export let disabled: boolean | undefined = undefined
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class={`root ${cls} ${disabled ? 'disabled' : ''}`} on:click>
+<div
+	class={`root ${cls} ${disabled ? 'disabled' : ''}`}
+	on:click
+	on:keypress
+	role="menu"
+	tabindex={0}
+>
 	<div class="label">
 		{label}
 	</div>

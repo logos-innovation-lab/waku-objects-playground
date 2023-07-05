@@ -106,37 +106,44 @@
 			</Button>
 		</svelte:fragment>
 	</Header>
-	<ul class="chats">
+	<ul class="chats" aria-label="Chat List">
 		{#each [...$chats.chats] as [id, chat]}
 			{@const userMessages = chat.messages.filter((message) => message.type === 'user')}
 			{@const lastMessage = userMessages[userMessages.length - 1]}
 			{@const myMessage = lastMessage.fromAddress === $walletStore.wallet.address}
 			{@const otherUser = chat.users.find((m) => m.address !== $walletStore.wallet?.address)}
 			{#if lastMessage && lastMessage.type === 'user'}
-				<!-- svelte-ignore a11y-click-events-have-key-events -->
-				<li on:click={() => goto(ROUTES.CHAT(id))}>
-					<Container grow>
-						<div class="chat">
-							<!-- TODO: WHAT HAPPENS TO THE AVATAR IF IT'S A GROUP CHAT? -->
-							{#if chat.users.length === 2}
-								<Avatar size={70} picture={otherUser?.avatar} />
-							{/if}
-							<div class="content">
-								<div class="user-info">
-									<span class="username text-lg text-bold">
-										{otherUser?.name}
-										<Badge dark>
-											{chat.messages.length}
-										</Badge>
-									</span>
+				<li>
+					<div
+						class="chat-button"
+						on:click={() => goto(ROUTES.CHAT(id))}
+						on:keypress={() => goto(ROUTES.CHAT(id))}
+						role="button"
+						tabindex="0"
+					>
+						<Container grow>
+							<div class="chat">
+								<!-- TODO: WHAT HAPPENS TO THE AVATAR IF IT'S A GROUP CHAT? -->
+								{#if chat.users.length === 2}
+									<Avatar size={70} picture={otherUser?.avatar} />
+								{/if}
+								<div class="content">
+									<div class="user-info">
+										<span class="username text-lg text-bold">
+											{otherUser?.name}
+											<Badge dark>
+												{chat.messages.length}
+											</Badge>
+										</span>
+									</div>
+									<p class={`message text-serif ${myMessage ? 'my-message' : ''}`}>
+										{myMessage ? 'You: ' : ''}
+										{lastMessage.text.substring(0, 50)}
+									</p>
 								</div>
-								<p class={`message text-serif ${myMessage ? 'my-message' : ''}`}>
-									{myMessage ? 'You: ' : ''}
-									{lastMessage.text.substring(0, 50)}
-								</p>
 							</div>
-						</div>
-					</Container>
+						</Container>
+					</div>
 				</li>
 			{/if}
 		{:else}
@@ -174,8 +181,12 @@
 			display: flex;
 			align-items: center;
 			gap: var(--spacing-12);
-			cursor: pointer;
 			border-bottom: 1px solid var(--gray20);
+
+			.chat-button {
+				width: 100%;
+				cursor: pointer;
+			}
 		}
 	}
 

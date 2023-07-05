@@ -5,8 +5,6 @@
 	export let disabled = false
 	export let pad = 0
 	export let label: string | undefined = undefined
-
-	let inputField: HTMLInputElement
 </script>
 
 <div class="input-wrapper">
@@ -22,7 +20,6 @@
 		{autofocus}
 		{placeholder}
 		bind:value
-		bind:this={inputField}
 		on:keydown
 		on:keypress
 		on:keyup
