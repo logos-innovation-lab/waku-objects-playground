@@ -40,7 +40,7 @@ import { objectKey, objectStore } from '$lib/stores/objects'
 import { lookup } from '$lib/objects/lookup'
 import { type Unsubscriber, get } from 'svelte/store'
 import { sleep } from '../utils'
-import { sendTransaction } from '../transaction'
+import { getBalance, sendTransaction } from '../transaction'
 
 export default class FirebaseAdapter implements Adapter {
 	protected userSubscriptions: Array<() => unknown> = []
@@ -279,17 +279,19 @@ export default class FirebaseAdapter implements Adapter {
 	/**
 	 * THIS IS JUST FOR DEV PURPOSES
 	 */
-	initializeBalances(wallet: HDNodeWallet): void {
+	async initializeBalances(wallet: HDNodeWallet): Promise<void> {
 		const { address } = wallet
 
 		if (!address) throw new Error('Address is missing')
+
+		const nativeTokenAmount = await getBalance(address)
 
 		const ethDoc = doc(db, `users/${address}/balances/eth`)
 		const ethData: Omit<TokenDb, 'amount'> & { amount: string } = {
 			name: 'Ether',
 			symbol: 'ETH',
 			decimals: 18,
-			amount: 50000000000000000000n.toString(),
+			amount: nativeTokenAmount.toString(),
 			image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
 		}
 
@@ -363,6 +365,14 @@ export default class FirebaseAdapter implements Adapter {
 		*/
 
 		const tx = await sendTransaction(wallet, to, token.amount, fee.amount)
+
+		const nativeTokenAmount = await getBalance(address)
+		const ethDoc = doc(db, `users/${address}/balances/eth`)
+		const ethData: { amount: string } = {
+			amount: nativeTokenAmount.toString(),
+		}
+
+		setDoc(ethDoc, ethData, { merge: true })
 
 		const txCollection = collection(db, `transactions`)
 		const txData = {

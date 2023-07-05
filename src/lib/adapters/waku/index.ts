@@ -20,6 +20,7 @@ import { get } from 'svelte/store'
 import { objectStore, type ObjectState, objectKey } from '$lib/stores/objects'
 import { lookup } from '$lib/objects/lookup'
 import { balanceStore, type Token } from '$lib/stores/balances'
+import { getBalance } from '../transaction'
 
 function createChat(chatId: string, user: User, address: string): string {
 	chats.update((state) => {
@@ -425,16 +426,18 @@ export default class WakuAdapter implements Adapter {
 	/**
 	 * THIS IS JUST FOR DEV PURPOSES
 	 */
-	initializeBalances(wallet: HDNodeWallet): void {
+	async initializeBalances(wallet: HDNodeWallet): Promise<void> {
 		const { address } = wallet
 
 		if (!address) throw new Error('Address is missing')
+
+		const nativeTokenAmount = await getBalance(address)
 
 		const ethData = {
 			name: 'Ether',
 			symbol: 'ETH',
 			decimals: 18,
-			amount: 50000000000000000000n,
+			amount: nativeTokenAmount,
 			image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
 		}
 
