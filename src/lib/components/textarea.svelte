@@ -83,7 +83,7 @@
 			position: absolute;
 			opacity: 0;
 			font-size: var(--font-size-lg);
-			color: var(--grey-300);
+			color: rgba(var(--gray50), 0.5);
 			width: 100%;
 			height: fit-content;
 			min-height: 48px;

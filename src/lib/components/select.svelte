@@ -42,7 +42,7 @@
 
 		.label {
 			font-size: var(--font-size-sm);
-			color: var(--grey-500);
+			color: var(--gray50);
 			margin-bottom: var(--spacing-4);
 		}
 
@@ -60,17 +60,17 @@
 		}
 
 		&:disabled {
-			color: var(--grey-200);
+			color: var(--gray20);
 			cursor: not-allowed;
 
 			& :global(svg) {
-				fill: var(--grey-200);
+				fill: var(--gray20);
 			}
 		}
 
 		&:active:not(:disabled),
 		&:hover:not(:disabled) {
-			background-color: var(--grey-150);
+			background-color: var(--gray20);
 			transition: background-color 0.2s;
 		}
 	}
