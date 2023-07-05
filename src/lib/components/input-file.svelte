@@ -6,7 +6,6 @@
 
 <label class={`input-file`}>
 	<slot />
-	<!-- svelte-ignore a11y-missing-attribute -->
 	<input type="file" {disabled} bind:files hidden {multiple} />
 </label>
 

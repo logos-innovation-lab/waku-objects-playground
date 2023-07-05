@@ -1,13 +1,12 @@
 import { goto } from '$app/navigation'
 import routes from '$lib/routes'
 import { walletStore } from '$lib/stores/wallet'
-import type { PageLoad } from './$types'
 
 // This prevents the load function from running on server
 // https://kit.svelte.dev/docs/load#page-data
 export const ssr = false
 
-export const load = (async () => {
+export const load = async () => {
 	const promise = new Promise<void>((resolve) => {
 		let unsubscribe: (() => void) | undefined = undefined
 		unsubscribe = walletStore.subscribe((p) => {
@@ -28,4 +27,4 @@ export const load = (async () => {
 	return {
 		mnemonics: walletStore.getMnemonics(),
 	}
-}) satisfies PageLoad
+}

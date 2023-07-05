@@ -47,6 +47,3 @@
 </script>
 
 <svelte:component this={component} {message} {args} />
-
-<style lang="scss">
-</style>

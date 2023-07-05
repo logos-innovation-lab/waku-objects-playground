@@ -8,8 +8,13 @@
 	export let avatarSize = size / 2
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class={`avatar ${onClick !== undefined ? 'click' : ''}`} on:click={onClick}>
+<div
+	class={`avatar ${onClick !== undefined ? 'click' : ''}`}
+	on:click={onClick}
+	on:keypress={onClick}
+	role="button"
+	tabindex={0}
+>
 	<div class="img" style={`height: ${size}px;`}>
 		{#if picture}
 			<img src={adapters.getPicture(picture)} alt="profile" />

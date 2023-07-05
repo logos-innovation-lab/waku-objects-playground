@@ -7,8 +7,7 @@
 	export let description: string | undefined = undefined
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<div class={`object`} on:click>
+<div class={`object`} on:click on:keypress role="button" tabindex={0}>
 	<Container direction="row" gap={12} alignItems="center">
 		<img class="img" src={imgSrc} alt={imgAlt} />
 		<p>

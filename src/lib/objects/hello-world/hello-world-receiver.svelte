@@ -23,6 +23,3 @@
 		<Button variant="strong" on:click={sendName}>{instanceId}: Send Hello from {ownName}!</Button>
 	</ChatMessage>
 {/if}
-
-<style lang="scss">
-</style>

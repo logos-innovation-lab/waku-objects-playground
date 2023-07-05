@@ -10,6 +10,7 @@
 
 	let showDropdown = false
 	let dropdownElement: HTMLElement
+	let dropdownId: string
 
 	const closeDropdown = (ev: MouseEvent) => {
 		const target = ev.target as unknown as Node
@@ -23,6 +24,9 @@
 
 	onMount(() => {
 		if (browser && window) window.addEventListener('click', closeDropdown)
+
+		// Generates unique ID for this dropdown instance (used for ARIA attributes)
+		dropdownId = `dropdown-${Math.random().toString(36).substring(7)}`
 	})
 
 	onDestroy(() => {
@@ -31,16 +35,31 @@
 
 	// Trigger event when dropdown is opened or closed
 	$: showDropdown ? dispatch('open') : dispatch('close')
+
+	function onClick() {
+		if (!disabled) showDropdown = !showDropdown
+	}
 </script>
 
-<div bind:this={dropdownElement} class="dropdown">
-	<!-- svelte-ignore a11y-click-events-have-key-events -->
-	<div on:click={() => !disabled && (showDropdown = !showDropdown)}>
+<div
+	bind:this={dropdownElement}
+	class="dropdown"
+	role="combobox"
+	aria-haspopup="listbox"
+	aria-expanded={showDropdown}
+	aria-controls={dropdownId}
+>
+	<div on:click={onClick} on:keypress={onClick} role="button" tabindex={0}>
 		<slot name="button" disabled />
 	</div>
 
-	<div class={`root`}>
-		<ul class={`${showDropdown ? '' : 'hidden'} ${up ? 'up' : ''} ${left ? 'left' : ''}`}>
+	<div class={`root`} aria-hidden={!showDropdown}>
+		<ul
+			class={`${showDropdown ? '' : 'hidden'} ${up ? 'up' : ''} ${left ? 'left' : ''}`}
+			id={dropdownId}
+			role="listbox"
+			aria-labelledby="dropdown-button"
+		>
 			<slot />
 		</ul>
 	</div>

@@ -4,10 +4,14 @@
 	export let onClick: () => unknown
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
 <li
 	class={`${$$props.class} ${disabled ? 'disabled' : ''} ${danger ? 'danger' : ''}`}
 	on:click={() => !disabled && onClick()}
+	on:keypress={() => !disabled && onClick()}
+	role="option"
+	tabindex={0}
+	aria-selected={false}
+	aria-disabled={disabled}
 >
 	<slot />
 </li>
