@@ -14,7 +14,7 @@ export function objectKey(objectId: string, instanceId: string): string {
 	return `${objectId}:${instanceId}`
 }
 
-export function createObjectStore(): ObjectStore {
+function createObjectStore(): ObjectStore {
 	const store = writable<ObjectState>({
 		loading: true,
 		objects: new Map<string, unknown>(),

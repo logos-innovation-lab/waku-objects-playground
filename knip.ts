@@ -20,6 +20,11 @@ const config: KnipConfig = {
 		},
 		css: (text: string) => [...text.matchAll(/(?<=@)import[^;]+/g)].join('\n'),
 	},
+	ignoreExportsUsedInFile: true,
+	rules: {
+		// For now it reports false positives
+		types: 'warn',
+	},
 }
 
 export default config

@@ -5,12 +5,6 @@ import FirebaseAdapter from './firebase'
 import WakuAdapter from './waku'
 import type { Token } from '$lib/stores/balances'
 
-export interface Contact {
-	address: string
-	name: string
-	avatar?: string
-}
-
 export interface Adapter {
 	onLogIn: (wallet: HDNodeWallet) => Promise<void>
 	onLogOut: () => void

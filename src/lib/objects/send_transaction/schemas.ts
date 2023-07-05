@@ -1,5 +1,6 @@
 import z from 'zod'
-import { AddressSchema, TokenSchema, UserSchema } from '../schemas'
+import { TokenSchema, UserSchema } from '../schemas'
+import { AddressSchema } from '$lib/utils/schemas'
 
 export const SendTransactionSchema = z.object({
 	token: z.object({
@@ -25,12 +26,6 @@ export const SendTransactionStandaloneSchema = z.object({
 	toUser: UserSchema,
 })
 export type SendTransactionStandalone = z.infer<typeof SendTransactionStandaloneSchema>
-
-export const TransactionSchema = z.object({
-	txHash: z.string().optional(),
-	status: z.enum(['confirmed', 'pending', 'failed']),
-})
-export type Transaction = z.infer<typeof TransactionSchema>
 
 export const MessageDataSendSchema = z.object({
 	token: z.object({
