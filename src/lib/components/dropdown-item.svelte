@@ -37,7 +37,7 @@
 		}
 
 		&.disabled {
-			color: var(--gray20);
+			color: rgba(var(--gray50-rgb), 0.25);
 			cursor: not-allowed;
 		}
 
