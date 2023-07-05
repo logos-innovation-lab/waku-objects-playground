@@ -23,6 +23,7 @@
 		type MessageDataSend,
 	} from './schemas'
 	import type { Token } from '../schemas'
+	import logo from './logo.svg'
 
 	export let args: WakuObjectArgs<MessageDataSend, MessageDataSend>
 
@@ -70,10 +71,30 @@
 			history.go(-3)
 		}
 	}
+
+	$: console.log(store?.fromUser?.address, args)
 </script>
 
 {#if !store}
 	<p>Invalid args</p>
+{:else if store.view === 'details'}
+	<Header title={`Transaction #...`}>
+		<div slot="left">
+			<img src={logo} alt="Payggy logo" />
+		</div>
+		<Button slot="right" variant="icon" on:click={() => history.back()}>
+			<Close />
+		</Button>
+	</Header>
+	{#if store?.fromUser?.address === args?.profile?.address}
+		You sent
+		<!-- You sent {formatTokenAmount(BigInt(store.token.amount), data.token.decimals)}
+		{data.token.symbol} to {otherUser.name} -->
+	{:else}
+		You received
+		<!-- You received {formatTokenAmount(BigInt(data.token.amount), data.token.decimals)}
+		{data.token.symbol} from {otherUser.name} -->
+	{/if}
 {:else if store.view === 'overview'}
 	<Header title="Payggy">
 		<Button slot="left" variant="icon" on:click={() => history.back()}>

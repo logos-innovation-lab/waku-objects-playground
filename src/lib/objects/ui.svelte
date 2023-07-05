@@ -5,6 +5,8 @@
 	import { page } from '$app/stores'
 	import { balanceStore, type Token } from '$lib/stores/balances'
 	import { chats } from '$lib/stores/chat'
+	import type { User } from './schemas'
+	import { profile } from '$lib/stores/profile'
 
 	export let objectId: string
 	export let instanceId: string
@@ -47,6 +49,18 @@
 	}
 
 	// TODO: handle when there is not wallet (redirect to login)
+	const address = $walletStore.wallet?.address
+
+	let users: User[]
+	$: users = chat?.users ?? []
+	let userProfile: User
+	$: if (address && !$profile.loading) {
+		userProfile = {
+			address,
+			name: $profile.name,
+			avatar: $profile.avatar,
+		}
+	}
 </script>
 
 {#if !store || !fromUser}
@@ -55,8 +69,8 @@
 	<svelte:component
 		this={component}
 		args={{
-			address: fromUser.address,
-			name: fromUser.name ?? '',
+			profile: userProfile,
+			users,
 			send,
 			updateStore,
 			onViewChange,
