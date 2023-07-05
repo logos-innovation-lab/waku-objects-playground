@@ -13,6 +13,7 @@
 	import Input from '$lib/components/input-field.svelte'
 	import Dropdown from '$lib/components/dropdown.svelte'
 	import DropdownItem from '$lib/components/dropdown-item.svelte'
+	import Close from '$lib/components/icons/close.svelte'
 
 	import { formatAddress, formatTokenAmount } from '$lib/utils/format'
 	import type { WakuObjectArgs } from '..'
@@ -74,9 +75,12 @@
 {#if !store}
 	<p>Invalid args</p>
 {:else if store.view === 'overview'}
-	<Header title="Send transaction">
+	<Header title="Payggy">
 		<Button slot="left" variant="icon" on:click={() => history.back()}>
 			<ChevronLeft />
+		</Button>
+		<Button slot="right" variant="icon" on:click={() => history.back()}>
+			<Close />
 		</Button>
 	</Header>
 
@@ -127,9 +131,13 @@
 		</Button>
 	</Container>
 {:else}
-	<Header title="Send transaction">
+	<Header title="Payggy">
 		<Button slot="left" variant="icon" on:click={() => history.back()}>
 			<ChevronLeft />
+		</Button>
+		<!-- FIXME: Close button should go back to chat OR object list screen, ask David -->
+		<Button slot="right" variant="icon" on:click={() => history.back()}>
+			<Close />
 		</Button>
 	</Header>
 

@@ -18,7 +18,7 @@
 	import { profile } from '$lib/stores/profile'
 	import ObjectLink from '$lib/components/object-link.svelte'
 	import ButtonBlock from '$lib/components/button-block.svelte'
-	import { SEND_TRANSACTION_OBJECT_ID } from '$lib/objects/send_transaction'
+	import { PAYGGY_OBJECT_ID } from '$lib/objects/payggy'
 
 	const objects = [
 		{
@@ -26,7 +26,7 @@
 			title: 'Payggy',
 			description: 'Send or request payments.',
 			onClick: () => {
-				goto(ROUTES.OBJECT_NEW($page.params.id, SEND_TRANSACTION_OBJECT_ID))
+				goto(ROUTES.OBJECT_NEW($page.params.id, PAYGGY_OBJECT_ID))
 			},
 		},
 		{
