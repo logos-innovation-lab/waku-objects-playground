@@ -7,7 +7,6 @@
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'
 	import Close from '$lib/components/icons/close.svelte'
-	import { HELLO_WORLD_OBJECT_ID } from '$lib/objects/hello-world'
 
 	import { goto } from '$app/navigation'
 	import { chats } from '$lib/stores/chat'
@@ -18,29 +17,20 @@
 	import { profile } from '$lib/stores/profile'
 	import ObjectLink from '$lib/components/object-link.svelte'
 	import ButtonBlock from '$lib/components/button-block.svelte'
-	import { PAYGGY_OBJECT_ID } from '$lib/objects/payggy'
+	import { wakuObjectList } from '$lib/objects/lookup'
 
-	const objects = [
-		{
-			image: 'https://picsum.photos/200',
-			title: 'Payggy',
-			description: 'Send or request payments.',
-			onClick: () => {
-				goto(ROUTES.OBJECT_NEW($page.params.id, PAYGGY_OBJECT_ID))
-			},
-		},
-		{
-			image: 'https://picsum.photos/200',
-			title: 'Hello World',
-			description: 'Say hello',
-			onClick: () => {
-				createObject(HELLO_WORLD_OBJECT_ID, {
-					/* TODO empty */
-				})
-				history.back()
-			},
-		},
-	]
+	const objects = wakuObjectList.map((object) => ({
+		...object,
+		onClick: object.standalone
+			? () => {
+					goto(ROUTES.OBJECT_NEW($page.params.id, object.objectId))
+			  }
+			: () => {
+					createObject(object.objectId, {
+						/* TODO empty */
+					})
+			  },
+	}))
 	let loading = false
 	let text = ''
 	$: if (browser && !$walletStore.loading && $walletStore.wallet === undefined) goto(ROUTES.HOME)
@@ -96,8 +86,8 @@
 				<div class="object" {...object}>
 					<ObjectLink
 						on:click={object.onClick}
-						imgSrc={object.image}
-						title={object.title}
+						imgSrc={object.logo}
+						title={object.name}
 						description={object.description}
 					/>
 				</div>

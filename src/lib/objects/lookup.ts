@@ -1,11 +1,12 @@
 import type { WakuObjectDescriptor } from '.'
-import { HELLO_WORLD_OBJECT_ID, helloWorldDescriptor } from './hello-world'
-import { PAYGGY_OBJECT_ID, sendTransactionDescriptor } from './payggy'
+import { helloWorldDescriptor } from './hello-world'
+import { payggyDescriptor } from './payggy'
 
-const wakuObjectMap: Map<string, WakuObjectDescriptor> = new Map([
-	[HELLO_WORLD_OBJECT_ID, helloWorldDescriptor],
-	[PAYGGY_OBJECT_ID, sendTransactionDescriptor],
-])
+export const wakuObjectList: WakuObjectDescriptor[] = [helloWorldDescriptor, payggyDescriptor]
+
+const wakuObjectMap: Map<string, WakuObjectDescriptor> = new Map(
+	wakuObjectList.map((wakuObject) => [wakuObject.objectId, wakuObject]),
+)
 
 export function lookup(objectId: string): WakuObjectDescriptor | undefined {
 	return wakuObjectMap.get(objectId)
