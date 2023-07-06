@@ -18,21 +18,15 @@
 	import { profile } from '$lib/stores/profile'
 	import ObjectLink from '$lib/components/object-link.svelte'
 	import ButtonBlock from '$lib/components/button-block.svelte'
-	import { SEND_TRANSACTION_OBJECT_ID } from '$lib/objects/send_transaction'
+	import { PAYGGY_OBJECT_ID } from '$lib/objects/payggy'
 
 	const objects = [
 		{
 			image: 'https://picsum.photos/200',
-			title: 'Request transaction',
-			description: 'Request a transaction in the chat to your prefered wallet',
-			onClick: () => goto(ROUTES.REQUEST_TRANSACTION),
-		},
-		{
-			image: 'https://picsum.photos/200',
-			title: 'Send transaction',
-			description: 'Send funds to anyone in the chat from your wallet.',
+			title: 'Payggy',
+			description: 'Send or request payments.',
 			onClick: () => {
-				goto(ROUTES.OBJECT_NEW($page.params.id, SEND_TRANSACTION_OBJECT_ID))
+				goto(ROUTES.OBJECT_NEW($page.params.id, PAYGGY_OBJECT_ID))
 			},
 		},
 		{
