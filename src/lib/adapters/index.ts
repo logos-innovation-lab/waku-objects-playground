@@ -34,7 +34,7 @@ export interface Adapter {
 
 	// THIS IS JUST FOR DEV PURPOSES
 	initializeBalances(wallet: HDNodeWallet): Promise<void>
-	updateBalance(address: string, token: Token): Promise<void>
+	checkBalance(address: string, token: Token): Promise<void>
 }
 
 const DEFAULT_ADAPTER = 'firebase'

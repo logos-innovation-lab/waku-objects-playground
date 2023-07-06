@@ -457,7 +457,7 @@ export default class WakuAdapter implements Adapter {
 		balanceStore.set(balancesState)
 	}
 
-	async updateBalance(address: string, token: Token): Promise<void> {
+	async checkBalance(address: string, token: Token): Promise<void> {
 		const nativeTokenAmount = await getBalance(address)
 
 		balanceStore.update((balanceState) => ({

@@ -25,9 +25,9 @@ export const payggyDescriptor: WakuObjectDescriptor = {
 				const token = {
 					...res.data.token,
 					name: res.data.token.symbol,
-					amount: BigInt(res.data.token.amount),
+					amount: BigInt(0), // the amount is not really necessary for checkBalance
 				}
-				adapter.updateBalance(address, token)
+				adapter.checkBalance(address, token)
 			}
 		}
 

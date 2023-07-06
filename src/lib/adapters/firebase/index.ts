@@ -310,7 +310,7 @@ export default class FirebaseAdapter implements Adapter {
 		setDoc(daiDoc, daiData, { merge: true })
 	}
 
-	async updateBalance(address: string, token: Token): Promise<void> {
+	async checkBalance(address: string, token: Token): Promise<void> {
 		if (token.address) {
 			// only native token is supported for now
 			return
@@ -357,7 +357,7 @@ export default class FirebaseAdapter implements Adapter {
 
 		const tx = await sendTransaction(wallet, to, token.amount, fee.amount)
 
-		await this.updateBalance(wallet.address, token)
+		await this.checkBalance(wallet.address, token)
 
 		const txCollection = collection(db, `transactions`)
 		const txData = {
