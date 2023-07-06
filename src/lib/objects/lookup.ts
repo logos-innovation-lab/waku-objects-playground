@@ -1,11 +1,8 @@
 import type { WakuObjectDescriptor } from '.'
 import { helloWorldDescriptor } from './hello-world'
-import { sendTransactionDescriptor } from './payggy'
+import { payggyDescriptor } from './payggy'
 
-export const wakuObjectList: WakuObjectDescriptor[] = [
-	helloWorldDescriptor,
-	sendTransactionDescriptor,
-]
+export const wakuObjectList: WakuObjectDescriptor[] = [helloWorldDescriptor, payggyDescriptor]
 
 const wakuObjectMap: Map<string, WakuObjectDescriptor> = new Map(
 	wakuObjectList.map((wakuObject) => [wakuObject.objectId, wakuObject]),

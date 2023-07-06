@@ -5,7 +5,7 @@ import logo from './logo.svg'
 
 export const PAYGGY_OBJECT_ID = 'payggy'
 
-export const sendTransactionDescriptor: WakuObjectDescriptor = {
+export const payggyDescriptor: WakuObjectDescriptor = {
 	objectId: PAYGGY_OBJECT_ID,
 	name: 'Payggy',
 	description: 'Send or request payments',
