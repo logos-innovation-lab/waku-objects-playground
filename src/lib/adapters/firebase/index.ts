@@ -7,7 +7,6 @@ import {
 	query,
 	arrayUnion,
 	where,
-	getDoc,
 } from 'firebase/firestore'
 
 // Stores
@@ -356,32 +355,6 @@ export default class FirebaseAdapter implements Adapter {
 
 		if (!address) throw new Error('Address is missing')
 
-		/*
-
-		// Update balances
-		const balanceFromDoc = doc(db, `users/${address}/balances/${token.symbol.toLowerCase()}`)
-		const balanceToDoc = doc(db, `users/${to}/balances/${token.symbol.toLowerCase()}`)
-		const feeDoc = doc(db, `users/${address}/balances/${fee.symbol.toLowerCase()}`)
-		const balanceFrom = (await getDoc(balanceFromDoc)).data()
-		const balanceTo = (await getDoc(balanceToDoc)).data()
-		if (!balanceFrom || !balanceTo) throw new Error('Balance not found')
-		setDoc(
-			balanceFromDoc,
-			{ amount: (BigInt(balanceFrom.amount) - token.amount).toString() },
-			{ merge: true },
-		)
-		setDoc(
-			balanceToDoc,
-			{ amount: (BigInt(balanceTo.amount) + token.amount).toString() },
-			{ merge: true },
-		)
-
-		// Calculate and deduct fee
-		const feeToken = (await getDoc(feeDoc)).data()
-		if (!feeToken) throw new Error('Fee not found')
-		setDoc(feeDoc, { amount: (BigInt(feeToken.amount) - fee.amount).toString() }, { merge: true })	
-		*/
-
 		const tx = await sendTransaction(wallet, to, token.amount, fee.amount)
 
 		await this.updateBalance(wallet.address, token)
@@ -405,7 +378,8 @@ export default class FirebaseAdapter implements Adapter {
 			},
 		}
 
-		const res = await addDoc(txCollection, txData)
+		await addDoc(txCollection, txData)
+
 		return tx.hash
 	}
 
