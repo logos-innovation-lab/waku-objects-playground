@@ -79,7 +79,7 @@
 		<Button slot="left" variant="icon" on:click={() => history.back()}>
 			<ChevronLeft />
 		</Button>
-		<Button slot="right" variant="icon" on:click={() => history.back()}>
+		<Button slot="right" variant="icon" on:click={() => history.go(-3)}>
 			<Close />
 		</Button>
 	</Header>
@@ -135,8 +135,7 @@
 		<Button slot="left" variant="icon" on:click={() => history.back()}>
 			<ChevronLeft />
 		</Button>
-		<!-- FIXME: Close button should go back to chat OR object list screen, ask David -->
-		<Button slot="right" variant="icon" on:click={() => history.back()}>
+		<Button slot="right" variant="icon" on:click={() => history.go(-2)}>
 			<Close />
 		</Button>
 	</Header>
@@ -145,7 +144,7 @@
 		<p>How much would you like to send?</p>
 		<div class="amt-drop">
 			<div class="drop">
-				<Input bind:value={amount} placeholder="0" />
+				<Input autofocus bind:value={amount} placeholder="0" />
 				<Dropdown>
 					<Button slot="button">{token.symbol} <CaretDown /></Button>
 					{#each store.tokens as t}
