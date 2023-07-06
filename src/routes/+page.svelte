@@ -109,43 +109,44 @@
 	<ul class="chats" aria-label="Chat List">
 		{#each [...$chats.chats] as [id, chat]}
 			{@const userMessages = chat.messages.filter((message) => message.type === 'user')}
-			{@const lastMessage = userMessages[userMessages.length - 1]}
-			{@const myMessage = lastMessage.fromAddress === $walletStore.wallet.address}
+			{@const lastMessage =
+				userMessages.length > 0 ? userMessages[userMessages.length - 1] : undefined}
+			{@const myMessage = lastMessage && lastMessage.fromAddress === $walletStore.wallet.address}
 			{@const otherUser = chat.users.find((m) => m.address !== $walletStore.wallet?.address)}
-			{#if lastMessage && lastMessage.type === 'user'}
-				<li>
-					<div
-						class="chat-button"
-						on:click={() => goto(ROUTES.CHAT(id))}
-						on:keypress={() => goto(ROUTES.CHAT(id))}
-						role="button"
-						tabindex="0"
-					>
-						<Container grow>
-							<div class="chat">
-								<!-- TODO: WHAT HAPPENS TO THE AVATAR IF IT'S A GROUP CHAT? -->
-								{#if chat.users.length === 2}
-									<Avatar size={70} picture={otherUser?.avatar} />
-								{/if}
-								<div class="content">
-									<div class="user-info">
-										<span class="username text-lg text-bold">
-											{otherUser?.name}
-											<Badge dark>
-												{chat.messages.length}
-											</Badge>
-										</span>
-									</div>
-									<p class={`message text-serif ${myMessage ? 'my-message' : ''}`}>
-										{myMessage ? 'You: ' : ''}
-										{lastMessage.text.substring(0, 50)}
-									</p>
+			<li>
+				<div
+					class="chat-button"
+					on:click={() => goto(ROUTES.CHAT(id))}
+					on:keypress={() => goto(ROUTES.CHAT(id))}
+					role="button"
+					tabindex="0"
+				>
+					<Container grow>
+						<div class="chat">
+							<!-- TODO: WHAT HAPPENS TO THE AVATAR IF IT'S A GROUP CHAT? -->
+							{#if chat.users.length === 2}
+								<Avatar size={70} picture={otherUser?.avatar} />
+							{/if}
+							<div class="content">
+								<div class="user-info">
+									<span class="username text-lg text-bold">
+										{otherUser?.name}
+										<Badge dark>
+											{chat.messages.length}
+										</Badge>
+									</span>
 								</div>
+								<p class={`message text-serif ${myMessage ? 'my-message' : ''}`}>
+									{myMessage ? 'You: ' : ''}
+									{lastMessage && lastMessage.type === 'user'
+										? lastMessage.text.substring(0, 50)
+										: 'No messages yet'}
+								</p>
 							</div>
-						</Container>
-					</div>
-				</li>
-			{/if}
+						</div>
+					</Container>
+				</div>
+			</li>
 		{:else}
 			<Container align="center" grow gap={6} justify="center">
 				<div class="center">

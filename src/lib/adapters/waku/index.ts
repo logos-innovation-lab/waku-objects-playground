@@ -192,6 +192,12 @@ export default class WakuAdapter implements Adapter {
 				const chatMessage = JSON.parse(decodedPayload) as Message
 				const chatsMap = get(chats).chats
 
+				// FIXME: the message should be checked for validity
+				if (!chatMessage) {
+					console.error('Invalid message received')
+					return
+				}
+
 				if (!chatsMap.has(chatMessage.fromAddress)) {
 					const user = await lookupUserFromContacts(adapter.waku, chatMessage.fromAddress)
 					if (user) {
