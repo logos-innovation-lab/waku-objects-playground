@@ -20,6 +20,10 @@ type WakuStoreType = unknown
 
 interface WakuObjectDescriptor {
 	readonly objectId: string
+	readonly name: string
+	readonly description: string
+	readonly logo: string
+
 	readonly wakuObject: ComponentType
 	readonly standalone?: ComponentType
 	onMessage?: (
