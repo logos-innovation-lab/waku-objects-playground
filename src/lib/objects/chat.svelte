@@ -8,6 +8,8 @@
 	import type { WakuObjectArgs } from '.'
 	import { lookup } from './lookup'
 	import type { User } from './schemas'
+	import { goto } from '$app/navigation'
+	import routes from '$lib/routes'
 
 	export let message: DataMessage
 	export let users: User[]
@@ -43,6 +45,9 @@
 			},
 			send: (data: unknown) =>
 				adapter.sendData(wallet, chatId, message.objectId, message.instanceId, data),
+			onViewChange: (view: string) => {
+				goto(routes.OBJECT(chatId, message.objectId, message.instanceId, view))
+			},
 		}
 </script>
 
