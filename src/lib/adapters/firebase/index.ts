@@ -32,7 +32,7 @@ import {
 import { formatAddress } from '$lib/utils/format'
 import { db, ipfs, IPFS_GATEWAY } from './connections'
 
-import type { HDNodeWallet } from 'ethers'
+import type { BaseWallet } from 'ethers'
 import type { Adapter } from '..'
 import { balanceStore, type Token } from '$lib/stores/balances'
 import { objectKey, objectStore } from '$lib/stores/objects'
@@ -40,16 +40,19 @@ import { lookup } from '$lib/objects/lookup'
 import { type Unsubscriber, get } from 'svelte/store'
 import { sleep } from '../utils'
 import { getBalance, sendTransaction } from '../transaction'
+import { makeWakuObjectAdapter } from '$lib/objects/adapter'
 
 export default class FirebaseAdapter implements Adapter {
 	protected userSubscriptions: Array<() => unknown> = []
 
-	async onLogIn(wallet: HDNodeWallet) {
+	async onLogIn(wallet: BaseWallet) {
 		profile.set({ loading: true })
 		contacts.update((state) => ({ ...state, loading: true }))
 		balanceStore.update((state) => ({ ...state, loading: true }))
 
 		const { address } = wallet
+
+		const wakuObjectAdapter = makeWakuObjectAdapter(this, wallet)
 
 		const profileSnapshot = doc(db, `users/${address}`)
 		const profileData: Partial<ProfileDb> = { address, lastSignIn: Date.now() }
@@ -140,7 +143,12 @@ export default class FirebaseAdapter implements Adapter {
 									wakuObjectStore.lastUpdated < message.timestamp
 								) {
 									const objects = wakuObjectStore.objects
-									const newStore = descriptor.onMessage(address, objects.get(key), message)
+									const newStore = descriptor.onMessage(
+										address,
+										wakuObjectAdapter,
+										objects.get(key),
+										message,
+									)
 
 									const objectDb = doc(db, `users/${address}/objects/${key}`)
 									// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -181,7 +189,6 @@ export default class FirebaseAdapter implements Adapter {
 		const subscribeBalances = onSnapshot(balanceCollection, (res) => {
 			const balances: Token[] = []
 			res.docs.forEach((d) => {
-				console.debug({ d, data: d.data() })
 				const parseRes = TokenDbSchema.safeParse(d.data())
 				if (parseRes.success) {
 					const token: Token = parseRes.data
@@ -191,7 +198,7 @@ export default class FirebaseAdapter implements Adapter {
 				}
 			})
 			// TODO: Handle this better, every new signed in user should have some balances set
-			if (balances.length === 0) this.initializeBalances(wallet)
+			if (balances.length === 0) this.initializeBalances(address)
 			balanceStore.set({ balances, loading: false })
 		})
 		this.userSubscriptions.push(subscribeBalances)
@@ -205,9 +212,7 @@ export default class FirebaseAdapter implements Adapter {
 		balanceStore.set({ loading: false, balances: [] })
 	}
 
-	async saveUserProfile(wallet: HDNodeWallet, name?: string, avatar?: string): Promise<void> {
-		const { address } = wallet
-
+	async saveUserProfile(address: string, name?: string, avatar?: string): Promise<void> {
 		const userDoc = doc(db, `users/${address}`)
 
 		const data: Partial<ProfileDb> = { address }
@@ -218,18 +223,15 @@ export default class FirebaseAdapter implements Adapter {
 		profile.update((state) => ({ ...state, ...data }))
 	}
 
-	async startChat(_wallet: HDNodeWallet, chat: DraftChat): Promise<string> {
+	async startChat(_address: string, chat: DraftChat): Promise<string> {
 		const chatCollection = collection(db, `/chats`)
 		const chatDoc = await addDoc(chatCollection, chat)
 
 		return chatDoc.id
 	}
 
-	async sendChatMessage(wallet: HDNodeWallet, chatId: string, text: string): Promise<void> {
+	async sendChatMessage(wallet: BaseWallet, chatId: string, text: string): Promise<void> {
 		const fromAddress = wallet.address
-
-		if (!fromAddress) throw new Error('ChatId or address is missing')
-
 		const message: UserMessage = {
 			type: 'user',
 			timestamp: Date.now(),
@@ -242,16 +244,13 @@ export default class FirebaseAdapter implements Adapter {
 	}
 
 	async sendData(
-		wallet: HDNodeWallet,
+		wallet: BaseWallet,
 		chatId: string,
 		objectId: string,
 		instanceId: string,
 		data: unknown,
 	): Promise<void> {
 		const fromAddress = wallet.address
-
-		if (!fromAddress) throw new Error('ChatId or address is missing')
-
 		const message: DataMessage = {
 			type: 'data',
 			timestamp: Date.now(),
@@ -279,11 +278,7 @@ export default class FirebaseAdapter implements Adapter {
 	/**
 	 * THIS IS JUST FOR DEV PURPOSES
 	 */
-	async initializeBalances(wallet: HDNodeWallet): Promise<void> {
-		const { address } = wallet
-
-		if (!address) throw new Error('Address is missing')
-
+	async initializeBalances(address: string): Promise<void> {
 		const nativeTokenAmount = await getBalance(address)
 
 		const ethDoc = doc(db, `users/${address}/balances/eth`)
@@ -295,7 +290,7 @@ export default class FirebaseAdapter implements Adapter {
 			image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
 		}
 
-		setDoc(ethDoc, ethData, { merge: true })
+		setDoc(ethDoc, ethData)
 
 		const daiDoc = doc(db, `users/${address}/balances/dai`)
 		const daiData: Omit<TokenDb, 'amount'> & { amount: string } = {
@@ -307,7 +302,7 @@ export default class FirebaseAdapter implements Adapter {
 			address: '0x0000000000000000000000000000000000000000',
 		}
 
-		setDoc(daiDoc, daiData, { merge: true })
+		setDoc(daiDoc, daiData)
 	}
 
 	async checkBalance(address: string, token: Token): Promise<void> {
@@ -327,12 +322,11 @@ export default class FirebaseAdapter implements Adapter {
 	}
 
 	async updateStore(
-		wallet: HDNodeWallet,
+		address: string,
 		objectId: string,
 		instanceId: string,
 		updater: (state: unknown) => unknown,
 	): Promise<void> {
-		const { address } = wallet
 		const key = objectKey(objectId, instanceId)
 		const objectDb = doc(db, `users/${address}/objects/${key}`)
 
@@ -345,12 +339,7 @@ export default class FirebaseAdapter implements Adapter {
 		setDoc(objectDb, newStore as any, { merge: true })
 	}
 
-	async sendTransaction(
-		wallet: HDNodeWallet,
-		to: string,
-		token: Token,
-		fee: Token,
-	): Promise<string> {
+	async sendTransaction(wallet: BaseWallet, to: string, token: Token, fee: Token): Promise<string> {
 		const { address } = wallet
 
 		if (!address) throw new Error('Address is missing')

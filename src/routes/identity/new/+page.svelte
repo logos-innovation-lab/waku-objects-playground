@@ -40,7 +40,7 @@
 		try {
 			if (!wallet) throw new Error('no wallet')
 
-			await adapters.saveUserProfile(wallet, name, picture)
+			await adapters.saveUserProfile(wallet.address, name, picture)
 			walletStore.saveWallet(wallet)
 			goto(routes.IDENTITY_CONFIRM)
 		} catch (error) {

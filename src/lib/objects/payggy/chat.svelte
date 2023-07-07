@@ -1,7 +1,6 @@
 <script lang="ts">
-	import { SendTransactionSchema, type MessageDataSend, MessageDataSendSchema } from './schemas'
+	import { type MessageDataSend, MessageDataSendSchema } from './schemas'
 	import type { WakuObjectArgs } from '..'
-	import type { SendTransaction } from './schemas'
 	import type { DataMessage } from '$lib/stores/chat'
 	import { toSignificant } from '$lib/utils/format'
 	import ChatMessage from '$lib/components/chat-message.svelte'
@@ -17,16 +16,6 @@
 	export let message: DataMessage<MessageDataSend>
 	export let args: WakuObjectArgs<MessageDataSend, MessageDataSend>
 
-	// Don't need to do this, everything should be in the message itself
-	let store: SendTransaction
-	$: if (args.store) {
-		const res = SendTransactionSchema.safeParse(args.store)
-		if (res.success) {
-			store = res.data
-		} else {
-			console.error(res.error)
-		}
-	}
 	let data: MessageDataSend
 	$: if (message?.data) {
 		const res = MessageDataSendSchema.safeParse(message.data)
@@ -36,8 +25,7 @@
 			console.error(res.error)
 		}
 	}
-	$: myMessage = data?.from === args.profile.address
-	// FIXME: will not work for group chats
+	$: myMessage = message.fromAddress === args.profile.address
 	$: otherUser = args.users.find((u) => u.address !== args.profile.address)
 </script>
 
@@ -47,7 +35,7 @@
 			<ObjectHeader name="Payggy" logoImg={logo} logoAlt="Payggy logo" />
 			{#if !args.store || !message.data || !otherUser}
 				Loading...
-			{:else if !store || !data}
+			{:else if !data}
 				<!-- This is an error state -->
 				Failed to parse store or message data. Check console for details.
 			{:else if myMessage}
@@ -57,9 +45,9 @@
 				You received {toSignificant(BigInt(data.token.amount), data.token.decimals)}
 				{data.token.symbol} from {otherUser.name}
 			{/if}
-			{#if args.store && message.data && store && data}
+			{#if args.store && message.data && data}
 				<!-- TODO: figure out what the transaction # is supposed to be -->
-				<ReadonlyText label={`Transaction #${data.tx}`} marginBottom={0}>
+				<ReadonlyText label={`Transaction #${message.instanceId.slice(0, 4)}`} marginBottom={0}>
 					<div class="readonly">
 						{#if myMessage}
 							<ArrowUpRight />

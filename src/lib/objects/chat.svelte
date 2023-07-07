@@ -8,6 +8,8 @@
 	import type { WakuObjectArgs } from '.'
 	import { lookup } from './lookup'
 	import type { User } from './schemas'
+	import { makeWakuObjectAdapter } from './adapter'
+	import { balanceStore } from '$lib/stores/balances'
 
 	export let message: DataMessage
 	export let users: User[]
@@ -32,18 +34,25 @@
 		}
 	}
 
+	$: tokens = $balanceStore.balances
+
 	let args: WakuObjectArgs
-	$: if (userProfile)
+	$: if (userProfile) {
+		const wakuObjectAdapter = makeWakuObjectAdapter(adapter, wallet)
 		args = {
+			instanceId: message.instanceId,
 			profile: userProfile,
 			users,
+			tokens,
 			store,
 			updateStore: (updater) => {
-				adapter.updateStore(wallet, message.objectId, message.instanceId, updater)
+				adapter.updateStore(address, message.objectId, message.instanceId, updater)
 			},
 			send: (data: unknown) =>
 				adapter.sendData(wallet, chatId, message.objectId, message.instanceId, data),
+			...wakuObjectAdapter,
 		}
+	}
 </script>
 
 <svelte:component this={component} {message} {args} />

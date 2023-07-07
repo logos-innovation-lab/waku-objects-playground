@@ -1,19 +1,19 @@
 import type { DraftChat } from '$lib/stores/chat'
-import type { HDNodeWallet } from 'ethers'
+import type { BaseWallet } from 'ethers'
 import { getFromLocalStorage } from '$lib/utils/localstorage'
 import FirebaseAdapter from './firebase'
 import WakuAdapter from './waku'
 import type { Token } from '$lib/stores/balances'
 
 export interface Adapter {
-	onLogIn: (wallet: HDNodeWallet) => Promise<void>
+	onLogIn: (wallet: BaseWallet) => Promise<void>
 	onLogOut: () => void
-	saveUserProfile(wallet: HDNodeWallet, name?: string, avatar?: string): Promise<void>
+	saveUserProfile(address: string, name?: string, avatar?: string): Promise<void>
 
-	startChat(wallet: HDNodeWallet, chat: DraftChat): Promise<string>
-	sendChatMessage(wallet: HDNodeWallet, chatId: string, text: string): Promise<void>
+	startChat(address: string, chat: DraftChat): Promise<string>
+	sendChatMessage(wallet: BaseWallet, chatId: string, text: string): Promise<void>
 	sendData(
-		wallet: HDNodeWallet,
+		wallet: BaseWallet,
 		chatId: string,
 		objectId: string,
 		instanceId: string,
@@ -24,16 +24,16 @@ export interface Adapter {
 	getPicture(cid: string): string
 
 	updateStore(
-		wallet: HDNodeWallet,
+		address: string,
 		objectId: string,
 		instanceId: string,
 		updater: (state: unknown) => unknown,
 	): Promise<void>
-	sendTransaction(wallet: HDNodeWallet, to: string, token: Token, fee: Token): Promise<string>
-	estimateTransaction(wallet: HDNodeWallet, to: string, token: Token): Promise<Token>
+	sendTransaction(wallet: BaseWallet, to: string, token: Token, fee: Token): Promise<string>
+	estimateTransaction(wallet: BaseWallet, to: string, token: Token): Promise<Token>
 
 	// THIS IS JUST FOR DEV PURPOSES
-	initializeBalances(wallet: HDNodeWallet): Promise<void>
+	initializeBalances(address: string): Promise<void>
 	checkBalance(address: string, token: Token): Promise<void>
 }
 

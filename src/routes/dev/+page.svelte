@@ -23,7 +23,7 @@
 		if (!wallet) {
 			return
 		}
-		adapter.initializeBalances(wallet)
+		adapter.initializeBalances(wallet.address)
 	}
 </script>
 

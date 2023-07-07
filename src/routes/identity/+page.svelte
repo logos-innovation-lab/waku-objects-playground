@@ -53,7 +53,7 @@
 	function saveProfileNow() {
 		const wallet = get(walletStore).wallet
 		if (!wallet) return console.error('no wallet')
-		adapters.saveUserProfile(wallet, name, avatar)
+		adapters.saveUserProfile(wallet.address, name, avatar)
 	}
 
 	// Debounce saving profile

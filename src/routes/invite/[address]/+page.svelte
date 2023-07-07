@@ -39,7 +39,7 @@
 			users: [$page.params.address, wallet.address],
 			messages: [],
 		}
-		const chatId = await adapters.startChat(wallet, chat)
+		const chatId = await adapters.startChat(wallet.address, chat)
 		loading = false
 		goto(routes.CHAT(chatId))
 	}

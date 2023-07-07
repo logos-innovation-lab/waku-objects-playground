@@ -2,9 +2,14 @@
 	import { walletStore } from '$lib/stores/wallet'
 	import adapter from '$lib/adapters'
 	import { lookup } from './lookup'
-	import { page } from '$app/stores'
 	import { balanceStore, type Token } from '$lib/stores/balances'
-	import { chats } from '$lib/stores/chat'
+	import { chats, type Chat } from '$lib/stores/chat'
+	import type { WakuObjectArgs } from '.'
+	import { profile } from '$lib/stores/profile'
+	import { makeWakuObjectAdapter } from './adapter'
+	import type { User } from '$lib/stores/users'
+	import { objectKey, objectStore } from '$lib/stores/objects'
+	import { throwError } from '$lib/utils/error'
 
 	export let objectId: string
 	export let instanceId: string
@@ -13,16 +18,30 @@
 
 	const component = lookup(objectId)?.standalone
 
-	$: tokens = $balanceStore.balances
-	$: nativeToken = tokens.find((token) => token.symbol === 'ETH')
-	$: chat = $chats.chats.get($page.params.id)
-	$: fromUser = chat?.users.find((user) => user.address === $walletStore.wallet?.address)
-	$: toUser = chat?.users.find((user) => user.address !== $walletStore.wallet?.address)
-
-	let store: unknown | undefined
-	$: if (nativeToken && tokens && fromUser && toUser) {
-		store = { nativeToken, tokens, fromUser, toUser, view: $page.params.view }
+	const wallet = $walletStore.wallet
+	if (!wallet) {
+		// TODO: handle when there is not wallet (redirect to login)
+		throw 'no wallet'
 	}
+	const address = wallet.address
+
+	let store: unknown
+	$: store = $objectStore.objects.get(objectKey(objectId, instanceId))
+	let tokens: Token[]
+	$: tokens = $balanceStore.balances
+	let chat: Chat
+	$: chat = $chats.chats.get(chatId) || throwError('chat not found')
+
+	let userProfile: User
+	$: if (address && !$profile.loading) {
+		userProfile = {
+			address,
+			name: $profile.name,
+			avatar: $profile.avatar,
+		}
+	}
+	let users: User[]
+	$: users = chat.users
 
 	function send(data: unknown): Promise<void> {
 		if (!$walletStore.wallet) throw new Error('not logged in')
@@ -30,39 +49,31 @@
 	}
 
 	function updateStore(updater: (state: unknown) => unknown): void {
-		if (!$walletStore.wallet) throw new Error('not logged in')
-		adapter.updateStore($walletStore.wallet, objectId, instanceId, updater)
+		adapter.updateStore(address, objectId, instanceId, updater)
 	}
 
-	function sendTransaction(to: string, token: Token, fee: Token) {
-		const wallet = $walletStore.wallet
-		if (!wallet) throw new Error('no wallet')
-		return adapter.sendTransaction(wallet, to, token, fee)
+	const wakuObjectAdapter = makeWakuObjectAdapter(adapter, wallet)
+
+	let args: WakuObjectArgs
+	$: if (userProfile && users) {
+		args = {
+			instanceId,
+			profile: userProfile,
+			users,
+			tokens,
+			store,
+			updateStore,
+			send,
+			onViewChange,
+			...wakuObjectAdapter,
+		}
 	}
 
-	function estimateTransaction(to: string, amount: bigint, token: Token) {
-		const wallet = $walletStore.wallet
-		if (!wallet) throw new Error('no wallet')
-		return adapter.estimateTransaction(wallet, to, token)
-	}
-
-	// TODO: handle when there is not wallet (redirect to login)
+	$: console.debug({ $chats, chat, chatId, store, tokens, args, userProfile, users })
 </script>
 
-{#if !store || !fromUser}
+{#if !args}
 	<p>Loading...</p>
 {:else}
-	<svelte:component
-		this={component}
-		args={{
-			address: fromUser.address,
-			name: fromUser.name ?? '',
-			send,
-			updateStore,
-			onViewChange,
-			sendTransaction,
-			estimateTransaction,
-			store,
-		}}
-	/>
+	<svelte:component this={component} {args} />
 {/if}

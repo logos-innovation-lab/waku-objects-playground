@@ -4,7 +4,7 @@ import { z } from 'zod'
 export const TokenDbSchema = z.object({
 	name: z.string(),
 	symbol: z.string(),
-	amount: z.preprocess((v) => BigInt(v as string), z.bigint().positive()),
+	amount: z.preprocess((v) => BigInt(v as string), z.bigint().nonnegative()),
 	decimals: z.number().int().positive(),
 	image: z.string(),
 	address: AddressSchema.optional(),

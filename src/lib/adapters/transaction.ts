@@ -11,8 +11,26 @@ type SendTransactionResponse = TransactionResponseParams & {
 	receipt: TransactionReceipt | null
 }
 
+interface BlockchainNetwork {
+	nativeToken: string
+	provider: string
+}
+
+const testBlockchain: BlockchainNetwork = {
+	nativeToken: 'ETH',
+	provider: 'http://127.0.0.1:8545',
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const chiadoBlockchain: BlockchainNetwork = {
+	nativeToken: 'XDAI',
+	provider: 'https://rpc.chiadochain.net/',
+}
+
+export const defaultBlockchainNetwork = testBlockchain
+
 function getProvider(): Provider {
-	const providerUrl = 'http://127.0.0.1:8545'
+	const providerUrl = defaultBlockchainNetwork.provider
 	const provider = new JsonRpcProvider(providerUrl)
 	return provider
 }
