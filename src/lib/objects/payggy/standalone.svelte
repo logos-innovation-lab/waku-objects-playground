@@ -15,7 +15,7 @@
 	import DropdownItem from '$lib/components/dropdown-item.svelte'
 	import Close from '$lib/components/icons/close.svelte'
 
-	import { formatAddress, formatTokenAmount } from '$lib/utils/format'
+	import { formatAddress, toSignificant, toBigInt } from '$lib/utils/format'
 	import type { WakuObjectArgs } from '..'
 	import {
 		SendTransactionStandaloneSchema,
@@ -41,14 +41,14 @@
 	let fee: Token | undefined = undefined
 	$: if (!token) token = store.nativeToken
 	$: if (args.estimateTransaction && amount && token) {
-		const tokenToTransfer = { ...token, amount: BigInt(Number(amount) * 10 ** token.decimals) }
+		const tokenToTransfer = { ...token, amount: toBigInt(amount, token.decimals) }
 		args.estimateTransaction(store.toUser.address, tokenToTransfer).then((f) => (fee = f))
 	}
 	$: if (!amount && store.view === 'overview') history.back()
 
 	async function sendTransaction() {
 		if (args.sendTransaction && fee) {
-			const tokenToTransfer = { ...token, amount: BigInt(Number(amount) * 10 ** token.decimals) }
+			const tokenToTransfer = { ...token, amount: toBigInt(amount, token.decimals) }
 
 			const tx = await args.sendTransaction(store.toUser.address, tokenToTransfer, fee)
 			// FIXME: check the amount is actually number and convert to some bigint mechanism which does not lose precision
@@ -106,20 +106,19 @@
 		</ReadonlyText>
 		<ReadonlyText label="Transaction fee (max)">
 			<div class="text-lg">
-				{fee ? `${formatTokenAmount(fee.amount, fee.decimals)} ${fee.symbol}` : 'unknown'}
+				{fee ? `${toSignificant(fee.amount, fee.decimals)} ${fee.symbol}` : 'unknown'}
 			</div>
 			<div class="secondary text-sm">≈ 1.56 EUR now</div>
 		</ReadonlyText>
 		<p
 			class={`balance ${
-				Number(amount) > Number(formatTokenAmount(token.amount, token.decimals)) ? 'text-bold' : ''
+				Number(amount) > Number(toSignificant(token.amount, token.decimals)) ? 'text-bold' : ''
 			}`}
 		>
-			{#if Number(amount) > Number(formatTokenAmount(token.amount, token.decimals))}
+			{#if Number(amount) > Number(toSignificant(token.amount, token.decimals))}
 				<WarningAltFilled />
 			{/if}
-			You have {formatTokenAmount(store.nativeToken.amount, store.nativeToken.decimals)} ETH in your
-			account.
+			You have {toSignificant(store.nativeToken.amount, store.nativeToken.decimals)} ETH in your account.
 		</p>
 	</Container>
 	<Container direction="row" justify="space-between" alignItems="center" padX={24}>
@@ -160,20 +159,20 @@
 		</div>
 		<p
 			class={`balance ${
-				Number(amount) > Number(formatTokenAmount(token.amount, token.decimals)) ? 'text-bold' : ''
+				Number(amount) > Number(toSignificant(token.amount, token.decimals)) ? 'text-bold' : ''
 			}`}
 		>
-			{#if Number(amount) > Number(formatTokenAmount(token.amount, token.decimals))}
+			{#if Number(amount) > Number(toSignificant(token.amount, token.decimals))}
 				<WarningAltFilled />
 			{/if}
-			You have {formatTokenAmount(token.amount, token.decimals)}
+			You have {toSignificant(token.amount, token.decimals)}
 			{token.symbol} in your account.
 		</p>
 	</Container>
 	<Container justify="flex-end">
 		<Button
 			variant="strong"
-			disabled={!amount || Number(amount) > Number(formatTokenAmount(token.amount, token.decimals))}
+			disabled={!amount || Number(amount) > Number(toSignificant(token.amount, token.decimals))}
 			on:click={() => args.onViewChange && args.onViewChange('overview')}
 		>
 			<ArrowRight />
