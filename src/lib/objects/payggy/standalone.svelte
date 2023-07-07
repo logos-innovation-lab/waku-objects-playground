@@ -15,7 +15,7 @@
 	import DropdownItem from '$lib/components/dropdown-item.svelte'
 	import Close from '$lib/components/icons/close.svelte'
 
-	import { formatAddress, formatTokenAmount } from '$lib/utils/format'
+	import { formatAddress, formatTokenAmount, toBigInt } from '$lib/utils/format'
 	import type { WakuObjectArgs } from '..'
 	import {
 		SendTransactionStandaloneSchema,
@@ -42,14 +42,14 @@
 	let fee: Token | undefined = undefined
 	$: if (!token) token = store.nativeToken
 	$: if (args.estimateTransaction && amount && token) {
-		const tokenToTransfer = { ...token, amount: BigInt(Number(amount) * 10 ** token.decimals) }
+		const tokenToTransfer = { ...token, amount: toBigInt(amount, token.decimals) }
 		args.estimateTransaction(store.toUser.address, tokenToTransfer).then((f) => (fee = f))
 	}
 	$: if (!amount && store.view === 'overview') history.back()
 
 	async function sendTransaction() {
 		if (args.sendTransaction && fee) {
-			const tokenToTransfer = { ...token, amount: BigInt(Number(amount) * 10 ** token.decimals) }
+			const tokenToTransfer = { ...token, amount: toBigInt(amount, token.decimals) }
 
 			const tx = await args.sendTransaction(store.toUser.address, tokenToTransfer, fee)
 			// FIXME: check the amount is actually number and convert to some bigint mechanism which does not lose precision
@@ -88,10 +88,12 @@
 	</Header>
 	{#if store?.fromUser?.address === args?.profile?.address}
 		You sent
+		{JSON.stringify(store)}
 		<!-- You sent {formatTokenAmount(BigInt(store.token.amount), data.token.decimals)}
 		{data.token.symbol} to {otherUser.name} -->
 	{:else}
 		You received
+		{JSON.stringify(store)}
 		<!-- You received {formatTokenAmount(BigInt(data.token.amount), data.token.decimals)}
 		{data.token.symbol} from {otherUser.name} -->
 	{/if}
