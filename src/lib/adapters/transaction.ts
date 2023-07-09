@@ -39,6 +39,7 @@ export async function sendTransaction(
 	wallet: BaseWallet,
 	to: string,
 	amount: bigint,
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	fee: bigint,
 ): Promise<SendTransactionResponse> {
 	const provider = getProvider()
