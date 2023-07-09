@@ -131,7 +131,6 @@ export default class FirebaseAdapter implements Adapter {
 
 						// update the object store if there is an incoming data message
 						parseRes.data.messages.forEach((message) => {
-							console.debug('onSnapshot', { message })
 							if (message.type === 'data') {
 								const descriptor = lookup(message.objectId)
 								const key = objectKey(message.objectId, message.instanceId)

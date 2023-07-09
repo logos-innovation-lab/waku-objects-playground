@@ -68,8 +68,6 @@
 			...wakuObjectAdapter,
 		}
 	}
-
-	$: console.debug({ $chats, chat, chatId, store, tokens, args, userProfile, users })
 </script>
 
 {#if !args}

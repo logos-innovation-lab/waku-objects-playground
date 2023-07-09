@@ -17,7 +17,6 @@ export const payggyDescriptor: WakuObjectDescriptor = {
 	standalone: StandaloneComponent,
 
 	onMessage: (address, adapter, store, message) => {
-		console.debug('onMessage callback', { address, store, message })
 		if (message?.data) {
 			const res = MessageDataSendSchema.safeParse(message.data)
 			if (res.success) {

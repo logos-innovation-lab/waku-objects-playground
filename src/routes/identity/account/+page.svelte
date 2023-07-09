@@ -34,7 +34,6 @@
 		if (address === undefined) return
 
 		const balance = await getBalance(address)
-		console.debug({ balance, $balanceStore })
 
 		balanceStore.update((balanceState) => ({
 			...balanceState,
