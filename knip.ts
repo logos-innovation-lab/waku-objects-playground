@@ -5,7 +5,7 @@ import type { KnipConfig } from 'knip'
 const sveltePreprocessor = sveltePreprocess()
 
 const config: KnipConfig = {
-	ignore: ['**/*.d.ts'],
+	ignore: ['**/*.d.ts', '**/schemas.ts', 'src/lib/objects/hello-world/index.ts'],
 	ignoreDependencies: ['hardhat'],
 	paths: {
 		// This ain't pretty, but Svelte basically does the same
