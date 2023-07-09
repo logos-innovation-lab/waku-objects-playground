@@ -63,16 +63,3 @@ export async function getBalance(address: string): Promise<bigint> {
 	const balance = provider.getBalance(address)
 	return balance
 }
-
-export async function getSendTransactionResponse(hash: string): Promise<SendTransactionResponse> {
-	const provider = getProvider()
-	const tx = await provider.getTransaction(hash)
-	if (!tx) {
-		throw 'transaction not found'
-	}
-	const receipt = await provider.getTransactionReceipt(hash)
-	return {
-		...tx,
-		receipt,
-	}
-}
