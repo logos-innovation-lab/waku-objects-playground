@@ -2,15 +2,19 @@
 	export let label: string | undefined = undefined
 	export let marginBottom = 24
 	export let overflow = true
+	export let align: 'left' | 'right' | 'center' = 'left'
 </script>
 
-<div class={`readonly`} style={`margin-bottom: ${marginBottom}px;`}>
+<div
+	class={`readonly ${overflow ? 'overflow' : ''}`}
+	style={`margin-bottom: ${marginBottom}px; text-align: ${align};`}
+>
 	{#if label}
 		<div class="label">
 			{label}
 		</div>
 	{/if}
-	<div class={`main ${overflow ? 'overflow' : ''}`}>
+	<div class={`main`}>
 		<slot />
 	</div>
 </div>
@@ -20,11 +24,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--spacing-6);
-	}
-	.main {
-		background-color: var(--gray10);
-		padding: var(--spacing-12);
-		border-radius: var(--border-radius);
 
 		&.overflow {
 			width: calc(100% + var(--spacing-24));
@@ -32,9 +31,15 @@
 			margin-right: calc(-1 * var(--spacing-12));
 		}
 	}
+	.main {
+		background-color: var(--gray10);
+		padding: var(--spacing-12);
+		border-radius: var(--border-radius);
+	}
 
 	.label {
 		font-size: var(--font-size-sm);
 		color: var(--gray40);
+		margin-left: var(--spacing-12);
 	}
 </style>
