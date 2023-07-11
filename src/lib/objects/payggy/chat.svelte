@@ -26,6 +26,7 @@
 		}
 	}
 	$: myMessage = message.fromAddress === args.profile.address
+	// FIXME: will not work for group chats
 	$: otherUser = args.users.find((u) => u.address !== args.profile.address)
 </script>
 
