@@ -38,6 +38,8 @@ interface WakuObjectDescriptor {
 
 	readonly wakuObject: ComponentType
 	readonly standalone?: ComponentType
+	readonly customArgs?: CustomArgs
+
 	onMessage?: (
 		address: string,
 		adapter: WakuObjectAdapter,

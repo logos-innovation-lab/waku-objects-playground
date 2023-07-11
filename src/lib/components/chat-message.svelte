@@ -2,6 +2,7 @@
 	export let bubble = false
 	export let myMessage = false
 	export let object = false
+	export let noText = false
 
 	const isFF = () => {
 		let browserInfo = navigator.userAgent
@@ -12,9 +13,9 @@
 <div
 	class={`message ${myMessage ? 'my-message' : 'their-message'} ${isFF() ? 'ff' : ''} ${
 		object ? 'object' : ''
-	}`}
+	} ${noText ? 'no-text' : ''}`}
 >
-	<div class={` ${bubble ? 'bubble message-content message-text text-lg' : ''}`}>
+	<div class={`${bubble ? 'bubble message-content message-text text-lg' : ''}`}>
 		<slot />
 	</div>
 </div>
@@ -87,5 +88,9 @@
 		.message-content {
 			text-align: left;
 		}
+	}
+
+	.no-text .text-lg {
+		line-height: 0;
 	}
 </style>
