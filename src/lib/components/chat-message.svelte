@@ -7,6 +7,7 @@
 
 	//did this message come from an object?
 	export let object = false
+	export let noText = false
 
 	//is this message in a group chat?
 	export let group = false
@@ -26,9 +27,9 @@
 <div
 	class={`message ${myMessage ? 'my-message' : 'their-message'} ${isFF() ? 'ff' : ''} ${
 		object ? 'object' : ''
-	} ${group ? 'group' : ''} ${sameSender ? 'same' : ''}`}
+	} ${group ? 'group' : ''} ${sameSender ? 'same' : ''} ${noText ? 'no-text' : ''}`}
 >
-	<div class={` ${bubble ? 'bubble message-content message-text text-lg' : ''}`}>
+	<div class={`${bubble ? 'bubble message-content message-text text-lg' : ''}`}>
 		<slot />
 		{#if senderName}
 			<div class="author">
@@ -130,5 +131,9 @@
 	.author {
 		font-family: sans-serif;
 		font-size: var(--font-size-sm);
+	}
+
+	.no-text .text-lg {
+		line-height: 0;
 	}
 </style>

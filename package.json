@@ -28,6 +28,7 @@
 		"@typescript-eslint/parser": "^5.61.0",
 		"@waku-objects/luminance": "^2.0.1",
 		"@waku/interfaces": "^0.0.15",
+		"@waku-objects/sandbox-example": "^0.0.2",
 		"@waku/sdk": "^0.0.16",
 		"copy-to-clipboard": "^3.3.3",
 		"eslint": "^8.44.0",

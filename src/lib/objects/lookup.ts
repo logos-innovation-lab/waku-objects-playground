@@ -1,4 +1,5 @@
 import type { WakuObjectDescriptor } from '.'
+import { getExternalDescriptor } from './external'
 import { helloWorldDescriptor } from './hello-world'
 import { payggyDescriptor } from './payggy'
 
@@ -6,6 +7,7 @@ import { payggyDescriptor } from './payggy'
 export const wakuObjectList: WakuObjectDescriptor<any, any>[] = [
 	helloWorldDescriptor,
 	payggyDescriptor,
+	getExternalDescriptor('@waku-objects/sandbox-example'),
 ]
 
 const wakuObjectMap: Map<string, WakuObjectDescriptor> = new Map(
