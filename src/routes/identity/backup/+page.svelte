@@ -8,7 +8,7 @@
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'
-	import Textarea from '$lib/components/textarea.svelte'
+	import ReadonlyText from '$lib/components/readonly-text.svelte'
 
 	export let data
 
@@ -30,7 +30,9 @@
 	<p class="text-lg description">
 		Anyone with your recovery phrase will be able to access your identity and account
 	</p>
-	<Textarea label="Recovery phrase" readonly placeholder={data.mnemonics} />
+	<ReadonlyText label="Recovery phrase" overflow={false} marginBottom={0} align="left">
+		{data.mnemonics}
+	</ReadonlyText>
 	<Button on:click={copyToClipboard}>
 		{#if copied}
 			<Checkmark />
