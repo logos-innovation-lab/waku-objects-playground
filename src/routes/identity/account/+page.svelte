@@ -18,7 +18,8 @@
 	import routes from '$lib/routes'
 	import { walletStore } from '$lib/stores/wallet'
 	import { balanceStore } from '$lib/stores/balances'
-	import { getBalance } from '$lib/adapters/transaction'
+	import { onMount } from 'svelte'
+	import adapter from '$lib/adapters'
 
 	let copied = false
 	function copyAddressToClipboard() {
@@ -29,26 +30,12 @@
 		copied = true
 	}
 
-	async function getBalances() {
+	onMount(() => {
 		const address = $walletStore.wallet?.address
 		if (address === undefined) return
 
-		const balance = await getBalance(address)
-
-		balanceStore.update((balanceState) => ({
-			...balanceState,
-			balances: balanceState.balances.map((value) => {
-				if (value.address) {
-					return value
-				} else {
-					return {
-						...value,
-						amount: balance,
-					}
-				}
-			}),
-		}))
-	}
+		adapter.initializeBalances(address)
+	})
 </script>
 
 <Header title="Account">
@@ -85,8 +72,6 @@
 	<Container align="center" direction="row" gap={6} justify="center" padX={24}>
 		Assets <Badge dark>{$balanceStore.balances.length}</Badge>
 	</Container>
-	<Button on:click={getBalances}>Fetch balances</Button>
-
 	<Divider pad={12} padBottom={0} />
 	<div class="assets">
 		{#each $balanceStore.balances as balance}
