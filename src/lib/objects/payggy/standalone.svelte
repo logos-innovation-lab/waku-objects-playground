@@ -18,43 +18,54 @@
 	import { formatAddress, toSignificant, toBigInt } from '$lib/utils/format'
 	import type { WakuObjectArgs } from '..'
 	import {
-		SendTransactionStandaloneSchema,
-		type SendTransactionStandalone,
 		type MessageDataSend,
+		SendTransactionStoreSchema,
+		type SendTransactionStore,
 	} from './schemas'
 	import type { Token } from '../schemas'
+	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
+	import { throwError } from '$lib/utils/error'
 
-	export let args: WakuObjectArgs<MessageDataSend, MessageDataSend>
+	export let args: WakuObjectArgs<SendTransactionStore, MessageDataSend>
 
-	let store: SendTransactionStandalone
+	let store: SendTransactionStore | undefined
 	$: {
-		const res = SendTransactionStandaloneSchema.safeParse(args.store)
-		if (res.success) {
-			store = res.data
-		} else {
-			console.error(res.error)
+		if (args.store) {
+			const res = SendTransactionStoreSchema.safeParse(args.store)
+			if (res.success) {
+				store = res.data
+			} else {
+				console.error(res.error)
+			}
 		}
 	}
 
 	let token: Token
 	let amount = ''
 	let fee: Token | undefined = undefined
-	$: if (!token) token = store.nativeToken
-	$: if (args.estimateTransaction && amount && token) {
-		const tokenToTransfer = { ...token, amount: toBigInt(amount, token.decimals) }
-		args.estimateTransaction(store.toUser.address, tokenToTransfer).then((f) => (fee = f))
+
+	$: if (!token) {
+		token =
+			args.tokens.find((token) => token.symbol === defaultBlockchainNetwork.nativeToken) ||
+			throwError('invalid token')
 	}
-	$: if (!amount && store.view === 'overview') history.back()
+	let toUser =
+		args.users.find((user) => user.address !== args.profile.address) || throwError('invalid user')
+	$: if (amount && token) {
+		const tokenToTransfer = { ...token, amount: toBigInt(amount, token.decimals) }
+		args.estimateTransaction(toUser.address, tokenToTransfer).then((f) => (fee = f))
+	}
+	// $: if (!amount && store && store.view === 'overview') history.back()
 
 	async function sendTransaction() {
-		if (args.sendTransaction && fee) {
+		if (fee) {
 			const tokenToTransfer = { ...token, amount: toBigInt(amount, token.decimals) }
 
-			const tx = await args.sendTransaction(store.toUser.address, tokenToTransfer, fee)
+			const tx = await args.sendTransaction(toUser.address, tokenToTransfer, fee)
 			// FIXME: check the amount is actually number and convert to some bigint mechanism which does not lose precision
 			args.send({
-				from: store.fromUser.address,
-				to: store.toUser.address,
+				from: args.profile.address,
+				to: toUser.address,
 				token: {
 					amount: tokenToTransfer.amount.toString(),
 					symbol: tokenToTransfer.symbol,
@@ -72,9 +83,7 @@
 	}
 </script>
 
-{#if !store}
-	<p>Invalid args</p>
-{:else if store.view === 'overview'}
+{#if store?.type === 'init'}
 	<Header title="Payggy">
 		<Button slot="left" variant="icon" on:click={() => history.back()}>
 			<ChevronLeft />
@@ -98,11 +107,11 @@
 		</ReadonlyText>
 		<ReadonlyText label="From">
 			<div class="text-lg">Your account</div>
-			<div class="secondary text-sm">{formatAddress(store.fromUser.address, 4, 4)}</div>
+			<div class="secondary text-sm">{formatAddress(args.profile.address, 4, 4)}</div>
 		</ReadonlyText>
 		<ReadonlyText label="To">
-			<div class="text-lg">{store.toUser.name}'s account</div>
-			<div class="secondary text-sm">{formatAddress(store.toUser.address, 4, 4)}</div>
+			<div class="text-lg">{toUser.name}'s account</div>
+			<div class="secondary text-sm">{formatAddress(toUser.address, 4, 4)}</div>
 		</ReadonlyText>
 		<ReadonlyText label="Transaction fee (max)">
 			<div class="text-lg">
@@ -118,12 +127,12 @@
 			{#if Number(amount) > Number(toSignificant(token.amount, token.decimals))}
 				<WarningAltFilled />
 			{/if}
-			You have {toSignificant(store.nativeToken.amount, store.nativeToken.decimals)} ETH in your account.
+			You have {toSignificant(token.amount, token.decimals)} ETH in your account.
 		</p>
 	</Container>
 	<Container direction="row" justify="space-between" alignItems="center" padX={24}>
 		<div class="secondary text-normal">
-			{store.toUser.name ?? formatAddress(store.toUser.address, 4, 4)}
+			{toUser.name ?? formatAddress(toUser.address, 4, 4)}
 		</div>
 		<Button variant="strong" align="right" disabled={!amount} on:click={sendTransaction}>
 			<ArrowUp /> Send now
@@ -146,7 +155,7 @@
 				<Input autofocus bind:value={amount} placeholder="0" />
 				<Dropdown>
 					<Button slot="button">{token.symbol} <CaretDown /></Button>
-					{#each store.tokens as t}
+					{#each args.tokens as t}
 						<DropdownItem
 							onClick={() => {
 								token = t
@@ -173,7 +182,10 @@
 		<Button
 			variant="strong"
 			disabled={!amount || Number(amount) > Number(toSignificant(token.amount, token.decimals))}
-			on:click={() => args.onViewChange && args.onViewChange('overview')}
+			on:click={() => {
+				args.updateStore(() => ({ type: 'init' }))
+				args.onViewChange && args.onViewChange('overview')
+			}}
 		>
 			<ArrowRight />
 		</Button>

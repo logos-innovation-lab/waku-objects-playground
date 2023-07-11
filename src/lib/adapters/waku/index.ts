@@ -14,12 +14,15 @@ import {
 	storeDocument,
 	subscribe,
 } from './waku'
-import type { HDNodeWallet } from 'ethers'
+import type { BaseWallet, Wallet } from 'ethers'
 import { ipfs, IPFS_GATEWAY } from '../firebase/connections'
 import { get } from 'svelte/store'
 import { objectStore, type ObjectState, objectKey } from '$lib/stores/objects'
 import { lookup } from '$lib/objects/lookup'
 import { balanceStore, type Token } from '$lib/stores/balances'
+import { getBalance } from '../transaction'
+import type { WakuObjectAdapter } from '$lib/objects'
+import { makeWakuObjectAdapter } from '$lib/objects/adapter'
 
 function createChat(chatId: string, user: User, address: string): string {
 	chats.update((state) => {
@@ -48,8 +51,13 @@ function createChat(chatId: string, user: User, address: string): string {
 	return chatId
 }
 
-function addMessageToChat(address: string, chatId: string, message: Message) {
-	executeOnMessage(address, message)
+function addMessageToChat(
+	address: string,
+	adapter: WakuObjectAdapter,
+	chatId: string,
+	message: Message,
+) {
+	executeOnMessage(address, adapter, message)
 
 	chats.update((state) => {
 		if (!state.chats.has(chatId)) {
@@ -70,7 +78,7 @@ function addMessageToChat(address: string, chatId: string, message: Message) {
 	})
 }
 
-function executeOnMessage(address: string, chatMessage: Message) {
+function executeOnMessage(address: string, adapter: WakuObjectAdapter, chatMessage: Message) {
 	if (chatMessage.type === 'data') {
 		const descriptor = lookup(chatMessage.objectId)
 		const key = objectKey(chatMessage.objectId, chatMessage.instanceId)
@@ -78,7 +86,7 @@ function executeOnMessage(address: string, chatMessage: Message) {
 
 		if (descriptor && descriptor.onMessage && wakuObjectStore.lastUpdated < chatMessage.timestamp) {
 			const objects = wakuObjectStore.objects
-			const newStore = descriptor.onMessage(address, objects.get(key), chatMessage)
+			const newStore = descriptor.onMessage(address, adapter, objects.get(key), chatMessage)
 			const newObjects = new Map(objects)
 			newObjects.set(key, newStore)
 			objectStore.update((state) => ({
@@ -137,9 +145,11 @@ export default class WakuAdapter implements Adapter {
 	private waku: LightNode | undefined
 	private subscriptions: Array<() => void> = []
 
-	async onLogIn(wallet: HDNodeWallet): Promise<void> {
+	async onLogIn(wallet: BaseWallet): Promise<void> {
 		const address = wallet.address
 		this.waku = await connectWaku()
+
+		const wakuObjectAdapter = makeWakuObjectAdapter(this, wallet)
 
 		const profileData = (await readLatestDocument(this.waku, 'profile', address)) as Profile
 		profile.update((state) => ({ ...state, ...profileData, address, loading: false }))
@@ -205,7 +215,7 @@ export default class WakuAdapter implements Adapter {
 					}
 				}
 
-				addMessageToChat(address, chatMessage.fromAddress, chatMessage)
+				addMessageToChat(address, wakuObjectAdapter, chatMessage.fromAddress, chatMessage)
 			},
 		)
 		this.subscriptions.push(subscribeChats)
@@ -221,7 +231,7 @@ export default class WakuAdapter implements Adapter {
 		})
 		this.subscriptions.push(subscribeObjectStore)
 
-		this.initializeBalances(wallet)
+		this.initializeBalances(address)
 	}
 
 	async onLogOut() {
@@ -231,8 +241,7 @@ export default class WakuAdapter implements Adapter {
 		contacts.set({ contacts: new Map<string, User>(), loading: true })
 	}
 
-	async saveUserProfile(wallet: HDNodeWallet, name?: string, avatar?: string): Promise<void> {
-		const address = wallet.address
+	async saveUserProfile(address: string, name?: string, avatar?: string): Promise<void> {
 		if (!this.waku) {
 			this.waku = await connectWaku()
 		}
@@ -253,7 +262,7 @@ export default class WakuAdapter implements Adapter {
 		}
 	}
 
-	async startChat(wallet: HDNodeWallet, chat: DraftChat): Promise<string> {
+	async startChat(address: string, chat: DraftChat): Promise<string> {
 		if (!this.waku) {
 			throw 'no waku'
 		}
@@ -267,13 +276,12 @@ export default class WakuAdapter implements Adapter {
 			throw 'invalid user'
 		}
 
-		const address = wallet.address
 		createChat(chatId, user, address)
 
 		return chatId
 	}
 
-	async sendChatMessage(wallet: HDNodeWallet, chatId: string, text: string): Promise<void> {
+	async sendChatMessage(wallet: BaseWallet, chatId: string, text: string): Promise<void> {
 		if (!this.waku) {
 			throw 'no waku'
 		}
@@ -286,12 +294,14 @@ export default class WakuAdapter implements Adapter {
 			fromAddress,
 		}
 
-		addMessageToChat(fromAddress, chatId, message)
+		const wakuObjectAdapter = makeWakuObjectAdapter(this, wallet)
+
+		addMessageToChat(fromAddress, wakuObjectAdapter, chatId, message)
 		await sendMessage(this.waku, chatId, message)
 	}
 
 	async sendData(
-		wallet: HDNodeWallet,
+		wallet: Wallet,
 		chatId: string,
 		objectId: string,
 		instanceId: string,
@@ -311,7 +321,9 @@ export default class WakuAdapter implements Adapter {
 			data,
 		}
 
-		addMessageToChat(fromAddress, chatId, message)
+		const wakuObjectAdapter = makeWakuObjectAdapter(this, wallet)
+
+		addMessageToChat(fromAddress, wakuObjectAdapter, chatId, message)
 		await sendMessage(this.waku, chatId, message)
 	}
 
@@ -328,7 +340,7 @@ export default class WakuAdapter implements Adapter {
 
 	async updateStore(
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		wallet: HDNodeWallet,
+		address: string,
 		objectId: string,
 		instanceId: string,
 		updater: (state: unknown) => unknown,
@@ -347,15 +359,10 @@ export default class WakuAdapter implements Adapter {
 		objectStore.update((state) => ({ ...state, objects: newObjects, lastUpdated: Date.now() }))
 
 		const updatedObjectStore = get(objectStore)
-		await storeObjectStore(this.waku, wallet.address, updatedObjectStore)
+		await storeObjectStore(this.waku, address, updatedObjectStore)
 	}
 
-	async sendTransaction(
-		wallet: HDNodeWallet,
-		to: string,
-		token: Token,
-		fee: Token,
-	): Promise<string> {
+	async sendTransaction(wallet: Wallet, to: string, token: Token, fee: Token): Promise<string> {
 		const { address } = wallet
 
 		if (!address) throw new Error('Address is missing')
@@ -425,16 +432,14 @@ export default class WakuAdapter implements Adapter {
 	/**
 	 * THIS IS JUST FOR DEV PURPOSES
 	 */
-	initializeBalances(wallet: HDNodeWallet): void {
-		const { address } = wallet
-
-		if (!address) throw new Error('Address is missing')
+	async initializeBalances(address: string): Promise<void> {
+		const nativeTokenAmount = await getBalance(address)
 
 		const ethData = {
 			name: 'Ether',
 			symbol: 'ETH',
 			decimals: 18,
-			amount: 50000000000000000000n,
+			amount: nativeTokenAmount,
 			image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
 		}
 
@@ -452,5 +457,23 @@ export default class WakuAdapter implements Adapter {
 			loading: false,
 		}
 		balanceStore.set(balancesState)
+	}
+
+	async checkBalance(address: string, token: Token): Promise<void> {
+		const nativeTokenAmount = await getBalance(address)
+
+		balanceStore.update((balanceState) => ({
+			...balanceState,
+			balances: balanceState.balances.map((value) => {
+				if (value.symbol !== token.symbol) {
+					return value
+				} else {
+					return {
+						...value,
+						amount: nativeTokenAmount,
+					}
+				}
+			}),
+		}))
 	}
 }

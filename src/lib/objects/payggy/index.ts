@@ -1,5 +1,6 @@
 import type { WakuObjectDescriptor } from '..'
 import ChatComponent from './chat.svelte'
+import { MessageDataSendSchema } from './schemas'
 import StandaloneComponent from './standalone.svelte'
 import logo from './logo.svg'
 
@@ -15,7 +16,19 @@ export const payggyDescriptor: WakuObjectDescriptor = {
 
 	standalone: StandaloneComponent,
 
-	onMessage: (address, store, message) => {
+	onMessage: (address, adapter, store, message) => {
+		if (message?.data) {
+			const res = MessageDataSendSchema.safeParse(message.data)
+			if (res.success) {
+				const token = {
+					...res.data.token,
+					name: res.data.token.symbol,
+					amount: BigInt(0), // the amount is not really necessary for checkBalance
+				}
+				adapter.checkBalance(token)
+			}
+		}
+
 		return message.data
 	},
 }

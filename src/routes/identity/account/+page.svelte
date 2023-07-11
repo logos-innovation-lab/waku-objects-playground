@@ -18,6 +18,8 @@
 	import routes from '$lib/routes'
 	import { walletStore } from '$lib/stores/wallet'
 	import { balanceStore } from '$lib/stores/balances'
+	import { onMount } from 'svelte'
+	import adapter from '$lib/adapters'
 
 	let copied = false
 	function copyAddressToClipboard() {
@@ -27,6 +29,13 @@
 		copy(address)
 		copied = true
 	}
+
+	onMount(() => {
+		const address = $walletStore.wallet?.address
+		if (address === undefined) return
+
+		adapter.initializeBalances(address)
+	})
 </script>
 
 <Header title="Account">
