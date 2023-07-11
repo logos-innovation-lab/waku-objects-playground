@@ -3,7 +3,7 @@
 	import type { WakuObjectArgs } from '..'
 	import type { SendTransaction } from './schemas'
 	import type { DataMessage } from '$lib/stores/chat'
-	import { formatTokenAmount } from '$lib/utils/format'
+	import { toSignificant } from '$lib/utils/format'
 	import ChatMessage from '$lib/components/chat-message.svelte'
 	import ReadonlyText from '$lib/components/readonly-text.svelte'
 	import ObjectHeader from '$lib/components/object-header.svelte'
@@ -51,10 +51,10 @@
 				<!-- This is an error state -->
 				Failed to parse store or message data. Check console for details.
 			{:else if myMessage}
-				You sent {formatTokenAmount(BigInt(data.token.amount), data.token.decimals)}
+				You sent {toSignificant(BigInt(data.token.amount), data.token.decimals)}
 				{data.token.symbol} to {otherUser.name}
 			{:else}
-				You received {formatTokenAmount(BigInt(data.token.amount), data.token.decimals)}
+				You received {toSignificant(BigInt(data.token.amount), data.token.decimals)}
 				{data.token.symbol} from {otherUser.name}
 			{/if}
 			{#if args.store && message.data && store && data}
@@ -67,7 +67,7 @@
 							<ArrowDownRight />
 						{/if}
 						<div class="grow text-lg">
-							{formatTokenAmount(BigInt(data.token.amount), data.token.decimals)}
+							{toSignificant(BigInt(data.token.amount), data.token.decimals)}
 							{data.token.symbol}
 						</div>
 						<!-- TODO: add action to icon -->
