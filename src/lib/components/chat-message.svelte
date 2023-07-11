@@ -39,11 +39,34 @@
 		font-style: italic;
 		margin-left: auto;
 		margin-right: 0;
+
+		& + .my-message .message-text {
+			border-top-right-radius: 0;
+		}
+
+		&:has(+ .my-message) {
+			margin-bottom: var(--spacing-6);
+
+			.message-text {
+				border-bottom-right-radius: 0;
+			}
+		}
 	}
 
 	.their-message {
 		align-items: flex-start;
 		text-align: left;
+
+		& + .their-message .message-text {
+			border-top-left-radius: 0;
+		}
+
+		&:has(+ .their-message) {
+			margin-bottom: var(--spacing-6);
+			.message-text {
+				border-bottom-left-radius: 0;
+			}
+		}
 
 		.message-content {
 			text-align: left;
