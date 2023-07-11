@@ -6,7 +6,6 @@ const sveltePreprocessor = sveltePreprocess()
 
 const config: KnipConfig = {
 	ignore: ['**/*.d.ts', '**/schemas.ts', 'src/lib/objects/hello-world/index.ts'],
-	ignoreDependencies: ['hardhat'],
 	paths: {
 		// This ain't pretty, but Svelte basically does the same
 		'$app/*': ['node_modules/@sveltejs/kit/src/runtime/app/*'],
