@@ -4,11 +4,7 @@
 
 	const isFF = () => {
 		let browserInfo = navigator.userAgent
-		if (browserInfo.includes('Firefox')) {
-			return true
-		} else {
-			return false
-		}
+		return browserInfo.includes('Firefox'))
 	}
 </script>
 
