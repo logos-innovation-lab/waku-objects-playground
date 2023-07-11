@@ -1,9 +1,10 @@
 <script lang="ts">
 	export let bubble = false
 	export let myMessage = false
+	export let noText = false
 </script>
 
-<div class={`message ${myMessage ? 'my-message' : 'their-message'}`}>
+<div class={`message ${myMessage ? 'my-message' : 'their-message'} ${noText ? 'no-text' : ''}`}>
 	<div class={` ${bubble ? 'bubble message-content message-text text-lg' : ''}`}>
 		<slot />
 	</div>
@@ -48,5 +49,9 @@
 		.message-content {
 			text-align: left;
 		}
+	}
+
+	.no-text .text-lg {
+		line-height: 0;
 	}
 </style>
