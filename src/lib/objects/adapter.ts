@@ -9,9 +9,8 @@ import {
 	waitForTransaction,
 } from '$lib/adapters/transaction'
 import type { Transaction, TransactionState } from './schemas'
-import { throwError } from '$lib/utils/error'
 
-const NUM_CONFIRMATIONS = 5
+const NUM_CONFIRMATIONS = 2
 
 export function makeWakuObjectAdapter(adapter: Adapter, wallet: BaseWallet): WakuObjectAdapter {
 	const { address } = wallet
@@ -28,10 +27,10 @@ export function makeWakuObjectAdapter(adapter: Adapter, wallet: BaseWallet): Wak
 		await adapter.checkBalance(address, token)
 	}
 
-	async function getTransaction(txHash: string): Promise<Transaction> {
+	async function getTransaction(txHash: string): Promise<Transaction | undefined> {
 		const tx = await getTransactionResponse(txHash)
 		if (!tx) {
-			throwError('transaction not found')
+			return undefined
 		}
 		const from = tx.from
 		const to = tx.to || ''
@@ -53,16 +52,16 @@ export function makeWakuObjectAdapter(adapter: Adapter, wallet: BaseWallet): Wak
 
 	async function transactionReceiptToState(
 		receipt: TransactionReceipt | null,
+		confirms: number | undefined = NUM_CONFIRMATIONS,
 	): Promise<TransactionState> {
 		if (!receipt) {
 			return 'unknown'
 		}
+
 		const confirmations = await receipt.confirmations()
-		if (confirmations < NUM_CONFIRMATIONS) {
+		if (confirmations < confirms) {
 			return 'pending'
 		}
-
-		console.debug({ receipt, confirmations })
 
 		if (receipt.status !== null) {
 			if (receipt.status === 0) {
@@ -72,12 +71,12 @@ export function makeWakuObjectAdapter(adapter: Adapter, wallet: BaseWallet): Wak
 				return 'success'
 			}
 		}
+
 		return 'unknown'
 	}
 
 	async function getTransactionState(txHash: string): Promise<TransactionState> {
 		const receipt = await getTransactionReceipt(txHash)
-		console.debug('getTransactionState', { receipt })
 		return transactionReceiptToState(receipt)
 	}
 

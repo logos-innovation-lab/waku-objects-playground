@@ -48,6 +48,11 @@
 		<Button disabled={!$walletStore.wallet} on:click={initializeBalances}
 			>Initialize token balances</Button
 		>
+		{#if $balanceStore.loading}
+			<Container align="center">
+				<h2>Loading...</h2>
+			</Container>
+		{/if}
 		{#each $balanceStore.balances as balance}
 			<Asset
 				name={balance.name}

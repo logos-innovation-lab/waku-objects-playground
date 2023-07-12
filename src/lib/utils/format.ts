@@ -1,6 +1,6 @@
 export function formatAddress(address: string, prefix = 4, suffix = 0) {
-	if (suffix) return `${address.substring(0, prefix + 2)}...${address.substring(-suffix, suffix)}`
-	return `${address.substring(0, prefix + 2)}`
+	if (suffix) return `${address.slice(0, prefix + 2)}...${address.slice(-suffix)}`
+	return `${address.slice(0, prefix + 2)}`
 }
 
 export function toSignificant(

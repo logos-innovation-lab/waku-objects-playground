@@ -4,21 +4,20 @@ import {
 	type BaseWallet,
 	type TransactionRequest,
 	TransactionReceipt,
-	type TransactionResponseParams,
 	type Provider,
 	TransactionResponse,
 } from 'ethers'
 
-type SendTransactionResponse = TransactionResponseParams & {
-	receipt: TransactionReceipt | null
-}
-
 interface BlockchainNetwork {
-	nativeToken: Token
+	name: string
 	provider: string
+	nativeToken: Token
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const testBlockchain: BlockchainNetwork = {
+	name: 'Local testnet',
+	provider: 'http://127.0.0.1:8545',
 	nativeToken: {
 		name: 'Test Ether',
 		symbol: 'ETH',
@@ -26,11 +25,13 @@ const testBlockchain: BlockchainNetwork = {
 		image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
 		amount: BigInt(0),
 	},
-	provider: 'http://127.0.0.1:8545',
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const chiadoBlockchain: BlockchainNetwork = {
+	name: 'Chiado testnet',
+	// provider: 'https://rpc.chiadochain.net/',
+	provider: 'https://rpc.chiado.gnosis.gateway.fm',
 	nativeToken: {
 		name: 'Chiado xDai',
 		symbol: 'xDai',
@@ -38,11 +39,13 @@ const chiadoBlockchain: BlockchainNetwork = {
 		image: 'https://docs.gnosischain.com/img/tokens/chiado-xdai.png',
 		amount: BigInt(0),
 	},
-	provider: 'https://rpc.chiadochain.net/',
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const sepoliaBlockchain: BlockchainNetwork = {
+	name: 'Sepolia testnet',
+	// provider: 'https://rpc.sepolia.org/',
+	provider: 'https://rpc2.sepolia.org/ ',
 	nativeToken: {
 		name: 'Sepolia ETH',
 		symbol: 'SEP',
@@ -50,12 +53,11 @@ const sepoliaBlockchain: BlockchainNetwork = {
 		image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
 		amount: BigInt(0),
 	},
-	provider: 'https://rpc.sepolia.dev',
 }
 
-export const defaultBlockchainNetwork = chiadoBlockchain
+export const defaultBlockchainNetwork = sepoliaBlockchain
 
-function getProvider(): Provider {
+export function getProvider(): Provider {
 	const providerUrl = defaultBlockchainNetwork.provider
 	const provider = new JsonRpcProvider(providerUrl)
 	return provider
