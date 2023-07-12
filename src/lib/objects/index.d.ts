@@ -4,7 +4,7 @@ import type { ComponentType } from 'svelte'
 import type { Transaction, User, TransactionState } from './schemas'
 
 export interface WakuObjectAdapter {
-	getTransaction(txHash: string): Promise<Transaction>
+	getTransaction(txHash: string): Promise<Transaction | undefined>
 	getTransactionState(txHash: string): Promise<TransactionState>
 	waitForTransaction(txHash: string): Promise<TransactionState>
 	checkBalance(token: Token): Promise<void>

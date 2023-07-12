@@ -18,16 +18,15 @@
 	import { formatAddress, toSignificant, toBigInt } from '$lib/utils/format'
 	import type { WakuObjectArgs } from '..'
 	import {
-		type MessageDataSend,
 		SendTransactionStoreSchema,
 		type SendTransactionStore,
+		type SendTransactionDataMessage,
 	} from './schemas'
-	import type { Token, Transaction } from '../schemas'
+	import type { Token } from '../schemas'
 	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 	import { throwError } from '$lib/utils/error'
-	import { sleep } from '$lib/adapters/utils'
 
-	export let args: WakuObjectArgs<SendTransactionStore, MessageDataSend>
+	export let args: WakuObjectArgs<SendTransactionStore, SendTransactionDataMessage>
 
 	let store: SendTransactionStore | undefined
 	$: {
@@ -61,19 +60,22 @@
 
 	async function sendTransaction() {
 		if (fee) {
+			// FIXME error handling
 			const tokenToTransfer = { ...token, amount: toBigInt(amount, token.decimals) }
 			const transactionHash = await args.sendTransaction(toUser.address, tokenToTransfer, fee)
 
-			await args.send({
+			args.send({
 				hash: transactionHash,
 			})
 
 			history.go(-3)
 
-			await args.waitForTransaction(transactionHash)
-			await args.send({
-				hash: transactionHash,
-			})
+			setTimeout(async () => {
+				await args.waitForTransaction(transactionHash)
+				await args.send({
+					hash: transactionHash,
+				})
+			}, 0)
 		}
 	}
 </script>
@@ -122,7 +124,8 @@
 			{#if Number(amount) > Number(toSignificant(token.amount, token.decimals))}
 				<WarningAltFilled />
 			{/if}
-			You have {toSignificant(token.amount, token.decimals)} ETH in your account.
+			You have {toSignificant(token.amount, token.decimals)}
+			{token.symbol} in your account.
 		</p>
 	</Container>
 	<Container direction="row" justify="space-between" alignItems="center" padX={24}>

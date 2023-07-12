@@ -1,7 +1,6 @@
 <script lang="ts">
 	import {
-		type MessageDataSend,
-		MessageDataSendSchema,
+		type SendTransactionDataMessage,
 		type SendTransactionStore,
 		SendTransactionStoreSchema,
 	} from './schemas'
@@ -18,8 +17,8 @@
 	import Container from '$lib/components/container.svelte'
 	import logo from './logo.svg'
 
-	export let message: DataMessage<MessageDataSend>
-	export let args: WakuObjectArgs<SendTransactionStore, MessageDataSend>
+	export let message: DataMessage<SendTransactionDataMessage>
+	export let args: WakuObjectArgs<SendTransactionStore, SendTransactionDataMessage>
 
 	let data: SendTransactionStore
 	$: {
@@ -36,7 +35,6 @@
 	$: myMessage = message.fromAddress === args.profile.address
 	// FIXME: will not work for group chats
 	$: otherUser = args.users.find((u) => u.address !== args.profile.address)
-	$: console.debug({ data })
 </script>
 
 <ChatMessage {myMessage} bubble>

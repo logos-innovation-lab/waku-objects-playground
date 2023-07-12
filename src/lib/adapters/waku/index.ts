@@ -219,7 +219,7 @@ export default class WakuAdapter implements Adapter {
 					}
 				}
 
-				addMessageToChat(address, wakuObjectAdapter, chatMessage.fromAddress, chatMessage)
+				await addMessageToChat(address, wakuObjectAdapter, chatMessage.fromAddress, chatMessage)
 			},
 		)
 		this.subscriptions.push(subscribeChats)
@@ -300,7 +300,7 @@ export default class WakuAdapter implements Adapter {
 
 		const wakuObjectAdapter = makeWakuObjectAdapter(this, wallet)
 
-		addMessageToChat(fromAddress, wakuObjectAdapter, chatId, message)
+		await addMessageToChat(fromAddress, wakuObjectAdapter, chatId, message)
 		await sendMessage(this.waku, chatId, message)
 	}
 
@@ -327,7 +327,7 @@ export default class WakuAdapter implements Adapter {
 
 		const wakuObjectAdapter = makeWakuObjectAdapter(this, wallet)
 
-		addMessageToChat(fromAddress, wakuObjectAdapter, chatId, message)
+		await addMessageToChat(fromAddress, wakuObjectAdapter, chatId, message)
 		await sendMessage(this.waku, chatId, message)
 	}
 
@@ -373,10 +373,8 @@ export default class WakuAdapter implements Adapter {
 
 	async estimateTransaction(): Promise<Token> {
 		return {
-			name: 'Ether',
-			symbol: 'ETH',
-			amount: 123000000000000000n,
-			decimals: 18,
+			...defaultBlockchainNetwork.nativeToken,
+			amount: 1000059237n,
 		}
 	}
 
@@ -384,6 +382,11 @@ export default class WakuAdapter implements Adapter {
 	 * THIS IS JUST FOR DEV PURPOSES
 	 */
 	async initializeBalances(address: string): Promise<void> {
+		balanceStore.update((state) => ({
+			...state,
+			loading: true,
+		}))
+
 		const nativeTokenAmount = await getBalance(address)
 
 		const ethData = {

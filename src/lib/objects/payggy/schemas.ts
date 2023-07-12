@@ -24,7 +24,7 @@ export const SendTransactionStoreSchema = z.union([
 ])
 export type SendTransactionStore = z.infer<typeof SendTransactionStoreSchema>
 
-export const MessageDataSendSchema = z.object({
+export const SendTransactionDataMessageSchema = z.object({
 	hash: TransactionHashSchema,
 })
-export type MessageDataSend = z.infer<typeof MessageDataSendSchema>
+export type SendTransactionDataMessage = z.infer<typeof SendTransactionDataMessageSchema>
