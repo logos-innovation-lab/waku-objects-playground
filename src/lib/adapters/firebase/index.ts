@@ -20,14 +20,7 @@ import {
 import { profile } from '$lib/stores/profile'
 import { contacts, type User } from '$lib/stores/users'
 
-import {
-	ChatDbSchema,
-	TokenDbSchema,
-	UserDbSchema,
-	type ProfileDb,
-	type TokenDb,
-	ObjectDbSchema,
-} from './schemas'
+import { ChatDbSchema, UserDbSchema, type ProfileDb, ObjectDbSchema } from './schemas'
 
 import { formatAddress } from '$lib/utils/format'
 import { db, ipfs, IPFS_GATEWAY } from './connections'
@@ -39,8 +32,9 @@ import { objectKey, objectStore } from '$lib/stores/objects'
 import { lookup } from '$lib/objects/lookup'
 import { type Unsubscriber, get } from 'svelte/store'
 import { sleep } from '../utils'
-import { defaultBlockchainNetwork, getBalance, sendTransaction } from '$lib/adapters/transaction'
+import { sendTransaction } from '$lib/adapters/transaction'
 import { makeWakuObjectAdapter } from '$lib/objects/adapter'
+import { initializeBalances } from '$lib/adapters/balance'
 
 export default class FirebaseAdapter implements Adapter {
 	protected userSubscriptions: Array<() => unknown> = []
@@ -188,23 +182,7 @@ export default class FirebaseAdapter implements Adapter {
 		})
 		this.userSubscriptions.push(subscribeUsers)
 
-		const balanceCollection = collection(db, `users/${address}/balances`)
-		const subscribeBalances = onSnapshot(balanceCollection, (res) => {
-			const balances: Token[] = []
-			res.docs.forEach((d) => {
-				const parseRes = TokenDbSchema.safeParse(d.data())
-				if (parseRes.success) {
-					const token: Token = parseRes.data
-					balances.push(token)
-				} else {
-					console.error(parseRes.error.issues)
-				}
-			})
-			// TODO: Handle this better, every new signed in user should have some balances set
-			if (balances.length === 0) this.initializeBalances(address)
-			balanceStore.set({ balances, loading: false })
-		})
-		this.userSubscriptions.push(subscribeBalances)
+		initializeBalances(address)
 	}
 
 	onLogOut() {
@@ -276,49 +254,6 @@ export default class FirebaseAdapter implements Adapter {
 
 	getPicture(cid: string): string {
 		return `${IPFS_GATEWAY}/${cid}`
-	}
-
-	/**
-	 * THIS IS JUST FOR DEV PURPOSES
-	 */
-	async initializeBalances(address: string): Promise<void> {
-		const nativeTokenAmount = await getBalance(address)
-
-		const ethDoc = doc(db, `users/${address}/balances/eth`)
-		const ethData: Omit<TokenDb, 'amount'> & { amount: string } = {
-			...defaultBlockchainNetwork.nativeToken,
-			amount: nativeTokenAmount.toString(),
-		}
-
-		setDoc(ethDoc, ethData)
-
-		const daiDoc = doc(db, `users/${address}/balances/dai`)
-		const daiData: Omit<TokenDb, 'amount'> & { amount: string } = {
-			name: 'Dai',
-			symbol: 'DAI',
-			decimals: 18,
-			amount: 7843900000000000000000n.toString(),
-			image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png',
-			address: '0x0000000000000000000000000000000000000000',
-		}
-
-		setDoc(daiDoc, daiData)
-	}
-
-	async checkBalance(address: string, token: Token): Promise<void> {
-		if (token.address) {
-			// only native token is supported for now
-			return
-		}
-
-		const nativeTokenAmount = await getBalance(address)
-
-		const ethDoc = doc(db, `users/${address}/balances/${token.symbol.toLowerCase()}`)
-		const ethData: { amount: string } = {
-			amount: nativeTokenAmount.toString(),
-		}
-
-		setDoc(ethDoc, ethData, { merge: true })
 	}
 
 	async updateStore(

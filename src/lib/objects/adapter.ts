@@ -9,6 +9,7 @@ import {
 	waitForTransaction,
 } from '$lib/adapters/transaction'
 import type { Transaction, TransactionState } from './schemas'
+import { checkBalance } from '$lib/adapters/balance'
 
 const NUM_CONFIRMATIONS = 2
 
@@ -23,8 +24,8 @@ export function makeWakuObjectAdapter(adapter: Adapter, wallet: BaseWallet): Wak
 		return adapter.estimateTransaction(wallet, to, token)
 	}
 
-	async function checkBalance(token: Token): Promise<void> {
-		await adapter.checkBalance(address, token)
+	async function _checkBalance(token: Token): Promise<void> {
+		await checkBalance(address, token)
 	}
 
 	async function getTransaction(txHash: string): Promise<Transaction | undefined> {
@@ -89,7 +90,7 @@ export function makeWakuObjectAdapter(adapter: Adapter, wallet: BaseWallet): Wak
 		getTransaction,
 		getTransactionState,
 		waitForTransaction: _waitForTransaction,
-		checkBalance,
+		checkBalance: _checkBalance,
 		sendTransaction,
 		estimateTransaction,
 	}

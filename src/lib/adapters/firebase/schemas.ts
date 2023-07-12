@@ -1,16 +1,6 @@
 import { AddressSchema } from '$lib/utils/schemas'
 import { z } from 'zod'
 
-export const TokenDbSchema = z.object({
-	name: z.string(),
-	symbol: z.string(),
-	amount: z.preprocess((v) => BigInt(v as string), z.bigint().nonnegative()),
-	decimals: z.number().int().positive(),
-	image: z.string().optional(),
-	address: AddressSchema.optional(),
-})
-export type TokenDb = z.infer<typeof TokenDbSchema>
-
 export const UserDbSchema = z.object({
 	address: AddressSchema,
 	name: z.string().optional(),

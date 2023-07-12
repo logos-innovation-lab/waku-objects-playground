@@ -2,7 +2,7 @@
 	import Header from '$lib/components/header.svelte'
 	import Container from '$lib/components/container.svelte'
 	import Divider from '$lib/components/divider.svelte'
-	import adapter, { adapterName, adapters, type AdapterName } from '$lib/adapters'
+	import { adapterName, adapters, type AdapterName } from '$lib/adapters'
 	import Dropdown from '$lib/components/dropdown.svelte'
 	import DropdownItem from '$lib/components/dropdown-item.svelte'
 	import Select from '$lib/components/select.svelte'
@@ -12,19 +12,20 @@
 	import Button from '$lib/components/button.svelte'
 	import { balanceStore } from '$lib/stores/balances'
 	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
+	import { initializeBalances } from '$lib/adapters/balance'
 
 	function changeAdapter(adapterName: AdapterName) {
 		saveToLocalStorage('adapter', adapterName)
 		location.reload()
 	}
 
-	function initializeBalances() {
+	function initializeTokenBalances() {
 		const wallet = $walletStore.wallet
 
 		if (!wallet) {
 			return
 		}
-		adapter.initializeBalances(wallet.address)
+		initializeBalances(wallet.address)
 	}
 </script>
 
@@ -45,7 +46,7 @@
 	</section>
 	<Divider />
 	<section class="assets">
-		<Button disabled={!$walletStore.wallet} on:click={initializeBalances}
+		<Button disabled={!$walletStore.wallet} on:click={initializeTokenBalances}
 			>Initialize token balances</Button
 		>
 		{#if $balanceStore.loading}
