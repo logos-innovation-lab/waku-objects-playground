@@ -6,7 +6,7 @@ export const TokenDbSchema = z.object({
 	symbol: z.string(),
 	amount: z.preprocess((v) => BigInt(v as string), z.bigint().nonnegative()),
 	decimals: z.number().int().positive(),
-	image: z.string(),
+	image: z.string().optional(),
 	address: AddressSchema.optional(),
 })
 export type TokenDb = z.infer<typeof TokenDbSchema>

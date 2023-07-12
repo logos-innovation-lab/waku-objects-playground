@@ -22,9 +22,10 @@
 		SendTransactionStoreSchema,
 		type SendTransactionStore,
 	} from './schemas'
-	import type { Token } from '../schemas'
+	import type { Token, Transaction } from '../schemas'
 	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 	import { throwError } from '$lib/utils/error'
+	import { sleep } from '$lib/adapters/utils'
 
 	export let args: WakuObjectArgs<SendTransactionStore, MessageDataSend>
 
@@ -43,10 +44,11 @@
 	let token: Token
 	let amount = ''
 	let fee: Token | undefined = undefined
+	const nativeToken = defaultBlockchainNetwork.nativeToken
 
 	$: if (!token) {
 		token =
-			args.tokens.find((token) => token.symbol === defaultBlockchainNetwork.nativeToken) ||
+			args.tokens.find((token) => token.symbol === nativeToken.symbol) ||
 			throwError('invalid token')
 	}
 	let toUser =
@@ -60,25 +62,18 @@
 	async function sendTransaction() {
 		if (fee) {
 			const tokenToTransfer = { ...token, amount: toBigInt(amount, token.decimals) }
+			const transactionHash = await args.sendTransaction(toUser.address, tokenToTransfer, fee)
 
-			const tx = await args.sendTransaction(toUser.address, tokenToTransfer, fee)
-			// FIXME: check the amount is actually number and convert to some bigint mechanism which does not lose precision
-			args.send({
-				from: args.profile.address,
-				to: toUser.address,
-				token: {
-					amount: tokenToTransfer.amount.toString(),
-					symbol: tokenToTransfer.symbol,
-					decimals: tokenToTransfer.decimals,
-				},
-				fee: {
-					amount: fee.amount.toString(),
-					symbol: fee.symbol,
-					decimals: fee.decimals,
-				},
-				tx,
+			await args.send({
+				hash: transactionHash,
 			})
+
 			history.go(-3)
+
+			await args.waitForTransaction(transactionHash)
+			await args.send({
+				hash: transactionHash,
+			})
 		}
 	}
 </script>
