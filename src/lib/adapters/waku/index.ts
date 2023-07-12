@@ -19,10 +19,11 @@ import { ipfs, IPFS_GATEWAY } from '../firebase/connections'
 import { get } from 'svelte/store'
 import { objectStore, type ObjectState, objectKey } from '$lib/stores/objects'
 import { lookup } from '$lib/objects/lookup'
-import { balanceStore, type Token } from '$lib/stores/balances'
-import { defaultBlockchainNetwork, getBalance, sendTransaction } from '$lib/adapters/transaction'
+import type { Token } from '$lib/stores/balances'
+import { defaultBlockchainNetwork, sendTransaction } from '$lib/adapters/transaction'
 import type { WakuObjectAdapter } from '$lib/objects'
 import { makeWakuObjectAdapter } from '$lib/objects/adapter'
+import { initializeBalances } from '$lib/adapters/balance'
 
 function createChat(chatId: string, user: User, address: string): string {
 	chats.update((state) => {
@@ -235,7 +236,7 @@ export default class WakuAdapter implements Adapter {
 		})
 		this.subscriptions.push(subscribeObjectStore)
 
-		this.initializeBalances(address)
+		initializeBalances(address)
 	}
 
 	async onLogOut() {
@@ -376,55 +377,5 @@ export default class WakuAdapter implements Adapter {
 			...defaultBlockchainNetwork.nativeToken,
 			amount: 1000059237n,
 		}
-	}
-
-	/**
-	 * THIS IS JUST FOR DEV PURPOSES
-	 */
-	async initializeBalances(address: string): Promise<void> {
-		balanceStore.update((state) => ({
-			...state,
-			loading: true,
-		}))
-
-		const nativeTokenAmount = await getBalance(address)
-
-		const ethData = {
-			...defaultBlockchainNetwork.nativeToken,
-			amount: nativeTokenAmount,
-		}
-
-		const daiData = {
-			name: 'Dai',
-			symbol: 'DAI',
-			decimals: 18,
-			amount: 7843900000000000000000n,
-			image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png',
-		}
-
-		const balances = [ethData, daiData]
-		const balancesState = {
-			balances,
-			loading: false,
-		}
-		balanceStore.set(balancesState)
-	}
-
-	async checkBalance(address: string, token: Token): Promise<void> {
-		const nativeTokenAmount = await getBalance(address)
-
-		balanceStore.update((balanceState) => ({
-			...balanceState,
-			balances: balanceState.balances.map((value) => {
-				if (value.symbol !== token.symbol) {
-					return value
-				} else {
-					return {
-						...value,
-						amount: nativeTokenAmount,
-					}
-				}
-			}),
-		}))
 	}
 }
