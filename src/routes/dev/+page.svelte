@@ -11,6 +11,7 @@
 	import { walletStore } from '$lib/stores/wallet'
 	import Button from '$lib/components/button.svelte'
 	import { balanceStore } from '$lib/stores/balances'
+	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 
 	function changeAdapter(adapterName: AdapterName) {
 		saveToLocalStorage('adapter', adapterName)
@@ -39,9 +40,11 @@
 				>
 			{/each}
 		</Dropdown>
+		<div class="label">Network</div>
+		<div class="value">{defaultBlockchainNetwork.name}</div>
 	</section>
 	<Divider />
-	<section>
+	<section class="assets">
 		<Button disabled={!$walletStore.wallet} on:click={initializeBalances}
 			>Initialize token balances</Button
 		>
@@ -64,5 +67,21 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+	}
+
+	.assets {
+		align-items: stretch;
+	}
+
+	.label {
+		font-family: var(--font-body);
+		font-weight: 600;
+		font-size: var(--font-size-sm);
+		color: var(--gray50);
+		margin-bottom: var(--spacing-4);
+	}
+
+	.value {
+		font-family: var(--font-serif);
 	}
 </style>
