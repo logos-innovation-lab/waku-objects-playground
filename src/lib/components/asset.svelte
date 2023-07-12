@@ -11,7 +11,7 @@
 <div class="asset root">
 	<Container justify="space-between" align="center" alignItems="center" direction="row">
 		<div class="token">
-			<img src={image} alt={`${name} logo`} />
+			<img src={image} alt={`${name} logo`} width="64" height="64" />
 			<span class="text-lg text-bold">
 				{name}
 			</span>

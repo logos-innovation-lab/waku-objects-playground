@@ -20,7 +20,7 @@ import { get } from 'svelte/store'
 import { objectStore, type ObjectState, objectKey } from '$lib/stores/objects'
 import { lookup } from '$lib/objects/lookup'
 import { balanceStore, type Token } from '$lib/stores/balances'
-import { getBalance } from '../transaction'
+import { defaultBlockchainNetwork, getBalance, sendTransaction } from '$lib/adapters/transaction'
 import type { WakuObjectAdapter } from '$lib/objects'
 import { makeWakuObjectAdapter } from '$lib/objects/adapter'
 
@@ -51,13 +51,13 @@ function createChat(chatId: string, user: User, address: string): string {
 	return chatId
 }
 
-function addMessageToChat(
+async function addMessageToChat(
 	address: string,
 	adapter: WakuObjectAdapter,
 	chatId: string,
 	message: Message,
 ) {
-	executeOnMessage(address, adapter, message)
+	await executeOnMessage(address, adapter, message)
 
 	chats.update((state) => {
 		if (!state.chats.has(chatId)) {
@@ -78,7 +78,7 @@ function addMessageToChat(
 	})
 }
 
-function executeOnMessage(address: string, adapter: WakuObjectAdapter, chatMessage: Message) {
+async function executeOnMessage(address: string, adapter: WakuObjectAdapter, chatMessage: Message) {
 	if (chatMessage.type === 'data') {
 		const descriptor = lookup(chatMessage.objectId)
 		const key = objectKey(chatMessage.objectId, chatMessage.instanceId)
@@ -86,14 +86,18 @@ function executeOnMessage(address: string, adapter: WakuObjectAdapter, chatMessa
 
 		if (descriptor && descriptor.onMessage && wakuObjectStore.lastUpdated < chatMessage.timestamp) {
 			const objects = wakuObjectStore.objects
-			const newStore = descriptor.onMessage(address, adapter, objects.get(key), chatMessage)
-			const newObjects = new Map(objects)
-			newObjects.set(key, newStore)
-			objectStore.update((state) => ({
-				...state,
-				objects: newObjects,
-				lastUpdated: chatMessage.timestamp,
-			}))
+			const store = objects.get(key)
+			const updateStore = (updater: (store: unknown) => unknown) => {
+				const newStore = updater(store)
+				const newObjects = new Map(objects)
+				newObjects.set(key, newStore)
+				objectStore.update((state) => ({
+					...state,
+					objects: newObjects,
+					lastUpdated: chatMessage.timestamp,
+				}))
+			}
+			await descriptor.onMessage(address, adapter, store, updateStore, chatMessage)
 		}
 	}
 }
@@ -363,61 +367,8 @@ export default class WakuAdapter implements Adapter {
 	}
 
 	async sendTransaction(wallet: Wallet, to: string, token: Token, fee: Token): Promise<string> {
-		const { address } = wallet
-
-		if (!address) throw new Error('Address is missing')
-
-		if (!this.waku) {
-			throw 'no waku'
-		}
-
-		const tx = {
-			from: address,
-			to,
-			token: {
-				amount: token.amount.toString(),
-				name: token.name,
-				symbol: token.symbol,
-				decimals: token.decimals,
-			},
-			timestamp: Date.now(),
-			fee: {
-				amount: fee.amount.toString(),
-				symbol: fee.symbol,
-				name: fee.name,
-				decimals: fee.decimals,
-			},
-		}
-
-		// Update balances
-		const balanceFromDoc = get(balanceStore)
-		const balanceFrom = balanceFromDoc.balances.find((balance) => balance.symbol === token.symbol)
-		const feeFrom = balanceFromDoc.balances.find((balance) => balance.symbol === fee.symbol)
-		if (!balanceFrom || !feeFrom) throw new Error('Balance not found')
-
-		if (balanceFrom.amount - token.amount >= 0 && feeFrom.amount - fee.amount >= 0) {
-			balanceStore.update((prevState) => ({
-				...prevState,
-				balances: prevState.balances.map((b) => {
-					if (b.symbol === token.symbol) {
-						return {
-							...b,
-							amount: b.amount - token.amount,
-						}
-					} else if (b.symbol === fee.symbol) {
-						return {
-							...b,
-							amount: b.amount - fee.amount,
-						}
-					}
-					return b
-				}),
-			}))
-		}
-
-		await storeDocument(this.waku, 'transactions', '', tx)
-
-		return ''
+		const tx = await sendTransaction(wallet, to, token.amount, fee.amount)
+		return tx.hash
 	}
 
 	async estimateTransaction(): Promise<Token> {
@@ -436,11 +387,8 @@ export default class WakuAdapter implements Adapter {
 		const nativeTokenAmount = await getBalance(address)
 
 		const ethData = {
-			name: 'Ether',
-			symbol: 'ETH',
-			decimals: 18,
+			...defaultBlockchainNetwork.nativeToken,
 			amount: nativeTokenAmount,
-			image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
 		}
 
 		const daiData = {

@@ -48,7 +48,7 @@
 		return adapter.sendData($walletStore.wallet, chatId, objectId, instanceId, data)
 	}
 
-	function updateStore(updater: (state: unknown) => unknown): void {
+	function updateStore(updater: (state: unknown) => unknown) {
 		adapter.updateStore(address, objectId, instanceId, updater)
 	}
 
@@ -62,8 +62,8 @@
 			users,
 			tokens,
 			store,
-			updateStore,
 			send,
+			updateStore,
 			onViewChange,
 			...wakuObjectAdapter,
 		}
