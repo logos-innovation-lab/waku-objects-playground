@@ -32,7 +32,7 @@
 	})
 
 	afterUpdate(() => {
-		if (autoscroll) div.scrollTo(0, div.scrollHeight)
+		if (autoscroll) div.scrollTo({ top: div.scrollHeight, behavior: 'smooth' })
 	})
 
 	onMount(() => {
