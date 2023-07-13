@@ -28,26 +28,19 @@
 	let autoscroll = true
 
 	beforeUpdate(() => {
-		if (browser && window && div) {
-			const height = div.scrollHeight
-			autoscroll = height <= window.scrollY + window.innerHeight
-		}
+		autoscroll = div && div.offsetHeight + div.scrollTop > div.scrollHeight - 74
 	})
 
 	afterUpdate(() => {
-		if (browser && div && autoscroll) {
-			window.scrollTo({
-				top: div.scrollHeight,
-				behavior: 'smooth',
-			})
-		}
+		if (autoscroll) div.scrollTo(0, div.scrollHeight)
 	})
 
 	onMount(() => {
 		if (browser && div) {
+			console.log('onMount inner')
 			// It can not be done in onMount because the div is not yet rendered
 			setTimeout(() => {
-				window.scrollTo({
+				div.scrollTo({
 					top: div.scrollHeight,
 					behavior: 'auto',
 				})
