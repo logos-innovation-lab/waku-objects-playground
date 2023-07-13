@@ -28,26 +28,19 @@
 	let autoscroll = true
 
 	beforeUpdate(() => {
-		if (browser && window && div) {
-			const height = div.scrollHeight
-			autoscroll = height <= window.scrollY + window.innerHeight
-		}
+		autoscroll = div && div.offsetHeight + div.scrollTop > div.scrollHeight - 74
 	})
 
 	afterUpdate(() => {
-		if (browser && div && autoscroll) {
-			window.scrollTo({
-				top: div.scrollHeight,
-				behavior: 'smooth',
-			})
-		}
+		if (autoscroll) div.scrollTo({ top: div.scrollHeight, behavior: 'smooth' })
 	})
 
 	onMount(() => {
 		if (browser && div) {
+			console.log('onMount inner')
 			// It can not be done in onMount because the div is not yet rendered
 			setTimeout(() => {
-				window.scrollTo({
+				div.scrollTo({
 					top: div.scrollHeight,
 					behavior: 'auto',
 				})
@@ -97,7 +90,7 @@
 			</svelte:fragment>
 		</Header>
 		<div class="chat-messages" bind:this={div}>
-			<Container>
+			<Container grow>
 				<div class="messages">
 					<div class="messages-inner">
 						<!-- Chat bubbles -->
@@ -174,9 +167,8 @@
 	.chat {
 		display: flex;
 		flex-direction: column;
-		min-height: 100dvh;
-		min-height: 100vh;
-		height: 100%;
+		height: 100dvh;
+		height: 100vh;
 		background-color: var(--gray10);
 	}
 
