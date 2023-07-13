@@ -44,15 +44,15 @@
 	})
 
 	onMount(() => {
-		if (browser && div) {
-			// It can not be done in onMount because the div is not yet rendered
-			setTimeout(() => {
+		// It can not be done in onMount because the div is not yet rendered
+		setTimeout(() => {
+			if (browser && div && typeof div.scrollHeight === 'number') {
 				window.scrollTo({
 					top: div.scrollHeight,
 					behavior: 'auto',
 				})
-			}, 0)
-		}
+			}
+		}, 0)
 	})
 
 	$: messages = $chats.chats.get($page.params.id)?.messages || []

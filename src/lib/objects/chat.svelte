@@ -36,6 +36,10 @@
 
 	$: tokens = $balanceStore.balances
 
+	function updateStore(updater: (state: unknown) => unknown) {
+		adapter.updateStore(address, message.objectId, message.instanceId, updater)
+	}
+
 	let args: WakuObjectArgs
 	$: if (userProfile) {
 		const wakuObjectAdapter = makeWakuObjectAdapter(adapter, wallet)
@@ -45,11 +49,9 @@
 			users,
 			tokens,
 			store,
-			updateStore: (updater) => {
-				adapter.updateStore(address, message.objectId, message.instanceId, updater)
-			},
 			send: (data: unknown) =>
 				adapter.sendData(wallet, chatId, message.objectId, message.instanceId, data),
+			updateStore,
 			...wakuObjectAdapter,
 		}
 	}

@@ -1,5 +1,9 @@
 <script lang="ts">
-	import { type MessageDataSend, MessageDataSendSchema } from './schemas'
+	import {
+		type SendTransactionDataMessage,
+		type SendTransactionStore,
+		SendTransactionStoreSchema,
+	} from './schemas'
 	import type { WakuObjectArgs } from '..'
 	import type { DataMessage } from '$lib/stores/chat'
 	import { toSignificant } from '$lib/utils/format'
@@ -13,18 +17,21 @@
 	import Container from '$lib/components/container.svelte'
 	import logo from './logo.svg'
 
-	export let message: DataMessage<MessageDataSend>
-	export let args: WakuObjectArgs<MessageDataSend, MessageDataSend>
+	export let message: DataMessage<SendTransactionDataMessage>
+	export let args: WakuObjectArgs<SendTransactionStore, SendTransactionDataMessage>
 
-	let data: MessageDataSend
-	$: if (message?.data) {
-		const res = MessageDataSendSchema.safeParse(message.data)
-		if (res.success) {
-			data = res.data
-		} else {
-			console.error(res.error)
+	let data: SendTransactionStore
+	$: {
+		if (args.store) {
+			const res = SendTransactionStoreSchema.safeParse(args.store)
+			if (res.success) {
+				data = res.data
+			} else {
+				console.error(res.error)
+			}
 		}
 	}
+
 	$: myMessage = message.fromAddress === args.profile.address
 	// FIXME: will not work for group chats
 	$: otherUser = args.users.find((u) => u.address !== args.profile.address)
@@ -39,32 +46,51 @@
 			{:else if !data}
 				<!-- This is an error state -->
 				Failed to parse store or message data. Check console for details.
-			{:else if myMessage}
-				You sent {toSignificant(BigInt(data.token.amount), data.token.decimals)}
-				{data.token.symbol} to {otherUser.name}
-			{:else}
-				You received {toSignificant(BigInt(data.token.amount), data.token.decimals)}
-				{data.token.symbol} from {otherUser.name}
+			{:else if myMessage && (data.type === 'pending' || data.type === 'success')}
+				You sent {toSignificant(
+					BigInt(data.transaction.token.amount),
+					data.transaction.token.decimals,
+				)}
+				{data.transaction.token.symbol} to {otherUser.name}
+			{:else if data.type === 'pending' || data.type === 'success'}
+				You received {toSignificant(
+					BigInt(data.transaction.token.amount),
+					data.transaction.token.decimals,
+				)}
+				{data.transaction.token.symbol} from {otherUser.name}
 			{/if}
 			{#if args.store && message.data && data}
-				<!-- TODO: figure out what the transaction # is supposed to be -->
-				<ReadonlyText label={`Transaction #${message.instanceId.slice(0, 4)}`} marginBottom={0}>
+				<ReadonlyText
+					label={`${message.objectId} #${message.instanceId.slice(0, 4)}`}
+					marginBottom={0}
+				>
 					<div class="readonly">
 						{#if myMessage}
 							<ArrowUpRight />
 						{:else}
 							<ArrowDownRight />
 						{/if}
-						<div class="grow text-lg">
-							{toSignificant(BigInt(data.token.amount), data.token.decimals)}
-							{data.token.symbol}
-						</div>
+						{#if data.type === 'pending' || data.type === 'success'}
+							<div class="grow text-lg">
+								{toSignificant(
+									BigInt(data.transaction.token.amount),
+									data.transaction.token.decimals,
+								)}
+								{data.transaction.token.symbol}
+							</div>
+						{/if}
 						<!-- TODO: add action to icon -->
 						<DataViewAlt />
 					</div>
 				</ReadonlyText>
 				<!-- TODO: add check for transaction status -->
-				<p class="transaction-status"><CheckmarkFilled />Payment successful</p>
+				<p class="transaction-status">
+					{#if data.type === 'success'}
+						<CheckmarkFilled />Payment successful
+					{:else if data.type === 'pending'}
+						Payment pending...
+					{/if}
+				</p>
 			{/if}
 		</div>
 	</Container>
