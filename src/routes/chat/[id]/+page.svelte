@@ -97,7 +97,7 @@
 			</svelte:fragment>
 		</Header>
 		<div class="chat-messages" bind:this={div}>
-			<Container>
+			<Container grow>
 				<div class="messages">
 					<div class="messages-inner">
 						<!-- Chat bubbles -->
@@ -174,9 +174,8 @@
 	.chat {
 		display: flex;
 		flex-direction: column;
-		min-height: 100dvh;
-		min-height: 100vh;
-		height: 100%;
+		height: 100dvh;
+		height: 100vh;
 		background-color: var(--gray10);
 	}
 
