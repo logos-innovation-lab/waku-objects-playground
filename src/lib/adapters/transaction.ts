@@ -31,7 +31,8 @@ const testBlockchain: BlockchainNetwork = {
 const chiadoBlockchain: BlockchainNetwork = {
 	name: 'Chiado testnet',
 	// provider: 'https://rpc.chiadochain.net/',
-	provider: 'https://rpc.chiado.gnosis.gateway.fm',
+	// provider: 'https://rpc.chiado.gnosis.gateway.fm',
+	provider: 'https://rpc.chiado.apyos.dev/',
 	nativeToken: {
 		name: 'Chiado xDai',
 		symbol: 'xDai',
@@ -55,7 +56,7 @@ const sepoliaBlockchain: BlockchainNetwork = {
 	},
 }
 
-export const defaultBlockchainNetwork = sepoliaBlockchain
+export const defaultBlockchainNetwork = chiadoBlockchain
 
 export function getProvider(): Provider {
 	const providerUrl = defaultBlockchainNetwork.provider
