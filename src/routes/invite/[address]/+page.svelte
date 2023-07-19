@@ -42,6 +42,7 @@
 			{
 				fps: 10,
 				qrbox: { width: 250, height: 250 },
+				aspectRatio: 1,
 			},
 			onScanSuccess,
 			onScanFailure,
@@ -171,6 +172,7 @@
 	#reader {
 		width: 250px;
 		height: 250px;
+		margin: 2px;
 	}
 	.hidden {
 		display: none;
