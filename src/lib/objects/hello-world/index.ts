@@ -16,7 +16,7 @@ export const helloWorldDescriptor: WakuObjectDescriptor = {
 
 	wakuObject: HelloWorld,
 
-	onMessage: (address, adapter, store, message) => {
-		return message.data
+	onMessage: async (address, adapter, store, updateStore, message) => {
+		updateStore(() => message.data)
 	},
 }

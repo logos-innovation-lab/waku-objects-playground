@@ -18,15 +18,15 @@
 	import { formatAddress, toSignificant, toBigInt } from '$lib/utils/format'
 	import type { WakuObjectArgs } from '..'
 	import {
-		type MessageDataSend,
 		SendTransactionStoreSchema,
 		type SendTransactionStore,
+		type SendTransactionDataMessage,
 	} from './schemas'
 	import type { Token } from '../schemas'
 	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 	import { throwError } from '$lib/utils/error'
 
-	export let args: WakuObjectArgs<SendTransactionStore, MessageDataSend>
+	export let args: WakuObjectArgs<SendTransactionStore, SendTransactionDataMessage>
 
 	let store: SendTransactionStore | undefined
 	$: {
@@ -43,10 +43,11 @@
 	let token: Token
 	let amount = ''
 	let fee: Token | undefined = undefined
+	const nativeToken = defaultBlockchainNetwork.nativeToken
 
 	$: if (!token) {
 		token =
-			args.tokens.find((token) => token.symbol === defaultBlockchainNetwork.nativeToken) ||
+			args.tokens.find((token) => token.symbol === nativeToken.symbol) ||
 			throwError('invalid token')
 	}
 	let toUser =
@@ -59,25 +60,22 @@
 
 	async function sendTransaction() {
 		if (fee) {
+			// FIXME error handling
 			const tokenToTransfer = { ...token, amount: toBigInt(amount, token.decimals) }
+			const transactionHash = await args.sendTransaction(toUser.address, tokenToTransfer, fee)
 
-			const tx = await args.sendTransaction(toUser.address, tokenToTransfer, fee)
-			// FIXME: check the amount is actually number and convert to some bigint mechanism which does not lose precision
 			args.send({
-				from: args.profile.address,
-				to: toUser.address,
-				token: {
-					amount: tokenToTransfer.amount.toString(),
-					symbol: tokenToTransfer.symbol,
-					decimals: tokenToTransfer.decimals,
-				},
-				fee: {
-					amount: fee.amount.toString(),
-					symbol: fee.symbol,
-					decimals: fee.decimals,
-				},
-				tx,
+				hash: transactionHash,
 			})
+
+			// FIXME this may not get invoked if navigated away from this page
+			setTimeout(async () => {
+				await args.waitForTransaction(transactionHash)
+				await args.send({
+					hash: transactionHash,
+				})
+			}, 0)
+
 			history.go(-3)
 		}
 	}
@@ -127,7 +125,8 @@
 			{#if Number(amount) > Number(toSignificant(token.amount, token.decimals))}
 				<WarningAltFilled />
 			{/if}
-			You have {toSignificant(token.amount, token.decimals)} ETH in your account.
+			You have {toSignificant(token.amount, token.decimals)}
+			{token.symbol} in your account.
 		</p>
 	</Container>
 	<Container direction="row" justify="space-between" alignItems="center" padX={24}>

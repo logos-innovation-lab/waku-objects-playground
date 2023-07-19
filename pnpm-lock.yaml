@@ -44,8 +44,8 @@ devDependencies:
     specifier: ^4.0.0
     version: 4.0.0(eslint@8.44.0)(svelte@4.0.3)
   ethers:
-    specifier: ^6.6.2
-    version: 6.6.2
+    specifier: ^6.6.4
+    version: 6.6.4
   firebase:
     specifier: ^9.23.0
     version: 9.23.0
@@ -4140,8 +4140,8 @@ packages:
       - utf-8-validate
     dev: true
 
-  /ethers@6.6.2:
-    resolution: {integrity: sha512-vyWfVAj2g7xeZIivOqlbpt7PbS2MzvJkKgsncgn4A/1xZr8Q3BznBmEBRQyPXKCgHmX4PzRQLpnYG7jl/yutMg==}
+  /ethers@6.6.4:
+    resolution: {integrity: sha512-r3myN2hEnydmu23iiIj5kjWnCh5JNzlqrE/z+Kw5UqH173F+JOWzU6qkFB4HVC50epgxzKSL2Hq1oNXA877vwQ==}
     engines: {node: '>=14.0.0'}
     dependencies:
       '@adraffy/ens-normalize': 1.9.2

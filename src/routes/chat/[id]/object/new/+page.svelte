@@ -29,6 +29,7 @@
 					createObject(object.objectId, {
 						/* TODO empty */
 					})
+					goto(ROUTES.CHAT($page.params.id))
 			  },
 	}))
 	let loading = false

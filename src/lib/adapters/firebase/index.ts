@@ -20,14 +20,7 @@ import {
 import { profile } from '$lib/stores/profile'
 import { contacts, type User } from '$lib/stores/users'
 
-import {
-	ChatDbSchema,
-	TokenDbSchema,
-	UserDbSchema,
-	type ProfileDb,
-	type TokenDb,
-	ObjectDbSchema,
-} from './schemas'
+import { ChatDbSchema, UserDbSchema, type ProfileDb, ObjectDbSchema } from './schemas'
 
 import { formatAddress } from '$lib/utils/format'
 import { db, ipfs, IPFS_GATEWAY } from './connections'
@@ -39,8 +32,9 @@ import { objectKey, objectStore } from '$lib/stores/objects'
 import { lookup } from '$lib/objects/lookup'
 import { type Unsubscriber, get } from 'svelte/store'
 import { sleep } from '../utils'
-import { getBalance, sendTransaction } from '../transaction'
+import { sendTransaction } from '$lib/adapters/transaction'
 import { makeWakuObjectAdapter } from '$lib/objects/adapter'
+import { fetchBalances } from '$lib/adapters/balance'
 
 export default class FirebaseAdapter implements Adapter {
 	protected userSubscriptions: Array<() => unknown> = []
@@ -105,7 +99,7 @@ export default class FirebaseAdapter implements Adapter {
 				unsubscribe && unsubscribe()
 
 				const newChats = new Map<string, Chat>()
-				res.docs.forEach((d) => {
+				for await (const d of res.docs) {
 					const parseRes = ChatDbSchema.passthrough().safeParse(d.data())
 					if (parseRes.success) {
 						const users: User[] = []
@@ -130,7 +124,7 @@ export default class FirebaseAdapter implements Adapter {
 						}
 
 						// update the object store if there is an incoming data message
-						parseRes.data.messages.forEach((message) => {
+						for await (const message of parseRes.data.messages) {
 							if (message.type === 'data') {
 								const descriptor = lookup(message.objectId)
 								const key = objectKey(message.objectId, message.instanceId)
@@ -141,26 +135,30 @@ export default class FirebaseAdapter implements Adapter {
 									descriptor.onMessage &&
 									wakuObjectStore.lastUpdated < message.timestamp
 								) {
-									const objects = wakuObjectStore.objects
-									const newStore = descriptor.onMessage(
+									const store = wakuObjectStore.objects.get(key)
+									const updateStore = (updater: (store: unknown) => unknown) => {
+										const newStore = updater(store)
+										const objectDb = doc(db, `users/${address}/objects/${key}`)
+										// eslint-disable-next-line @typescript-eslint/no-explicit-any
+										setDoc(objectDb, newStore as any, { merge: true })
+									}
+
+									await descriptor.onMessage(
 										address,
 										wakuObjectAdapter,
-										objects.get(key),
+										store,
+										updateStore,
 										message,
 									)
-
-									const objectDb = doc(db, `users/${address}/objects/${key}`)
-									// eslint-disable-next-line @typescript-eslint/no-explicit-any
-									setDoc(objectDb, newStore as any, { merge: true })
 								}
 							}
-						})
+						}
 
 						newChats.set(d.id, chat)
 					} else {
 						console.error(parseRes.error.issues)
 					}
-				})
+				}
 				chats.update((state) => ({ ...state, chats: newChats, loading: false }))
 			} catch (error) {
 				console.error('Error loading chats', error)
@@ -184,23 +182,7 @@ export default class FirebaseAdapter implements Adapter {
 		})
 		this.userSubscriptions.push(subscribeUsers)
 
-		const balanceCollection = collection(db, `users/${address}/balances`)
-		const subscribeBalances = onSnapshot(balanceCollection, (res) => {
-			const balances: Token[] = []
-			res.docs.forEach((d) => {
-				const parseRes = TokenDbSchema.safeParse(d.data())
-				if (parseRes.success) {
-					const token: Token = parseRes.data
-					balances.push(token)
-				} else {
-					console.error(parseRes.error.issues)
-				}
-			})
-			// TODO: Handle this better, every new signed in user should have some balances set
-			if (balances.length === 0) this.initializeBalances(address)
-			balanceStore.set({ balances, loading: false })
-		})
-		this.userSubscriptions.push(subscribeBalances)
+		fetchBalances(address)
 	}
 
 	onLogOut() {
@@ -274,52 +256,6 @@ export default class FirebaseAdapter implements Adapter {
 		return `${IPFS_GATEWAY}/${cid}`
 	}
 
-	/**
-	 * THIS IS JUST FOR DEV PURPOSES
-	 */
-	async initializeBalances(address: string): Promise<void> {
-		const nativeTokenAmount = await getBalance(address)
-
-		const ethDoc = doc(db, `users/${address}/balances/eth`)
-		const ethData: Omit<TokenDb, 'amount'> & { amount: string } = {
-			name: 'Ether',
-			symbol: 'ETH',
-			decimals: 18,
-			amount: nativeTokenAmount.toString(),
-			image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
-		}
-
-		setDoc(ethDoc, ethData)
-
-		const daiDoc = doc(db, `users/${address}/balances/dai`)
-		const daiData: Omit<TokenDb, 'amount'> & { amount: string } = {
-			name: 'Dai',
-			symbol: 'DAI',
-			decimals: 18,
-			amount: 7843900000000000000000n.toString(),
-			image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png',
-			address: '0x0000000000000000000000000000000000000000',
-		}
-
-		setDoc(daiDoc, daiData)
-	}
-
-	async checkBalance(address: string, token: Token): Promise<void> {
-		if (token.address) {
-			// only native token is supported for now
-			return
-		}
-
-		const nativeTokenAmount = await getBalance(address)
-
-		const ethDoc = doc(db, `users/${address}/balances/${token.symbol.toLowerCase()}`)
-		const ethData: { amount: string } = {
-			amount: nativeTokenAmount.toString(),
-		}
-
-		setDoc(ethDoc, ethData, { merge: true })
-	}
-
 	async updateStore(
 		address: string,
 		objectId: string,
@@ -339,35 +275,7 @@ export default class FirebaseAdapter implements Adapter {
 	}
 
 	async sendTransaction(wallet: BaseWallet, to: string, token: Token, fee: Token): Promise<string> {
-		const { address } = wallet
-
-		if (!address) throw new Error('Address is missing')
-
 		const tx = await sendTransaction(wallet, to, token.amount, fee.amount)
-
-		await this.checkBalance(wallet.address, token)
-
-		const txCollection = collection(db, `transactions`)
-		const txData = {
-			from: address,
-			to,
-			token: {
-				amount: token.amount.toString(),
-				name: token.name,
-				symbol: token.symbol,
-				decimals: token.decimals,
-			},
-			timestamp: Date.now(),
-			fee: {
-				amount: fee.amount.toString(),
-				symbol: fee.symbol,
-				name: fee.name,
-				decimals: fee.decimals,
-			},
-		}
-
-		await addDoc(txCollection, txData)
-
 		return tx.hash
 	}
 

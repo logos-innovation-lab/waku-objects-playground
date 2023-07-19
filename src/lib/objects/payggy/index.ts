@@ -1,6 +1,6 @@
 import type { WakuObjectDescriptor } from '..'
 import ChatComponent from './chat.svelte'
-import { MessageDataSendSchema } from './schemas'
+import { SendTransactionDataMessageSchema } from './schemas'
 import StandaloneComponent from './standalone.svelte'
 import logo from './logo.svg'
 
@@ -16,19 +16,43 @@ export const payggyDescriptor: WakuObjectDescriptor = {
 
 	standalone: StandaloneComponent,
 
-	onMessage: (address, adapter, store, message) => {
-		if (message?.data) {
-			const res = MessageDataSendSchema.safeParse(message.data)
-			if (res.success) {
-				const token = {
-					...res.data.token,
-					name: res.data.token.symbol,
-					amount: BigInt(0), // the amount is not really necessary for checkBalance
-				}
-				adapter.checkBalance(token)
-			}
+	onMessage: async (address, adapter, store, updateStore, message) => {
+		if (!message?.data) {
+			return
 		}
 
-		return message.data
+		const res = SendTransactionDataMessageSchema.safeParse(message.data)
+		if (!res.success) {
+			return
+		}
+
+		const tx = await adapter.getTransaction(res.data.hash)
+		if (!tx) {
+			return
+		}
+
+		const state = await adapter.getTransactionState(res.data.hash)
+		if (state === 'reverted') {
+			updateStore(() => ({
+				type: 'error',
+				transaction: tx,
+				error: 'Transaction has failed!',
+			}))
+			return
+		}
+
+		updateStore(() => ({
+			type: state === 'success' ? 'success' : 'pending',
+			transaction: tx,
+			hash: res.data.hash,
+		}))
+
+		const token = {
+			...tx.token,
+			name: tx.token.symbol,
+			amount: BigInt(0), // the amount is not really necessary for checkBalance
+		}
+
+		await adapter.checkBalance(token)
 	},
 }

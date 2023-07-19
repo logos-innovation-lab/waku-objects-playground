@@ -1,47 +1,6 @@
 import z from 'zod'
-import { TokenSchema, UserSchema } from '../schemas'
-import { AddressSchema, TransactionHashSchema } from '$lib/utils/schemas'
-
-export const SendTransactionSchema = z.object({
-	token: z.object({
-		amount: z.string(),
-		symbol: z.string(),
-		decimals: z.number().int().positive(),
-	}),
-	to: AddressSchema,
-	from: AddressSchema,
-	fee: z.object({
-		amount: z.string(),
-		symbol: z.string(),
-		decimals: z.number().int().positive(),
-	}),
-})
-export type SendTransaction = z.infer<typeof SendTransactionSchema>
-
-export const TransactionSchema = z.object({
-	token: z.object({
-		amount: z.string(),
-		symbol: z.string(),
-		decimals: z.number().int().positive(),
-	}),
-	to: AddressSchema,
-	from: AddressSchema,
-	fee: z.object({
-		amount: z.string(),
-		symbol: z.string(),
-		decimals: z.number().int().positive(),
-	}),
-})
-export type Transaction = z.infer<typeof SendTransactionSchema>
-
-export const SendTransactionStandaloneSchema = z.object({
-	view: z.string().optional(),
-	tokens: z.array(TokenSchema),
-	nativeToken: TokenSchema,
-	fromUser: UserSchema,
-	toUser: UserSchema,
-})
-export type SendTransactionStandalone = z.infer<typeof SendTransactionStandaloneSchema>
+import { TransactionSchema } from '../schemas'
+import { TransactionHashSchema } from '$lib/utils/schemas'
 
 export const SendTransactionStoreSchema = z.union([
 	z.object({
@@ -53,26 +12,19 @@ export const SendTransactionStoreSchema = z.union([
 		hash: TransactionHashSchema,
 	}),
 	z.object({
-		type: z.literal('complete'),
+		type: z.literal('success'),
 		transaction: TransactionSchema,
 		hash: TransactionHashSchema,
+	}),
+	z.object({
+		type: z.literal('error'),
+		transaction: TransactionSchema,
+		error: z.string(),
 	}),
 ])
 export type SendTransactionStore = z.infer<typeof SendTransactionStoreSchema>
 
-export const MessageDataSendSchema = z.object({
-	token: z.object({
-		amount: z.string(),
-		symbol: z.string(),
-		decimals: z.number().int().positive(),
-	}),
-	to: AddressSchema,
-	from: AddressSchema,
-	fee: z.object({
-		amount: z.string(),
-		symbol: z.string(),
-		decimals: z.number().int().positive(),
-	}),
-	tx: z.string(),
+export const SendTransactionDataMessageSchema = z.object({
+	hash: TransactionHashSchema,
 })
-export type MessageDataSend = z.infer<typeof MessageDataSendSchema>
+export type SendTransactionDataMessage = z.infer<typeof SendTransactionDataMessageSchema>

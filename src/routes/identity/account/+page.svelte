@@ -19,7 +19,7 @@
 	import { walletStore } from '$lib/stores/wallet'
 	import { balanceStore } from '$lib/stores/balances'
 	import { onMount } from 'svelte'
-	import adapter from '$lib/adapters'
+	import { fetchBalances } from '$lib/adapters/balance'
 
 	let copied = false
 	function copyAddressToClipboard() {
@@ -34,7 +34,7 @@
 		const address = $walletStore.wallet?.address
 		if (address === undefined) return
 
-		adapter.initializeBalances(address)
+		fetchBalances(address)
 	})
 </script>
 
