@@ -21,12 +21,53 @@
 	import { walletStore } from '$lib/stores/wallet'
 	import { profile } from '$lib/stores/profile'
 	import adapters from '$lib/adapters'
+	import { Html5Qrcode } from 'html5-qrcode'
+	import Camera from '$lib/components/icons/camera.svelte'
 
 	let copied = false
 	let loading = false
 	function copyToClipboard() {
 		copy($page.url.href)
 		copied = true
+	}
+	let scanning = false
+
+	let html5Qrcode: Html5Qrcode
+
+	function start() {
+		html5Qrcode = new Html5Qrcode('reader')
+		html5Qrcode.start(
+			{ facingMode: 'environment' },
+			{
+				fps: 10,
+				qrbox: { width: 250, height: 250 },
+			},
+			onScanSuccess,
+			onScanFailure,
+		)
+		scanning = true
+	}
+
+	async function stop() {
+		if (html5Qrcode) await html5Qrcode.stop()
+		scanning = false
+	}
+
+	function onScanSuccess(decodedText: string) {
+		// Regular expression to match last part of URL after last /
+		const regex = /\/([^/]*)$/
+
+		// Execute regex on URL
+		const match = decodedText.match(regex)
+
+		// If match found, return it, otherwise return null
+		if (match && match[1]) {
+			goto(routes.INVITE(match[1]))
+		}
+	}
+
+	function onScanFailure(error: string) {
+		console.warn(`Code scan error = ${error}`)
 	}
 
 	async function startChat() {
@@ -61,7 +102,18 @@
 	<Container gap={12} grow justify="flex-start" align="center" padX={24} padY={24}>
 		<p class="text-lg text-bold">Show QR code or share link below</p>
 		<div class="qr">
-			<QRCode content={$page.url.href} size={'250'} padding={'0'} />
+			{#if !scanning}
+				<QRCode content={$page.url.href} size={'250'} padding={'0'} />
+			{/if}
+			<div id="reader" class={`${!scanning ? 'hidden' : ''}`} />
+			{#if !scanning}
+				<Button on:click={start} variant="strong">
+					<Camera />
+					Scan QR code
+				</Button>
+			{:else}
+				<Button on:click={stop} variant="strong">Show my QR code</Button>
+			{/if}
 		</div>
 		<div class="link">
 			<Textarea label="Invitation link" readonly placeholder={$page.url.href} height={96} />
@@ -112,5 +164,13 @@
 	}
 	.link {
 		width: calc(100% + var(--spacing-24));
+	}
+
+	#reader {
+		width: 250px;
+		height: 250px;
+	}
+	.hidden {
+		display: none;
 	}
 </style>

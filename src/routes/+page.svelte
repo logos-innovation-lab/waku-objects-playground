@@ -21,7 +21,6 @@
 
 	import ROUTES from '$lib/routes'
 	import { walletStore } from '$lib/stores/wallet'
-	import Camera from '$lib/components/icons/camera.svelte'
 </script>
 
 {#if $profile.loading || $walletStore.loading}
@@ -86,13 +85,6 @@
 				<AddComment />
 				Invite to chat
 			</Button>
-			<label for="camInput">
-				<div class="cam-btn">
-					<Camera />
-					Scan QR code
-				</div>
-				<input id="camInput" type="file" accept="image/*" capture="environment" />
-			</label>
 		</div>
 	</Container>
 {:else}
