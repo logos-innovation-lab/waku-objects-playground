@@ -21,6 +21,7 @@
 
 	import ROUTES from '$lib/routes'
 	import { walletStore } from '$lib/stores/wallet'
+	import Camera from '$lib/components/icons/camera.svelte'
 </script>
 
 {#if $profile.loading || $walletStore.loading}
@@ -84,6 +85,15 @@
 			<Button on:click={() => goto(ROUTES.INVITE(address))}>
 				<AddComment />
 				Invite to chat
+			</Button>
+			<!-- TODO: add correct action to open camera -->
+			<Button
+				on:click={() => {
+					console.log('clicked to scan')
+				}}
+			>
+				<Camera />
+				Scan QR code
 			</Button>
 		</div>
 	</Container>
@@ -171,6 +181,10 @@
 
 	.btn-spacing {
 		margin-top: var(--spacing-6);
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		gap: var(--spacing-6);
 	}
 
 	.chats {
@@ -237,5 +251,9 @@
 
 	.my-message {
 		font-style: italic;
+	}
+
+	#cameraFileInput {
+		display: none;
 	}
 </style>
