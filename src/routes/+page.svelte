@@ -171,6 +171,10 @@
 
 	.btn-spacing {
 		margin-top: var(--spacing-6);
+		display: flex;
+		flex-direction: row;
+		justify-content: center;
+		gap: var(--spacing-6);
 	}
 
 	.chats {
@@ -237,5 +241,27 @@
 
 	.my-message {
 		font-style: italic;
+	}
+	#camInput {
+		display: none;
+	}
+	.cam-btn {
+		background: var(--transparent);
+		border: 1px solid var(--gray20);
+		border-radius: var(--border-radius);
+		color: var(--gray50);
+		font-size: var(--font-size-normal);
+		font-weight: var(--font-weight-500);
+		line-height: 20px;
+		padding: 11px;
+		overflow-wrap: normal;
+		cursor: pointer;
+		display: inline-flex;
+		justify-content: center;
+		flex-direction: row;
+		align-items: center;
+		margin-block: 0;
+		gap: var(--spacing-6);
+		white-space: nowrap;
 	}
 </style>

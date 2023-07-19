@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: false
+  excludeLinksFromLockfile: false
+
 devDependencies:
   '@bonosoft/sveltekit-qrcode':
     specifier: ^0.0.3
@@ -52,6 +56,9 @@ devDependencies:
   hardhat:
     specifier: ^2.16.1
     version: 2.16.1(typescript@5.1.6)
+  html5-qrcode:
+    specifier: ^2.3.8
+    version: 2.3.8
   ipfs-http-client:
     specifier: ^60.0.0
     version: 60.0.0
@@ -4631,6 +4638,10 @@ packages:
       minimalistic-crypto-utils: 1.0.1
     dev: true
 
+  /html5-qrcode@2.3.8:
+    resolution: {integrity: sha512-jsr4vafJhwoLVEDW3n1KvPnCCXWaQfRng0/EEYk1vNcQGcG/htAdhJX0be8YyqMoSz7+hZvOZSTAepsabiuhiQ==}
+    dev: true
+
   /http-errors@2.0.0:
     resolution: {integrity: sha512-FtwrG/euBzaEjYeRqOgly7G0qviiXoJWnvEH2Z1plBdXgbyjv34pHTSb9zoeHMyDy33+DWy5Wt9Wo+TURtOYSQ==}
     engines: {node: '>= 0.8'}
@@ -7422,7 +7433,3 @@ packages:
   /zod@3.21.4:
     resolution: {integrity: sha512-m46AKbrzKVzOzs/DZgVnG5H55N1sv1M8qZU3A8RIKbs3mrACDNeIOeilDymVb2HdmP8uwshOCF4uJ8uM9rCqJw==}
     dev: true
-
-settings:
-  autoInstallPeers: false
-  excludeLinksFromLockfile: false
