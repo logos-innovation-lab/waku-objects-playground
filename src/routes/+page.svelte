@@ -86,7 +86,6 @@
 				<AddComment />
 				Invite to chat
 			</Button>
-			<!-- TODO: add correct action to open camera -->
 			<label for="camInput">
 				<div class="cam-btn">
 					<Camera />
