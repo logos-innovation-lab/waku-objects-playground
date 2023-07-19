@@ -87,14 +87,13 @@
 				Invite to chat
 			</Button>
 			<!-- TODO: add correct action to open camera -->
-			<Button
-				on:click={() => {
-					console.log('clicked to scan')
-				}}
-			>
-				<Camera />
-				Scan QR code
-			</Button>
+			<label for="camInput">
+				<div class="cam-btn">
+					<Camera />
+					Scan QR code
+				</div>
+				<input id="camInput" type="file" accept="image/*" capture="environment" />
+			</label>
 		</div>
 	</Container>
 {:else}
@@ -252,8 +251,26 @@
 	.my-message {
 		font-style: italic;
 	}
-
-	#cameraFileInput {
+	#camInput {
 		display: none;
+	}
+	.cam-btn {
+		background: var(--transparent);
+		border: 1px solid var(--gray20);
+		border-radius: var(--border-radius);
+		color: var(--gray50);
+		font-size: var(--font-size-normal);
+		font-weight: var(--font-weight-500);
+		line-height: 20px;
+		padding: 11px;
+		overflow-wrap: normal;
+		cursor: pointer;
+		display: inline-flex;
+		justify-content: center;
+		flex-direction: row;
+		align-items: center;
+		margin-block: 0;
+		gap: var(--spacing-6);
+		white-space: nowrap;
 	}
 </style>
