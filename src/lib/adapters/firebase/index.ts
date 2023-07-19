@@ -34,7 +34,7 @@ import { type Unsubscriber, get } from 'svelte/store'
 import { sleep } from '../utils'
 import { sendTransaction } from '$lib/adapters/transaction'
 import { makeWakuObjectAdapter } from '$lib/objects/adapter'
-import { initializeBalances } from '$lib/adapters/balance'
+import { fetchBalances } from '$lib/adapters/balance'
 
 export default class FirebaseAdapter implements Adapter {
 	protected userSubscriptions: Array<() => unknown> = []
@@ -182,7 +182,7 @@ export default class FirebaseAdapter implements Adapter {
 		})
 		this.userSubscriptions.push(subscribeUsers)
 
-		initializeBalances(address)
+		fetchBalances(address)
 	}
 
 	onLogOut() {
