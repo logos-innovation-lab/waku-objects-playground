@@ -1,7 +1,7 @@
 import { balanceStore, type Token } from '$lib/stores/balances'
 import { defaultBlockchainNetwork, getBalance } from '$lib/adapters/transaction'
 
-export async function initializeBalances(address: string): Promise<void> {
+export async function fetchBalances(address: string): Promise<void> {
 	balanceStore.update((state) => ({
 		...state,
 		loading: true,

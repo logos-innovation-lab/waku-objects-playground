@@ -12,7 +12,7 @@
 	import Button from '$lib/components/button.svelte'
 	import { balanceStore } from '$lib/stores/balances'
 	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
-	import { initializeBalances } from '$lib/adapters/balance'
+	import { fetchBalances } from '$lib/adapters/balance'
 
 	function changeAdapter(adapterName: AdapterName) {
 		saveToLocalStorage('adapter', adapterName)
@@ -25,7 +25,7 @@
 		if (!wallet) {
 			return
 		}
-		initializeBalances(wallet.address)
+		fetchBalances(wallet.address)
 	}
 </script>
 

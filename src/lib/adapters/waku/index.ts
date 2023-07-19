@@ -23,7 +23,7 @@ import type { Token } from '$lib/stores/balances'
 import { defaultBlockchainNetwork, sendTransaction } from '$lib/adapters/transaction'
 import type { WakuObjectAdapter } from '$lib/objects'
 import { makeWakuObjectAdapter } from '$lib/objects/adapter'
-import { initializeBalances } from '$lib/adapters/balance'
+import { fetchBalances } from '$lib/adapters/balance'
 
 function createChat(chatId: string, user: User, address: string): string {
 	chats.update((state) => {
@@ -236,7 +236,7 @@ export default class WakuAdapter implements Adapter {
 		})
 		this.subscriptions.push(subscribeObjectStore)
 
-		initializeBalances(address)
+		fetchBalances(address)
 	}
 
 	async onLogOut() {
