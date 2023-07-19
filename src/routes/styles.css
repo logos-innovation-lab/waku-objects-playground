@@ -63,6 +63,8 @@
 	--input-filled-content: var(--gray50);
 	--input-filled-icon: var(--gray40);
 
+	--max-width: 498px;
+
 	/* INPUT - SEARCH-ICON */
 	/* size: 20px */
 }

@@ -26,6 +26,7 @@
 		padding: var(--spacing-12) var(--spacing-24);
 		width: 100%;
 		flex-grow: 0;
+		max-width: var(--max-width);
 	}
 
 	.sticky-top,
