@@ -48,6 +48,7 @@
 	--font-weight-700: 700;
 
 	--border-radius: var(--spacing-24);
+	--border-radius-sm: 14px;
 	--border: 1px solid var(--gray10);
 	--blur: 3px;
 
