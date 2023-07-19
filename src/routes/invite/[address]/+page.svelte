@@ -23,6 +23,7 @@
 	import adapters from '$lib/adapters'
 	import { Html5Qrcode } from 'html5-qrcode'
 	import Camera from '$lib/components/icons/camera.svelte'
+	import QrCodeIcon from '$lib/components/icons/qr-code.svelte'
 
 	let copied = false
 	let loading = false
@@ -53,7 +54,7 @@
 		scanning = false
 	}
 
-	function onScanSuccess(decodedText: string) {
+	async function onScanSuccess(decodedText: string) {
 		// Regular expression to match last part of URL after last /
 		const regex = /\/([^/]*)$/
 
@@ -62,6 +63,7 @@
 
 		// If match found, return it, otherwise return null
 		if (match && match[1]) {
+			await stop()
 			goto(routes.INVITE(match[1]))
 		}
 	}
@@ -107,12 +109,12 @@
 			{/if}
 			<div id="reader" class={`${!scanning ? 'hidden' : ''}`} />
 			{#if !scanning}
-				<Button on:click={start} variant="strong">
+				<Button on:click={start}>
 					<Camera />
 					Scan QR code
 				</Button>
 			{:else}
-				<Button on:click={stop} variant="strong">Show my QR code</Button>
+				<Button on:click={stop}><QrCodeIcon />Show my QR code</Button>
 			{/if}
 		</div>
 		<div class="link">
