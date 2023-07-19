@@ -68,14 +68,15 @@
 				hash: transactionHash,
 			})
 
-			history.go(-3)
-
+			// FIXME this may not get invoked if navigated away from this page
 			setTimeout(async () => {
 				await args.waitForTransaction(transactionHash)
 				await args.send({
 					hash: transactionHash,
 				})
 			}, 0)
+
+			history.go(-3)
 		}
 	}
 </script>
