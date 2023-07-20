@@ -4,6 +4,8 @@
 	import Renew from '$lib/components/icons/renew.svelte'
 	import Wallet from '$lib/components/icons/wallet.svelte'
 	import User from '$lib/components/icons/user.svelte'
+	import Logout from '$lib/components/icons/logout.svelte'
+	import DocumentSigned from '$lib/components/icons/document-signed.svelte'
 
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
@@ -11,6 +13,7 @@
 	import ButtonBlock from '$lib/components/button-block.svelte'
 	import InputFile from '$lib/components/input-file.svelte'
 	import InputField from '$lib/components/input-field.svelte'
+	import Spacer from '$lib/components/spacer.svelte'
 
 	import adapters from '$lib/adapters'
 	import { profile } from '$lib/stores/profile'
@@ -18,8 +21,6 @@
 	import { clipAndResize } from '$lib/utils/image'
 	import routes from '$lib/routes'
 	import { onDestroy } from 'svelte'
-	import DocumentSigned from '$lib/components/icons/document-signed.svelte'
-	import Logout from '$lib/components/icons/logout.svelte'
 	import { walletStore } from '$lib/stores/wallet'
 	import { get } from 'svelte/store'
 
@@ -142,6 +143,7 @@
 			Disconnect identity from device
 		</Button>
 	</Container>
+	<Spacer />
 {/if}
 
 <style lang="scss">

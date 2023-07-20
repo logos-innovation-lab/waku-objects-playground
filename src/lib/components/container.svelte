@@ -27,6 +27,7 @@
 		width: 100%;
 		flex-grow: 0;
 		max-width: var(--max-width);
+		margin-inline: auto;
 	}
 
 	.sticky-top,

@@ -30,9 +30,7 @@
 </script>
 
 <div class="root" style={`background-color: ${pageBg};`}>
-	<div class="wrapper">
-		<slot />
-	</div>
+	<slot />
 </div>
 
 <style>
@@ -40,20 +38,21 @@
 		min-height: 100vh;
 		min-height: 100dvh;
 		width: 100vw;
-		/* background-color: var(--white); */
-	}
-
-	.wrapper {
-		max-width: 498px;
 		width: 100%;
-		margin-inline: auto;
-		min-height: 100vh;
-		min-height: 100dvh;
-		height: 100%;
-		background-color: white;
-		position: relative;
 		display: flex;
 		flex-direction: column;
 		justify-content: flex-start;
+		margin-inline: auto;
+		position: relative;
+
+		/* background-color: var(--white); */
 	}
+
+	/* .wrapper {
+		max-width: 498px;
+		width: 100%;
+		min-height: 100vh;
+		min-height: 100dvh;
+		height: 100%;		
+	} */
 </style>
