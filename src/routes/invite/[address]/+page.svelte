@@ -12,7 +12,7 @@
 	import Button from '$lib/components/button.svelte'
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
-	import Textarea from '$lib/components/textarea.svelte'
+	import ReadonlyText from '$lib/components/readonly-text.svelte'
 
 	import { goto } from '$app/navigation'
 	import routes from '$lib/routes'
@@ -119,7 +119,9 @@
 			{/if}
 		</div>
 		<div class="link">
-			<Textarea label="Invitation link" readonly placeholder={$page.url.href} height={96} />
+			<ReadonlyText label="Invitation link" overflow={false}>
+				{$page.url.href}
+			</ReadonlyText>
 		</div>
 		<Button on:click={copyToClipboard} variant="strong">
 			{#if copied}
@@ -164,9 +166,9 @@
 <style lang="scss">
 	.qr {
 		padding-block: 7px;
-	}
-	.link {
-		width: calc(100% + var(--spacing-24));
+		display: flex;
+		flex-direction: column;
+		gap: var(--spacing-12);
 	}
 
 	#reader {

@@ -2,9 +2,10 @@
 	export let variant: '' | 'icon' | 'strong' | 'account' = ''
 	export let disabled: boolean | undefined = undefined
 	export let align: 'center' | 'left' | 'right' | 'block' = 'center'
+	export let grow = false
 </script>
 
-<button type="button" {disabled} class={`${variant} ${align}`} on:click>
+<button type="button" {disabled} class={`${variant} ${align} ${grow ? 'grow' : ''}`} on:click>
 	{#if variant === 'account'}
 		<div class="avatar">
 			<slot name="avatar" />
@@ -21,8 +22,8 @@
 		color: var(--gray50);
 		font-size: var(--font-size-normal);
 		font-weight: var(--font-weight-500);
-		line-height: 20px;
-		padding: 11px;
+		line-height: 1.25;
+		padding: 13px;
 		overflow-wrap: normal;
 		cursor: pointer;
 		display: inline-flex;
@@ -47,6 +48,11 @@
 
 		&.right {
 			margin-right: 0;
+		}
+
+		&.grow {
+			width: 100%;
+			justify-content: space-between;
 		}
 
 		&:active {

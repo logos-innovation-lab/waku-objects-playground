@@ -25,6 +25,7 @@
 	import type { Token } from '../schemas'
 	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 	import { throwError } from '$lib/utils/error'
+	import Grid from '$lib/components/grid.svelte'
 
 	export let args: WakuObjectArgs<SendTransactionStore, SendTransactionDataMessage>
 
@@ -150,19 +151,23 @@
 	<Container gap={24} grow justify="center" padX={24}>
 		<p>How much would you like to send?</p>
 		<div class="amt-drop">
-			<div class="drop">
-				<Input autofocus bind:value={amount} placeholder="0" />
-				<Dropdown>
-					<Button slot="button">{token.symbol} <CaretDown /></Button>
-					{#each args.tokens as t}
-						<DropdownItem
-							onClick={() => {
-								token = t
-							}}>{t.symbol}</DropdownItem
-						>
-					{/each}
-				</Dropdown>
-			</div>
+			<Grid>
+				<div>
+					<Input autofocus bind:value={amount} placeholder="0" />
+				</div>
+				<div>
+					<Dropdown>
+						<Button grow align="block" slot="button">{token.symbol} <CaretDown /></Button>
+						{#each args.tokens as t}
+							<DropdownItem
+								onClick={() => {
+									token = t
+								}}>{t.symbol}</DropdownItem
+							>
+						{/each}
+					</Dropdown>
+				</div>
+			</Grid>
 			<p class="fiat text-sm">x EUR {amount ? 'now' : ''}</p>
 		</div>
 		<p
@@ -209,13 +214,6 @@
 		display: flex;
 		flex-direction: column;
 		gap: var(--spacing-12);
-
-		.drop {
-			display: flex;
-			flex-direction: row;
-			gap: var(--spacing-6);
-			margin-inline: calc(var(--spacing-12) * -1);
-		}
 	}
 	.balance {
 		display: flex;
