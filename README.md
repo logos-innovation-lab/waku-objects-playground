@@ -1,4 +1,7 @@
-# create-svelte
+# Waku Objects: Playground
+Waku Objects Playground is a simple chat app. Its main use is to showcase Waku Objects, develop and test them. 
+
+
 
 Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/master/packages/create-svelte).
 
