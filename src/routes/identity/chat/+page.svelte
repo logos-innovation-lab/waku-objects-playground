@@ -87,24 +87,24 @@
 	}
 
 	.white {
-		background-color: var(--white);
+		background-color: var(--color-base);
 	}
 	.ultra-light {
-		background-color: var(--ultra-light);
+		background-color: var(--color-step-10);
 	}
 	.light {
-		background-color: var(--light);
+		background-color: var(--color-step-20);
 	}
 	.mid {
-		background-color: var(--mid);
+		background-color: var(--color-step-30);
 	}
 	.dark {
-		background-color: var(--dark);
+		background-color: var(--color-step-40);
 	}
 	.ultra-dark {
-		background-color: var(--ultra-dark);
+		background-color: var(--color-step-50);
 	}
 	.black {
-		background-color: var(--black);
+		background-color: var(--color-accent);
 	}
 </style>

@@ -26,14 +26,14 @@
 		justify-content: space-between;
 		align-items: center;
 		gap: var(--spacing-24);
-		background-color: var(--white);
+		background-color: var(--color-base);
 
 		&.danger {
 			color: var(--color-red);
 		}
 
 		&:hover {
-			background-color: var(--ultra-light);
+			background-color: var(--color-step-10);
 		}
 
 		&.disabled {
@@ -42,7 +42,7 @@
 		}
 
 		&:not(:last-child) {
-			border-bottom: 1px solid var(--light);
+			border-bottom: 1px solid var(--color-step-20);
 		}
 	}
 </style>

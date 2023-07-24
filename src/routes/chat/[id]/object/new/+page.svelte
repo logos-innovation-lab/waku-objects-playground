@@ -102,7 +102,7 @@
 		min-height: 100dvh;
 		min-height: 100vh;
 		height: 100%;
-		background-color: var(--ultra-light);
+		background-color: var(--color-step-10);
 	}
 
 	.object-list {
@@ -115,10 +115,10 @@
 		display: flex;
 		align-items: center;
 		gap: var(--spacing-6);
-		color: var(--dark);
+		color: var(--color-step-40);
 		font-weight: var(--font-weight-500);
 		:global(svg) {
-			fill: var(--dark);
+			fill: var(--color-step-40);
 		}
 	}
 
@@ -161,14 +161,14 @@
 		border-radius: var(--border-radius);
 		display: inline-block;
 		font-family: var(--font-serif);
-		background-color: var(--white);
+		background-color: var(--color-base);
 	}
 
 	.chat {
 		display: flex;
 		flex-direction: column;
 		height: 100%;
-		background-color: var(--ultra-light);
+		background-color: var(--color-step-10);
 	}
 
 	.chat-messages {
@@ -180,8 +180,8 @@
 		flex-grow: 0;
 		position: sticky;
 		bottom: 0;
-		background-color: var(--white);
-		border-top: 1px solid var(--light);
+		background-color: var(--color-base);
+		border-top: 1px solid var(--color-step-20);
 	}
 
 	.chat-input {

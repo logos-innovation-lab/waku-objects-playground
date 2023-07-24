@@ -31,14 +31,14 @@
 		position: sticky;
 		top: 0;
 		height: auto;
-		background-color: var(--white);
-		border-bottom: 1px solid var(--light);
+		background-color: var(--color-base);
+		border-bottom: 1px solid var(--color-step-20);
 		z-index: 100;
 
 		.white {
 			position: absolute;
 			content: '';
-			background-color: var(--white);
+			background-color: var(--color-base);
 			top: 0;
 			left: 0;
 			right: 0;
@@ -53,7 +53,7 @@
 			justify-content: space-between;
 			align-items: center;
 			gap: var(--spacing-12);
-			background-color: var(--white);
+			background-color: var(--color-base);
 			z-index: 30;
 
 			h1,

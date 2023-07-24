@@ -36,11 +36,11 @@
 	span {
 		margin-inline: 13px;
 		text-align: left;
-		color: var(--dark);
+		color: var(--color-step-40);
 	}
 
 	input {
-		border: 1px solid var(--light);
+		border: 1px solid var(--color-step-20);
 		border-radius: var(--border-radius);
 		padding: 11px var(--spacing-12);
 		max-height: 120px;
@@ -49,11 +49,11 @@
 
 		&:focus {
 			outline: none;
-			color: var(--black);
+			color: var(--color-accent);
 		}
 
 		&:disabled {
-			background-color: var(--ultra-light);
+			background-color: var(--color-step-10);
 			border-color: transparent;
 		}
 

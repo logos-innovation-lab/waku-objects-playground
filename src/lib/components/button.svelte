@@ -17,9 +17,9 @@
 <style lang="scss">
 	button {
 		background: var(--transparent);
-		border: 1px solid var(--light);
+		border: 1px solid var(--color-step-20);
 		border-radius: var(--border-radius);
-		color: var(--ultra-dark);
+		color: var(--color-step-50);
 		font-size: var(--font-size-normal);
 		font-weight: var(--font-weight-500);
 		line-height: 1.25;
@@ -56,7 +56,7 @@
 		}
 
 		&:active {
-			background-color: var(--light);
+			background-color: var(--color-step-20);
 		}
 
 		&:disabled {
@@ -64,7 +64,7 @@
 			color: rgba(var(--ultra-dark-rgb), 0.25);
 
 			& :global(svg) {
-				fill: var(--mid);
+				fill: var(--color-step-30);
 			}
 		}
 
@@ -78,19 +78,19 @@
 		}
 
 		&.strong {
-			background-color: var(--ultra-dark);
-			color: var(--ultra-light);
+			background-color: var(--color-step-50);
+			color: var(--color-step-10);
 
 			:global(svg) {
-				fill: var(--ultra-light);
+				fill: var(--color-step-10);
 				width: 20px;
 				height: 20px;
 			}
 
 			&:active {
-				background-color: var(--black);
+				background-color: var(--color-accent);
 				:global(svg) {
-					fill: var(--white);
+					fill: var(--color-base);
 					width: 20px;
 					height: 20px;
 				}
@@ -115,7 +115,7 @@
 			margin-right: 0;
 		}
 		&.border {
-			border: 1px solid var(--light);
+			border: 1px solid var(--color-step-20);
 		}
 
 		&.account {

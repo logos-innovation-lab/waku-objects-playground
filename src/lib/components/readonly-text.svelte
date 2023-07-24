@@ -32,14 +32,14 @@
 		}
 	}
 	.main {
-		background-color: var(--ultra-light);
+		background-color: var(--color-step-10);
 		padding: var(--spacing-12);
 		border-radius: var(--border-radius);
 	}
 
 	.label {
 		font-size: var(--font-size-sm);
-		color: var(--dark);
+		color: var(--color-step-40);
 		margin-left: var(--spacing-12);
 	}
 </style>

@@ -10,62 +10,62 @@ interface Color {
 // TODO: maybe these should actually be the other way around? So --white should actually be black and vice versa
 const darkColorVars: Color[] = [
 	{
-		name: '--white',
+		name: '--color-base',
 		luminance: 1,
 	},
 	{
-		name: '--ultra-light',
+		name: '--color-step-10',
 		luminance: 0.85,
 	},
 	{
-		name: '--light',
+		name: '--color-step-20',
 		luminance: 0.6,
 	},
 	{
-		name: '--mid',
+		name: '--color-step-30',
 		luminance: 0.3,
 	},
 	{
-		name: '--dark',
+		name: '--color-step-40',
 		luminance: 0.03,
 	},
 	{
-		name: '--ultra-dark',
+		name: '--color-step-50',
 		luminance: 0.01,
 	},
 	{
-		name: '--black',
+		name: '--color-accent',
 		luminance: 0,
 	},
 ]
 
 const lightColorsVars: Color[] = [
 	{
-		name: '--white',
+		name: '--color-base',
 		luminance: 1,
 	},
 	{
-		name: '--ultra-light',
+		name: '--color-step-10',
 		luminance: 0.9,
 	},
 	{
-		name: '--light',
+		name: '--color-step-20',
 		luminance: 0.8,
 	},
 	{
-		name: '--mid',
+		name: '--color-step-30',
 		luminance: 0.5,
 	},
 	{
-		name: '--dark',
+		name: '--color-step-40',
 		luminance: 0.2,
 	},
 	{
-		name: '--ultra-dark',
+		name: '--color-step-50',
 		luminance: 0.05,
 	},
 	{
-		name: '--black',
+		name: '--color-accent',
 		luminance: 0,
 	},
 ]

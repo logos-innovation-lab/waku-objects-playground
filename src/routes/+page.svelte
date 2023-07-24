@@ -186,7 +186,7 @@
 			display: flex;
 			align-items: center;
 			gap: var(--spacing-12);
-			border-bottom: 1px solid var(--light);
+			border-bottom: 1px solid var(--color-step-20);
 
 			.chat-button {
 				width: 100%;
@@ -225,7 +225,7 @@
 
 	.timestamp {
 		font-size: var(--font-size-sm);
-		color: var(--dark);
+		color: var(--color-step-40);
 		margin-left: auto;
 	}
 

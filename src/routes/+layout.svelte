@@ -48,6 +48,6 @@
 		justify-content: flex-start;
 		margin-inline: auto;
 		position: relative;
-		background-color: var(--white);
+		background-color: var(--color-base);
 	}
 </style>

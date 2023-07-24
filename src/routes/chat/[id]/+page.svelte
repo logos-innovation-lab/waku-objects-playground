@@ -169,7 +169,7 @@
 		flex-direction: column;
 		height: 100dvh;
 		height: 100vh;
-		background-color: var(--ultra-light);
+		background-color: var(--color-step-10);
 	}
 
 	.chat-messages {
@@ -181,8 +181,8 @@
 		flex-grow: 0;
 		position: sticky;
 		bottom: 0;
-		background-color: var(--white);
-		border-top: 1px solid var(--light);
+		background-color: var(--color-base);
+		border-top: 1px solid var(--color-step-20);
 	}
 
 	.chat-input {
