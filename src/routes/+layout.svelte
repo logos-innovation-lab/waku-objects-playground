@@ -38,21 +38,10 @@
 		min-height: 100vh;
 		min-height: 100dvh;
 		width: 100vw;
-		/* width: 100%; */
 		display: flex;
 		flex-direction: column;
 		justify-content: flex-start;
 		margin-inline: auto;
 		position: relative;
-
-		/* background-color: var(--white); */
 	}
-
-	/* .wrapper {
-		max-width: 498px;
-		width: 100%;
-		min-height: 100vh;
-		min-height: 100dvh;
-		height: 100%;		
-	} */
 </style>
