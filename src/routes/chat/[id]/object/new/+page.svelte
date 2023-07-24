@@ -102,7 +102,7 @@
 		min-height: 100dvh;
 		min-height: 100vh;
 		height: 100%;
-		background-color: var(--gray10);
+		background-color: var(--ultra-light);
 	}
 
 	.object-list {
@@ -115,10 +115,10 @@
 		display: flex;
 		align-items: center;
 		gap: var(--spacing-6);
-		color: var(--gray40);
+		color: var(--dark);
 		font-weight: var(--font-weight-500);
 		:global(svg) {
-			fill: var(--gray40);
+			fill: var(--dark);
 		}
 	}
 
@@ -168,7 +168,7 @@
 		display: flex;
 		flex-direction: column;
 		height: 100%;
-		background-color: var(--gray10);
+		background-color: var(--ultra-light);
 	}
 
 	.chat-messages {
@@ -181,7 +181,7 @@
 		position: sticky;
 		bottom: 0;
 		background-color: var(--white);
-		border-top: 1px solid var(--gray20);
+		border-top: 1px solid var(--light);
 	}
 
 	.chat-input {

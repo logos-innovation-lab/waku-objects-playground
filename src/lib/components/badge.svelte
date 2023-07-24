@@ -9,16 +9,16 @@
 
 <style lang="scss">
 	.badge {
-		background-color: var(--gray10);
+		background-color: var(--ultra-light);
 		border-radius: var(--border-radius);
-		color: var(--gray40);
+		color: var(--dark);
 		padding: var(--spacing-3) var(--spacing-6);
 		text-transform: uppercase;
 		min-width: 22px;
 		text-align: center;
 
 		&.dark {
-			background-color: var(--gray50);
+			background-color: var(--ultra-dark);
 			color: var(--white);
 			font-weight: var(--font-weight-700);
 		}

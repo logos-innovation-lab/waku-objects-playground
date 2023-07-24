@@ -59,7 +59,7 @@
 		align-items: flex-start;
 		gap: var(--spacing-6);
 		width: 100%;
-		color: var(--gray40);
+		color: var(--dark);
 		background-color: transparent;
 
 		span {
@@ -68,7 +68,7 @@
 		}
 
 		::placeholder {
-			color: var(--gray40);
+			color: var(--dark);
 		}
 	}
 
@@ -83,7 +83,7 @@
 			position: absolute;
 			opacity: 0;
 			font-size: var(--font-size-lg);
-			color: rgba(var(--gray50), 0.5);
+			color: rgba(var(--ultra-dark), 0.5);
 			width: 100%;
 			height: fit-content;
 			min-height: 48px;
@@ -99,7 +99,7 @@
 	textarea {
 		border: none;
 		resize: none;
-		border: 1px solid var(--gray20);
+		border: 1px solid var(--light);
 		border-radius: var(--border-radius);
 		padding: 11px var(--spacing-12);
 		max-height: 120px;
@@ -114,7 +114,7 @@
 
 		&:disabled,
 		&:read-only {
-			background-color: var(--gray10);
+			background-color: var(--ultra-light);
 			border-color: transparent;
 		}
 

@@ -33,16 +33,16 @@
 		}
 
 		&:hover {
-			background-color: var(--gray10);
+			background-color: var(--ultra-light);
 		}
 
 		&.disabled {
-			color: rgba(var(--gray50-rgb), 0.25);
+			color: rgba(var(--ultra-dark-rgb), 0.25);
 			cursor: not-allowed;
 		}
 
 		&:not(:last-child) {
-			border-bottom: 1px solid var(--gray20);
+			border-bottom: 1px solid var(--light);
 		}
 	}
 </style>

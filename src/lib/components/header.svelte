@@ -32,7 +32,7 @@
 		top: 0;
 		height: auto;
 		background-color: var(--white);
-		border-bottom: 1px solid var(--gray20);
+		border-bottom: 1px solid var(--light);
 		z-index: 100;
 
 		.white {

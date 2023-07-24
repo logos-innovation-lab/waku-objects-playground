@@ -1,35 +1,44 @@
 :root {
+	/* These are the app colors, but they are overwritten by the code in +layout.svelte */
+	--white: #ffffff;
+	--ultra-light: #f4f4f4;
+	--light: #e8e8e8;
+	--mid: #bcbcbc;
+	--dark: #7b7b7b;
+	--ultra-dark: #404040;
+	--black: #000000;
+
 	--spacing-3: 3px;
 	--spacing-6: 6px;
 	--spacing-12: 12px;
 	--spacing-24: 24px;
 
-	--white: #ffffff;
-	--gray10: #f3f3f3;
-	--gray20: #e7e7e7;
-	--gray30: #bcbcbc;
-	--gray40: #7c7c7c;
-	--gray50: #3f3f3f;
-	--black: #000000;
+	/* --white: #ffffff;
+	--ultra-light: #f3f3f3;
+	--light: #e7e7e7;
+	--mid: #bcbcbc;
+	--dark: #7c7c7c;
+	--ultra-dark: #3f3f3f;
+	--black: #000000; */
 
 	/* RGB */
-
+	/* 
 	--white-rgb: 255, 255, 255;
-	--gray10-rgb: 243, 243, 243;
-	--gray20-rgb: 231, 231, 231;
-	--gray30-rgb: 188, 188, 188;
-	--gray40-rgb: 124, 124, 124;
-	--gray50-rgb: 63, 63, 63;
-	--black-rgb: 0, 0, 0;
+	--ultra-light-rgb: 243, 243, 243;
+	--light-rgb: 231, 231, 231;
+	--mid-rgb: 188, 188, 188;
+	--dark-rgb: 124, 124, 124;
+	--ultra-dark-rgb: 63, 63, 63;
+	--black-rgb: 0, 0, 0; */
 
 	/* HSL */
 
 	/* --white: hsl(0, 0%, 100%);
-	--gray10: hsl(0, 0%, 95%);
-	--gray20: hsl(0, 0%, 91%);
-	--gray30: hsl(0, 0%, 74%);
-	--gray40: hsl(0, 0%, 49%);
-	--gray50: hsl(0, 0%, 25%);
+	--ultra-light: hsl(0, 0%, 95%);
+	--light: hsl(0, 0%, 91%);
+	--mid: hsl(0, 0%, 74%);
+	--dark: hsl(0, 0%, 49%);
+	--ultra-dark: hsl(0, 0%, 25%);
 	--black: hsl(0, 0%, 0%); */
 
 	--transparent: transparent;
@@ -48,20 +57,20 @@
 	--font-weight-700: 700;
 
 	--border-radius: var(--spacing-24);
-	--border: 1px solid var(--gray10);
+	--border: 1px solid var(--ultra-light);
 	--blur: 3px;
 
 	/* INPUT */
-	--input-bg: var(--gray10);
-	--input-border: var(--gray20);
-	--input-placeholder: var(--gray40);
+	--input-bg: var(--ultra-light);
+	--input-border: var(--light);
+	--input-placeholder: var(--dark);
 	--input-active-bg: var(--white);
-	--input-active-border: var(--gray20);
+	--input-active-border: var(--light);
 	--input-active-content: var(--black);
-	--input-filled-bg: var(--gray10);
-	--input-filled-border: var(--gray20);
-	--input-filled-content: var(--gray50);
-	--input-filled-icon: var(--gray40);
+	--input-filled-bg: var(--ultra-light);
+	--input-filled-border: var(--light);
+	--input-filled-content: var(--ultra-dark);
+	--input-filled-icon: var(--dark);
 
 	--max-width: 498px;
 
@@ -82,7 +91,7 @@ body {
 	line-height: 20px;
 	font-weight: var(--font-weight-400);
 	font-size: var(--font-size-normal);
-	color: var(--gray50);
+	color: var(--ultra-dark);
 	background-color: var(--black);
 }
 
@@ -107,7 +116,7 @@ video {
 }
 
 svg {
-	fill: var(--gray50);
+	fill: var(--ultra-dark);
 }
 
 h1 {

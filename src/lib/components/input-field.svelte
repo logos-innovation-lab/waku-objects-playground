@@ -36,11 +36,11 @@
 	span {
 		margin-inline: 13px;
 		text-align: left;
-		color: var(--gray40);
+		color: var(--dark);
 	}
 
 	input {
-		border: 1px solid var(--gray20);
+		border: 1px solid var(--light);
 		border-radius: var(--border-radius);
 		padding: 11px var(--spacing-12);
 		max-height: 120px;
@@ -53,7 +53,7 @@
 		}
 
 		&:disabled {
-			background-color: var(--gray10);
+			background-color: var(--ultra-light);
 			border-color: transparent;
 		}
 
