@@ -9,6 +9,8 @@
 	import adapter from '$lib/adapters'
 	import { walletStore } from '$lib/stores/wallet'
 
+	let pageBg = 'white'
+
 	let unsubscribeWalletStore: (() => void) | undefined = undefined
 
 	onMount(() => {
@@ -27,10 +29,8 @@
 	})
 </script>
 
-<div class="root">
-	<div class="wrapper">
-		<slot />
-	</div>
+<div class="root" style={`background-color: ${pageBg};`}>
+	<slot />
 </div>
 
 <style>
@@ -38,20 +38,10 @@
 		min-height: 100vh;
 		min-height: 100dvh;
 		width: 100vw;
-		background-color: var(--black);
-	}
-
-	.wrapper {
-		max-width: 412px;
-		width: 100%;
-		margin-inline: auto;
-		min-height: 100vh;
-		min-height: 100dvh;
-		height: 100%;
-		background-color: white;
-		position: relative;
 		display: flex;
 		flex-direction: column;
 		justify-content: flex-start;
+		margin-inline: auto;
+		position: relative;
 	}
 </style>

@@ -7,24 +7,27 @@
 	export let description: string | undefined = undefined
 </script>
 
-<div class={`object`} on:click on:keypress role="button" tabindex={0}>
-	<Container direction="row" gap={12} alignItems="center">
+<Container padX={0} padY={0}>
+	<div class={`object`} on:click on:keypress role="button" tabindex={0}>
 		<img class="img" src={imgSrc} alt={imgAlt} />
 		<p>
 			<span class="text-bold text-lg">{title}</span>
 			{description}
 		</p>
-	</Container>
-</div>
+	</div>
+</Container>
 
 <style lang="scss">
 	.object {
 		background-color: var(--white);
 		border-radius: var(--border-radius);
+		display: flex;
+		flex-direction: row;
+		gap: var(--spacing-12);
+		justify-content: center;
+		align-items: flex-start;
+		padding: var(--spacing-12);
 
-		.img {
-			width: 72px;
-		}
 		img {
 			width: 72px;
 			height: 72px;
