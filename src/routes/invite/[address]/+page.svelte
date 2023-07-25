@@ -24,6 +24,7 @@
 	import { Html5Qrcode } from 'html5-qrcode'
 	import Camera from '$lib/components/icons/camera.svelte'
 	import QrCodeIcon from '$lib/components/icons/qr-code.svelte'
+	import { onDestroy } from 'svelte'
 
 	let copied = false
 	let loading = false
@@ -87,6 +88,10 @@
 		loading = false
 		goto(routes.CHAT(chatId))
 	}
+
+	onDestroy(() => {
+		stop()
+	})
 </script>
 
 <Header title="Invite to chat">
