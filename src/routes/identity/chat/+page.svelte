@@ -1,17 +1,20 @@
 <script lang="ts">
-	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
-
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'
-	import Divider from '$lib/components/divider.svelte'
+	import Dropdown from '$lib/components/dropdown.svelte'
+	import ChatMessage from '$lib/components/chat-message.svelte'
+	import DropdownItem from '$lib/components/dropdown-item.svelte'
+	import Spacer from '$lib/components/spacer.svelte'
+	import InputField from '$lib/components/input-field.svelte'
+
+	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
+	import PaintPalette from '$lib/components/icons/paint-palette.svelte'
+	import CaretDown from '$lib/components/icons/caret-down.svelte'
 
 	import { profile } from '$lib/stores/profile'
 	import { goto } from '$app/navigation'
 	import routes from '$lib/routes'
-	import Dropdown from '$lib/components/dropdown.svelte'
-	import DropdownItem from '$lib/components/dropdown-item.svelte'
-	import CaretDown from '$lib/components/icons/caret-down.svelte'
 	import { theme } from '$lib/stores/theme'
 
 	let baseColor = $theme.baseColor
@@ -34,77 +37,81 @@
 		<h2>Failed to load profile: {$profile.error.message}</h2>
 	</Container>
 {:else}
-	<div class="color">
-		<div class="white" />
-		<div>--white</div>
+	<div class="preview">
+		<Container>
+			<ChatMessage bubble>This is a preview, use the menus below to customise</ChatMessage>
+			<ChatMessage bubble myMessage>Hey this is really nice!</ChatMessage>
+		</Container>
 	</div>
-	<div class="color">
-		<div class="ultra-light" />
-		<div>--ultra-light</div>
-	</div>
-	<div class="color">
-		<div class="light" />
-		<div>--light</div>
-	</div>
-	<div class="color">
-		<div class="mid" />
-		<div>--mid</div>
-	</div>
-	<div class="color">
-		<div class="dark" />
-		<div>--dark</div>
-	</div>
-	<div class="color">
-		<div class="ultra-dark" />
-		<div>--ultra-dark</div>
-	</div>
-	<div class="color">
-		<div class="black" />
-		<div>--black</div>
-	</div>
-	<Divider pad={12} />
-	<Dropdown>
-		<Button grow align="block" slot="button">{$theme.darkMode} <CaretDown /></Button>
-		<DropdownItem onClick={() => theme.setDarkMode('system')}>Automatic</DropdownItem>
-		<DropdownItem onClick={() => theme.setDarkMode('dark')}>Dark</DropdownItem>
-		<DropdownItem onClick={() => theme.setDarkMode('light')}>Light</DropdownItem>
-	</Dropdown>
-
-	<input type="text" bind:value={baseColor} />
-	<input type="color" bind:value={baseColor} />
+	<Spacer height={12} />
+	<Container padY={12}>
+		<Dropdown label="Mode">
+			<Button grow align="block" slot="button">
+				{#if $theme.darkMode === 'system'}
+					Automatic
+				{:else if $theme.darkMode === 'dark'}
+					Dark
+				{:else}
+					Light
+				{/if}
+				<CaretDown />
+			</Button>
+			<DropdownItem onClick={() => theme.setDarkMode('system')}>Automatic</DropdownItem>
+			<DropdownItem onClick={() => theme.setDarkMode('dark')}>Dark</DropdownItem>
+			<DropdownItem onClick={() => theme.setDarkMode('light')}>Light</DropdownItem>
+		</Dropdown>
+	</Container>
+	<Container direction="row" gap={12}>
+		<div class="grow">
+			<InputField bind:value={baseColor}>
+				{baseColor}
+			</InputField>
+		</div>
+		<label for="color">
+			<div class="palette-icon">
+				<PaintPalette />
+			</div>
+			<input id="color" type="color" bind:value={baseColor} />
+		</label>
+	</Container>
 {/if}
 
 <style lang="scss">
-	.color {
-		display: flex;
-		flex-direction: row;
-		align-items: center;
-		> div {
-			width: 50px;
-			height: 50px;
-			border-radius: 50%;
+	.preview {
+		background-color: var(--color-step-10);
+	}
+
+	label {
+		position: relative;
+	}
+	input[type='color'] {
+		border-radius: 50%;
+		width: 48px;
+		height: 48px;
+		border: none;
+	}
+
+	::-webkit-color-swatch-wrapper {
+		padding: 0;
+	}
+
+	::-webkit-color-swatch {
+		border-radius: 50%;
+		border: none;
+	}
+
+	.palette-icon {
+		position: absolute;
+		inset: 50% auto auto 50%;
+		transform: translate(-50%, -50%);
+		z-index: 10;
+
+		:global(svg) {
+			fill: var(--color-base);
 		}
 	}
 
-	.white {
-		background-color: var(--color-base);
-	}
-	.ultra-light {
-		background-color: var(--color-step-10);
-	}
-	.light {
-		background-color: var(--color-step-20);
-	}
-	.mid {
-		background-color: var(--color-step-30);
-	}
-	.dark {
-		background-color: var(--color-step-40);
-	}
-	.ultra-dark {
-		background-color: var(--color-step-50);
-	}
-	.black {
-		background-color: var(--color-accent);
+	.grow {
+		flex-grow: 1;
 	}
 </style>

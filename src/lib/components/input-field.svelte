@@ -36,7 +36,7 @@
 	span {
 		margin-inline: 13px;
 		text-align: left;
-		color: var(--color-step-40);
+		color: rgba(var(--color-step-50-rgb), 0.5);
 	}
 
 	input {
@@ -46,6 +46,7 @@
 		max-height: 120px;
 		min-height: 48px;
 		width: 100%;
+		color: var(--color-step-50);
 
 		&:focus {
 			outline: none;
@@ -58,7 +59,7 @@
 		}
 
 		&::placeholder {
-			opacity: 0.5;
+			color: rgba(var(--color-step-50-rgb), 0.5);
 		}
 	}
 </style>

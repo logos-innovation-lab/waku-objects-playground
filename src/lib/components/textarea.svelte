@@ -59,7 +59,7 @@
 		align-items: flex-start;
 		gap: var(--spacing-6);
 		width: 100%;
-		color: var(--color-step-40);
+		color: rgba(var(--color-step-50-rgb), 0.5);
 		background-color: transparent;
 
 		span {
@@ -68,7 +68,7 @@
 		}
 
 		::placeholder {
-			color: var(--color-step-40);
+			color: rgba(var(--color-step-50-rgb), 0.5);
 		}
 	}
 
@@ -109,7 +109,7 @@
 		&:focus,
 		&.content {
 			outline: none;
-			color: var(--color-accent);
+			color: var(--color-step-50);
 		}
 
 		&:disabled,
