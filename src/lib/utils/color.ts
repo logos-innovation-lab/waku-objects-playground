@@ -1,4 +1,4 @@
-import { getClosestColor } from '@waku-objects/luminance'
+import { getClosestColor, hexToRgb } from '@waku-objects/luminance'
 import { browser } from '$app/environment'
 import type { DarkMode } from '$lib/stores/theme'
 
@@ -80,6 +80,12 @@ export function changeColors(baseColor: string, darkMode: DarkMode) {
 
 	colors.forEach(({ name, luminance }) => {
 		const color = getClosestColor(baseColor, luminance)
+		const { r, g, b } = hexToRgb(color)
 		document.documentElement.style.setProperty(name, color)
+		// FIXME: we likely just need the RGB variant not the hex ones
+		document.documentElement.style.setProperty(
+			`${name}-rgb`,
+			`${r.toFixed()}, ${g.toFixed()}, ${b.toFixed()}`,
+		)
 	})
 }
