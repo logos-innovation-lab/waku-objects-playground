@@ -125,7 +125,7 @@
 		justify-content: center;
 
 		:global(svg) {
-			fill: var(--color-step-50, var(--color-dark-step-50));
+			fill: var(--color-step-50, var(--color-dark-step-10));
 		}
 	}
 </style>
