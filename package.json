@@ -35,7 +35,7 @@
 		"hardhat": "^2.16.1",
 		"html5-qrcode": "^2.3.8",
 		"ipfs-http-client": "^60.0.0",
-		"knip": "^2.14.3",
+		"knip": "^2.17.1",
 		"prettier": "^2.8.8",
 		"prettier-plugin-svelte": "^2.10.1",
 		"sass": "^1.63.6",

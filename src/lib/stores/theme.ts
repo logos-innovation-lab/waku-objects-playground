@@ -3,7 +3,7 @@ import { writable, type Writable } from 'svelte/store'
 
 export type DarkMode = 'dark' | 'light' | 'system'
 
-export interface Theme {
+interface Theme {
 	darkMode: DarkMode
 	baseColor: string
 }
