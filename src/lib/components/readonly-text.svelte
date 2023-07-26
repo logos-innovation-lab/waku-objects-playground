@@ -45,7 +45,8 @@
 
 	.label {
 		font-size: var(--font-size-sm);
-		color: rgba(var(--color-step-50-rgb), 0.5);
+		// color: rgba(var(--color-step-50-rgb), 0.5);
+		color: var(--color-step-40);
 		margin-left: var(--spacing-12);
 	}
 </style>
