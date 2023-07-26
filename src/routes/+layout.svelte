@@ -48,6 +48,6 @@
 		justify-content: flex-start;
 		margin-inline: auto;
 		position: relative;
-		background-color: var(--color-base);
+		background-color: var(--color-base, var(--color-dark-accent));
 	}
 </style>

@@ -1,10 +1,9 @@
 :root {
-	--spacing-3: 3px;
-	--spacing-6: 6px;
-	--spacing-12: 12px;
-	--spacing-24: 24px;
+	/* 
+	These are here just for refference
+	they need to be commented out otherwise dark mode does not work
 
-	/* hex colors */
+	hex colors
 	--color-base: #ffffff;
 	--color-step-10: #f4f4f4;
 	--color-step-20: #e8e8e8;
@@ -13,14 +12,38 @@
 	--color-step-50: #404040;
 	--color-accent: #000000;
 
-	/* RGB */
+	RGB
 	--color-base-rgb: 255, 255, 255;
-	--color-step-10-rgb: 238, 238, 238;
-	--color-step-20-rgb: 204, 204, 204;
-	--color-step-30-rgb: 148, 148, 148;
-	--color-step-40-rgb: 49, 49, 49;
-	--color-step-50-rgb: 26, 26, 26;
+	--color-step-10-rgb: 244, 244, 244;
+	--color-step-20-rgb: 232, 232, 232;
+	--color-step-30-rgb: 188, 188, 188;
+	--color-step-40-rgb: 123, 123, 123;
+	--color-step-50-rgb: 64, 64, 64;
 	--color-accent-rgb: 0, 0, 0;
+
+	hex colors dark mode
+	--color-dark-base: #ffffff;
+	--color-dark-step-10: #eeeeee;
+	--color-dark-step-20: #cccccc;
+	--color-dark-step-30: #949494;
+	--color-dark-step-40: #313131;
+	--color-dark-step-50: #1a1a1a;
+	--color-dark-accent: #000000;
+
+	RGB colors  dark mode
+	--color-dark-base-rgb: 255, 255, 255;
+	--color-dark-step-10-rgb: 238, 238, 238;
+	--color-dark-step-20-rgb: 204, 204, 204;
+	--color-dark-step-30-rgb: 148, 148, 148;
+	--color-dark-step-40-rgb: 49, 49, 49;
+	--color-dark-step-50-rgb: 26, 26, 26;
+	--color-dark-accent-rgb: 0, 0, 0; 
+	*/
+
+	--spacing-3: 3px;
+	--spacing-6: 6px;
+	--spacing-12: 12px;
+	--spacing-24: 24px;
 
 	--transparent: transparent;
 
