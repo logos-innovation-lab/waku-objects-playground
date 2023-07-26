@@ -12,9 +12,9 @@
 <style lang="scss">
 	label.input-file {
 		background: var(--color-base);
-		border: 1px solid var(--color-step-20);
+		border: 1px solid var(--color-step-20, var(--color-dark-step-40));
 		border-radius: var(--border-radius);
-		color: var(--color-step-50);
+		color: var(--color-step-50, var(--color-dark-step-10));
 		font-size: var(--font-size-normal);
 		font-weight: var(--font-weight-500);
 		line-height: 20px;
@@ -29,14 +29,14 @@
 		overflow-wrap: normal;
 
 		&:active {
-			background-color: var(--color-step-20);
+			background-color: var(--color-step-20, var(--color-dark-step-40));
 		}
 
 		&:disabled {
 			cursor: not-allowed;
 
 			& :global(svg) {
-				fill: var(--color-step-30);
+				fill: var(--color-step-30), var(--color-dark-step-30);
 			}
 		}
 	}

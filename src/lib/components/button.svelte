@@ -17,9 +17,9 @@
 <style lang="scss">
 	button {
 		background: var(--transparent);
-		border: 1px solid var(--color-step-20);
+		border: 1px solid var(--color-step-20, var(--color-dark-step-40));
 		border-radius: var(--border-radius);
-		color: var(--color-step-50);
+		color: var(--color-step-50, var(--color-dark-step-10));
 		font-size: var(--font-size-normal);
 		font-weight: var(--font-weight-500);
 		line-height: 1.25;
@@ -56,15 +56,15 @@
 		}
 
 		&:active {
-			background-color: var(--color-step-20);
+			background-color: var(--color-step-20, var(--color-dark-step-40));
 		}
 
 		&:disabled {
 			cursor: not-allowed;
-			color: rgba(var(--ultra-dark-rgb), 0.25);
+			color: var(--color-step-30, var(--color-dark-step-30));
 
 			& :global(svg) {
-				fill: var(--color-step-30);
+				fill: var(--color-step-30, var(--color-dark-step-30));
 			}
 		}
 
@@ -78,26 +78,26 @@
 		}
 
 		&.strong {
-			background-color: var(--color-step-50);
-			color: var(--color-step-10);
+			background-color: var(--color-step-50, var(--color-dark-step-10));
+			color: var(--color-step-10, var(--color-dark-step-50));
 
 			:global(svg) {
-				fill: var(--color-step-10);
+				fill: var(--color-step-10, var(--color-dark-step-50));
 				width: 20px;
 				height: 20px;
 			}
 
 			&:active {
-				background-color: var(--color-accent);
+				background-color: var(--color-accent, var(--color-dark-base));
 				:global(svg) {
-					fill: var(--color-base);
+					fill: var(--color-base, var(--color-dark-accent));
 					width: 20px;
 					height: 20px;
 				}
 			}
 
 			&:disabled {
-				background-color: rgba(var(--ultra-dark-rgb), 0.25);
+				background-color: rgba(var(--color-step-50-rgb, var(--color-dark-step-10-rgb)), 0.25);
 			}
 		}
 
@@ -115,7 +115,7 @@
 			margin-right: 0;
 		}
 		&.border {
-			border: 1px solid var(--color-step-20);
+			border: 1px solid var(--color-step-20, var(--color-dark-step-40));
 		}
 
 		&.account {

@@ -37,12 +37,12 @@
 		font-weight: 600;
 		font-size: var(--font-size-normal);
 		white-space: nowrap;
-		color: var(--color-body-text);
+		// color: var(--color-body-text);
 		margin: var(--spacing-24) calc(var(--spacing-24) * -1) var(--spacing-12);
 
 		.label {
 			font-size: var(--font-size-sm);
-			color: var(--color-step-50);
+			color: var(--color-step-50, var(--color-dark-step-10));
 			margin-bottom: var(--spacing-4);
 		}
 
@@ -56,21 +56,21 @@
 		}
 
 		& :global(svg) {
-			fill: var(--color-body-text);
+			fill: var(--color-accent, var(--color-dark-base));
 		}
 
 		&:disabled {
-			color: var(--color-step-20);
+			color: var(--color-step-20, var(--color-dark-step-40));
 			cursor: not-allowed;
 
 			& :global(svg) {
-				fill: var(--color-step-20);
+				fill: var(--color-step-20, var(--color-dark-step-40));
 			}
 		}
 
 		&:active:not(:disabled),
 		&:hover:not(:disabled) {
-			background-color: var(--color-step-20);
+			background-color: var(--color-step-20, var(--color-dark-step-40));
 			transition: background-color 0.2s;
 		}
 	}

@@ -9,9 +9,9 @@
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'
 	import Divider from '$lib/components/divider.svelte'
-	import Textarea from '$lib/components/textarea.svelte'
 	import Badge from '$lib/components/badge.svelte'
 	import Asset from '$lib/components/asset.svelte'
+	import ReadonlyText from '$lib/components/readonly-text.svelte'
 
 	import { profile } from '$lib/stores/profile'
 	import { goto } from '$app/navigation'
@@ -57,7 +57,9 @@
 		<p class="text-lg">This address is used to send and receive tokens with Waku objects</p>
 	</Container>
 	<Container gap={6}>
-		<Textarea value={$walletStore.wallet?.address} readonly label="Account address" />
+		<ReadonlyText label="Account address" overflow={false} breakWord>
+			{$walletStore.wallet?.address}
+		</ReadonlyText>
 		<Button on:click={copyAddressToClipboard}>
 			{#if copied}
 				<Checkmark />

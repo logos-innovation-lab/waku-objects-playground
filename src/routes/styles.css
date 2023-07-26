@@ -1,6 +1,6 @@
 :root {
 	/* 
-	These are here just for refference
+	These are here just for reference
 	they need to be commented out otherwise dark mode does not work
 
 	hex colors
@@ -30,7 +30,7 @@
 	--color-dark-step-50: #1a1a1a;
 	--color-dark-accent: #000000;
 
-	RGB colors  dark mode
+	RGB colors dark mode
 	--color-dark-base-rgb: 255, 255, 255;
 	--color-dark-step-10-rgb: 238, 238, 238;
 	--color-dark-step-20-rgb: 204, 204, 204;
@@ -92,8 +92,9 @@ body {
 	line-height: 20px;
 	font-weight: var(--font-weight-400);
 	font-size: var(--font-size-normal);
-	color: var(--color-step-50);
-	background-color: var(--color-accent);
+	color: var(--color-step-50,
+		var(--color-dark-step-10));
+	background-color: var(--color-accent, var(--color-dark-base));
 }
 
 *,
@@ -117,7 +118,7 @@ video {
 }
 
 svg {
-	fill: var(--color-step-50);
+	fill: var(--color-step-50, var(--color-dark-step-10));
 }
 
 h1 {

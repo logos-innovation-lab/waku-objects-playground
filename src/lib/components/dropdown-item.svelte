@@ -26,23 +26,23 @@
 		justify-content: space-between;
 		align-items: center;
 		gap: var(--spacing-24);
-		background-color: var(--color-base);
+		background-color: var(--color-base, var(--color-dark-accent));
 
 		&.danger {
-			color: var(--color-red);
+			color: red;
 		}
 
 		&:hover {
-			background-color: var(--color-step-10);
+			background-color: var(--color-step-10, var(--color-dark-step-50));
 		}
 
 		&.disabled {
-			color: rgba(var(--ultra-dark-rgb), 0.25);
+			color: rgba(var(--color-step-50-rgb, var(--color-dark-step-10-rgb)), 0.25);
 			cursor: not-allowed;
 		}
 
 		&:not(:last-child) {
-			border-bottom: 1px solid var(--color-step-20);
+			border-bottom: 1px solid var(--color-step-20, var(--color-dark-step-40));
 		}
 	}
 </style>

@@ -37,7 +37,7 @@
 		border-radius: var(--border-radius);
 		display: inline-block;
 		font-family: var(--font-serif);
-		background-color: var(--color-base);
+		background-color: var(--color-base, var(--color-dark-step-40));
 	}
 
 	.my-message {

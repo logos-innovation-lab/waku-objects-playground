@@ -33,10 +33,10 @@
 		}
 	}
 	.main {
-		background-color: var(--color-step-10);
+		font-size: var(--font-size-lg);
 		padding: var(--spacing-12);
 		border-radius: var(--border-radius);
-		font-size: var(--font-size-lg);
+		background-color: var(--color-step-10, var(--color-dark-step-40));
 
 		&.break {
 			word-break: break-all;
@@ -45,7 +45,7 @@
 
 	.label {
 		font-size: var(--font-size-sm);
-		color: var(--color-step-40);
 		margin-left: var(--spacing-12);
+		color: var(--color-step-40, var(--color-dark-step-20));
 	}
 </style>
