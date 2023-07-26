@@ -59,7 +59,6 @@
 		align-items: flex-start;
 		gap: var(--spacing-6);
 		width: 100%;
-		// color: rgba(var(--color-step-50-rgb), 0.5);
 		color: var(--color-step-40);
 		background-color: transparent;
 

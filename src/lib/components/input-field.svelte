@@ -26,24 +26,6 @@
 	/>
 </label>
 
-<!-- <div class="input-wrapper">
-	{#if label !== undefined && label !== ''}
-		<span class="text-sm">{label}</span>
-	{/if}
-	<input
-		class="text-lg"
-		style={`padding-block: ${pad}px`}
-		type="text"
-		{disabled}
-		{autofocus}
-		{placeholder}
-		bind:value
-		on:keydown
-		on:keypress
-		on:keyup
-	/>
-</div> -->
-
 <style lang="scss">
 	label {
 		display: flex;
@@ -54,7 +36,6 @@
 	span {
 		margin-inline: 13px;
 		text-align: left;
-		// color: rgba(var(--color-step-50-rgb), 0.5);
 		color: var(--color-step-40);
 	}
 
