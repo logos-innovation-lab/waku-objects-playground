@@ -4,33 +4,23 @@
 	--spacing-12: 12px;
 	--spacing-24: 24px;
 
-	--white: #ffffff;
-	--gray10: #f3f3f3;
-	--gray20: #e7e7e7;
-	--gray30: #bcbcbc;
-	--gray40: #7c7c7c;
-	--gray50: #3f3f3f;
-	--black: #000000;
+	/* hex colors */
+	--color-base: #ffffff;
+	--color-step-10: #f4f4f4;
+	--color-step-20: #e8e8e8;
+	--color-step-30: #bcbcbc;
+	--color-step-40: #7b7b7b;
+	--color-step-50: #404040;
+	--color-accent: #000000;
 
 	/* RGB */
-
-	--white-rgb: 255, 255, 255;
-	--gray10-rgb: 243, 243, 243;
-	--gray20-rgb: 231, 231, 231;
-	--gray30-rgb: 188, 188, 188;
-	--gray40-rgb: 124, 124, 124;
-	--gray50-rgb: 63, 63, 63;
-	--black-rgb: 0, 0, 0;
-
-	/* HSL */
-
-	/* --white: hsl(0, 0%, 100%);
-	--gray10: hsl(0, 0%, 95%);
-	--gray20: hsl(0, 0%, 91%);
-	--gray30: hsl(0, 0%, 74%);
-	--gray40: hsl(0, 0%, 49%);
-	--gray50: hsl(0, 0%, 25%);
-	--black: hsl(0, 0%, 0%); */
+	--color-base-rgb: 255, 255, 255;
+	--color-step-10-rgb: 238, 238, 238;
+	--color-step-20-rgb: 204, 204, 204;
+	--color-step-30-rgb: 148, 148, 148;
+	--color-step-40-rgb: 49, 49, 49;
+	--color-step-50-rgb: 26, 26, 26;
+	--color-accent-rgb: 0, 0, 0;
 
 	--transparent: transparent;
 
@@ -48,25 +38,22 @@
 	--font-weight-700: 700;
 
 	--border-radius: var(--spacing-24);
-	--border: 1px solid var(--gray10);
+	--border: 1px solid var(--color-step-10);
 	--blur: 3px;
 
 	/* INPUT */
-	--input-bg: var(--gray10);
-	--input-border: var(--gray20);
-	--input-placeholder: var(--gray40);
-	--input-active-bg: var(--white);
-	--input-active-border: var(--gray20);
-	--input-active-content: var(--black);
-	--input-filled-bg: var(--gray10);
-	--input-filled-border: var(--gray20);
-	--input-filled-content: var(--gray50);
-	--input-filled-icon: var(--gray40);
+	--input-bg: var(--color-step-10);
+	--input-border: var(--color-step-20);
+	--input-placeholder: var(--color-step-40);
+	--input-active-bg: var(--color-base);
+	--input-active-border: var(--color-step-20);
+	--input-active-content: var(--color-accent);
+	--input-filled-bg: var(--color-step-10);
+	--input-filled-border: var(--color-step-20);
+	--input-filled-content: var(--color-step-50);
+	--input-filled-icon: var(--color-step-40);
 
 	--max-width: 498px;
-
-	/* INPUT - SEARCH-ICON */
-	/* size: 20px */
 }
 
 html {
@@ -82,8 +69,8 @@ body {
 	line-height: 20px;
 	font-weight: var(--font-weight-400);
 	font-size: var(--font-size-normal);
-	color: var(--gray50);
-	background-color: var(--black);
+	color: var(--color-step-50);
+	background-color: var(--color-accent);
 }
 
 *,
@@ -107,7 +94,7 @@ video {
 }
 
 svg {
-	fill: var(--gray50);
+	fill: var(--color-step-50);
 }
 
 h1 {

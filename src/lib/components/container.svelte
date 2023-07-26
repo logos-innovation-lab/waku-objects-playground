@@ -34,7 +34,7 @@
 	.sticky-bottom {
 		position: sticky;
 		height: auto;
-		background-color: var(--white);
+		background-color: var(--color-base);
 		z-index: 100;
 	}
 

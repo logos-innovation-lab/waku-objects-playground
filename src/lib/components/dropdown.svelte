@@ -7,6 +7,7 @@
 	export let disabled: boolean | undefined = undefined
 	export let up: boolean | undefined = undefined
 	export let left: boolean | undefined = false
+	export let label: undefined | string = undefined
 
 	let showDropdown = false
 	let dropdownElement: HTMLElement
@@ -49,6 +50,11 @@
 	aria-expanded={showDropdown}
 	aria-controls={dropdownId}
 >
+	{#if label}
+		<div class="label">
+			{label}
+		</div>
+	{/if}
 	<div on:click={onClick} on:keypress={onClick} role="button" tabindex={0}>
 		<slot name="button" disabled />
 	</div>
@@ -92,5 +98,10 @@
 				inset: auto auto 50px 0;
 			}
 		}
+	}
+	.label {
+		font-size: var(--font-size-sm);
+		color: rgba(var(--color-step-50-rgb), 0.5);
+		margin-left: var(--spacing-12);
 	}
 </style>

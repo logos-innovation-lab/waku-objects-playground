@@ -6,6 +6,7 @@ export default {
 	IDENTITY_CONNECT: '/identity/connect',
 	IDENTITY_ACCOUNT: '/identity/account',
 	IDENTITY_BACKUP: '/identity/backup',
+	IDENTITY_CHAT: '/identity/chat',
 	CHAT: (id: string) => `/chat/${id}`,
 	INVITE: (address: string) => `/invite/${address}`,
 	OBJECTS: (id: string) => `/chat/${id}/object/new`,

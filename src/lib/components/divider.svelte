@@ -15,6 +15,6 @@
 		border: none;
 		width: 100%;
 		height: 1px;
-		background-color: var(--gray20);
+		background-color: var(--color-step-20);
 	}
 </style>

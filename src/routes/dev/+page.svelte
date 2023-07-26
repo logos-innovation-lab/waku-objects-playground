@@ -83,7 +83,7 @@
 		font-family: var(--font-body);
 		font-weight: 600;
 		font-size: var(--font-size-sm);
-		color: var(--gray50);
+		color: var(--color-step-50);
 		margin-bottom: var(--spacing-4);
 	}
 

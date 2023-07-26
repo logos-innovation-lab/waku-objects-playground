@@ -122,6 +122,19 @@
 			</div>
 		</Container>
 	</ButtonBlock>
+	<ButtonBlock borderTop borderBottom on:click={() => goto(routes.IDENTITY_CHAT)}>
+		<Container direction="row" justify="space-between" align="center" alignItems="center">
+			<div class="wallet">
+				<!-- FIXME: find correct icon -->
+				<Wallet size={20} /> Chat appearance
+			</div>
+			<div>
+				<Button variant="icon">
+					<ChevronRight />
+				</Button>
+			</div>
+		</Container>
+	</ButtonBlock>
 	<Container align="center" gap={12} padX={24} padY={24}>
 		<p>
 			If you disconnect or need to recover access to your identity you will need your recovery

@@ -3,6 +3,7 @@
 	export let marginBottom = 24
 	export let overflow = true
 	export let align: 'left' | 'right' | 'center' = 'left'
+	export let breakWord = false
 </script>
 
 <div
@@ -14,7 +15,7 @@
 			{label}
 		</div>
 	{/if}
-	<div class={`main`}>
+	<div class={`main ${breakWord ? 'break' : ''}`}>
 		<slot />
 	</div>
 </div>
@@ -32,14 +33,19 @@
 		}
 	}
 	.main {
-		background-color: var(--gray10);
+		background-color: var(--color-step-10);
 		padding: var(--spacing-12);
 		border-radius: var(--border-radius);
+		font-size: var(--font-size-lg);
+
+		&.break {
+			word-break: break-all;
+		}
 	}
 
 	.label {
 		font-size: var(--font-size-sm);
-		color: var(--gray40);
+		color: rgba(var(--color-step-50-rgb), 0.5);
 		margin-left: var(--spacing-12);
 	}
 </style>

@@ -198,7 +198,7 @@
 
 <style lang="scss">
 	.secondary {
-		color: var(--gray40);
+		color: var(--color-step-40);
 	}
 	.row {
 		display: flex;

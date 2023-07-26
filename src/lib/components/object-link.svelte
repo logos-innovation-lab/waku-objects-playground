@@ -19,7 +19,7 @@
 
 <style lang="scss">
 	.object {
-		background-color: var(--white);
+		background-color: var(--color-base);
 		border-radius: var(--border-radius);
 		display: flex;
 		flex-direction: row;

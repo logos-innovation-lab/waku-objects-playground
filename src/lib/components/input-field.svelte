@@ -36,29 +36,30 @@
 	span {
 		margin-inline: 13px;
 		text-align: left;
-		color: var(--gray40);
+		color: rgba(var(--color-step-50-rgb), 0.5);
 	}
 
 	input {
-		border: 1px solid var(--gray20);
+		border: 1px solid var(--color-step-20);
 		border-radius: var(--border-radius);
 		padding: 11px var(--spacing-12);
 		max-height: 120px;
 		min-height: 48px;
 		width: 100%;
+		color: var(--color-step-50);
 
 		&:focus {
 			outline: none;
-			color: var(--black);
+			color: var(--color-accent);
 		}
 
 		&:disabled {
-			background-color: var(--gray10);
+			background-color: var(--color-step-10);
 			border-color: transparent;
 		}
 
 		&::placeholder {
-			opacity: 0.5;
+			color: rgba(var(--color-step-50-rgb), 0.5);
 		}
 	}
 </style>

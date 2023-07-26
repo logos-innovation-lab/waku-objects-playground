@@ -59,7 +59,7 @@
 		align-items: flex-start;
 		gap: var(--spacing-6);
 		width: 100%;
-		color: var(--gray40);
+		color: rgba(var(--color-step-50-rgb), 0.5);
 		background-color: transparent;
 
 		span {
@@ -68,7 +68,7 @@
 		}
 
 		::placeholder {
-			color: var(--gray40);
+			color: rgba(var(--color-step-50-rgb), 0.5);
 		}
 	}
 
@@ -83,7 +83,7 @@
 			position: absolute;
 			opacity: 0;
 			font-size: var(--font-size-lg);
-			color: rgba(var(--gray50), 0.5);
+			color: rgba(var(--color-step-50), 0.5);
 			width: 100%;
 			height: fit-content;
 			min-height: 48px;
@@ -99,7 +99,7 @@
 	textarea {
 		border: none;
 		resize: none;
-		border: 1px solid var(--gray20);
+		border: 1px solid var(--color-step-20);
 		border-radius: var(--border-radius);
 		padding: 11px var(--spacing-12);
 		max-height: 120px;
@@ -109,12 +109,12 @@
 		&:focus,
 		&.content {
 			outline: none;
-			color: var(--black);
+			color: var(--color-step-50);
 		}
 
 		&:disabled,
 		&:read-only {
-			background-color: var(--gray10);
+			background-color: var(--color-step-10);
 			border-color: transparent;
 		}
 
