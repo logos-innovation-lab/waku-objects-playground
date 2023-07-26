@@ -92,8 +92,7 @@ body {
 	line-height: 20px;
 	font-weight: var(--font-weight-400);
 	font-size: var(--font-size-normal);
-	color: var(--color-step-50,
-		var(--color-dark-step-10));
+	color: var(--color-step-50, var(--color-dark-step-10));
 	background-color: var(--color-accent, var(--color-dark-base));
 }
 
