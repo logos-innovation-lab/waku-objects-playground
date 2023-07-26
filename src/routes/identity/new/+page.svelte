@@ -105,7 +105,7 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		background-color: #c9c9c9;
+		background-color: var(--color-step-10, var(--color-dark-step-50));
 		margin-inline: auto;
 		position: relative;
 
@@ -123,5 +123,9 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+
+		:global(svg) {
+			fill: var(--color-step-50, var(--color-dark-step-10));
+		}
 	}
 </style>

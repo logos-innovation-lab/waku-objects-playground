@@ -102,7 +102,7 @@
 		min-height: 100dvh;
 		min-height: 100vh;
 		height: 100%;
-		background-color: var(--color-step-10);
+		background-color: var(--color-step-10, var(--color-dark-step-50));
 	}
 
 	.object-list {
@@ -115,78 +115,10 @@
 		display: flex;
 		align-items: center;
 		gap: var(--spacing-6);
-		color: var(--color-step-40);
+		color: var(--color-step-40, var(--color-dark-step-20));
 		font-weight: var(--font-weight-500);
 		:global(svg) {
-			fill: var(--color-step-40);
+			fill: var(--color-step-40, var(--color-dark-step-20));
 		}
-	}
-
-	.messages {
-		flex-grow: 1;
-	}
-	.messages-inner {
-		padding-top: var(--spacing-48);
-		overflow-y: auto;
-	}
-
-	.message {
-		display: flex;
-		gap: var(--spacing-6);
-		flex-direction: column;
-		align-items: flex-end;
-		max-width: 75%;
-		margin-right: auto;
-		margin-left: 0;
-		&:not(:last-child) {
-			margin-bottom: var(--spacing-12);
-		}
-
-		&.my-message {
-			font-style: italic;
-			margin-left: auto;
-			margin-right: 0;
-		}
-	}
-	.message-content {
-		display: flex;
-		flex-direction: row;
-		gap: var(--spacing-6);
-		align-items: flex-end;
-		text-align: right;
-	}
-
-	.message-text {
-		padding: var(--spacing-12);
-		border-radius: var(--border-radius);
-		display: inline-block;
-		font-family: var(--font-serif);
-		background-color: var(--color-base);
-	}
-
-	.chat {
-		display: flex;
-		flex-direction: column;
-		height: 100%;
-		background-color: var(--color-step-10);
-	}
-
-	.chat-messages {
-		flex-grow: 1;
-		overflow-y: auto;
-	}
-
-	.chat-input-wrapper {
-		flex-grow: 0;
-		position: sticky;
-		bottom: 0;
-		background-color: var(--color-base);
-		border-top: 1px solid var(--color-step-20);
-	}
-
-	.chat-input {
-		display: flex;
-		gap: var(--spacing-12);
-		align-items: center;
 	}
 </style>

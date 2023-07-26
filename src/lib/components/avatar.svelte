@@ -37,7 +37,7 @@
 			display: flex;
 			justify-content: center;
 			align-items: center;
-			background-color: #c9c9c9;
+			background-color: var(--color-step-10, var(--color-dark-step-50));
 			margin-inline: auto;
 			position: relative;
 
@@ -46,6 +46,9 @@
 				object-fit: cover;
 				border-radius: 100px;
 			}
+		}
+		:global(svg) {
+			fill: var(--color-step-50, var(--color-dark-step-10));
 		}
 	}
 </style>

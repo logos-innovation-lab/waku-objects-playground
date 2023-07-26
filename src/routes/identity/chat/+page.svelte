@@ -67,28 +67,32 @@
 				{baseColor}
 			</InputField>
 		</div>
-		<label for="color">
+		<label>
+			<div class="palette-overlay" />
 			<div class="palette-icon">
 				<PaintPalette />
 			</div>
-			<input id="color" type="color" bind:value={baseColor} />
+			<input type="color" bind:value={baseColor} />
 		</label>
 	</Container>
 {/if}
 
 <style lang="scss">
 	.preview {
-		background-color: var(--color-step-10);
+		background-color: var(--color-step-10, var(--color-dark-step-50));
 	}
 
 	label {
 		position: relative;
+		line-height: 0;
+		cursor: pointer;
 	}
 	input[type='color'] {
 		border-radius: 50%;
 		width: 48px;
 		height: 48px;
 		border: none;
+		background-color: transparent;
 	}
 
 	::-webkit-color-swatch-wrapper {
@@ -105,10 +109,22 @@
 		inset: 50% auto auto 50%;
 		transform: translate(-50%, -50%);
 		z-index: 10;
+		line-height: 0;
 
 		:global(svg) {
-			fill: var(--color-base);
+			fill: var(--color-base, var(--color-dark-base));
 		}
+	}
+
+	.palette-overlay {
+		position: absolute;
+		inset: 50% auto auto 50%;
+		transform: translate(-50%, -50%);
+		z-index: 5;
+		background-color: rgba(0, 0, 0, 0.25);
+		border-radius: 50%;
+		height: 32px;
+		width: 32px;
 	}
 
 	.grow {

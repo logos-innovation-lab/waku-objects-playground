@@ -31,14 +31,14 @@
 		position: sticky;
 		top: 0;
 		height: auto;
-		background-color: var(--color-base);
-		border-bottom: 1px solid var(--color-step-20);
+		background-color: var(--color-base, var(--color-dark-accent));
+		border-bottom: 1px solid var(--color-step-20, var(--color-dark-step-40));
 		z-index: 100;
 
 		.white {
 			position: absolute;
 			content: '';
-			background-color: var(--color-base);
+			background-color: var(--color-base, var(--color-dark-accent));
 			top: 0;
 			left: 0;
 			right: 0;
@@ -53,7 +53,7 @@
 			justify-content: space-between;
 			align-items: center;
 			gap: var(--spacing-12);
-			background-color: var(--color-base);
+			background-color: var(--color-base, var(--color-dark-accent));
 			z-index: 30;
 
 			h1,

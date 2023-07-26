@@ -186,7 +186,7 @@
 			display: flex;
 			align-items: center;
 			gap: var(--spacing-12);
-			border-bottom: 1px solid var(--color-step-20);
+			border-bottom: 1px solid var(--color-step-20, var(--color-dark-step-40));
 
 			.chat-button {
 				width: 100%;

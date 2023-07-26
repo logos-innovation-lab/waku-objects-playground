@@ -19,7 +19,7 @@
 
 <style lang="scss">
 	.object {
-		background-color: var(--color-base);
+		background-color: var(--color-base, var(--color-dark-step-40));
 		border-radius: var(--border-radius);
 		display: flex;
 		flex-direction: row;

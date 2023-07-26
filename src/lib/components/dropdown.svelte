@@ -83,7 +83,7 @@
 			z-index: 100;
 			overflow: hidden;
 			border-radius: var(--border-radius);
-			box-shadow: 0 1px 5px 0 rgba(0, 0, 0, 0.25);
+			box-shadow: 0 1px 5px 0 rgba(var(--color-accent-rgb, var(--color-dark-base-rgb)), 0.25);
 			backdrop-filter: blur(var(--blur));
 
 			&.hidden {
@@ -102,6 +102,6 @@
 	.label {
 		font-size: var(--font-size-sm);
 		margin-left: var(--spacing-12);
-		color: var(--color-step-40);
+		color: var(--color-step-40, var(--color-dark-step-20));
 	}
 </style>

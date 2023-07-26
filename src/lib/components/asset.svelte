@@ -29,7 +29,7 @@
 		justify-content: space-between;
 		align-items: center;
 		border-bottom: var(--border);
-		border-bottom: 1px solid var(--color-step-20);
+		border-bottom: 1px solid var(--color-step-20, var(--color-dark-step-40));
 
 		.token {
 			display: flex;

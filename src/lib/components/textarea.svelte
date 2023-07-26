@@ -6,7 +6,6 @@
 	export let placeholder = ''
 	export let autofocus = false
 	export let disabled = false
-	export let readonly = false
 	export let pad = 0
 	export let height = 46
 
@@ -46,7 +45,6 @@
 			{disabled}
 			{autofocus}
 			{placeholder}
-			{readonly}
 			rows="1"
 		/>
 	</div>
@@ -59,7 +57,7 @@
 		align-items: flex-start;
 		gap: var(--spacing-6);
 		width: 100%;
-		color: var(--color-step-40);
+		color: var(--color-step-40, var(--color-dark-step-20));
 		background-color: transparent;
 
 		span {
@@ -68,7 +66,7 @@
 		}
 
 		::placeholder {
-			color: rgba(var(--color-step-50-rgb), 0.5);
+			color: rgba(var(--color-step-50-rgb, var(--color-dark-step-10-rgb)), 0.5);
 		}
 	}
 
@@ -83,7 +81,7 @@
 			position: absolute;
 			opacity: 0;
 			font-size: var(--font-size-lg);
-			color: rgba(var(--color-step-50), 0.5);
+			color: rgba(var(--color-step-50-rgb, var(--color-dark-step-10-rgb)), 0.5);
 			width: 100%;
 			height: fit-content;
 			min-height: 48px;
@@ -99,22 +97,22 @@
 	textarea {
 		border: none;
 		resize: none;
-		border: 1px solid var(--color-step-20);
+		border: 1px solid var(--color-step-20, var(--color-dark-step-40));
 		border-radius: var(--border-radius);
 		padding: 11px var(--spacing-12);
 		max-height: 120px;
 		min-height: 48px;
 		width: 100%;
+		background-color: var(--color-base, var(--color-dark-accent));
 
 		&:focus,
 		&.content {
 			outline: none;
-			color: var(--color-step-50);
+			color: var(--color-step-50, var(--color-dark-step-10));
 		}
 
-		&:disabled,
-		&:read-only {
-			background-color: var(--color-step-10);
+		&:disabled {
+			background-color: var(--color-step-10, var(--color-dark-step-50));
 			border-color: transparent;
 		}
 
