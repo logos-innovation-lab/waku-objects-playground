@@ -7,7 +7,7 @@
 	export let label: string | undefined = undefined
 </script>
 
-<div class="input-wrapper">
+<label>
 	{#if label !== undefined && label !== ''}
 		<span class="text-sm">{label}</span>
 	{/if}
@@ -24,10 +24,10 @@
 		on:keypress
 		on:keyup
 	/>
-</div>
+</label>
 
 <style lang="scss">
-	.input-wrapper {
+	label {
 		display: flex;
 		flex-direction: column;
 		gap: var(--spacing-6);
@@ -36,7 +36,7 @@
 	span {
 		margin-inline: 13px;
 		text-align: left;
-		color: rgba(var(--color-step-50-rgb), 0.5);
+		color: var(--color-step-40);
 	}
 
 	input {
