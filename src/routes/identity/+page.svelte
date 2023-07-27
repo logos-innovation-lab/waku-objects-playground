@@ -107,7 +107,7 @@
 			Change picture
 		</InputFile>
 		<div class="displayname">
-			<InputField autofocus bind:value={name} label="Display name" />
+			<InputField bind:value={name} label="Display name" />
 		</div>
 	</Container>
 	<ButtonBlock borderTop borderBottom on:click={() => goto(routes.IDENTITY_ACCOUNT)}>
