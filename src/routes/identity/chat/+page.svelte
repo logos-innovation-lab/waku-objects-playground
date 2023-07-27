@@ -23,7 +23,7 @@
 	}
 </script>
 
-<Header title="Account">
+<Header title="Chat Appearance">
 	<Button slot="left" variant="icon" on:click={() => goto(routes.IDENTITY)}>
 		<ChevronLeft />
 	</Button>
