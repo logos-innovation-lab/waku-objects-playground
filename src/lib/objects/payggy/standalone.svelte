@@ -54,8 +54,12 @@
 	let toUser =
 		args.users.find((user) => user.address !== args.profile.address) || throwError('invalid user')
 	$: if (amount && token) {
-		const tokenToTransfer = { ...token, amount: toBigInt(amount, token.decimals) }
-		args.estimateTransaction(toUser.address, tokenToTransfer).then((f) => (fee = f))
+		try {
+			const tokenToTransfer = { ...token, amount: toBigInt(amount, token.decimals) }
+			args.estimateTransaction(toUser.address, tokenToTransfer).then((f) => (fee = f))
+		} catch (e) {
+			console.log({ e })
+		}
 	}
 	// $: if (!amount && store && store.view === 'overview') history.back()
 
