@@ -3,6 +3,7 @@
 	import ChevronRight from '$lib/components/icons/chevron-right.svelte'
 	import Renew from '$lib/components/icons/renew.svelte'
 	import Wallet from '$lib/components/icons/wallet.svelte'
+	import SettingsView from '$lib/components/icons/settings-view.svelte'
 	import User from '$lib/components/icons/user.svelte'
 	import Logout from '$lib/components/icons/logout.svelte'
 	import DocumentSigned from '$lib/components/icons/document-signed.svelte'
@@ -112,7 +113,7 @@
 	</Container>
 	<ButtonBlock borderTop borderBottom on:click={() => goto(routes.IDENTITY_ACCOUNT)}>
 		<Container direction="row" justify="space-between" align="center" alignItems="center">
-			<div class="wallet">
+			<div class="icon">
 				<Wallet size={20} /> Account
 			</div>
 			<div>
@@ -124,9 +125,8 @@
 	</ButtonBlock>
 	<ButtonBlock borderTop borderBottom on:click={() => goto(routes.IDENTITY_CHAT)}>
 		<Container direction="row" justify="space-between" align="center" alignItems="center">
-			<div class="wallet">
-				<!-- FIXME: find correct icon -->
-				<Wallet size={20} /> Chat appearance
+			<div class="icon">
+				<SettingsView size={20} /> Chat appearance
 			</div>
 			<div>
 				<Button variant="icon">
@@ -197,7 +197,7 @@
 		margin-bottom: var(--spacing-12);
 	}
 
-	.wallet {
+	.icon {
 		display: flex;
 		justify-content: flex-start;
 		align-items: center;
