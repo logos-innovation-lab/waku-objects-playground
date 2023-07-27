@@ -53,6 +53,33 @@ export const payggyDescriptor: WakuObjectDescriptor = {
 			amount: BigInt(0), // the amount is not really necessary for checkBalance
 		}
 
-		await adapter.checkBalance(token)
+		adapter.checkBalance(token)
+
+		if (state === 'pending' || state === 'unknown') {
+			adapter.waitForTransaction(res.data.hash).then((state) => {
+				if (state === 'reverted') {
+					updateStore(() => ({
+						type: 'error',
+						transaction: tx,
+						error: 'Transaction has failed!',
+					}))
+					return
+				}
+
+				updateStore(() => ({
+					type: state === 'success' ? 'success' : 'pending',
+					transaction: tx,
+					hash: res.data.hash,
+				}))
+
+				const token = {
+					...tx.token,
+					name: tx.token.symbol,
+					amount: BigInt(0), // the amount is not really necessary for checkBalance
+				}
+
+				adapter.checkBalance(token)
+			})
+		}
 	},
 }

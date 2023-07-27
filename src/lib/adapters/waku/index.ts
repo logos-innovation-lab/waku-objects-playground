@@ -87,8 +87,8 @@ async function executeOnMessage(address: string, adapter: WakuObjectAdapter, cha
 
 		if (descriptor && descriptor.onMessage && wakuObjectStore.lastUpdated < chatMessage.timestamp) {
 			const objects = wakuObjectStore.objects
-			const store = objects.get(key)
-			const updateStore = (updater: (store: unknown) => unknown) => {
+			const updateStore = (updater: (_store: unknown) => unknown) => {
+				const store = objects.get(key)
 				const newStore = updater(store)
 				const newObjects = new Map(objects)
 				newObjects.set(key, newStore)
@@ -98,6 +98,7 @@ async function executeOnMessage(address: string, adapter: WakuObjectAdapter, cha
 					lastUpdated: chatMessage.timestamp,
 				}))
 			}
+			const store = objects.get(key)
 			await descriptor.onMessage(address, adapter, store, updateStore, chatMessage)
 		}
 	}
