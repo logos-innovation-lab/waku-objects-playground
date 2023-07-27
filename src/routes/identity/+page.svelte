@@ -111,7 +111,7 @@
 			<InputField bind:value={name} label="Display name" />
 		</div>
 	</Container>
-	<ButtonBlock borderTop borderBottom on:click={() => goto(routes.IDENTITY_ACCOUNT)}>
+	<ButtonBlock borderTop on:click={() => goto(routes.IDENTITY_ACCOUNT)}>
 		<Container direction="row" justify="space-between" align="center" alignItems="center">
 			<div class="icon">
 				<Wallet size={20} /> Account
