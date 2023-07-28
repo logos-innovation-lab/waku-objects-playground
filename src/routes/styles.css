@@ -61,20 +61,8 @@
 	--font-weight-700: 700;
 
 	--border-radius: var(--spacing-24);
-	--border: 1px solid var(--color-step-10);
+	--border: 1px solid var(--color-step-20, var(--color-dark-step-40));
 	--blur: 3px;
-
-	/* INPUT */
-	--input-bg: var(--color-step-10);
-	--input-border: var(--color-step-20);
-	--input-placeholder: var(--color-step-40);
-	--input-active-bg: var(--color-base);
-	--input-active-border: var(--color-step-20);
-	--input-active-content: var(--color-accent);
-	--input-filled-bg: var(--color-step-10);
-	--input-filled-border: var(--color-step-20);
-	--input-filled-content: var(--color-step-50);
-	--input-filled-icon: var(--color-step-40);
 
 	--max-width: 498px;
 }
