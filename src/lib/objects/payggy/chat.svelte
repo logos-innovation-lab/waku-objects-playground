@@ -37,7 +37,7 @@
 	$: otherUser = args.users.find((u) => u.address !== args.profile.address)
 </script>
 
-<ChatMessage {myMessage} bubble>
+<ChatMessage {myMessage} bubble fullwidth>
 	<Container>
 		<div class="wo text-normal">
 			<ObjectHeader name="Payggy" logoImg={logo} logoAlt="Payggy logo" />
