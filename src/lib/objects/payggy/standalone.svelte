@@ -41,6 +41,7 @@
 		}
 	}
 
+	let transactionSent = false
 	let token: Token
 	let amount = ''
 	let fee: Token | undefined = undefined
@@ -61,21 +62,15 @@
 
 	async function sendTransaction() {
 		if (fee) {
+			transactionSent = true
+
 			// FIXME error handling
 			const tokenToTransfer = { ...token, amount: toBigInt(amount, token.decimals) }
 			const transactionHash = await args.sendTransaction(toUser.address, tokenToTransfer, fee)
 
-			args.send({
+			await args.send({
 				hash: transactionHash,
 			})
-
-			// FIXME this may not get invoked if navigated away from this page
-			setTimeout(async () => {
-				await args.waitForTransaction(transactionHash)
-				await args.send({
-					hash: transactionHash,
-				})
-			}, 0)
 
 			history.go(-3)
 		}
@@ -134,7 +129,12 @@
 		<div class="secondary text-normal">
 			{toUser.name ?? formatAddress(toUser.address, 4, 4)}
 		</div>
-		<Button variant="strong" align="right" disabled={!amount} on:click={sendTransaction}>
+		<Button
+			variant="strong"
+			align="right"
+			disabled={!amount || transactionSent}
+			on:click={sendTransaction}
+		>
 			<ArrowUp /> Send now
 		</Button>
 	</Container>
