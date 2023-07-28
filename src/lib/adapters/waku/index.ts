@@ -307,7 +307,7 @@ export default class WakuAdapter implements Adapter {
 	}
 
 	async sendData(
-		wallet: Wallet,
+		wallet: BaseWallet,
 		chatId: string,
 		objectId: string,
 		instanceId: string,
