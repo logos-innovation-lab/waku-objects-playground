@@ -15,7 +15,7 @@ import {
 	subscribe,
 } from './waku'
 import type { BaseWallet, Wallet } from 'ethers'
-import { ipfs, IPFS_GATEWAY } from '../firebase/connections'
+import { ipfs, IPFS_GATEWAY } from '$lib/adapters/ipfs'
 import { get } from 'svelte/store'
 import { objectStore, type ObjectState, objectKey } from '$lib/stores/objects'
 import { lookup } from '$lib/objects/lookup'
@@ -307,7 +307,7 @@ export default class WakuAdapter implements Adapter {
 	}
 
 	async sendData(
-		wallet: Wallet,
+		wallet: BaseWallet,
 		chatId: string,
 		objectId: string,
 		instanceId: string,
