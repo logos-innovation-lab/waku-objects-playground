@@ -12,7 +12,8 @@
 		"lint": "prettier --plugin-search-dir . --check . && eslint .",
 		"format": "prettier --plugin-search-dir . --write . && eslint . --fix",
 		"knip": "knip",
-		"start:blockchain": "hardhat node"
+		"start:blockchain": "hardhat node",
+		"cli": "npx ts-node --esm --experimental-specifier-resolution=node ./src/cli/cli.ts"
 	},
 	"devDependencies": {
 		"@bonosoft/sveltekit-qrcode": "^0.0.3",
