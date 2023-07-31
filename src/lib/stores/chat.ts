@@ -23,6 +23,7 @@ export interface DraftChat {
 	messages: Message[]
 	users: string[]
 	name?: string
+	avatar?: string
 }
 
 export interface Chat {
@@ -31,18 +32,24 @@ export interface Chat {
 	unread: number
 	users: User[]
 	name?: string
+	avatar?: string
 }
 
 export interface ChatData {
 	loading: boolean
 	chats: Map<string, Chat>
+	groups: Map<string, Chat>
 	error?: Error
 }
 
 type ChatStore = Writable<ChatData>
 
 function createChatStore(): ChatStore {
-	const store = writable<ChatData>({ loading: true, chats: new Map<string, Chat>() })
+	const store = writable<ChatData>({
+		loading: true,
+		chats: new Map<string, Chat>(),
+		groups: new Map<string, Chat>(),
+	})
 
 	return store
 }

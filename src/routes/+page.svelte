@@ -21,6 +21,11 @@
 
 	import ROUTES from '$lib/routes'
 	import { walletStore } from '$lib/stores/wallet'
+
+	// FIXME temporary hack
+	function isGroupChat(id: string) {
+		return id.length === 64
+	}
 </script>
 
 <div class="wrapper">
@@ -109,18 +114,18 @@
 		</Header>
 		<div class="grow">
 			<ul class="chats" aria-label="Chat List">
-				{#each [...$chats.chats] as [id, chat]}
+				{#each [...$chats.chats, ...$chats.groups] as [id, chat]}
 					{@const userMessages = chat.messages.filter((message) => message.type === 'user')}
 					{@const lastMessage =
 						userMessages.length > 0 ? userMessages[userMessages.length - 1] : undefined}
-					{@const myMessage =
-						lastMessage && lastMessage.fromAddress === $walletStore.wallet.address}
+					{@const myMessage = lastMessage && lastMessage.fromAddress === $walletStore.wallet.address}
 					{@const otherUser = chat.users.find((m) => m.address !== $walletStore.wallet?.address)}
 					<li>
 						<div
 							class="chat-button"
-							on:click={() => goto(ROUTES.CHAT(id))}
-							on:keypress={() => goto(ROUTES.CHAT(id))}
+							on:click={() => (isGroupChat(id) ? goto(ROUTES.GROUP_CHAT(id)) : goto(ROUTES.CHAT(id)))}
+							on:keypress={() =>
+								isGroupChat(id) ? goto(ROUTES.GROUP_CHAT(id)) : goto(ROUTES.CHAT(id))}
 							role="button"
 							tabindex="0"
 						>
@@ -134,11 +139,9 @@
 										<div class="user-info">
 											<span class="username text-lg text-bold">
 												{otherUser?.name}
-												{#if chat.unread > 0}
-													<Badge dark>
-														{chat.unread}
-													</Badge>
-												{/if}
+												<Badge dark>
+													{chat.messages.length}
+												</Badge>
 											</span>
 										</div>
 										<p class={`message text-serif ${myMessage ? 'my-message' : ''}`}>

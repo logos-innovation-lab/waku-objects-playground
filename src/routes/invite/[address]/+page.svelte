@@ -25,6 +25,9 @@
 	import Camera from '$lib/components/icons/camera.svelte'
 	import QrCodeIcon from '$lib/components/icons/qr-code.svelte'
 	import { onDestroy } from 'svelte'
+	import ButtonBlock from '$lib/components/button-block.svelte'
+	import User from '$lib/components/icons/user.svelte'
+	import ChevronRight from '$lib/components/icons/chevron-right.svelte'
 
 	// check if the chat already exists
 	$: if ($chats.chats.has($page.params.address)) {
@@ -112,6 +115,18 @@
 		</div>
 	</Container>
 {:else if $walletStore.wallet?.address === $page.params.address}
+	<ButtonBlock borderBottom on:click={() => goto(routes.GROUP_NEW)}>
+		<Container direction="row" justify="space-between" align="center" alignItems="center">
+			<div class="icon">
+				<User size={20} /> Create group
+			</div>
+			<div>
+				<Button variant="icon">
+					<ChevronRight />
+				</Button>
+			</div>
+		</Container>
+	</ButtonBlock>
 	<Container gap={12} grow justify="flex-start" align="center" padX={24} padY={24}>
 		<p class="text-lg text-bold">Show QR code or share link below</p>
 		<div class="qr">

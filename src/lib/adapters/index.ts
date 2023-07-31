@@ -9,6 +9,8 @@ export interface Adapter {
 	saveUserProfile(address: string, name?: string, avatar?: string): Promise<void>
 
 	startChat(address: string, chat: DraftChat): Promise<string>
+	startGroupChat(chat: DraftChat): Promise<string>
+
 	sendChatMessage(wallet: BaseWallet, chatId: string, text: string): Promise<void>
 	sendData(
 		wallet: BaseWallet,

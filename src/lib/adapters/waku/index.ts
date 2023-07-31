@@ -51,6 +51,39 @@ function createChat(chatId: string, user: User, address: string): string {
 	return chatId
 }
 
+function createGroupChat(
+	chatId: string,
+	users: User[],
+	name: string | undefined = undefined,
+	avatar: string | undefined = undefined,
+): string {
+	chats.update((state) => {
+		if (state.groups.has(chatId)) {
+			return state
+		}
+		if (users.length === 0) {
+			return state
+		}
+
+		const groups = new Map<string, Chat>(state.groups)
+		const groupChat = {
+			chatId: chatId,
+			messages: [],
+			users,
+			name,
+			avatar,
+		}
+		groups.set(chatId, groupChat)
+
+		return {
+			...state,
+			groups,
+			loading: false,
+		}
+	})
+	return chatId
+}
+
 async function addMessageToChat(
 	address: string,
 	adapter: WakuObjectAdapter,
@@ -105,14 +138,17 @@ async function executeOnMessage(address: string, adapter: WakuObjectAdapter, cha
 
 async function readChats(waku: LightNode, address: string): Promise<ChatData> {
 	const chatDataChats = (await readLatestDocument(waku, 'chats', address)) as [string, Chat][]
+	const chatDataGroups = (await readLatestDocument(waku, 'groups', address)) as [string, Chat][]
 	return {
 		loading: false,
 		chats: new Map(chatDataChats),
+		groups: new Map(chatDataGroups),
 	}
 }
 
 async function storeChats(waku: LightNode, address: string, chatData: ChatData) {
 	await storeDocument(waku, 'chats', address, Array.from(chatData.chats.entries()))
+	await storeDocument(waku, 'groups', address, Array.from(chatData.groups.entries()))
 }
 
 async function readObjectStore(waku: LightNode, address: string): Promise<ObjectState> {
@@ -295,6 +331,28 @@ export default class WakuAdapter implements Adapter {
 		}
 
 		createChat(chatId, user, address)
+
+		return chatId
+	}
+
+	async startGroupChat(chat: DraftChat): Promise<string> {
+		if (!this.waku) {
+			throw 'no waku'
+		}
+		if (chat.users.length === 0) {
+			throw 'invalid chat'
+		}
+
+		const genRanHex = (size: number) =>
+			[...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')
+		const chatId = genRanHex(64)
+
+		const waku = this.waku
+		const userPromises = chat.users.map((address) => lookupUserFromContacts(waku, address))
+		const allUsers = await Promise.all(userPromises)
+		const users = allUsers.filter((user) => user) as User[]
+
+		createGroupChat(chatId, users, chat.name, chat.avatar)
 
 		return chatId
 	}
