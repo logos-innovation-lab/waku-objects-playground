@@ -35,7 +35,7 @@ async function fund(address: string, amount = '1', fee = '0.1') {
 
 	const tx = await sendTransaction(wallet, address, parseEther(amount), parseEther(fee))
 
-	console.debug('tx done', { tx })
+	console.log('tx done', { tx })
 }
 
 async function balance(address: string) {
