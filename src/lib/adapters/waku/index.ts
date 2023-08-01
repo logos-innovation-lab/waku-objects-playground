@@ -180,6 +180,56 @@ async function lookupUserFromContacts(waku: LightNode, address: string): Promise
 	return users.find((user) => user.address === address)
 }
 
+async function readGroupChat(waku: LightNode, id: string): Promise<DraftChat> {
+	const groupChat = (await readLatestDocument(waku, 'group-chats', id)) as DraftChat
+	return groupChat
+}
+
+async function storeGroupChat(waku: LightNode, id: string, groupChat: DraftChat) {
+	await storeDocument(waku, 'group-chats', id, groupChat)
+}
+
+async function subscribeToPrivateMessages(
+	waku: LightNode,
+	adapter: WakuObjectAdapter,
+	id: string,
+	subscriptions: Array<() => void>,
+): Promise<void> {
+	const subscription = await subscribe(waku, 'private-message', id, async (msg: DecodedMessage) => {
+		const decodedPayload = decodeMessagePayload(msg)
+		const chatMessage = JSON.parse(decodedPayload) as Message
+		const chatsMap = get(chats).chats
+
+		// FIXME: the message should be checked for validity
+		if (!chatMessage) {
+			console.error('Invalid message received')
+			return
+		}
+
+		console.debug({ chatMessage })
+
+		if (!chatsMap.has(chatMessage.fromAddress)) {
+			const user = await lookupUserFromContacts(waku, chatMessage.fromAddress)
+			if (user) {
+				createChat(chatMessage.fromAddress, user, id)
+			}
+		}
+
+		if (chatMessage.type === 'invite') {
+			const groupChat = await readGroupChat(waku, chatMessage.chatId)
+			const userPromises = groupChat.users.map((address) => lookupUserFromContacts(waku, address))
+			const allUsers = await Promise.all(userPromises)
+			const users = allUsers.filter((user) => user) as User[]
+			createGroupChat(chatMessage.chatId, users, groupChat.name, groupChat.avatar)
+
+			await subscribeToPrivateMessages(waku, adapter, chatMessage.chatId, subscriptions)
+		} else {
+			await addMessageToChat(id, adapter, chatMessage.fromAddress, chatMessage)
+		}
+	})
+	subscriptions.push(subscription)
+}
+
 export default class WakuAdapter implements Adapter {
 	private waku: LightNode | undefined
 	private subscriptions: Array<() => void> = []
@@ -321,6 +371,7 @@ export default class WakuAdapter implements Adapter {
 		const users = allUsers.filter((user) => user) as User[]
 
 		createGroupChat(chatId, users, chat.name, chat.avatar)
+		await storeGroupChat(this.waku, chatId, chat)
 
 		return chatId
 	}

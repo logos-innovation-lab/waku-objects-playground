@@ -30,6 +30,8 @@ type ContentTopic =
 	| 'objects'
 	| 'balances'
 	| 'transactions'
+	| 'group-chats'
+
 type QueryResult = AsyncGenerator<Promise<DecodedMessage | undefined>[]>
 
 const topicApp = 'wakuobjects-playground'
