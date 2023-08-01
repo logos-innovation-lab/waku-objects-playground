@@ -35,7 +35,7 @@
 			<div>
 				<WakuLogo size={48} />
 			</div>
-			<p class="text-lg text-bold">Waku chats</p>
+			<p class="text-lg text-bold">Waku Play</p>
 		</div>
 		<Button on:click={() => goto(ROUTES.IDENTITY_NEW)}>
 			<UserFollow />
