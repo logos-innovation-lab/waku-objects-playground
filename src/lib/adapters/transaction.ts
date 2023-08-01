@@ -12,6 +12,7 @@ interface BlockchainNetwork {
 	name: string
 	provider: string
 	nativeToken: Token
+	tokens?: Token[]
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -40,6 +41,16 @@ const chiadoBlockchain: BlockchainNetwork = {
 		image: 'https://docs.gnosischain.com/img/tokens/chiado-xdai.png',
 		amount: BigInt(0),
 	},
+	tokens: [
+		{
+			name: 'Chiado GNO',
+			symbol: 'GNO',
+			decimals: 18,
+			image: 'https://docs.gnosischain.com/img/tokens/gno.png',
+			amount: BigInt(0),
+			address: '0x19C653Da7c37c66208fbfbE8908A5051B57b4C70',
+		},
+	],
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
