@@ -48,7 +48,7 @@
 		}
 	})
 
-	$: messages = $chats.groups.get($page.params.id)?.messages || []
+	$: messages = $chats.chats.get($page.params.id)?.messages || []
 	let loading = false
 	let text = ''
 	$: if (browser && !$walletStore.loading && $walletStore.wallet === undefined) goto(ROUTES.HOME)
@@ -62,8 +62,8 @@
 		loading = false
 	}
 
-	$: chat = $chats.groups.get($page.params.id)
-	$: console.debug({ groups: $chats.groups })
+	$: chat = $chats.chats.get($page.params.id)
+	$: console.debug({ groups: $chats.chats })
 </script>
 
 {#if $walletStore.loading || $profile.loading}

@@ -14,7 +14,7 @@
 	import { walletStore } from '$lib/stores/wallet'
 	import { profile } from '$lib/stores/profile'
 	import Avatar from '$lib/components/avatar.svelte'
-	import { chats } from '$lib/stores/chat'
+	import { chats, isGroupChatId } from '$lib/stores/chat'
 	import ArrowRight from '$lib/components/icons/arrow-right.svelte'
 	import Checkmark from '$lib/components/icons/checkmark.svelte'
 	import InputFile from '$lib/components/input-file.svelte'
@@ -48,6 +48,9 @@
 			avatar: picture,
 		}
 		const chatId = await adapters.startGroupChat(groupChat)
+		if ($walletStore.wallet) {
+			await adapters.sendInvite($walletStore.wallet, chatId, groupMembers)
+		}
 
 		buttonDisabled = false
 
@@ -94,24 +97,25 @@
 	</Header>
 	<ul class="chats" aria-label="Contact List">
 		{#each [...$chats.chats] as [id, chat]}
-			<li>
-				<div class="chat-button" role="listitem">
-					<Container grow>
-						<div class="chat">
-							<!-- TODO: WHAT HAPPENS TO THE AVATAR IF IT'S A GROUP CHAT? -->
-							<Avatar size={70} picture={chat.users[0].avatar} />
-							<div class="content">
-								<div class="user-info">
-									<span class="username text-lg text-bold">
-										{chat.users[0].name}
-									</span>
+			{#if !isGroupChatId(id)}
+				<li>
+					<div class="chat-button" role="listitem">
+						<Container grow>
+							<div class="chat">
+								<Avatar size={70} picture={chat.users[0].avatar} />
+								<div class="content">
+									<div class="user-info">
+										<span class="username text-lg text-bold">
+											{chat.users[0].name}
+										</span>
+									</div>
 								</div>
+								<input type="checkbox" bind:group={groupMembers} value={id} />
 							</div>
-							<input type="checkbox" bind:group={groupMembers} value={id} />
-						</div>
-					</Container>
-				</div>
-			</li>
+						</Container>
+					</div>
+				</li>
+			{/if}
 		{/each}
 	</ul>
 	<Container grow justify="flex-end">

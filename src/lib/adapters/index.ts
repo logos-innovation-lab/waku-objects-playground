@@ -19,6 +19,7 @@ export interface Adapter {
 		instanceId: string,
 		data: unknown,
 	): Promise<void>
+	sendInvite(wallet: BaseWallet, chatId: string, users: string[]): Promise<void>
 
 	uploadPicture(picture: string): Promise<string>
 	getPicture(cid: string): string

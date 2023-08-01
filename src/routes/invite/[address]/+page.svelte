@@ -90,7 +90,6 @@
 
 		const chat: DraftChat = {
 			users: [$page.params.address, wallet.address],
-			messages: [],
 		}
 		const chatId = await adapters.startChat(wallet.address, chat)
 		loading = false

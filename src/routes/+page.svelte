@@ -17,15 +17,10 @@
 
 	// Stores
 	import { profile } from '$lib/stores/profile'
-	import { chats } from '$lib/stores/chat'
+	import { chats, isGroupChatId } from '$lib/stores/chat'
 
 	import ROUTES from '$lib/routes'
 	import { walletStore } from '$lib/stores/wallet'
-
-	// FIXME temporary hack
-	function isGroupChat(id: string) {
-		return id.length === 64
-	}
 </script>
 
 <div class="wrapper">
@@ -114,7 +109,7 @@
 		</Header>
 		<div class="grow">
 			<ul class="chats" aria-label="Chat List">
-				{#each [...$chats.chats, ...$chats.groups] as [id, chat]}
+				{#each [...$chats.chats] as [id, chat]}
 					{@const userMessages = chat.messages.filter((message) => message.type === 'user')}
 					{@const lastMessage =
 						userMessages.length > 0 ? userMessages[userMessages.length - 1] : undefined}
@@ -123,9 +118,9 @@
 					<li>
 						<div
 							class="chat-button"
-							on:click={() => (isGroupChat(id) ? goto(ROUTES.GROUP_CHAT(id)) : goto(ROUTES.CHAT(id)))}
+							on:click={() => (isGroupChatId(id) ? goto(ROUTES.GROUP_CHAT(id)) : goto(ROUTES.CHAT(id)))}
 							on:keypress={() =>
-								isGroupChat(id) ? goto(ROUTES.GROUP_CHAT(id)) : goto(ROUTES.CHAT(id))}
+								isGroupChatId(id) ? goto(ROUTES.GROUP_CHAT(id)) : goto(ROUTES.CHAT(id))}
 							role="button"
 							tabindex="0"
 						>
