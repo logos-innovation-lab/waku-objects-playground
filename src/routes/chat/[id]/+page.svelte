@@ -37,7 +37,6 @@
 
 	onMount(() => {
 		if (browser && div) {
-			console.log('onMount inner')
 			// It can not be done in onMount because the div is not yet rendered
 			setTimeout(() => {
 				div.scrollTo({
