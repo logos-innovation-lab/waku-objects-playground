@@ -17,7 +17,7 @@
 	import { goto } from '$app/navigation'
 	import routes from '$lib/routes'
 	import { page } from '$app/stores'
-	import type { DraftChat } from '$lib/stores/chat'
+	import { type DraftChat, chats } from '$lib/stores/chat'
 	import { walletStore } from '$lib/stores/wallet'
 	import { profile } from '$lib/stores/profile'
 	import adapters from '$lib/adapters'
@@ -25,6 +25,11 @@
 	import Camera from '$lib/components/icons/camera.svelte'
 	import QrCodeIcon from '$lib/components/icons/qr-code.svelte'
 	import { onDestroy } from 'svelte'
+
+	// check if the chat already exists
+	$: if ($chats.chats.has($page.params.address)) {
+		goto(routes.CHAT($page.params.address))
+	}
 
 	let copied = false
 	let loading = false
@@ -100,7 +105,7 @@
 	</Button>
 </Header>
 
-{#if $walletStore.loading || $profile.loading}
+{#if $walletStore.loading || $profile.loading || $chats.loading}
 	<Container align="center" grow gap={6} justify="center">
 		<div class="center">
 			<h2>Loading...</h2>
