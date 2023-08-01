@@ -1,5 +1,7 @@
 import { balanceStore, type Token } from '$lib/stores/balances'
-import { defaultBlockchainNetwork, getBalance } from '$lib/adapters/transaction'
+import { defaultBlockchainNetwork, getBalance, getProvider } from '$lib/adapters/transaction'
+import { Contract } from 'ethers'
+import abi from '$lib/abis/erc20.json'
 
 export async function fetchBalances(address: string): Promise<void> {
 	balanceStore.update((state) => ({
@@ -14,15 +16,18 @@ export async function fetchBalances(address: string): Promise<void> {
 		amount: nativeTokenAmount,
 	}
 
-	const daiData = {
-		name: 'Dai',
-		symbol: 'DAI',
-		decimals: 18,
-		amount: 7843900000000000000000n,
-		image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/4943.png',
+	const tokens = defaultBlockchainNetwork.tokens ?? []
+
+	for (const token of tokens) {
+		// We skip tokens that have no address (likely native tokens)
+		if (!token.address) return
+
+		const contract = new Contract(token.address, abi, getProvider())
+		const tokenAmount = await contract.balanceOf(address)
+		token.amount = tokenAmount
 	}
 
-	const balances = [ethData, daiData]
+	const balances = [ethData, ...tokens]
 	const balancesState = {
 		balances,
 		loading: false,
