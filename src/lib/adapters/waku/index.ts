@@ -250,6 +250,10 @@ async function subscribeToPrivateMessages(
 						}
 					}
 
+					if (isGroupChatId(id) && chatMessage.fromAddress === address) {
+						return
+					}
+
 					await addMessageToChat(address, adapter, id, chatMessage)
 				}
 			},
