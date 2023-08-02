@@ -1,7 +1,9 @@
-import { browser } from '$app/environment'
+import { getFromLocalStorage, saveToLocalStorage } from '$lib/adapters/utils'
 import { writable, type Writable } from 'svelte/store'
+import { z } from 'zod'
 
-export type DarkMode = 'dark' | 'light' | 'system'
+const darkModeSchema = z.enum(['dark', 'light', 'system'])
+export type DarkMode = z.infer<typeof darkModeSchema>
 
 interface Theme {
 	darkMode: DarkMode
@@ -16,19 +18,18 @@ interface ThemeStore extends Writable<Theme> {
 function createThemeStore(): ThemeStore {
 	let darkMode: DarkMode = 'system'
 	let baseColor = '#000000'
-	if (browser) {
-		darkMode = (localStorage.getItem('dark-mode') as DarkMode) ?? darkMode
-		baseColor = localStorage.getItem('color') ?? baseColor
-	}
+	darkMode = getFromLocalStorage<DarkMode>('dark-mode', darkModeSchema) ?? darkMode
+	baseColor = getFromLocalStorage<string>('color', z.string()) ?? baseColor
 	const store = writable<Theme>({ darkMode, baseColor })
+
 	return {
 		...store,
 		setColor: (newColor: string) => {
-			localStorage.setItem('color', newColor)
+			saveToLocalStorage('color', newColor)
 			store.update((theme) => ({ ...theme, baseColor: newColor }))
 		},
 		setDarkMode: (newDarkMode: DarkMode) => {
-			localStorage.setItem('dark-mode', newDarkMode)
+			saveToLocalStorage('dark-mode', newDarkMode)
 			store.update((theme) => ({ ...theme, darkMode: newDarkMode }))
 		},
 	}
