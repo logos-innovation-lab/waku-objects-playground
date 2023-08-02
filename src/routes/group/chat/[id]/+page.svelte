@@ -5,6 +5,7 @@
 	import Add from '$lib/components/icons/add.svelte'
 	import ArrowUp from '$lib/components/icons/arrow-up.svelte'
 	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
+	import EditIcon from '$lib/components/icons/edit.svelte'
 
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
@@ -21,7 +22,6 @@
 	import ROUTES from '$lib/routes'
 	import { walletStore } from '$lib/stores/wallet'
 	import { browser } from '$app/environment'
-	import { profile } from '$lib/stores/profile'
 	import ChatMessage from '$lib/components/chat-message.svelte'
 
 	let div: HTMLElement
@@ -36,16 +36,15 @@
 	})
 
 	onMount(() => {
-		if (browser && div) {
-			console.log('onMount inner')
-			// It can not be done in onMount because the div is not yet rendered
-			setTimeout(() => {
+		// It can not be done in onMount because the div is not yet rendered
+		setTimeout(() => {
+			if (browser && div) {
 				div.scrollTo({
 					top: div.scrollHeight,
 					behavior: 'auto',
 				})
-			}, 0)
-		}
+			}
+		}, 0)
 	})
 
 	$: messages = $chats.chats.get($page.params.id)?.messages || []
@@ -66,13 +65,13 @@
 	$: console.debug({ groups: $chats.chats })
 </script>
 
-{#if $walletStore.loading || $profile.loading}
+{#if $walletStore.loading || $chats.loading}
 	<Container align="center" grow gap={6} justify="center" padX={24}>
 		<h2>Loading...</h2>
 	</Container>
-{:else if $walletStore.error || $profile.error}
+{:else if $walletStore.error}
 	<Container align="center" grow gap={6} justify="center" padX={24}>
-		<h2>Failed to load chat: {$profile.error?.message ?? $walletStore.error?.message}</h2>
+		<h2>Failed to load chat: {$walletStore.error?.message}</h2>
 	</Container>
 {:else if !chat}
 	<Container align="center" grow gap={6} justify="center" padX={24}>
@@ -88,6 +87,9 @@
 				<Avatar picture={chat?.avatar ?? ''} />
 				{chat?.name}
 			</svelte:fragment>
+			<Button variant="icon" slot="right" on:click={() => goto(ROUTES.GROUP_EDIT($page.params.id))}>
+				<EditIcon />
+			</Button>
 		</Header>
 		<div class="chat-messages" bind:this={div}>
 			<Container grow>

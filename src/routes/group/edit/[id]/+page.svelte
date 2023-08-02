@@ -1,7 +1,4 @@
 <script lang="ts">
-	import { goto } from '$app/navigation'
-
-	import AddComment from '$lib/components/icons/add-comment.svelte'
 	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
 	import UserIcon from '$lib/components/icons/user.svelte'
 
@@ -10,25 +7,26 @@
 	import Container from '$lib/components/container.svelte'
 	import InputField from '$lib/components/input-field.svelte'
 
-	import routes from '$lib/routes'
 	import { walletStore } from '$lib/stores/wallet'
 	import Avatar from '$lib/components/avatar.svelte'
 	import { chats, isGroupChatId } from '$lib/stores/chat'
-	import ArrowRight from '$lib/components/icons/arrow-right.svelte'
 	import Checkmark from '$lib/components/icons/checkmark.svelte'
 	import InputFile from '$lib/components/input-file.svelte'
 	import adapters from '$lib/adapters'
 	import { clipAndResize } from '$lib/utils/image'
 	import Renew from '$lib/components/icons/renew.svelte'
+	import { page } from '$app/stores'
+	import { throwError } from '$lib/utils/error'
 
-	$: contacts = Array.from($chats.chats)
-		.filter(([, chat]) => !isGroupChatId(chat.chatId))
-		.map(([, chat]) => chat.users[0])
+	$: chatId = $page.params.id
+	$: groupChat = $chats.chats.get(chatId) || throwError(`no chat found with id ${chatId}`)
+	$: groupMembers = groupChat.users
+	$: picture = groupChat.avatar
+	$: name = groupChat.name
+	$: console.debug({ groupMembers })
 
-	let groupMembers: string[] = []
-	let screen: 'create' | 'details' = 'create'
-	let picture = ''
-	let name = ''
+	let invitedMembers: string[] = []
+	let screen: 'settings' | 'invite' = 'settings'
 	let pictureFiles: FileList | undefined = undefined
 	let buttonDisabled = false
 
@@ -41,111 +39,36 @@
 	}
 	$: resizePersonaPicture(pictureFiles && pictureFiles[0])
 
-	async function createGroup() {
+	async function inviteMembers() {
 		buttonDisabled = true
 
-		const wallet = $walletStore.wallet
-		if (!wallet) throw new Error('no wallet')
+		const wallet = $walletStore.wallet || throwError('no wallet')
 
-		const groupChat = {
-			messages: [],
-			users: [...groupMembers, wallet.address],
-			name,
-			avatar: picture,
-		}
-		const chatId = await adapters.startGroupChat(wallet, groupChat)
-		if ($walletStore.wallet) {
-			await adapters.sendInvite($walletStore.wallet, chatId, groupMembers)
-		}
+		await adapters.addMemberToGroupChat(chatId, invitedMembers)
+		await adapters.sendInvite(wallet, chatId, invitedMembers)
 
+		invitedMembers = []
 		buttonDisabled = false
 
-		goto(routes.GROUP_CHAT(chatId))
+		screen = 'settings'
+	}
+
+	function isGroupMember(address: string) {
+		return groupMembers.map((user) => user.address).includes(address)
 	}
 </script>
 
-<<<<<<< HEAD
-{#if $profile.loading || $walletStore.loading || !$walletStore.wallet}
-=======
 {#if $walletStore.loading || !$walletStore.wallet || $chats.loading}
->>>>>>> 7bb272d (feat: group chat is working)
 	<Container align="center" grow gap={6} justify="center">
 		<div class="center">
 			<h2>Loading...</h2>
 		</div>
 	</Container>
-<<<<<<< HEAD
-{:else if $chats.chats.size === 0}
-=======
-{:else if contacts.length === 0}
->>>>>>> 7bb272d (feat: group chat is working)
-	{@const address = $walletStore.wallet.address}
-	<Header title="Create group">
+{:else if screen === 'settings'}
+	<Header title="Group settings">
 		<svelte:fragment slot="left">
 			<div class="header-btns">
 				<Button variant="icon" on:click={() => history.go(-1)}>
-					<ChevronLeft />
-				</Button>
-			</div>
-		</svelte:fragment>
-	</Header>
-	<Container align="center" grow gap={6} justify="center" padX={24}>
-		<p class="text-lg text-bold">No contacts</p>
-		<p class="text-lg">You can only create groups from existing chat contacts</p>
-		<div class="btn-spacing">
-			<Button on:click={() => goto(routes.INVITE(address))}>
-				<AddComment />
-				Invite to chat
-			</Button>
-		</div>
-	</Container>
-{:else if screen === 'create'}
-	<Header title="Create group">
-		<svelte:fragment slot="left">
-			<div class="header-btns">
-				<Button variant="icon" on:click={() => history.go(-1)}>
-					<ChevronLeft />
-				</Button>
-			</div>
-		</svelte:fragment>
-	</Header>
-	<ul class="chats" aria-label="Contact List">
-		{#each [...$chats.chats] as [id, chat]}
-			{#if !isGroupChatId(id)}
-				<li>
-					<div class="chat-button" role="listitem">
-						<Container grow>
-							<div class="chat">
-								<Avatar size={70} picture={chat.users[0].avatar} />
-								<div class="content">
-									<div class="user-info">
-										<span class="username text-lg text-bold">
-											{chat.users[0].name}
-										</span>
-									</div>
-								</div>
-								<input type="checkbox" bind:group={groupMembers} value={id} />
-							</div>
-						</Container>
-					</div>
-				</li>
-			{/if}
-		{/each}
-	</ul>
-	<Container grow justify="flex-end">
-		<Button
-			variant="strong"
-			disabled={groupMembers.length === 0}
-			on:click={() => (screen = 'details')}
-		>
-			<ArrowRight />
-		</Button>
-	</Container>
-{:else if screen === 'details'}
-	<Header mainContent="right" title="Set group details">
-		<svelte:fragment slot="left">
-			<div class="header-btns">
-				<Button variant="icon" on:click={() => (screen = 'create')}>
 					<ChevronLeft />
 				</Button>
 			</div>
@@ -171,15 +94,75 @@
 		</InputFile>
 		<InputField autofocus bind:value={name} label="Group name" />
 	</Container>
+	<Container alignItems="center">
+		{groupMembers?.length} Members
+		<Button disabled={buttonDisabled} on:click={() => (screen = 'invite')}>
+			<UserIcon />
+			Invite to group
+		</Button>
+	</Container>
+	<ul class="chats" aria-label="Contact List">
+		{#each groupMembers as user}
+			<li>
+				<div class="chat-button" role="listitem">
+					<Container grow>
+						<div class="chat">
+							<Avatar size={70} picture={user.avatar} />
+							<div class="content">
+								<div class="user-info">
+									<span class="username text-lg text-bold">
+										{user.name}
+									</span>
+								</div>
+							</div>
+						</div>
+					</Container>
+				</div>
+			</li>
+		{/each}
+	</ul>
+{:else if screen === 'invite'}
+	<Header mainContent="right" title="Invite to group">
+		<svelte:fragment slot="left">
+			<div class="header-btns">
+				<Button variant="icon" on:click={() => (screen = 'settings')}>
+					<ChevronLeft />
+				</Button>
+			</div>
+		</svelte:fragment>
+	</Header>
+	<ul class="chats" aria-label="Contact List">
+		{#each [...$chats.chats] as [id, chat]}
+			{#if !isGroupChatId(id) && !isGroupMember(id)}
+				<li>
+					<div class="chat-button" role="listitem">
+						<Container grow>
+							<div class="chat">
+								<Avatar size={70} picture={chat.users[0].avatar} />
+								<div class="content">
+									<div class="user-info">
+										<span class="username text-lg text-bold">
+											{chat.users[0].name}
+										</span>
+									</div>
+								</div>
+								<input type="checkbox" bind:group={invitedMembers} value={id} />
+							</div>
+						</Container>
+					</div>
+				</li>
+			{/if}
+		{/each}
+	</ul>
 
 	<Container grow justify="flex-end">
 		<Button
 			variant="strong"
-			disabled={buttonDisabled || name.length === 0}
-			on:click={() => createGroup()}
+			disabled={buttonDisabled || invitedMembers.length === 0}
+			on:click={() => inviteMembers()}
 		>
 			<Checkmark />
-			Create group
+			Invite
 		</Button>
 	</Container>
 {/if}
@@ -194,14 +177,6 @@
 		justify-content: center;
 		align-items: center;
 		place-items: center;
-	}
-
-	.btn-spacing {
-		margin-top: var(--spacing-6);
-		display: flex;
-		flex-direction: row;
-		justify-content: center;
-		gap: var(--spacing-6);
 	}
 
 	.chats {

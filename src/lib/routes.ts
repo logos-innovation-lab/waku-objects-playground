@@ -14,4 +14,5 @@ export default {
 		`/chat/${id}/object/${objectId}/new${view ? `/${view}` : ''}`,
 	GROUP_NEW: `/group/new`,
 	GROUP_CHAT: (id: string) => `/group/chat/${id}`,
+	GROUP_EDIT: (id: string) => `/group/edit/${id}`,
 }
