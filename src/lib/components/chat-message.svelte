@@ -1,6 +1,7 @@
 <script lang="ts">
 	export let bubble = false
 	export let myMessage = false
+	export let object = false
 
 	const isFF = () => {
 		let browserInfo = navigator.userAgent
@@ -8,7 +9,11 @@
 	}
 </script>
 
-<div class={`message ${myMessage ? 'my-message' : 'their-message'} ${isFF() ? 'ff' : ''}`}>
+<div
+	class={`message ${myMessage ? 'my-message' : 'their-message'} ${isFF() ? 'ff' : ''} ${
+		object ? 'object' : ''
+	}`}
+>
 	<div class={` ${bubble ? 'bubble message-content message-text text-lg' : ''}`}>
 		<slot />
 	</div>
@@ -25,6 +30,12 @@
 		margin-left: 0;
 		&:not(:last-child) {
 			margin-bottom: var(--spacing-12);
+		}
+
+		&.object {
+			.message-content {
+				width: 100%;
+			}
 		}
 	}
 
