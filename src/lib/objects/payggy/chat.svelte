@@ -7,7 +7,7 @@
 	import type { WakuObjectArgs } from '..'
 	import type { DataMessage } from '$lib/stores/chat'
 	import { toSignificant } from '$lib/utils/format'
-	import ChatMessage from '$lib/components/chat-message.svelte'
+	import ObjectBubble from '$lib/components/object-bubble.svelte'
 	import ReadonlyText from '$lib/components/readonly-text.svelte'
 	import ObjectHeader from '$lib/components/object-header.svelte'
 	import ArrowDownRight from '$lib/components/icons/arrow-down-right.svelte'
@@ -37,7 +37,7 @@
 	$: otherUser = args.users.find((u) => u.address !== args.profile.address)
 </script>
 
-<ChatMessage {myMessage} bubble fullwidth>
+<ObjectBubble {myMessage}>
 	<Container>
 		<div class="wo text-normal">
 			<ObjectHeader name="Payggy" logoImg={logo} logoAlt="Payggy logo" />
@@ -94,7 +94,7 @@
 			{/if}
 		</div>
 	</Container>
-</ChatMessage>
+</ObjectBubble>
 
 <style lang="scss">
 	.wo {
