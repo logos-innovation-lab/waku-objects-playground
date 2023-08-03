@@ -160,7 +160,7 @@
 			<div>
 				<ChatBot size={32} />
 			</div>
-			<p class="text-lg text-bold">Waku chats</p>
+			<p class="text-lg text-bold">Waku Play</p>
 		</div>
 		<Button on:click={() => goto(routes.IDENTITY_NEW)}>
 			<UserFollow />
