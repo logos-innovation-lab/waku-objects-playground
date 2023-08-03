@@ -28,6 +28,7 @@ export interface DraftChat {
 export interface Chat {
 	chatId: string
 	messages: Message[]
+	unread: number
 	users: User[]
 	name?: string
 }

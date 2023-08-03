@@ -134,9 +134,11 @@
 										<div class="user-info">
 											<span class="username text-lg text-bold">
 												{otherUser?.name}
-												<Badge dark>
-													{chat.messages.length}
-												</Badge>
+												{#if chat.unread > 0}
+													<Badge dark>
+														{chat.unread}
+													</Badge>
+												{/if}
 											</span>
 										</div>
 										<p class={`message text-serif ${myMessage ? 'my-message' : ''}`}>
