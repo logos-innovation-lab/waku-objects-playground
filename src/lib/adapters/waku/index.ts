@@ -146,9 +146,6 @@ export default class WakuAdapter implements Adapter {
 		const chatData = await readChats(this.waku, address)
 		chats.update((state) => ({ ...state, ...chatData, loading: false }))
 
-		// the adapter is stored to maintain a copy of the chats so that we don't have to lookup the users
-		// from the waku store each time a message arrives
-
 		// eslint-disable-next-line @typescript-eslint/no-this-alias
 		const adapter = this
 		const subscribeChatStore = chats.subscribe(async (chats) => {
@@ -158,6 +155,41 @@ export default class WakuAdapter implements Adapter {
 			await storeChats(adapter.waku, address, chats)
 		})
 		this.subscriptions.push(subscribeChatStore)
+
+		// look for changes in users profile name and picture
+		const contacts = Array.from(get(chats).chats).map(([, chat]) => chat.users[0])
+		const changes = new Map<string, User>()
+		for await (const contact of contacts) {
+			const contactProfile = (await readLatestDocument(
+				this.waku,
+				'profile',
+				contact.address,
+			)) as Profile
+
+			if (contactProfile.name != contact.name || contactProfile.avatar != contact.avatar) {
+				const changedUser = {
+					name: contactProfile.name,
+					avatar: contactProfile.avatar,
+					address: contact.address,
+				}
+				changes.set(contact.address, changedUser)
+			}
+		}
+		if (changes.size > 0) {
+			chats.update((state) => {
+				const newChats = new Map<string, Chat>(state.chats)
+				changes.forEach((user) => {
+					const chat = newChats.get(user.address)
+					if (chat) {
+						chat.users[0] = user
+					}
+				})
+				return {
+					...state,
+					chats: newChats,
+				}
+			})
+		}
 
 		const subscribeChats = await subscribe(
 			this.waku,
