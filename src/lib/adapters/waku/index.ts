@@ -1,15 +1,12 @@
 import { profile, type Profile } from '$lib/stores/profile'
 import type { Adapter } from '..'
 import { chats, type DraftChat, type Chat, type Message, type ChatData } from '$lib/stores/chat'
-import { contacts, type User } from '$lib/stores/users'
 import type { LightNode } from '@waku/interfaces'
 import type { DecodedMessage } from '@waku/sdk'
 import {
 	connectWaku,
 	decodeMessagePayload,
-	parseQueryResults,
 	readLatestDocument,
-	readStore,
 	sendMessage,
 	storeDocument,
 	subscribe,
@@ -24,6 +21,7 @@ import { defaultBlockchainNetwork, sendTransaction } from '$lib/adapters/transac
 import type { WakuObjectAdapter } from '$lib/objects'
 import { makeWakuObjectAdapter } from '$lib/objects/adapter'
 import { fetchBalances } from '$lib/adapters/balance'
+import type { User } from '$lib/types'
 
 function createChat(chatId: string, user: User, address: string): string {
 	chats.update((state) => {
@@ -132,21 +130,6 @@ async function storeObjectStore(waku: LightNode, address: string, objectStore: O
 	await storeDocument(waku, 'objects', address, Array.from(objectStore.objects))
 }
 
-/*
- * Temporary helper function to read all users from the waku store, so that contacts are discoverable.
- * This functionality can be removed once the invite system is working.
- */
-async function readAllUsers(waku: LightNode): Promise<User[]> {
-	const results = await readStore(waku, 'all-users')
-	const users = (await parseQueryResults(results)) as User[]
-	return users
-}
-
-async function lookupUserFromContacts(waku: LightNode, address: string): Promise<User | undefined> {
-	const users = await readAllUsers(waku)
-	return users.find((user) => user.address === address)
-}
-
 export default class WakuAdapter implements Adapter {
 	private waku: LightNode | undefined
 	private subscriptions: Array<() => void> = []
@@ -159,25 +142,6 @@ export default class WakuAdapter implements Adapter {
 
 		const profileData = (await readLatestDocument(this.waku, 'profile', address)) as Profile
 		profile.update((state) => ({ ...state, ...profileData, address, loading: false }))
-
-		const allUsers = await readAllUsers(this.waku)
-		if (!allUsers.find((user) => user.address === address)) {
-			// save it in the waku store so that other users can find
-			// this can be removed once the invite system is in place
-			const selfUser: User = {
-				...profileData,
-				address,
-			}
-			await storeDocument(this.waku, 'all-users', '', selfUser)
-		}
-		const globalContacts = new Map<string, User>(
-			allUsers.filter((user) => user.address !== address).map((user) => [user.address, user]),
-		)
-
-		contacts.update(() => ({
-			contacts: new Map<string, User>(globalContacts),
-			loading: false,
-		}))
 
 		const chatData = await readChats(this.waku, address)
 		chats.update((state) => ({ ...state, ...chatData, loading: false }))
@@ -215,8 +179,17 @@ export default class WakuAdapter implements Adapter {
 				}
 
 				if (!chatsMap.has(chatMessage.fromAddress)) {
-					const user = await lookupUserFromContacts(adapter.waku, chatMessage.fromAddress)
-					if (user) {
+					const storedProfile = (await readLatestDocument(
+						adapter.waku,
+						'profile',
+						address,
+					)) as Profile
+					if (storedProfile) {
+						const user = {
+							name: storedProfile.name,
+							avatar: storedProfile.avatar,
+							address,
+						}
 						createChat(chatMessage.fromAddress, user, address)
 					}
 				}
@@ -244,7 +217,6 @@ export default class WakuAdapter implements Adapter {
 		this.subscriptions.forEach((s) => s())
 		this.subscriptions = []
 		profile.set({ loading: false })
-		contacts.set({ contacts: new Map<string, User>(), loading: true })
 	}
 
 	async saveUserProfile(address: string, name?: string, avatar?: string): Promise<void> {
@@ -277,9 +249,15 @@ export default class WakuAdapter implements Adapter {
 		}
 
 		const chatId = chat.users[0]
-		const user = await lookupUserFromContacts(this.waku, chatId)
-		if (!user) {
+		const storedProfile = (await readLatestDocument(this.waku, 'profile', chatId)) as Profile
+		if (!storedProfile) {
 			throw 'invalid user'
+		}
+
+		const user = {
+			name: storedProfile.name,
+			avatar: storedProfile.avatar,
+			address: chatId,
 		}
 
 		createChat(chatId, user, address)

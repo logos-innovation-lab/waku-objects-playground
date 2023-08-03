@@ -27,7 +27,6 @@ type ContentTopic =
 	| 'profile'
 	| 'contact'
 	| 'chats'
-	| 'all-users'
 	| 'objects'
 	| 'balances'
 	| 'transactions'
