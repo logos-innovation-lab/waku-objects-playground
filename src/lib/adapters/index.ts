@@ -27,7 +27,7 @@ export interface Adapter {
 		instanceId: string,
 		updater: (state: unknown) => unknown,
 	): Promise<void>
-	sendTransaction(wallet: BaseWallet, to: string, token: Token, fee: Token): Promise<string>
+	sendTransaction(wallet: BaseWallet, to: string, token: Token): Promise<string>
 	estimateTransaction(wallet: BaseWallet, to: string, token: Token): Promise<Token>
 }
 

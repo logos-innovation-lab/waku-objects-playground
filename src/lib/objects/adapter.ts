@@ -17,8 +17,8 @@ const NUM_CONFIRMATIONS = 2
 export function makeWakuObjectAdapter(adapter: Adapter, wallet: BaseWallet): WakuObjectAdapter {
 	const { address } = wallet
 
-	function sendTransaction(to: string, token: Token, fee: Token) {
-		return adapter.sendTransaction(wallet, to, token, fee)
+	function sendTransaction(to: string, token: Token) {
+		return adapter.sendTransaction(wallet, to, token)
 	}
 
 	function estimateTransaction(to: string, token: Token) {

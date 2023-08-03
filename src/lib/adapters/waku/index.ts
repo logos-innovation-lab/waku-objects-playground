@@ -11,18 +11,17 @@ import {
 	storeDocument,
 	subscribe,
 } from './waku'
-import { Contract, type BaseWallet, type Wallet, TransactionResponse } from 'ethers'
+import type { BaseWallet, Wallet } from 'ethers'
 import { ipfs, IPFS_GATEWAY } from '$lib/adapters/ipfs'
 import { get } from 'svelte/store'
 import { objectStore, type ObjectState, objectKey } from '$lib/stores/objects'
 import { lookup } from '$lib/objects/lookup'
 import type { Token } from '$lib/stores/balances'
-import { defaultBlockchainNetwork, getProvider, sendTransaction } from '$lib/adapters/transaction'
+import { defaultBlockchainNetwork, sendTransaction } from '$lib/adapters/transaction'
 import type { WakuObjectAdapter } from '$lib/objects'
 import { makeWakuObjectAdapter } from '$lib/objects/adapter'
 import { fetchBalances } from '$lib/adapters/balance'
 import type { User } from '$lib/types'
-import abi from '$lib/abis/erc20.json'
 
 function createChat(chatId: string, user: User, address: string): string {
 	chats.update((state) => {
@@ -381,16 +380,8 @@ export default class WakuAdapter implements Adapter {
 		await storeObjectStore(this.waku, address, updatedObjectStore)
 	}
 
-	async sendTransaction(wallet: Wallet, to: string, token: Token, fee: Token): Promise<string> {
-		let tx: TransactionResponse
-		if (token.address) {
-			const provider = getProvider()
-			const txWallet = wallet.connect(provider)
-			const contract = new Contract(token.address, abi, txWallet)
-			tx = await contract.transfer(to, token.amount)
-		} else {
-			tx = await sendTransaction(wallet, to, token.amount, fee.amount)
-		}
+	async sendTransaction(wallet: Wallet, to: string, token: Token): Promise<string> {
+		const tx = await sendTransaction(wallet, to, token.amount, token.address)
 		return tx.hash
 	}
 
