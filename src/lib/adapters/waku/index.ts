@@ -40,6 +40,7 @@ function createChat(chatId: string, user: User, address: string): string {
 			messages: [],
 			users: [user, { address }],
 			name: user.name ?? user.address,
+			unread: 0, // FIXME: this should be calculated
 		}
 		newChats.set(chatId, chat)
 
