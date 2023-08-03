@@ -182,13 +182,14 @@ export default class WakuAdapter implements Adapter {
 					const storedProfile = (await readLatestDocument(
 						adapter.waku,
 						'profile',
-						address,
+						chatMessage.fromAddress,
 					)) as Profile
+
 					if (storedProfile) {
 						const user = {
 							name: storedProfile.name,
 							avatar: storedProfile.avatar,
-							address,
+							address: chatMessage.fromAddress,
 						}
 						createChat(chatMessage.fromAddress, user, address)
 					}
