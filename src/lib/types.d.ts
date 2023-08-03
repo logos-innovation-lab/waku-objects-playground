@@ -9,3 +9,9 @@ export type ComponentConstructor<T extends Record<string, any>> = new (args: {
 export interface IconProps {
 	size?: number
 }
+
+export interface User {
+	address: string
+	name?: string
+	avatar?: string
+}

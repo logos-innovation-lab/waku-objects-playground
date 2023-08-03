@@ -7,7 +7,7 @@
 	import type { WakuObjectArgs } from '.'
 	import { profile } from '$lib/stores/profile'
 	import { makeWakuObjectAdapter } from './adapter'
-	import type { User } from '$lib/stores/users'
+	import type { User } from '$lib/types'
 	import { objectKey, objectStore } from '$lib/stores/objects'
 	import { throwError } from '$lib/utils/error'
 
