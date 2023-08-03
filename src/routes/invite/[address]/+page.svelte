@@ -105,7 +105,7 @@
 	</Button>
 </Header>
 
-{#if $walletStore.loading || $profile.loading || $chats.loading}
+{#if $walletStore.loading || $profile.loading || ($walletStore.wallet && $chats.loading)}
 	<Container align="center" grow gap={6} justify="center">
 		<div class="center">
 			<h2>Loading...</h2>
