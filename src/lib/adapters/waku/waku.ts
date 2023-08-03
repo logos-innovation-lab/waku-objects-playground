@@ -102,22 +102,6 @@ export async function readLatestDocument(
 	}
 }
 
-export async function parseQueryResults<T>(results: QueryResult): Promise<T[]> {
-	const typedResults: T[] = []
-	for await (const messagePromises of results) {
-		for (const messagePromise of messagePromises) {
-			const message = await messagePromise
-			if (message) {
-				const decodedPayload = decodeMessagePayload(message)
-
-				const typedPayload = JSON.parse(decodedPayload) as T
-				typedResults.push(typedPayload)
-			}
-		}
-	}
-	return typedResults
-}
-
 export async function readStore(
 	waku: LightNode,
 	contentTopic: ContentTopic,
