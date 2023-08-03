@@ -12,7 +12,7 @@
 	const chatId = $page.params.id
 
 	function onViewChange(view: string) {
-		goto(routes.OBJECT_NEW(chatId, 'new', view))
+		goto(routes.OBJECT_NEW(chatId, objectId, view))
 	}
 </script>
 
