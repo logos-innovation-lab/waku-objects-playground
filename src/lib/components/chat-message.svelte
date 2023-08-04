@@ -39,10 +39,6 @@
 		}
 	}
 
-	.message-content {
-		text-align: right;
-	}
-
 	.message-text {
 		padding: var(--spacing-12);
 		border-radius: var(--border-radius);
