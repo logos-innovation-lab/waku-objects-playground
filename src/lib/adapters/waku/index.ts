@@ -269,6 +269,39 @@ async function subscribeToPrivateMessages(
 	}
 }
 
+async function updateContactProfiles(waku: LightNode) {
+	// look for changes in users profile name and picture
+	const contacts = Array.from(get(chats).chats).map(([, chat]) => chat.users[0])
+	const changes = new Map<string, User>()
+	for await (const contact of contacts) {
+		const contactProfile = (await readLatestDocument(waku, 'profile', contact.address)) as Profile
+
+		if (contactProfile.name != contact.name || contactProfile.avatar != contact.avatar) {
+			const changedUser = {
+				name: contactProfile.name,
+				avatar: contactProfile.avatar,
+				address: contact.address,
+			}
+			changes.set(contact.address, changedUser)
+		}
+	}
+	if (changes.size > 0) {
+		chats.update((state) => {
+			const newChats = new Map<string, Chat>(state.chats)
+			changes.forEach((user) => {
+				const chat = newChats.get(user.address)
+				if (chat) {
+					chat.users[0] = user
+				}
+			})
+			return {
+				...state,
+				chats: newChats,
+			}
+		})
+	}
+}
+
 export default class WakuAdapter implements Adapter {
 	private waku: LightNode | undefined
 	private subscriptions: Array<() => void> = []
@@ -295,41 +328,6 @@ export default class WakuAdapter implements Adapter {
 		})
 		this.subscriptions.push(subscribeChatStore)
 
-		// look for changes in users profile name and picture
-		const contacts = Array.from(get(chats).chats).map(([, chat]) => chat.users[0])
-		const changes = new Map<string, User>()
-		for (const contact of contacts) {
-			const contactProfile = (await readLatestDocument(
-				this.waku,
-				'profile',
-				contact.address,
-			)) as Profile
-
-			if (contactProfile.name != contact.name || contactProfile.avatar != contact.avatar) {
-				const changedUser = {
-					name: contactProfile.name,
-					avatar: contactProfile.avatar,
-					address: contact.address,
-				}
-				changes.set(contact.address, changedUser)
-			}
-		}
-		if (changes.size > 0) {
-			chats.update((state) => {
-				const newChats = new Map<string, Chat>(state.chats)
-				changes.forEach((user) => {
-					const chat = newChats.get(user.address)
-					if (chat) {
-						chat.users[0] = user
-					}
-				})
-				return {
-					...state,
-					chats: newChats,
-				}
-			})
-		}
-
 		const groupChatIds = Array.from(chatData.chats)
 			.filter(([id]) => isGroupChatId(id))
 			.map(([id]) => id)
@@ -353,7 +351,9 @@ export default class WakuAdapter implements Adapter {
 		})
 		this.subscriptions.push(subscribeObjectStore)
 
+		// there is no await so that it does not block loading
 		fetchBalances(address)
+		updateContactProfiles(this.waku)
 	}
 
 	async onLogOut() {
