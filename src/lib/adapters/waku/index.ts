@@ -1,6 +1,15 @@
 import { profile, type Profile } from '$lib/stores/profile'
 import type { Adapter } from '..'
-import { chats, type DraftChat, type Chat, type Message, type ChatData } from '$lib/stores/chat'
+import {
+	chats,
+	type DraftChat,
+	type Chat,
+	type Message,
+	type ChatData,
+	isGroupChatId,
+	type DataMessage,
+} from '$lib/stores/chat'
+import type { User } from '$lib/types'
 import type { LightNode } from '@waku/interfaces'
 import type { DecodedMessage } from '@waku/sdk'
 import {
@@ -21,7 +30,6 @@ import { defaultBlockchainNetwork, sendTransaction } from '$lib/adapters/transac
 import type { WakuObjectAdapter } from '$lib/objects'
 import { makeWakuObjectAdapter } from '$lib/objects/adapter'
 import { fetchBalances } from '$lib/adapters/balance'
-import type { User } from '$lib/types'
 
 function createChat(chatId: string, user: User, address: string): string {
 	chats.update((state) => {
@@ -51,13 +59,49 @@ function createChat(chatId: string, user: User, address: string): string {
 	return chatId
 }
 
+function createGroupChat(
+	chatId: string,
+	users: User[],
+	name: string | undefined = undefined,
+	avatar: string | undefined = undefined,
+): string {
+	chats.update((state) => {
+		if (state.chats.has(chatId)) {
+			return state
+		}
+		if (users.length === 0) {
+			return state
+		}
+
+		const newChats = new Map<string, Chat>(state.chats)
+		const groupChat = {
+			chatId: chatId,
+			messages: [],
+			users,
+			name,
+			avatar,
+			unread: 0,
+		}
+		newChats.set(chatId, groupChat)
+
+		return {
+			...state,
+			chats: newChats,
+			loading: false,
+		}
+	})
+	return chatId
+}
+
 async function addMessageToChat(
 	address: string,
 	adapter: WakuObjectAdapter,
 	chatId: string,
 	message: Message,
 ) {
-	await executeOnMessage(address, adapter, message)
+	if (message.type === 'data') {
+		await executeOnDataMessage(address, adapter, message)
+	}
 
 	chats.update((state) => {
 		if (!state.chats.has(chatId)) {
@@ -78,28 +122,30 @@ async function addMessageToChat(
 	})
 }
 
-async function executeOnMessage(address: string, adapter: WakuObjectAdapter, chatMessage: Message) {
-	if (chatMessage.type === 'data') {
-		const descriptor = lookup(chatMessage.objectId)
-		const key = objectKey(chatMessage.objectId, chatMessage.instanceId)
-		const wakuObjectStore = get(objectStore)
+async function executeOnDataMessage(
+	address: string,
+	adapter: WakuObjectAdapter,
+	chatMessage: DataMessage,
+) {
+	const descriptor = lookup(chatMessage.objectId)
+	const key = objectKey(chatMessage.objectId, chatMessage.instanceId)
+	const wakuObjectStore = get(objectStore)
 
-		if (descriptor && descriptor.onMessage && wakuObjectStore.lastUpdated < chatMessage.timestamp) {
-			const objects = wakuObjectStore.objects
-			const updateStore = (updater: (_store: unknown) => unknown) => {
-				const store = objects.get(key)
-				const newStore = updater(store)
-				const newObjects = new Map(objects)
-				newObjects.set(key, newStore)
-				objectStore.update((state) => ({
-					...state,
-					objects: newObjects,
-					lastUpdated: chatMessage.timestamp,
-				}))
-			}
+	if (descriptor && descriptor.onMessage && wakuObjectStore.lastUpdated < chatMessage.timestamp) {
+		const objects = wakuObjectStore.objects
+		const updateStore = (updater: (_store: unknown) => unknown) => {
 			const store = objects.get(key)
-			await descriptor.onMessage(address, adapter, store, updateStore, chatMessage)
+			const newStore = updater(store)
+			const newObjects = new Map(objects)
+			newObjects.set(key, newStore)
+			objectStore.update((state) => ({
+				...state,
+				objects: newObjects,
+				lastUpdated: chatMessage.timestamp,
+			}))
 		}
+		const store = objects.get(key)
+		await descriptor.onMessage(address, adapter, store, updateStore, chatMessage)
 	}
 }
 
@@ -131,6 +177,98 @@ async function storeObjectStore(waku: LightNode, address: string, objectStore: O
 	await storeDocument(waku, 'objects', address, Array.from(objectStore.objects))
 }
 
+async function readGroupChat(waku: LightNode, id: string): Promise<DraftChat> {
+	const groupChat = (await readLatestDocument(waku, 'group-chats', id)) as DraftChat
+	return groupChat
+}
+
+async function storeGroupChat(waku: LightNode, id: string, groupChat: DraftChat) {
+	await storeDocument(waku, 'group-chats', id, groupChat)
+}
+
+async function readUserFromProfile(waku: LightNode, address: string) {
+	const profile = (await readLatestDocument(waku, 'profile', address)) as Profile | undefined
+	if (profile) {
+		return {
+			name: profile.name,
+			avatar: profile.avatar,
+			address,
+		}
+	}
+}
+
+async function subscribeToPrivateMessages(
+	waku: LightNode,
+	adapter: WakuObjectAdapter,
+	address: string,
+	ids: string[],
+	subscriptions: Array<() => void>,
+): Promise<void> {
+	for (const id of ids) {
+		const subscription = await subscribe(
+			waku,
+			'private-message',
+			id,
+			async (msg: DecodedMessage) => {
+				const decodedPayload = decodeMessagePayload(msg)
+				const chatMessage = JSON.parse(decodedPayload) as Message
+				const chatsMap = get(chats).chats
+
+				// FIXME: the message should be checked for validity
+				if (!chatMessage) {
+					console.error('Invalid message received')
+					return
+				}
+
+				// ignore messages coming from own address
+				if (chatMessage.fromAddress === address) {
+					return
+				}
+
+				if (chatMessage.type === 'invite') {
+					const groupChat = await readGroupChat(waku, chatMessage.chatId)
+					const userPromises = groupChat.users.map((address) => readUserFromProfile(waku, address))
+					const allUsers = await Promise.all(userPromises)
+					const users = allUsers.filter((user) => user) as User[]
+					createGroupChat(chatMessage.chatId, users, groupChat.name, groupChat.avatar)
+
+					await subscribeToPrivateMessages(
+						waku,
+						adapter,
+						address,
+						[chatMessage.chatId],
+						subscriptions,
+					)
+				} else {
+					if (!isGroupChatId(id)) {
+						if (!chatsMap.has(chatMessage.fromAddress)) {
+							const storedProfile = (await readLatestDocument(
+								waku,
+								'profile',
+								chatMessage.fromAddress,
+							)) as Profile
+
+							if (storedProfile) {
+								const user = {
+									name: storedProfile.name,
+									avatar: storedProfile.avatar,
+									address: chatMessage.fromAddress,
+								}
+								createChat(chatMessage.fromAddress, user, address)
+							}
+						}
+
+						await addMessageToChat(address, adapter, chatMessage.fromAddress, chatMessage)
+					} else {
+						await addMessageToChat(address, adapter, id, chatMessage)
+					}
+				}
+			},
+		)
+		subscriptions.push(subscription)
+	}
+}
+
 export default class WakuAdapter implements Adapter {
 	private waku: LightNode | undefined
 	private subscriptions: Array<() => void> = []
@@ -160,7 +298,7 @@ export default class WakuAdapter implements Adapter {
 		// look for changes in users profile name and picture
 		const contacts = Array.from(get(chats).chats).map(([, chat]) => chat.users[0])
 		const changes = new Map<string, User>()
-		for await (const contact of contacts) {
+		for (const contact of contacts) {
 			const contactProfile = (await readLatestDocument(
 				this.waku,
 				'profile',
@@ -192,46 +330,17 @@ export default class WakuAdapter implements Adapter {
 			})
 		}
 
-		const subscribeChats = await subscribe(
+		const groupChatIds = Array.from(chatData.chats)
+			.filter(([id]) => isGroupChatId(id))
+			.map(([id]) => id)
+
+		subscribeToPrivateMessages(
 			this.waku,
-			'private-message',
+			wakuObjectAdapter,
 			address,
-			async (msg: DecodedMessage) => {
-				if (!adapter.waku) {
-					return
-				}
-
-				const decodedPayload = decodeMessagePayload(msg)
-				const chatMessage = JSON.parse(decodedPayload) as Message
-				const chatsMap = get(chats).chats
-
-				// FIXME: the message should be checked for validity
-				if (!chatMessage) {
-					console.error('Invalid message received')
-					return
-				}
-
-				if (!chatsMap.has(chatMessage.fromAddress)) {
-					const storedProfile = (await readLatestDocument(
-						adapter.waku,
-						'profile',
-						chatMessage.fromAddress,
-					)) as Profile
-
-					if (storedProfile) {
-						const user = {
-							name: storedProfile.name,
-							avatar: storedProfile.avatar,
-							address: chatMessage.fromAddress,
-						}
-						createChat(chatMessage.fromAddress, user, address)
-					}
-				}
-
-				await addMessageToChat(address, wakuObjectAdapter, chatMessage.fromAddress, chatMessage)
-			},
+			[address, ...groupChatIds],
+			this.subscriptions,
 		)
-		this.subscriptions.push(subscribeChats)
 
 		const objects = await readObjectStore(this.waku, address)
 		objectStore.update((state) => ({ ...state, ...objects, loading: false }))
@@ -299,6 +408,74 @@ export default class WakuAdapter implements Adapter {
 		return chatId
 	}
 
+	async startGroupChat(wallet: BaseWallet, chat: DraftChat): Promise<string> {
+		if (!this.waku) {
+			throw 'no waku'
+		}
+		if (chat.users.length === 0) {
+			throw 'invalid chat'
+		}
+
+		const genRanHex = (size: number) =>
+			[...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')
+		const chatId = genRanHex(64)
+
+		const waku = this.waku
+		const userPromises = chat.users.map((address) => readUserFromProfile(waku, address))
+		const allUsers = await Promise.all(userPromises)
+		const users = allUsers.filter((user) => user) as User[]
+
+		const wakuObjectAdapter = makeWakuObjectAdapter(this, wallet)
+
+		createGroupChat(chatId, users, chat.name, chat.avatar)
+		await storeGroupChat(this.waku, chatId, chat)
+		await subscribeToPrivateMessages(
+			this.waku,
+			wakuObjectAdapter,
+			wallet.address,
+			[chatId],
+			this.subscriptions,
+		)
+
+		return chatId
+	}
+
+	async addMemberToGroupChat(chatId: string, users: string[]): Promise<void> {
+		if (!this.waku) {
+			throw 'no waku'
+		}
+
+		const waku = this.waku
+		const groupChat = await readGroupChat(this.waku, chatId)
+		const updatedGroupChat = {
+			...groupChat,
+			users: groupChat.users.concat(...users),
+		}
+		await storeGroupChat(this.waku, chatId, updatedGroupChat)
+
+		const newUserPromises = users.map((address) => readUserFromProfile(waku, address))
+		const newResolvedUsers = await Promise.all(newUserPromises)
+		const newUsers = newResolvedUsers.filter((user) => user) as User[]
+
+		chats.update((state) => {
+			if (!state.chats.has(chatId)) {
+				return state
+			}
+
+			const newChats = new Map<string, Chat>(state.chats)
+			const chat = newChats.get(chatId)
+			if (chat) {
+				chat.users = [...chat.users, ...newUsers]
+			}
+
+			return {
+				...state,
+				chats: newChats,
+				loading: false,
+			}
+		})
+	}
+
 	async sendChatMessage(wallet: BaseWallet, chatId: string, text: string): Promise<void> {
 		if (!this.waku) {
 			throw 'no waku'
@@ -343,6 +520,28 @@ export default class WakuAdapter implements Adapter {
 
 		await addMessageToChat(fromAddress, wakuObjectAdapter, chatId, message)
 		await sendMessage(this.waku, chatId, message)
+	}
+
+	async sendInvite(wallet: BaseWallet, chatId: string, users: string[]): Promise<void> {
+		if (!this.waku) {
+			throw 'no waku'
+		}
+
+		if (!isGroupChatId(chatId)) {
+			throw 'chat id is private'
+		}
+
+		const fromAddress = wallet.address
+		const message: Message = {
+			type: 'invite',
+			timestamp: Date.now(),
+			fromAddress,
+			chatId,
+		}
+
+		for (const user of users) {
+			await sendMessage(this.waku, user, message)
+		}
 	}
 
 	async uploadPicture(picture: string): Promise<string> {

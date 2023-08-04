@@ -9,6 +9,10 @@ export interface Adapter {
 	saveUserProfile(address: string, name?: string, avatar?: string): Promise<void>
 
 	startChat(address: string, chat: DraftChat): Promise<string>
+	startGroupChat(wallet: BaseWallet, chat: DraftChat): Promise<string>
+
+	addMemberToGroupChat(chatId: string, users: string[]): Promise<void>
+
 	sendChatMessage(wallet: BaseWallet, chatId: string, text: string): Promise<void>
 	sendData(
 		wallet: BaseWallet,
@@ -17,6 +21,7 @@ export interface Adapter {
 		instanceId: string,
 		data: unknown,
 	): Promise<void>
+	sendInvite(wallet: BaseWallet, chatId: string, users: string[]): Promise<void>
 
 	uploadPicture(picture: string): Promise<string>
 	getPicture(cid: string): string

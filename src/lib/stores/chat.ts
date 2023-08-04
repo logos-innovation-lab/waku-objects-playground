@@ -17,12 +17,19 @@ export interface DataMessage<T = unknown> {
 	data?: T
 }
 
-export type Message = UserMessage | DataMessage
+export interface InviteMessage {
+	type: 'invite'
+	timestamp: number
+	fromAddress: string
+	chatId: string
+}
+
+export type Message = UserMessage | DataMessage | InviteMessage
 
 export interface DraftChat {
-	messages: Message[]
 	users: string[]
 	name?: string
+	avatar?: string
 }
 
 export interface Chat {
@@ -31,6 +38,7 @@ export interface Chat {
 	unread: number
 	users: User[]
 	name?: string
+	avatar?: string
 }
 
 export interface ChatData {
@@ -41,8 +49,16 @@ export interface ChatData {
 
 type ChatStore = Writable<ChatData>
 
+// FIXME temporary hack
+export function isGroupChatId(id: string) {
+	return id.length === 64
+}
+
 function createChatStore(): ChatStore {
-	const store = writable<ChatData>({ loading: true, chats: new Map<string, Chat>() })
+	const store = writable<ChatData>({
+		loading: true,
+		chats: new Map<string, Chat>(),
+	})
 
 	return store
 }

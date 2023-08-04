@@ -17,10 +17,19 @@
 
 	// Stores
 	import { profile } from '$lib/stores/profile'
-	import { chats } from '$lib/stores/chat'
+	import { chats, isGroupChatId, type Chat } from '$lib/stores/chat'
 
 	import ROUTES from '$lib/routes'
 	import { walletStore } from '$lib/stores/wallet'
+
+	$: orderedChats = Array.from($chats.chats)
+		.map(([, chat]) => chat)
+		.sort((a, b) => lastChatMessageTimestamp(b) - lastChatMessageTimestamp(a))
+
+	function lastChatMessageTimestamp(chat: Chat) {
+		const lastMessage = chat.messages.slice(-1)[0]
+		return lastMessage ? lastMessage.timestamp : 0
+	}
 </script>
 
 <div class="wrapper">
@@ -109,7 +118,7 @@
 		</Header>
 		<div class="grow">
 			<ul class="chats" aria-label="Chat List">
-				{#each [...$chats.chats] as [id, chat]}
+				{#each orderedChats as chat}
 					{@const userMessages = chat.messages.filter((message) => message.type === 'user')}
 					{@const lastMessage =
 						userMessages.length > 0 ? userMessages[userMessages.length - 1] : undefined}
@@ -119,21 +128,32 @@
 					<li>
 						<div
 							class="chat-button"
-							on:click={() => goto(ROUTES.CHAT(id))}
-							on:keypress={() => goto(ROUTES.CHAT(id))}
+							on:click={() =>
+								isGroupChatId(chat.chatId)
+									? goto(ROUTES.GROUP_CHAT(chat.chatId))
+									: goto(ROUTES.CHAT(chat.chatId))}
+							on:keypress={() =>
+								isGroupChatId(chat.chatId)
+									? goto(ROUTES.GROUP_CHAT(chat.chatId))
+									: goto(ROUTES.CHAT(chat.chatId))}
 							role="button"
 							tabindex="0"
 						>
 							<Container grow>
 								<div class="chat">
-									<!-- TODO: WHAT HAPPENS TO THE AVATAR IF IT'S A GROUP CHAT? -->
-									{#if chat.users.length === 2}
+									{#if isGroupChatId(chat.chatId)}
+										<Avatar size={70} picture={chat?.avatar} />
+									{:else}
 										<Avatar size={70} picture={otherUser?.avatar} />
 									{/if}
 									<div class="content">
 										<div class="user-info">
 											<span class="username text-lg text-bold">
-												{otherUser?.name}
+												{#if isGroupChatId(chat.chatId)}
+													{chat?.name}
+												{:else}
+													{otherUser?.name}
+												{/if}
 												{#if chat.unread > 0}
 													<Badge dark>
 														{chat.unread}
@@ -152,12 +172,6 @@
 							</Container>
 						</div>
 					</li>
-				{:else}
-					<Container align="center" grow gap={6} justify="center">
-						<div class="center">
-							<p>No chats</p>
-						</div>
-					</Container>
 				{/each}
 			</ul>
 		</div>
