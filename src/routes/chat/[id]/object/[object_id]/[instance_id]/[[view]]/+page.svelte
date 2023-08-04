@@ -8,7 +8,7 @@
 		[...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')
 
 	const objectId = $page.params.object_id
-	const instanceId = objectId === 'new' ? genRanHex(12) : $page.params.instance_id
+	const instanceId = $page.params.instance_id === 'new' ? genRanHex(12) : $page.params.instance_id
 	const chatId = $page.params.id
 	let view = $page.params.view
 

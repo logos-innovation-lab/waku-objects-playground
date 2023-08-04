@@ -19,6 +19,8 @@ export const UserSchema = z.object({
 export type User = z.infer<typeof UserSchema>
 
 export const TransactionSchema = z.object({
+	timestamp: z.number().int().positive(),
+	hash: z.string(),
 	token: z.object({
 		amount: z.string(),
 		symbol: z.string(),
