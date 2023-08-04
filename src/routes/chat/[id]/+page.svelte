@@ -37,13 +37,10 @@
 
 	onMount(() => {
 		if (browser && div) {
-			// It can not be done in onMount because the div is not yet rendered
-			setTimeout(() => {
-				div.scrollTo({
-					top: div.scrollHeight,
-					behavior: 'auto',
-				})
-			}, 0)
+			div.scrollTo({
+				top: div.scrollHeight,
+				behavior: 'auto',
+			})
 		}
 	})
 

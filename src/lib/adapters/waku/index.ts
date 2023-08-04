@@ -380,8 +380,8 @@ export default class WakuAdapter implements Adapter {
 		await storeObjectStore(this.waku, address, updatedObjectStore)
 	}
 
-	async sendTransaction(wallet: Wallet, to: string, token: Token, fee: Token): Promise<string> {
-		const tx = await sendTransaction(wallet, to, token.amount, fee.amount)
+	async sendTransaction(wallet: Wallet, to: string, token: Token): Promise<string> {
+		const tx = await sendTransaction(wallet, to, token.amount, token.address)
 		return tx.hash
 	}
 

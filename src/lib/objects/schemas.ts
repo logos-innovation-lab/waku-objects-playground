@@ -34,10 +34,5 @@ export const TransactionSchema = z.object({
 })
 export type Transaction = z.infer<typeof TransactionSchema>
 
-export const TransactionStateSchema = z.union([
-	z.literal('unknown'),
-	z.literal('pending'),
-	z.literal('reverted'),
-	z.literal('success'),
-])
+export const TransactionStateSchema = z.enum(['unknown', 'pending', 'reverted', 'success'])
 export type TransactionState = z.infer<typeof TransactionStateSchema>

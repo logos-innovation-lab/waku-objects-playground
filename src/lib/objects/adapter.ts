@@ -1,5 +1,5 @@
 import type { Adapter } from '$lib/adapters'
-import type { BaseWallet, TransactionReceipt } from 'ethers'
+import { Contract, type BaseWallet, type TransactionReceipt } from 'ethers'
 import type { WakuObjectAdapter } from '.'
 import type { Token } from '$lib/stores/balances'
 import {
@@ -10,14 +10,15 @@ import {
 } from '$lib/adapters/transaction'
 import type { Transaction, TransactionState } from './schemas'
 import { checkBalance } from '$lib/adapters/balance'
+import abi from '$lib/abis/erc20.json'
 
 const NUM_CONFIRMATIONS = 2
 
 export function makeWakuObjectAdapter(adapter: Adapter, wallet: BaseWallet): WakuObjectAdapter {
 	const { address } = wallet
 
-	function sendTransaction(to: string, token: Token, fee: Token) {
-		return adapter.sendTransaction(wallet, to, token, fee)
+	function sendTransaction(to: string, token: Token) {
+		return adapter.sendTransaction(wallet, to, token)
 	}
 
 	function estimateTransaction(to: string, token: Token) {
@@ -34,20 +35,43 @@ export function makeWakuObjectAdapter(adapter: Adapter, wallet: BaseWallet): Wak
 			return undefined
 		}
 		const from = tx.from
-		const to = tx.to || ''
-		const token = {
-			...defaultBlockchainNetwork.nativeToken,
-			amount: tx.value.toString(),
+		const nonNativeToken = defaultBlockchainNetwork.tokens?.find((t) => t.address === tx.to)
+
+		let token: Token
+		let to: string
+
+		if (nonNativeToken && tx.to) {
+			const contract = new Contract(tx.to, abi)
+			const parsedTransaction = contract.interface.parseTransaction({ data: tx.data })
+			if (!parsedTransaction) throw new Error('Could not parse transaction')
+
+			to = parsedTransaction.args[0]
+			const amount = parsedTransaction.args[1]
+
+			token = {
+				...nonNativeToken,
+				amount: amount,
+			}
+		} else {
+			token = {
+				...defaultBlockchainNetwork.nativeToken,
+				amount: tx.value,
+			}
+			to = tx.to ?? ''
 		}
+		let feeAmount = 0n
+		if (tx.maxFeePerGas && tx.maxPriorityFeePerGas)
+			feeAmount = tx.gasLimit * tx.maxFeePerGas + tx.gasLimit * tx.maxPriorityFeePerGas
+		else if (tx.gasPrice) feeAmount = tx.gasLimit * tx.gasPrice
+
 		return {
 			from,
 			to,
 			fee: {
-				symbol: '',
-				amount: '0', // has to be non-zero
-				decimals: 18,
+				...defaultBlockchainNetwork.nativeToken,
+				amount: feeAmount.toString(),
 			},
-			token,
+			token: { ...token, amount: token.amount.toString() },
 		}
 	}
 

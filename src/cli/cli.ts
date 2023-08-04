@@ -28,12 +28,12 @@ async function main() {
 	await fn(...restArgs)
 }
 
-async function fund(address: string, amount = '1', fee = '0.1') {
+async function fund(address: string, amount = '1') {
 	console.log(`Funding address: ${address}`)
 	// hardhat builtin wallet private key
 	const wallet = new Wallet('0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80')
 
-	const tx = await sendTransaction(wallet, address, parseEther(amount), parseEther(fee))
+	const tx = await sendTransaction(wallet, address, parseEther(amount))
 
 	console.log('tx done', { tx })
 }

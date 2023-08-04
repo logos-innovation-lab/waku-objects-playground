@@ -6,7 +6,9 @@ import {
 	TransactionReceipt,
 	type Provider,
 	TransactionResponse,
+	Contract,
 } from 'ethers'
+import abi from '$lib/abis/erc20.json'
 
 interface BlockchainNetwork {
 	name: string
@@ -79,18 +81,23 @@ export async function sendTransaction(
 	wallet: BaseWallet,
 	to: string,
 	amount: bigint,
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	fee: bigint,
+	tokenAddress?: string,
 ): Promise<TransactionResponse> {
 	const provider = getProvider()
 	const txWallet = wallet.connect(provider)
 
-	const txRequest: TransactionRequest = {
-		to,
-		value: amount,
-	}
+	let tx: TransactionResponse
+	if (tokenAddress) {
+		const contract = new Contract(tokenAddress, abi, txWallet)
+		tx = await contract.transfer(to, amount)
+	} else {
+		const txRequest: TransactionRequest = {
+			to,
+			value: amount,
+		}
 
-	const tx = await txWallet.sendTransaction(txRequest)
+		tx = await txWallet.sendTransaction(txRequest)
+	}
 
 	return tx
 }
