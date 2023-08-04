@@ -2,14 +2,13 @@
 
 import { connectWaku, decodeMessagePayload, sendMessage, storeDocument, subscribe } from './waku'
 
-import child_process from 'child_process'
+import axios from 'axios'
 
 const botAddress = process.argv[2] || process.env['BOT_ADDRESS']
 const botProfile = {
 	name: 'Bot',
 	avatar: 'QmahJdru5ooiPrn8FipC7tLb2t9o39Kdszohk2g5SFffnQ', // IPFS hash of image comes here
 }
-const command = ['/home/attila/Projects/randomshit/ollama/ollama', 'run', 'llama2-uncensored']
 
 async function main() {
 	if (!botAddress) {
@@ -37,13 +36,21 @@ async function main() {
 			fromAddress: botAddress,
 		})
 
-		const output = child_process.spawnSync(command[0], command.slice(1), {
-			input: chatMessage.text,
+		const httpResponse = await axios.post('http://localhost:8004/api/userinput', {
+			user_input: chatMessage.text,
 		})
+
+		const text = (await httpResponse.data) as string
+		const output = text
+			.split('\n')
+			.map((part: string) => JSON.parse(part) as { cmd: string; text: string })
+			.filter((obj) => obj.cmd === 'append' && obj.text)
+			.join('')
+
 		sendMessage(waku, chatMessage.fromAddress, {
 			type: 'user',
 			timestamp: Date.now(),
-			text: output.stdout.toString('utf-8'),
+			text: output,
 			fromAddress: botAddress,
 		})
 	})
