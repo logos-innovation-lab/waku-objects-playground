@@ -10,12 +10,14 @@ import {
 	type DataMessage,
 } from '$lib/stores/chat'
 import type { User } from '$lib/types'
-import type { LightNode } from '@waku/interfaces'
+import { PageDirection, type LightNode, type StoreQueryOptions } from '@waku/interfaces'
 import type { DecodedMessage } from '@waku/sdk'
 import {
 	connectWaku,
 	decodeMessagePayload,
+	parseQueryResults,
 	readLatestDocument,
+	readStore,
 	sendMessage,
 	storeDocument,
 	subscribe,
@@ -269,6 +271,65 @@ async function subscribeToPrivateMessages(
 	}
 }
 
+async function updateContactProfiles(waku: LightNode) {
+	// look for changes in users profile name and picture
+	const contacts = Array.from(get(chats).chats).map(([, chat]) => chat.users[0])
+	const changes = new Map<string, User>()
+	for await (const contact of contacts) {
+		const contactProfile = (await readLatestDocument(waku, 'profile', contact.address)) as Profile
+
+		if (contactProfile.name != contact.name || contactProfile.avatar != contact.avatar) {
+			const changedUser = {
+				name: contactProfile.name,
+				avatar: contactProfile.avatar,
+				address: contact.address,
+			}
+			changes.set(contact.address, changedUser)
+		}
+	}
+	if (changes.size > 0) {
+		chats.update((state) => {
+			const newChats = new Map<string, Chat>(state.chats)
+			changes.forEach((user) => {
+				const chat = newChats.get(user.address)
+				if (chat) {
+					chat.users[0] = user
+				}
+			})
+			return {
+				...state,
+				chats: newChats,
+			}
+		})
+	}
+}
+
+async function readGroupChatInvites(waku: LightNode, address: string) {
+	const storeQueryOptions: StoreQueryOptions = {
+		pageDirection: PageDirection.BACKWARD,
+		pageSize: 100,
+	}
+
+	const results = await readStore(waku, 'private-message', address, storeQueryOptions)
+	const messages = await parseQueryResults<Message>(results)
+
+	const storeChats = get(chats).chats
+	for (const message of messages) {
+		if (message.type === 'invite') {
+			if (!storeChats.get(message.chatId)) {
+				const groupChat = await readGroupChat(waku, message.chatId)
+				if (!groupChat) {
+					continue
+				}
+				const userPromises = groupChat.users.map((address) => readUserFromProfile(waku, address))
+				const allUsers = await Promise.all(userPromises)
+				const users = allUsers.filter((user) => user) as User[]
+				createGroupChat(message.chatId, users, groupChat.name, groupChat.avatar)
+			}
+		}
+	}
+}
+
 export default class WakuAdapter implements Adapter {
 	private waku: LightNode | undefined
 	private subscriptions: Array<() => void> = []
@@ -295,42 +356,9 @@ export default class WakuAdapter implements Adapter {
 		})
 		this.subscriptions.push(subscribeChatStore)
 
-		// look for changes in users profile name and picture
-		const contacts = Array.from(get(chats).chats).map(([, chat]) => chat.users[0])
-		const changes = new Map<string, User>()
-		for (const contact of contacts) {
-			const contactProfile = (await readLatestDocument(
-				this.waku,
-				'profile',
-				contact.address,
-			)) as Profile
+		await readGroupChatInvites(this.waku, address)
 
-			if (contactProfile.name != contact.name || contactProfile.avatar != contact.avatar) {
-				const changedUser = {
-					name: contactProfile.name,
-					avatar: contactProfile.avatar,
-					address: contact.address,
-				}
-				changes.set(contact.address, changedUser)
-			}
-		}
-		if (changes.size > 0) {
-			chats.update((state) => {
-				const newChats = new Map<string, Chat>(state.chats)
-				changes.forEach((user) => {
-					const chat = newChats.get(user.address)
-					if (chat) {
-						chat.users[0] = user
-					}
-				})
-				return {
-					...state,
-					chats: newChats,
-				}
-			})
-		}
-
-		const groupChatIds = Array.from(chatData.chats)
+		const groupChatIds = Array.from(get(chats).chats)
 			.filter(([id]) => isGroupChatId(id))
 			.map(([id]) => id)
 
@@ -352,6 +380,8 @@ export default class WakuAdapter implements Adapter {
 			await storeObjectStore(adapter.waku, address, objects)
 		})
 		this.subscriptions.push(subscribeObjectStore)
+
+		await updateContactProfiles(this.waku)
 
 		fetchBalances(address)
 	}

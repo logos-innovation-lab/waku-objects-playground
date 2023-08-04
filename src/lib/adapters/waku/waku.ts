@@ -115,6 +115,22 @@ export async function readStore(
 	return waku.store.queryGenerator([decoder], storeQueryOptions)
 }
 
+export async function parseQueryResults<T>(results: QueryResult): Promise<T[]> {
+	const typedResults: T[] = []
+	for await (const messagePromises of results) {
+		for (const messagePromise of messagePromises) {
+			const message = await messagePromise
+			if (message) {
+				const decodedPayload = decodeMessagePayload(message)
+
+				const typedPayload = JSON.parse(decodedPayload) as T
+				typedResults.push(typedPayload)
+			}
+		}
+	}
+	return typedResults
+}
+
 export function decodeMessagePayload(wakuMessage: DecodedMessage): string {
 	return bytesToUtf8(wakuMessage.payload)
 }
