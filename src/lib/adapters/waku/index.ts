@@ -273,10 +273,14 @@ async function subscribeToPrivateMessages(
 
 async function updateContactProfiles(waku: LightNode) {
 	// look for changes in users profile name and picture
-	const contacts = Array.from(get(chats).chats).map(([, chat]) => chat.users[0])
+	const contacts = Array.from(get(chats).chats).flatMap(([, chat]) => chat.users)
 	const changes = new Map<string, User>()
-	for await (const contact of contacts) {
+	for (const contact of contacts) {
 		const contactProfile = (await readLatestDocument(waku, 'profile', contact.address)) as Profile
+
+		if (!contactProfile) {
+			continue
+		}
 
 		if (contactProfile.name != contact.name || contactProfile.avatar != contact.avatar) {
 			const changedUser = {
@@ -381,9 +385,8 @@ export default class WakuAdapter implements Adapter {
 		})
 		this.subscriptions.push(subscribeObjectStore)
 
-		await updateContactProfiles(this.waku)
-
 		fetchBalances(address)
+		updateContactProfiles(this.waku)
 	}
 
 	async onLogOut() {
