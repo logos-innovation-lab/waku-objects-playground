@@ -35,6 +35,9 @@
 	$: myMessage = message.fromAddress === args.profile.address
 	// FIXME: will not work for group chats
 	$: otherUser = args.users.find((u) => u.address !== args.profile.address)
+	function onDetailsClick() {
+		if (args.onViewChange) args.onViewChange('details')
+	}
 </script>
 
 <ChatMessage {myMessage} object bubble>
@@ -79,8 +82,15 @@
 								{data.transaction.token.symbol}
 							</div>
 						{/if}
-						<!-- TODO: add action to icon -->
-						<DataViewAlt />
+						<div
+							class="change-view"
+							on:click={onDetailsClick}
+							on:keypress={onDetailsClick}
+							role="button"
+							tabindex={0}
+						>
+							<DataViewAlt />
+						</div>
 					</div>
 				</ReadonlyText>
 				<!-- TODO: add check for transaction status -->
@@ -123,5 +133,12 @@
 		flex-direction: row;
 		align-items: center;
 		gap: var(--spacing-6);
+	}
+
+	.change-view {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		cursor: pointer;
 	}
 </style>

@@ -5,6 +5,9 @@
 	import WarningAltFilled from '$lib/components/icons/warning-alt-filled.svelte'
 	import Edit from '$lib/components/icons/edit.svelte'
 	import ArrowUp from '$lib/components/icons/arrow-up.svelte'
+	import Close from '$lib/components/icons/close.svelte'
+	import ArrowDownRight from '$lib/components/icons/arrow-down-right.svelte'
+	import ArrowUpRight from '$lib/components/icons/arrow-up-right.svelte'
 
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'
@@ -13,9 +16,8 @@
 	import Input from '$lib/components/input-field.svelte'
 	import Dropdown from '$lib/components/dropdown.svelte'
 	import DropdownItem from '$lib/components/dropdown-item.svelte'
-	import Close from '$lib/components/icons/close.svelte'
 
-	import { formatAddress, toSignificant, toBigInt } from '$lib/utils/format'
+	import { formatAddress, toSignificant, toBigInt, formatDateAndTime } from '$lib/utils/format'
 	import type { WakuObjectArgs } from '..'
 	import {
 		SendTransactionStoreSchema,
@@ -26,6 +28,7 @@
 	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 	import { throwError } from '$lib/utils/error'
 	import Grid from '$lib/components/grid.svelte'
+	import logo from './logo.svg'
 
 	export let args: WakuObjectArgs<SendTransactionStore, SendTransactionDataMessage>
 
@@ -142,6 +145,77 @@
 			<ArrowUp /> Send now
 		</Button>
 	</Container>
+{:else if args.view === 'details'}
+	<Header title={`Transaction #${args.instanceId}`}>
+		<div slot="left">
+			<img src={logo} alt="Payggy logo" />
+		</div>
+		<Button slot="right" variant="icon" on:click={() => history.back()}>
+			<Close />
+		</Button>
+	</Header>
+	{#if !store}
+		<Container align="center" grow gap={6} justify="center" padX={24}>
+			<h2>Loading details...</h2>
+		</Container>
+	{:else}
+		{@const isSender = store.transaction.from === args.profile.address}
+
+		{#if isSender}
+			<ArrowUpRight />
+		{:else}
+			<ArrowDownRight />
+		{/if}
+		{toSignificant(BigInt(store.transaction.token.amount), store.transaction.token.decimals)}
+		{store.transaction.token.symbol}
+		Payment {store.type}
+
+		<Container gap={6} direction="column" grow padX={24}>
+			<!-- TODO: format the timestamp -->
+			{formatDateAndTime(store.transaction.timestamp)}
+
+			{#if isSender}
+				You sent {toSignificant(
+					BigInt(store.transaction.token.amount),
+					store.transaction.token.decimals,
+				)}
+				{store.transaction.token.symbol} to {args.users.find(
+					(u) => store && store.type !== 'init' && u.address === store.transaction.to,
+				)?.name}
+			{:else}
+				You received {toSignificant(
+					BigInt(store.transaction.token.amount),
+					store.transaction.token.decimals,
+				)}
+				{store.transaction.token.symbol} from {args.users.find(
+					(u) => store && store.type !== 'init' && u.address === store.transaction.from,
+				)?.name}
+			{/if}
+			Payment {store.type}
+
+			<!-- Details -->
+			<ReadonlyText label="Amount">
+				<div class="row">
+					<div>
+						<div class="text-lg">{amount} {token.symbol}</div>
+						<div class="secondary text-sm">≈ 13.91 EUR at the time of transaction</div>
+					</div>
+				</div>
+			</ReadonlyText>
+			<ReadonlyText label="Transaction fee (max)">
+				<div class="text-lg">
+					{fee ? `${toSignificant(fee.amount, fee.decimals)} ${fee.symbol}` : 'unknown'}
+				</div>
+				<div class="secondary text-sm">≈ 1.56 EUR now</div>
+			</ReadonlyText>
+			<ReadonlyText label="Transaction ID">
+				<div class="text-lg">{store.transaction.hash}</div>
+			</ReadonlyText>
+			<ReadonlyText label="Transaction status">
+				<div class="text-lg">{store.type}</div>
+			</ReadonlyText>
+		</Container>
+	{/if}
 {:else}
 	<Header title="Payggy">
 		<Button slot="left" variant="icon" on:click={() => history.back()}>

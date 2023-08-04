@@ -128,3 +128,9 @@ export async function getTransactionReceipt(txHash: string): Promise<Transaction
 	const receipt = await provider.getTransactionReceipt(txHash)
 	return receipt
 }
+
+export async function getTransactionTimestamp(blocknum: number): Promise<number> {
+	const provider = getProvider()
+	const block = await provider.getBlock(blocknum)
+	return block?.timestamp ?? Date.now()
+}

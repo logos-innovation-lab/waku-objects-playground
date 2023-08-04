@@ -6,6 +6,7 @@ import {
 	defaultBlockchainNetwork,
 	getTransactionReceipt,
 	getTransactionResponse,
+	getTransactionTimestamp,
 	waitForTransaction,
 } from '$lib/adapters/transaction'
 import type { Transaction, TransactionState } from './schemas'
@@ -64,7 +65,18 @@ export function makeWakuObjectAdapter(adapter: Adapter, wallet: BaseWallet): Wak
 			feeAmount = tx.gasLimit * tx.maxFeePerGas + tx.gasLimit * tx.maxPriorityFeePerGas
 		else if (tx.gasPrice) feeAmount = tx.gasLimit * tx.gasPrice
 
+		let timestamp: number = Date.now()
+		if (tx.blockNumber) {
+			try {
+				timestamp = await getTransactionTimestamp(tx.blockNumber)
+			} catch (error) {
+				console.error(error)
+			}
+		}
+
 		return {
+			timestamp,
+			hash: txHash,
 			from,
 			to,
 			fee: {

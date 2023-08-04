@@ -1,3 +1,5 @@
+import { browser } from '$app/environment'
+
 export function formatAddress(address: string, prefix = 4, suffix = 0) {
 	if (suffix) return `${address.slice(0, prefix + 2)}...${address.slice(-suffix)}`
 	return `${address.slice(0, prefix + 2)}`
@@ -64,4 +66,33 @@ export function toBigInt(decimalString: string, decimals: number): bigint | neve
 
 	// Parse the resulting string to a BigInt
 	return BigInt(wholePart + paddedFractionalPart)
+}
+
+export function formatDateAndTime(timestamp: number) {
+	if (!browser) {
+		return ''
+	}
+	const locale = navigator.language
+	const date = new Date(timestamp)
+	const dateFormat = new Intl.DateTimeFormat(locale, {
+		year: 'numeric',
+		month: 'numeric',
+		day: 'numeric',
+	})
+	let dateString = dateFormat.format(date)
+	const today = new Date()
+	const yesterday = new Date(today).setDate(today.getDate() - 1)
+
+	if (dateString === dateFormat.format(today)) {
+		dateString = 'Today'
+	} else if (dateString === dateFormat.format(yesterday)) {
+		dateString = 'Yesterday'
+	}
+	const timeFormat = new Intl.DateTimeFormat(locale, {
+		hour: 'numeric',
+		minute: 'numeric',
+		second: 'numeric',
+	})
+	const dateTime = timeFormat.format(date)
+	return `${dateString} at ${dateTime}`
 }
