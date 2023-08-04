@@ -13,7 +13,8 @@
 		"format": "prettier --plugin-search-dir . --write . && eslint . --fix",
 		"knip": "knip",
 		"start:blockchain": "hardhat node",
-		"cli": "ts-node --esm --experimental-specifier-resolution=node ./src/cli/cli.ts"
+		"cli": "ts-node --esm --experimental-specifier-resolution=node ./src/cli/cli.ts",
+		"bot": "ts-node --esm --experimental-specifier-resolution=node ./src/lib/adapters/waku/bot.ts"
 	},
 	"devDependencies": {
 		"@bonosoft/sveltekit-qrcode": "^0.0.3",
