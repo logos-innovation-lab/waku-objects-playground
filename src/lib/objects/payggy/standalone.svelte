@@ -82,8 +82,6 @@
 			history.go(-3)
 		}
 	}
-
-	$: console.log({ store, args })
 </script>
 
 {#if store?.type === 'init'}
