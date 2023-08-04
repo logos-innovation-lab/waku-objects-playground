@@ -13,6 +13,9 @@
 	import Avatar from '$lib/components/avatar.svelte'
 	import Dropdown from '$lib/components/dropdown.svelte'
 	import DropdownItem from '$lib/components/dropdown-item.svelte'
+	import ChatMessage from '$lib/components/chat-message.svelte'
+	import Layout from '$lib/components/layout.svelte'
+
 	import WakuObject from '$lib/objects/chat.svelte'
 
 	import { goto } from '$app/navigation'
@@ -22,7 +25,6 @@
 	import { walletStore } from '$lib/stores/wallet'
 	import { browser } from '$app/environment'
 	import { profile } from '$lib/stores/profile'
-	import ChatMessage from '$lib/components/chat-message.svelte'
 
 	let div: HTMLElement
 	let autoscroll = true
@@ -63,28 +65,36 @@
 </script>
 
 {#if $walletStore.loading || $profile.loading}
-	<Container align="center" grow gap={6} justify="center" padX={24}>
-		<h2>Loading...</h2>
-	</Container>
+	<Layout align="center">
+		<Container align="center" grow gap={6} justify="center" padX={24}>
+			<h2>Loading...</h2>
+		</Container>
+	</Layout>
 {:else if $walletStore.error || $profile.error}
-	<Container align="center" grow gap={6} justify="center" padX={24}>
-		<h2>Failed to load chat: {$profile.error?.message ?? $walletStore.error?.message}</h2>
-	</Container>
+	<Layout align="center">
+		<Container align="center" grow gap={6} justify="center" padX={24}>
+			<h2>Failed to load chat: {$profile.error?.message ?? $walletStore.error?.message}</h2>
+		</Container>
+	</Layout>
 {:else if !chat}
-	<Container align="center" grow gap={6} justify="center" padX={24}>
-		<h2>Chat not found</h2>
-	</Container>
+	<Layout align="center">
+		<Container align="center" grow gap={6} justify="center" padX={24}>
+			<h2>Chat not found</h2>
+		</Container>
+	</Layout>
 {:else}
-	<div class="chat">
-		<Header>
-			<Button variant="icon" slot="left" on:click={() => goto(ROUTES.HOME)}>
-				<ChevronLeft />
-			</Button>
-			<svelte:fragment slot="chat">
-				<Avatar picture={otherUser?.avatar ?? ''} />
-				{otherUser?.name}
-			</svelte:fragment>
-		</Header>
+	<Layout align="center" bgColor="shade">
+		<svelte:fragment slot="header">
+			<Header>
+				<Button variant="icon" slot="left" on:click={() => goto(ROUTES.HOME)}>
+					<ChevronLeft />
+				</Button>
+				<svelte:fragment slot="chat">
+					<Avatar picture={otherUser?.avatar ?? ''} />
+					{otherUser?.name}
+				</svelte:fragment>
+			</Header>
+		</svelte:fragment>
 		<div class="chat-messages" bind:this={div}>
 			<Container grow>
 				<div class="messages">
@@ -106,50 +116,51 @@
 				</div>
 			</Container>
 		</div>
-		<div class="chat-input-wrapper">
-			<Container>
-				<div class="chat-input">
-					<Dropdown up left>
-						<!-- TODO: make button "active" while dropdown is open -->
-						<Button variant="icon" slot="button">
-							<Add />
-						</Button>
-						<DropdownItem disabled onClick={() => console.log('Pic from Cam')}
-							>Pic from Cam</DropdownItem
-						>
-						<DropdownItem disabled onClick={() => console.log('Pic from Lib')}
-							>Pic from Lib</DropdownItem
-						>
-						<DropdownItem onClick={() => goto(ROUTES.OBJECTS($page.params.id))}
-							>Waku Object</DropdownItem
-						>
-					</Dropdown>
-					<Textarea
-						placeholder="Message"
-						autofocus
-						bind:value={text}
-						on:keypress={(e) => {
-							// When enter is pressed without modifier keys, send the message
-							if (e.key === 'Enter' && !(e.shiftKey || e.ctrlKey || e.altKey)) {
-								sendMessage()
-								e.preventDefault()
-							}
-							// When shift+enter is pressed, add a newline
-							else if (e.key === 'Enter' && (e.altKey || e.ctrlKey)) {
-								text += '\n'
-								e.preventDefault()
-							}
-						}}
-					/>
-					{#if text.length > 0}
-						<Button variant="strong" disabled={loading} on:click={sendMessage}>
-							<ArrowUp />
-						</Button>
-					{/if}
-				</div>
-			</Container>
-		</div>
-	</div>
+		<svelte:fragment slot="footer">
+			<div class="chat-input-wrapper">
+				<Container>
+					<div class="chat-input">
+						<Dropdown up left>
+							<!-- TODO: make button "active" while dropdown is open -->
+							<Button variant="icon" slot="button">
+								<Add />
+							</Button>
+							<DropdownItem disabled onClick={() => console.log('Pic from Cam')}
+								>Pic from Cam</DropdownItem
+							>
+							<DropdownItem disabled onClick={() => console.log('Pic from Lib')}
+								>Pic from Lib</DropdownItem
+							>
+							<DropdownItem onClick={() => goto(ROUTES.OBJECTS($page.params.id))}
+								>Waku Object</DropdownItem
+							>
+						</Dropdown>
+						<Textarea
+							placeholder="Message"
+							bind:value={text}
+							on:keypress={(e) => {
+								// When enter is pressed without modifier keys, send the message
+								if (e.key === 'Enter' && !(e.shiftKey || e.ctrlKey || e.altKey)) {
+									sendMessage()
+									e.preventDefault()
+								}
+								// When shift+enter is pressed, add a newline
+								else if (e.key === 'Enter' && (e.altKey || e.ctrlKey)) {
+									text += '\n'
+									e.preventDefault()
+								}
+							}}
+						/>
+						{#if text.length > 0}
+							<Button variant="strong" disabled={loading} on:click={sendMessage}>
+								<ArrowUp />
+							</Button>
+						{/if}
+					</div>
+				</Container>
+			</div>
+		</svelte:fragment>
+	</Layout>
 {/if}
 
 <style lang="scss">
@@ -161,13 +172,13 @@
 		overflow-y: auto;
 	}
 
-	.chat {
-		display: flex;
-		flex-direction: column;
-		height: 100vh;
-		height: 100dvh;
-		background-color: var(--color-step-10, var(--color-dark-step-50));
-	}
+	// .chat {
+	// 	display: flex;
+	// 	flex-direction: column;
+	// 	height: 100vh;
+	// 	height: 100dvh;
+	// 	background-color: var(--color-step-10, var(--color-dark-step-50));
+	// }
 
 	.chat-messages {
 		flex-grow: 1;

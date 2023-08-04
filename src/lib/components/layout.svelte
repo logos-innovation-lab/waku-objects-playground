@@ -4,15 +4,11 @@
 </script>
 
 <div class={`wrapper ${bgColor}`}>
-	<div class="header">
-		<slot name="header" />
-	</div>
+	<slot name="header" />
 	<div class={`grow ${align}`}>
 		<slot />
 	</div>
-	<div class="footer">
-		<slot name="footer" />
-	</div>
+	<slot name="footer" />
 </div>
 
 <style lang="scss">
@@ -30,10 +26,6 @@
 
 	.shade {
 		background-color: var(--color-step-10, var(--color-dark-step-50));
-	}
-
-	.header {
-		position: sticky;
 	}
 
 	.grow {

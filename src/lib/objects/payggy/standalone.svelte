@@ -29,6 +29,7 @@
 	import { throwError } from '$lib/utils/error'
 	import Grid from '$lib/components/grid.svelte'
 	import logo from './logo.svg'
+	import Layout from '$lib/components/layout.svelte'
 
 	export let args: WakuObjectArgs<SendTransactionStore, SendTransactionDataMessage>
 
