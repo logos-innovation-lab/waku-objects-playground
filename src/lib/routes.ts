@@ -10,8 +10,8 @@ export default {
 	CHAT: (id: string) => `/chat/${id}`,
 	INVITE: (address: string) => `/invite/${address}`,
 	OBJECTS: (id: string) => `/chat/${id}/object/new`,
-	OBJECT_NEW: (id: string, objectId: string, view?: string) =>
-		`/chat/${id}/object/${objectId}/new${view ? `/${view}` : ''}`,
+	OBJECT: (id: string, objectId: string, instanceId: string, view?: string) =>
+		`/chat/${id}/object/${objectId}/${instanceId}${view ? `/${view}` : ''}`,
 	GROUP_NEW: `/group/new`,
 	GROUP_CHAT: (id: string) => `/group/chat/${id}`,
 	GROUP_EDIT: (id: string) => `/group/chat/${id}/edit`,

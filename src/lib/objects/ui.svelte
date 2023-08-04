@@ -15,6 +15,7 @@
 	export let instanceId: string
 	export let chatId: string
 	export let onViewChange: ((view: string) => void) | undefined = undefined
+	export let view: string | undefined = undefined
 
 	const component = lookup(objectId)?.standalone
 
@@ -65,6 +66,7 @@
 			send,
 			updateStore,
 			onViewChange,
+			view,
 			...wakuObjectAdapter,
 		}
 	}

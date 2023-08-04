@@ -26,6 +26,7 @@
 	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 	import { throwError } from '$lib/utils/error'
 	import Grid from '$lib/components/grid.svelte'
+	import logo from './logo.svg'
 
 	export let args: WakuObjectArgs<SendTransactionStore, SendTransactionDataMessage>
 
@@ -79,6 +80,8 @@
 			history.go(-3)
 		}
 	}
+
+	$: console.log({ store, args })
 </script>
 
 {#if store?.type === 'init'}
@@ -142,6 +145,22 @@
 			<ArrowUp /> Send now
 		</Button>
 	</Container>
+{:else if args.view === 'details'}
+	<Header title={`Transaction #...`}>
+		<div slot="left">
+			<img src={logo} alt="Payggy logo" />
+		</div>
+		<Button slot="right" variant="icon" on:click={() => history.back()}>
+			<Close />
+		</Button>
+	</Header>
+	<!-- {#if store?.fromUser?.address === args?.profile?.address}
+		You sent
+		{JSON.stringify(store)}
+	{:else}
+		You received
+		{JSON.stringify(store)}
+	{/if} -->
 {:else}
 	<Header title="Payggy">
 		<Button slot="left" variant="icon" on:click={() => history.back()}>

@@ -10,6 +10,8 @@
 	import type { User } from './schemas'
 	import { makeWakuObjectAdapter } from './adapter'
 	import { balanceStore } from '$lib/stores/balances'
+	import { goto } from '$app/navigation'
+	import routes from '$lib/routes'
 
 	export let message: DataMessage
 	export let users: User[]
@@ -53,6 +55,9 @@
 				adapter.sendData(wallet, chatId, message.objectId, message.instanceId, data),
 			updateStore,
 			...wakuObjectAdapter,
+			onViewChange: (view: string) => {
+				goto(routes.OBJECT(chatId, message.objectId, message.instanceId, view))
+			},
 		}
 	}
 </script>
