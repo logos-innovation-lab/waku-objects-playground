@@ -4,15 +4,23 @@ import { connectWaku, decodeMessagePayload, sendMessage, storeDocument, subscrib
 
 import child_process from 'child_process'
 
-async function main() {
-	const waku = await connectWaku()
-	console.log({ waku })
+const botAddress = process.argv[2] || process.env['BOT_ADDRESS']
+const botProfile = {
+	name: 'Bot',
+	avatar: 'QmahJdru5ooiPrn8FipC7tLb2t9o39Kdszohk2g5SFffnQ', // IPFS hash of image comes here
+}
+const command = ['/home/attila/Projects/randomshit/ollama/ollama', 'run', 'llama2-uncensored']
 
-	const botAddress = '0x1190ff60748db04e0457593c94219ccf739374d5'
-	const botProfile = {
-		name: 'Bot',
-		avatar: 'QmahJdru5ooiPrn8FipC7tLb2t9o39Kdszohk2g5SFffnQ', // IPFS hash of image comes here
+async function main() {
+	if (!botAddress) {
+		console.error(
+			'please provide a bot address as argument or in the BOT_ADDRESS environment variable',
+		)
+		process.exit(1)
 	}
+
+	const waku = await connectWaku()
+
 	await storeDocument(waku, 'profile', botAddress, botProfile)
 
 	await subscribe(waku, 'private-message', botAddress, async (msg) => {
@@ -29,11 +37,9 @@ async function main() {
 			fromAddress: botAddress,
 		})
 
-		const output = child_process.spawnSync(
-			'/home/attila/Projects/randomshit/ollama/ollama',
-			['run', 'llama2-uncensored'],
-			{ input: chatMessage.text },
-		)
+		const output = child_process.spawnSync(command[0], command.slice(1), {
+			input: chatMessage.text,
+		})
 		sendMessage(waku, chatMessage.fromAddress, {
 			type: 'user',
 			timestamp: Date.now(),

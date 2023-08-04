@@ -15,7 +15,8 @@
 		"start:blockchain": "hardhat node",
 		"cli": "ts-node --esm --experimental-specifier-resolution=node ./src/cli/cli.ts",
 		"waku:start": "docker compose -f ./docker-compose.yaml up -d",
-		"waku:stop": "docker kill waku-objects-playground-waku-1"
+		"waku:stop": "docker kill waku-objects-playground-waku-1",
+		"bot": "ts-node --esm --experimental-specifier-resolution=node ./src/lib/adapters/waku/bot.ts"
 	},
 	"devDependencies": {
 		"@bonosoft/sveltekit-qrcode": "^0.0.3",
