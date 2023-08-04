@@ -126,6 +126,7 @@
 					</Dropdown>
 					<Textarea
 						placeholder="Message"
+						autofocus
 						bind:value={text}
 						on:keypress={(e) => {
 							// When enter is pressed without modifier keys, send the message
