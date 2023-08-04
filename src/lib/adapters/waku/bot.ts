@@ -44,7 +44,8 @@ async function main() {
 		const output = text
 			.split('\n')
 			.map((part: string) => JSON.parse(part) as { cmd: string; text: string })
-			.filter((obj) => obj.cmd === 'append' && obj.text)
+			.filter((obj) => obj.cmd === 'append')
+			.map((obj) => obj.text)
 			.join('')
 
 		sendMessage(waku, chatMessage.fromAddress, {
