@@ -59,8 +59,6 @@ export async function subscribe(
 	const messageDecoder = createDecoder(getTopic(contentTopic, id))
 	const unsubscribe = await waku.filter.subscribe([messageDecoder], callback)
 
-	console.debug('subscribe', { contentTopic, id })
-
 	return unsubscribe
 }
 
@@ -70,8 +68,6 @@ export async function storeDocument(
 	id: string | '',
 	document: unknown,
 ) {
-	console.debug('storeDocument', { contentTopicName, id, document })
-
 	const contentTopic = getTopic(contentTopicName, id)
 	const encoder = createEncoder({ contentTopic })
 	const json = JSON.stringify(document)
@@ -124,8 +120,6 @@ export function decodeMessagePayload(wakuMessage: DecodedMessage): string {
 }
 
 export async function sendMessage(waku: LightNode, id: string, message: unknown) {
-	console.debug('sendMessage', { id, message })
-
 	const json = JSON.stringify(message)
 	const payload = utf8ToBytes(json)
 	const contentTopic = getTopic('private-message', id)

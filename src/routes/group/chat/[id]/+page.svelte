@@ -62,7 +62,6 @@
 	}
 
 	$: chat = $chats.chats.get($page.params.id)
-	$: console.debug({ groups: $chats.chats })
 </script>
 
 {#if $walletStore.loading || $chats.loading}

@@ -214,8 +214,6 @@ async function subscribeToPrivateMessages(
 				const chatMessage = JSON.parse(decodedPayload) as Message
 				const chatsMap = get(chats).chats
 
-				console.debug({ chatMessage, address })
-
 				// FIXME: the message should be checked for validity
 				if (!chatMessage) {
 					console.error('Invalid message received')

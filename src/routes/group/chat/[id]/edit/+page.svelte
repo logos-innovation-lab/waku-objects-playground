@@ -23,7 +23,6 @@
 	$: groupMembers = groupChat.users
 	$: picture = groupChat.avatar
 	$: name = groupChat.name
-	$: console.debug({ groupMembers })
 
 	let invitedMembers: string[] = []
 	let screen: 'settings' | 'invite' = 'settings'
