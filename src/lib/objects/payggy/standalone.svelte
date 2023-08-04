@@ -218,61 +218,65 @@
 		</Container>
 	{/if}
 {:else}
-	<Header title="Payggy">
-		<Button slot="left" variant="icon" on:click={() => history.back()}>
-			<ChevronLeft />
-		</Button>
-		<Button slot="right" variant="icon" on:click={() => history.go(-2)}>
-			<Close />
-		</Button>
-	</Header>
+	<Layout>
+		<svelte:fragment slot="header">
+			<Header title="Payggy">
+				<Button slot="left" variant="icon" on:click={() => history.back()}>
+					<ChevronLeft />
+				</Button>
+				<Button slot="right" variant="icon" on:click={() => history.go(-2)}>
+					<Close />
+				</Button>
+			</Header>
+		</svelte:fragment>
 
-	<Container gap={24} grow justify="center" padX={24}>
-		<p>How much would you like to send?</p>
-		<div class="amt-drop">
-			<Grid>
-				<div>
-					<Input autofocus bind:value={amount} placeholder="0" />
-				</div>
-				<div>
-					<Dropdown>
-						<Button grow align="block" slot="button">{token.symbol} <CaretDown /></Button>
-						{#each args.tokens as t}
-							<DropdownItem
-								onClick={() => {
-									token = t
-								}}>{t.symbol}</DropdownItem
-							>
-						{/each}
-					</Dropdown>
-				</div>
-			</Grid>
-			<p class="fiat text-sm">x EUR {amount ? 'now' : ''}</p>
-		</div>
-		<p
-			class={`balance ${
-				Number(amount) > Number(toSignificant(token.amount, token.decimals)) ? 'text-bold' : ''
-			}`}
-		>
-			{#if Number(amount) > Number(toSignificant(token.amount, token.decimals))}
-				<WarningAltFilled />
-			{/if}
-			You have {toSignificant(token.amount, token.decimals)}
-			{token.symbol} in your account.
-		</p>
-	</Container>
-	<Container justify="flex-end">
-		<Button
-			variant="strong"
-			disabled={!amount || Number(amount) > Number(toSignificant(token.amount, token.decimals))}
-			on:click={() => {
-				args.updateStore(() => ({ type: 'init' }))
-				args.onViewChange && args.onViewChange('overview')
-			}}
-		>
-			<ArrowRight />
-		</Button>
-	</Container>
+		<Container gap={24} grow justify="center" padX={24}>
+			<p>How much would you like to send?</p>
+			<div class="amt-drop">
+				<Grid>
+					<div>
+						<Input autofocus bind:value={amount} placeholder="0" />
+					</div>
+					<div>
+						<Dropdown>
+							<Button grow align="block" slot="button">{token.symbol} <CaretDown /></Button>
+							{#each args.tokens as t}
+								<DropdownItem
+									onClick={() => {
+										token = t
+									}}>{t.symbol}</DropdownItem
+								>
+							{/each}
+						</Dropdown>
+					</div>
+				</Grid>
+				<p class="fiat text-sm">x EUR {amount ? 'now' : ''}</p>
+			</div>
+			<p
+				class={`balance ${
+					Number(amount) > Number(toSignificant(token.amount, token.decimals)) ? 'text-bold' : ''
+				}`}
+			>
+				{#if Number(amount) > Number(toSignificant(token.amount, token.decimals))}
+					<WarningAltFilled />
+				{/if}
+				You have {toSignificant(token.amount, token.decimals)}
+				{token.symbol} in your account.
+			</p>
+		</Container>
+		<Container justify="flex-end">
+			<Button
+				variant="strong"
+				disabled={!amount || Number(amount) > Number(toSignificant(token.amount, token.decimals))}
+				on:click={() => {
+					args.updateStore(() => ({ type: 'init' }))
+					args.onViewChange && args.onViewChange('overview')
+				}}
+			>
+				<ArrowRight />
+			</Button>
+		</Container>
+	</Layout>
 {/if}
 
 <style lang="scss">
