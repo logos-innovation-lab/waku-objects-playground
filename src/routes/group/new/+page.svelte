@@ -64,21 +64,13 @@
 	}
 </script>
 
-<<<<<<< HEAD
-{#if $profile.loading || $walletStore.loading || !$walletStore.wallet}
-=======
 {#if $walletStore.loading || !$walletStore.wallet || $chats.loading}
->>>>>>> 7bb272d (feat: group chat is working)
 	<Container align="center" grow gap={6} justify="center">
 		<div class="center">
 			<h2>Loading...</h2>
 		</div>
 	</Container>
-<<<<<<< HEAD
 {:else if $chats.chats.size === 0}
-=======
-{:else if contacts.length === 0}
->>>>>>> 7bb272d (feat: group chat is working)
 	{@const address = $walletStore.wallet.address}
 	<Header title="Create group">
 		<svelte:fragment slot="left">

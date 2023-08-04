@@ -16,7 +16,6 @@ import {
 	connectWaku,
 	decodeMessagePayload,
 	readLatestDocument,
-	readStore,
 	sendMessage,
 	storeDocument,
 	subscribe,
@@ -81,6 +80,7 @@ function createGroupChat(
 			users,
 			name,
 			avatar,
+			unread: 0,
 		}
 		newChats.set(chatId, groupChat)
 
@@ -177,21 +177,6 @@ async function storeObjectStore(waku: LightNode, address: string, objectStore: O
 	await storeDocument(waku, 'objects', address, Array.from(objectStore.objects))
 }
 
-/*
- * Temporary helper function to read all users from the waku store, so that contacts are discoverable.
- * This functionality can be removed once the invite system is working.
- */
-async function readAllUsers(waku: LightNode): Promise<User[]> {
-	const results = await readStore(waku, 'all-users')
-	const users = (await parseQueryResults(results)) as User[]
-	return users
-}
-
-async function lookupUserFromContacts(waku: LightNode, address: string): Promise<User | undefined> {
-	const users = await readAllUsers(waku)
-	return users.find((user) => user.address === address)
-}
-
 async function readGroupChat(waku: LightNode, id: string): Promise<DraftChat> {
 	const groupChat = (await readLatestDocument(waku, 'group-chats', id)) as DraftChat
 	return groupChat
@@ -201,6 +186,17 @@ async function storeGroupChat(waku: LightNode, id: string, groupChat: DraftChat)
 	await storeDocument(waku, 'group-chats', id, groupChat)
 }
 
+async function readUserFromProfile(waku: LightNode, address: string) {
+	const profile = (await readLatestDocument(waku, 'profile', address)) as Profile | undefined
+	if (profile) {
+		return {
+			name: profile.name,
+			avatar: profile.avatar,
+			address,
+		}
+	}
+}
+
 async function subscribeToPrivateMessages(
 	waku: LightNode,
 	adapter: WakuObjectAdapter,
@@ -208,7 +204,7 @@ async function subscribeToPrivateMessages(
 	ids: string[],
 	subscriptions: Array<() => void>,
 ): Promise<void> {
-	for await (const id of ids) {
+	for (const id of ids) {
 		const subscription = await subscribe(
 			waku,
 			'private-message',
@@ -233,9 +229,7 @@ async function subscribeToPrivateMessages(
 
 				if (chatMessage.type === 'invite') {
 					const groupChat = await readGroupChat(waku, chatMessage.chatId)
-					const userPromises = groupChat.users.map((address) =>
-						lookupUserFromContacts(waku, address),
-					)
+					const userPromises = groupChat.users.map((address) => readUserFromProfile(waku, address))
 					const allUsers = await Promise.all(userPromises)
 					const users = allUsers.filter((user) => user) as User[]
 					createGroupChat(chatMessage.chatId, users, groupChat.name, groupChat.avatar)
@@ -250,9 +244,19 @@ async function subscribeToPrivateMessages(
 				} else {
 					if (!isGroupChatId(id)) {
 						if (!chatsMap.has(chatMessage.fromAddress)) {
-							const user = await lookupUserFromContacts(waku, chatMessage.fromAddress)
-							if (user) {
-								createChat(chatMessage.fromAddress, user, id)
+							const storedProfile = (await readLatestDocument(
+								waku,
+								'profile',
+								chatMessage.fromAddress,
+							)) as Profile
+
+							if (storedProfile) {
+								const user = {
+									name: storedProfile.name,
+									avatar: storedProfile.avatar,
+									address: chatMessage.fromAddress,
+								}
+								createChat(chatMessage.fromAddress, user, address)
 							}
 						}
 
@@ -293,36 +297,41 @@ export default class WakuAdapter implements Adapter {
 		})
 		this.subscriptions.push(subscribeChatStore)
 
-		const subscribeChats = await subscribe(
-			this.waku,
-			'private-message',
-			address,
-			async (msg: DecodedMessage) => {
-				if (!adapter.waku) {
-					return
+		// look for changes in users profile name and picture
+		const contacts = Array.from(get(chats).chats).map(([, chat]) => chat.users[0])
+		const changes = new Map<string, User>()
+		for (const contact of contacts) {
+			const contactProfile = (await readLatestDocument(
+				this.waku,
+				'profile',
+				contact.address,
+			)) as Profile
+
+			if (contactProfile.name != contact.name || contactProfile.avatar != contact.avatar) {
+				const changedUser = {
+					name: contactProfile.name,
+					avatar: contactProfile.avatar,
+					address: contact.address,
 				}
-
-				const decodedPayload = decodeMessagePayload(msg)
-				const chatMessage = JSON.parse(decodedPayload) as Message
-				const chatsMap = get(chats).chats
-
-				// FIXME: the message should be checked for validity
-				if (!chatMessage) {
-					console.error('Invalid message received')
-					return
-				}
-
-				if (!chatsMap.has(chatMessage.fromAddress)) {
-					const user = await lookupUserFromContacts(adapter.waku, chatMessage.fromAddress)
-					if (user) {
-						createChat(chatMessage.fromAddress, user, address)
+				changes.set(contact.address, changedUser)
+			}
+		}
+		if (changes.size > 0) {
+			chats.update((state) => {
+				const newChats = new Map<string, Chat>(state.chats)
+				changes.forEach((user) => {
+					const chat = newChats.get(user.address)
+					if (chat) {
+						chat.users[0] = user
 					}
+				})
+				return {
+					...state,
+					chats: newChats,
 				}
+			})
+		}
 
-				await addMessageToChat(address, wakuObjectAdapter, chatMessage.fromAddress, chatMessage)
-			},
-		)
-		this.subscriptions.push(subscribeChats)
 		const groupChatIds = Array.from(chatData.chats)
 			.filter(([id]) => isGroupChatId(id))
 			.map(([id]) => id)
@@ -414,7 +423,7 @@ export default class WakuAdapter implements Adapter {
 		const chatId = genRanHex(64)
 
 		const waku = this.waku
-		const userPromises = chat.users.map((address) => lookupUserFromContacts(waku, address))
+		const userPromises = chat.users.map((address) => readUserFromProfile(waku, address))
 		const allUsers = await Promise.all(userPromises)
 		const users = allUsers.filter((user) => user) as User[]
 
@@ -446,7 +455,7 @@ export default class WakuAdapter implements Adapter {
 		}
 		await storeGroupChat(this.waku, chatId, updatedGroupChat)
 
-		const newUserPromises = users.map((address) => lookupUserFromContacts(waku, address))
+		const newUserPromises = users.map((address) => readUserFromProfile(waku, address))
 		const newResolvedUsers = await Promise.all(newUserPromises)
 		const newUsers = newResolvedUsers.filter((user) => user) as User[]
 
@@ -532,7 +541,7 @@ export default class WakuAdapter implements Adapter {
 			chatId,
 		}
 
-		for await (const user of users) {
+		for (const user of users) {
 			await sendMessage(this.waku, user, message)
 		}
 	}
