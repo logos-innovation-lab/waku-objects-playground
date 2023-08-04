@@ -119,11 +119,12 @@
 		<div class="grow">
 			<ul class="chats" aria-label="Chat List">
 				{#each orderedChats as chat}
-				{@const userMessages = chat.messages.filter((message) => message.type === 'user')}
-				{@const lastMessage =
-					userMessages.length > 0 ? userMessages[userMessages.length - 1] : undefined}
-				{@const myMessage = lastMessage && lastMessage.fromAddress === $walletStore.wallet.address}
-				{@const otherUser = chat.users.find((m) => m.address !== $walletStore.wallet?.address)}
+					{@const userMessages = chat.messages.filter((message) => message.type === 'user')}
+					{@const lastMessage =
+						userMessages.length > 0 ? userMessages[userMessages.length - 1] : undefined}
+					{@const myMessage =
+						lastMessage && lastMessage.fromAddress === $walletStore.wallet.address}
+					{@const otherUser = chat.users.find((m) => m.address !== $walletStore.wallet?.address)}
 					<li>
 						<div
 							class="chat-button"
@@ -153,18 +154,20 @@
 												{:else}
 													{otherUser?.name}
 												{/if}
-												<Badge dark>
-													{chat.messages.length}
-												</Badge>
+												{#if chat.unread > 0}
+													<Badge dark>
+														{chat.unread}
+													</Badge>
+												{/if}
 											</span>
 										</div>
+										<p class={`message text-serif ${myMessage ? 'my-message' : ''}`}>
+											{myMessage ? 'You: ' : ''}
+											{lastMessage && lastMessage.type === 'user'
+												? lastMessage.text.substring(0, 50)
+												: 'No messages yet'}
+										</p>
 									</div>
-									<p class={`message text-serif ${myMessage ? 'my-message' : ''}`}>
-										{myMessage ? 'You: ' : ''}
-										{lastMessage && lastMessage.type === 'user'
-											? lastMessage.text.substring(0, 50)
-											: 'No messages yet'}
-									</p>
 								</div>
 							</Container>
 						</div>
