@@ -3,6 +3,7 @@
 	import ObjectUI from '$lib/objects/ui.svelte'
 	import { goto } from '$app/navigation'
 	import routes from '$lib/routes'
+	import Login from '$lib/components/login.svelte'
 
 	const genRanHex = (size: number) =>
 		[...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')
@@ -17,4 +18,6 @@
 	}
 </script>
 
-<ObjectUI {objectId} {chatId} {instanceId} {onViewChange} {view} />
+<Login let:wallet>
+	<ObjectUI {objectId} {chatId} {instanceId} {onViewChange} {view} {wallet} />
+</Login>

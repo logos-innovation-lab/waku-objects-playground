@@ -3,7 +3,6 @@
 
 	import ArrowUp from '$lib/components/icons/arrow-up.svelte'
 
-	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'
 	import Close from '$lib/components/icons/close.svelte'
@@ -13,11 +12,10 @@
 	import adapters from '$lib/adapters'
 	import ROUTES from '$lib/routes'
 	import { walletStore } from '$lib/stores/wallet'
-	import { browser } from '$app/environment'
-	import { profile } from '$lib/stores/profile'
 	import ObjectLink from '$lib/components/object-link.svelte'
 	import ButtonBlock from '$lib/components/button-block.svelte'
 	import { wakuObjectList } from '$lib/objects/lookup'
+	import Login from '$lib/components/login.svelte'
 
 	const objects = wakuObjectList.map((object) => ({
 		...object,
@@ -34,7 +32,6 @@
 	}))
 	let loading = false
 	let text = ''
-	$: if (browser && !$walletStore.loading && $walletStore.wallet === undefined) goto(ROUTES.HOME)
 
 	const createObject = async <T>(objectId: string, t: T) => {
 		// TODO random
@@ -58,16 +55,8 @@
 		?.users.find((m) => m.address !== $walletStore.wallet?.address)
 </script>
 
-<div class="main">
-	{#if $walletStore.loading || $profile.loading}
-		<Container align="center" grow gap={6} justify="center" padX={24}>
-			<h2>Loading...</h2>
-		</Container>
-	{:else if $walletStore.error || $profile.error}
-		<Container align="center" grow gap={6} justify="center" padX={24}>
-			<h2>Failed to load chat: {$profile.error?.message ?? $walletStore.error?.message}</h2>
-		</Container>
-	{:else}
+<Login>
+	<div class="main">
 		<ButtonBlock on:click={() => history.back()}>
 			<Header mainContent="left">
 				<svelte:fragment slot="left">
@@ -94,8 +83,8 @@
 				</div>
 			{/each}
 		</div>
-	{/if}
-</div>
+	</div>
+</Login>
 
 <style lang="scss">
 	.main {

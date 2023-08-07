@@ -9,13 +9,13 @@
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'
 	import ReadonlyText from '$lib/components/readonly-text.svelte'
-
-	export let data
+	import Login from '$lib/components/login.svelte'
+	import { walletStore } from '$lib/stores/wallet'
 
 	let copied = false
 
 	function copyToClipboard() {
-		copy(data.mnemonics)
+		copy(walletStore.getMnemonics())
 		copied = true
 	}
 </script>
@@ -25,24 +25,27 @@
 		<Close />
 	</Button>
 </Header>
-<Container gap={6} grow justify="center" align="center">
-	<p class="text-lg text-bold">Keep your recovery phrase safe</p>
-	<p class="text-lg description">
-		Anyone with your recovery phrase will be able to access your identity and account
-	</p>
-	<ReadonlyText label="Recovery phrase" overflow={false} marginBottom={0} align="left">
-		{data.mnemonics}
-	</ReadonlyText>
-	<Button on:click={copyToClipboard}>
-		{#if copied}
-			<Checkmark />
-			Copied
-		{:else}
-			<Copy />
-			Copy
-		{/if}
-	</Button>
-</Container>
+
+<Login>
+	<Container gap={6} grow justify="center" align="center">
+		<p class="text-lg text-bold">Keep your recovery phrase safe</p>
+		<p class="text-lg description">
+			Anyone with your recovery phrase will be able to access your identity and account
+		</p>
+		<ReadonlyText label="Recovery phrase" overflow={false} marginBottom={0} align="left">
+			{walletStore.getMnemonics()}
+		</ReadonlyText>
+		<Button on:click={copyToClipboard}>
+			{#if copied}
+				<Checkmark />
+				Copied
+			{:else}
+				<Copy />
+				Copy
+			{/if}
+		</Button>
+	</Container>
+</Login>
 
 <style lang="scss">
 	.description {

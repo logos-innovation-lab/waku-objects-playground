@@ -7,24 +7,14 @@
 
 	import { onDestroy, onMount } from 'svelte'
 	import adapter from '$lib/adapters'
-	import { walletStore } from '$lib/stores/wallet'
 	import { changeColors } from '$lib/utils/color'
+
+	import { walletStore } from '$lib/stores/wallet'
 	import { theme } from '$lib/stores/theme'
-	import Container from '$lib/components/container.svelte'
-	import { goto } from '$app/navigation'
-	import Button from '$lib/components/button.svelte'
-	import ChatBot from '$lib/components/icons/chat-bot.svelte'
-	import Login from '$lib/components/icons/login.svelte'
-	import UserFollow from '$lib/components/icons/user-follow.svelte'
-	import routes from '$lib/routes'
 
 	let unsubscribeWalletStore: (() => void) | undefined = undefined
-	let unsubscribeThemeStore: (() => void) | undefined = undefined
 
 	onMount(() => {
-		unsubscribeThemeStore = theme.subscribe((theme) => {
-			changeColors(theme.baseColor, theme.darkMode)
-		})
 		unsubscribeWalletStore = walletStore.subscribe(({ wallet }) => {
 			if (wallet) {
 				adapter.onLogIn(wallet)
@@ -37,39 +27,13 @@
 	onDestroy(() => {
 		if ($walletStore.wallet) adapter.onLogOut()
 		if (unsubscribeWalletStore) unsubscribeWalletStore()
-		if (unsubscribeThemeStore) unsubscribeThemeStore()
 	})
 
-	$: noWallet = !$walletStore.wallet && !$walletStore.loading
+	$: changeColors($theme.baseColor, $theme.darkMode)
 </script>
 
 <div class="root">
-	{#if $walletStore.loading}
-		<Container align="center" grow gap={6} justify="center">
-			<div class="center">
-				<h2>Loading...</h2>
-			</div>
-		</Container>
-	{:else if noWallet}
-		<Container align="center" alignItems="center" gap={12} justify="center" grow padX={24}>
-			<div class="chatbot">
-				<div>
-					<ChatBot size={32} />
-				</div>
-				<p class="text-lg text-bold">Waku Play</p>
-			</div>
-			<Button on:click={() => goto(routes.IDENTITY_NEW)}>
-				<UserFollow />
-				Create new identity
-			</Button>
-			<Button on:click={() => goto(routes.IDENTITY_CONNECT)}>
-				<Login />
-				Connect existing identity
-			</Button>
-		</Container>
-	{:else}
-		<slot />
-	{/if}
+	<slot />
 </div>
 
 <style>

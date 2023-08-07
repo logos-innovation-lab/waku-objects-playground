@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { walletStore } from '$lib/stores/wallet'
 	import adapter from '$lib/adapters'
 	import { lookup } from './lookup'
 	import { balanceStore, type Token } from '$lib/stores/balances'
@@ -11,12 +10,14 @@
 	import { objectKey, objectStore } from '$lib/stores/objects'
 	import { throwError } from '$lib/utils/error'
 	import Container from '$lib/components/container.svelte'
+	import type { HDNodeWallet } from 'ethers/lib.commonjs'
 
 	export let objectId: string
 	export let instanceId: string
 	export let chatId: string
 	export let onViewChange: ((view: string) => void) | undefined = undefined
 	export let view: string | undefined = undefined
+	export let wallet: HDNodeWallet
 
 	const component = lookup(objectId)?.standalone
 
@@ -27,23 +28,14 @@
 	let userProfile: User
 	let users: User[]
 
-	$: wallet = $walletStore.wallet
-
-	$: loading =
-		$walletStore.loading ||
-		$chats.loading ||
-		$objectStore.loading ||
-		$balanceStore.loading ||
-		$profile.loading
+	$: loading = $chats.loading || $objectStore.loading || $balanceStore.loading
 
 	function send(data: unknown): Promise<void> {
-		if (!$walletStore.wallet) throw new Error('not logged in')
-		return adapter.sendData($walletStore.wallet, chatId, objectId, instanceId, data)
+		return adapter.sendData(wallet, chatId, objectId, instanceId, data)
 	}
 
 	function updateStore(updater: (state: unknown) => unknown) {
-		if (!$walletStore.wallet) throw new Error('not logged in')
-		adapter.updateStore($walletStore.wallet.address, objectId, instanceId, updater)
+		adapter.updateStore(wallet.address, objectId, instanceId, updater)
 	}
 
 	$: if (!loading && wallet) {
