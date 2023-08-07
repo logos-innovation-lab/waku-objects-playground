@@ -3,10 +3,7 @@
 
 	// Icons
 	import AddComment from '$lib/components/icons/add-comment.svelte'
-	import Login from '$lib/components/icons/login.svelte'
-	import WakuLogo from '$lib/components/icons/waku-logo.svelte'
 	import NewChat from '$lib/components/icons/add-comment.svelte'
-	import UserFollow from '$lib/components/icons/user-follow.svelte'
 
 	// Components
 	import Avatar from '$lib/components/avatar.svelte'
@@ -20,7 +17,7 @@
 	import { chats, isGroupChatId, type Chat } from '$lib/stores/chat'
 
 	import ROUTES from '$lib/routes'
-	import { walletStore } from '$lib/stores/wallet'
+	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 
 	$: orderedChats = Array.from($chats.chats)
 		.map(([, chat]) => chat)
@@ -30,153 +27,129 @@
 		const lastMessage = chat.messages.slice(-1)[0]
 		return lastMessage ? lastMessage.timestamp : 0
 	}
+
+	$: loading = $profile.loading || $chats.loading
 </script>
 
-<div class="wrapper">
-	{#if $profile.loading || $walletStore.loading}
-		<Container align="center" grow gap={6} justify="center">
-			<div class="center">
+<AuthenticatedOnly let:wallet>
+	<div class="wrapper">
+		{#if loading}
+			<Container align="center" grow gap={6} justify="center">
 				<h2>Loading...</h2>
-			</div>
-		</Container>
-	{:else if !$walletStore.wallet}
-		<Container align="center" alignItems="center" gap={12} justify="center" grow padX={24}>
-			<div class="chatbot">
-				<div>
-					<WakuLogo size={48} />
-				</div>
-				<p class="text-lg text-bold">Waku Play</p>
-			</div>
-			<Button on:click={() => goto(ROUTES.IDENTITY_NEW)}>
-				<UserFollow />
-				Create new identity
-			</Button>
-			<Button on:click={() => goto(ROUTES.IDENTITY_CONNECT)}>
-				<Login />
-				Connect existing identity
-			</Button>
-		</Container>
-	{:else if $chats.loading}
-		<Container align="center" grow gap={6} justify="center" padX={24}>
-			<div class="center">
-				<h2>Loading...</h2>
-			</div>
-		</Container>
-	{:else if $chats.error}
-		<Container align="center" grow gap={6} justify="center" padX={24}>
-			<div class="center">
+			</Container>
+		{:else if $chats.error}
+			<Container align="center" grow gap={6} justify="center" padX={24}>
 				<h2>Failed to load chats: {$chats.error.message}</h2>
-			</div>
-		</Container>
-	{:else if $chats.chats.size === 0}
-		{@const address = $walletStore.wallet.address}
-		<Header mainContent="right">
-			<svelte:fragment slot="left">
-				<div class="header-btns">
-					<Button variant="icon" on:click={() => goto(ROUTES.INVITE(address))}>
-						<NewChat size={24} />
+			</Container>
+		{:else if $chats.chats.size === 0}
+			{@const address = wallet.address}
+			<Header mainContent="right">
+				<svelte:fragment slot="left">
+					<div class="header-btns">
+						<Button variant="icon" on:click={() => goto(ROUTES.INVITE(address))}>
+							<NewChat size={24} />
+						</Button>
+					</div>
+				</svelte:fragment>
+				<svelte:fragment slot="right">
+					<Button align="right" variant="account" on:click={() => goto(ROUTES.IDENTITY)}>
+						<svelte:fragment slot="avatar">
+							<Avatar size={48} picture={$profile.avatar} />
+						</svelte:fragment>
+						{$profile.name}
+					</Button>
+				</svelte:fragment>
+			</Header>
+			<Container align="center" grow gap={6} justify="center" padX={24}>
+				<p class="text-lg text-bold">No active chats</p>
+				<p class="text-lg">Invite someone to chat</p>
+				<div class="btn-spacing">
+					<Button on:click={() => goto(ROUTES.INVITE(address))}>
+						<AddComment />
+						Invite to chat
 					</Button>
 				</div>
-			</svelte:fragment>
-			<svelte:fragment slot="right">
-				<Button align="right" variant="account" on:click={() => goto(ROUTES.IDENTITY)}>
-					<svelte:fragment slot="avatar">
-						<Avatar size={48} picture={$profile.avatar} />
-					</svelte:fragment>
-					{$profile.name}
-				</Button>
-			</svelte:fragment>
-		</Header>
-		<Container align="center" grow gap={6} justify="center" padX={24}>
-			<p class="text-lg text-bold">No active chats</p>
-			<p class="text-lg">Invite someone to chat</p>
-			<div class="btn-spacing">
-				<Button on:click={() => goto(ROUTES.INVITE(address))}>
-					<AddComment />
-					Invite to chat
-				</Button>
-			</div>
-		</Container>
-	{:else}
-		{@const address = $walletStore.wallet.address}
-		<Header mainContent="right">
-			<svelte:fragment slot="left">
-				<div class="header-btns">
-					<Button variant="icon" on:click={() => goto(ROUTES.INVITE(address))}>
-						<NewChat size={24} />
+			</Container>
+		{:else}
+			{@const address = wallet.address}
+			<Header mainContent="right">
+				<svelte:fragment slot="left">
+					<div class="header-btns">
+						<Button variant="icon" on:click={() => goto(ROUTES.INVITE(address))}>
+							<NewChat size={24} />
+						</Button>
+					</div>
+				</svelte:fragment>
+				<svelte:fragment slot="right">
+					<Button align="right" variant="account" on:click={() => goto(ROUTES.IDENTITY)}>
+						<svelte:fragment slot="avatar">
+							<Avatar size={48} picture={$profile.avatar} />
+						</svelte:fragment>
+						{$profile.name}
 					</Button>
-				</div>
-			</svelte:fragment>
-			<svelte:fragment slot="right">
-				<Button align="right" variant="account" on:click={() => goto(ROUTES.IDENTITY)}>
-					<svelte:fragment slot="avatar">
-						<Avatar size={48} picture={$profile.avatar} />
-					</svelte:fragment>
-					{$profile.name}
-				</Button>
-			</svelte:fragment>
-		</Header>
-		<div class="grow">
-			<ul class="chats" aria-label="Chat List">
-				{#each orderedChats as chat}
-					{@const userMessages = chat.messages.filter((message) => message.type === 'user')}
-					{@const lastMessage =
-						userMessages.length > 0 ? userMessages[userMessages.length - 1] : undefined}
-					{@const myMessage =
-						lastMessage && lastMessage.fromAddress === $walletStore.wallet.address}
-					{@const otherUser = chat.users.find((m) => m.address !== $walletStore.wallet?.address)}
-					<li>
-						<div
-							class="chat-button"
-							on:click={() =>
-								isGroupChatId(chat.chatId)
-									? goto(ROUTES.GROUP_CHAT(chat.chatId))
-									: goto(ROUTES.CHAT(chat.chatId))}
-							on:keypress={() =>
-								isGroupChatId(chat.chatId)
-									? goto(ROUTES.GROUP_CHAT(chat.chatId))
-									: goto(ROUTES.CHAT(chat.chatId))}
-							role="button"
-							tabindex="0"
-						>
-							<Container grow>
-								<div class="chat">
-									{#if isGroupChatId(chat.chatId)}
-										<Avatar size={70} picture={chat?.avatar} />
-									{:else}
-										<Avatar size={70} picture={otherUser?.avatar} />
-									{/if}
-									<div class="content">
-										<div class="user-info">
-											<span class="username text-lg text-bold">
-												{#if isGroupChatId(chat.chatId)}
-													{chat?.name}
-												{:else}
-													{otherUser?.name}
-												{/if}
-												{#if chat.unread > 0}
-													<Badge dark>
-														{chat.unread}
-													</Badge>
-												{/if}
-											</span>
+				</svelte:fragment>
+			</Header>
+			<div class="grow">
+				<ul class="chats" aria-label="Chat List">
+					{#each orderedChats as chat}
+						{@const userMessages = chat.messages.filter((message) => message.type === 'user')}
+						{@const lastMessage =
+							userMessages.length > 0 ? userMessages[userMessages.length - 1] : undefined}
+						{@const myMessage = lastMessage && lastMessage.fromAddress === wallet.address}
+						{@const otherUser = chat.users.find((m) => m.address !== wallet.address)}
+						<li>
+							<div
+								class="chat-button"
+								on:click={() =>
+									isGroupChatId(chat.chatId)
+										? goto(ROUTES.GROUP_CHAT(chat.chatId))
+										: goto(ROUTES.CHAT(chat.chatId))}
+								on:keypress={() =>
+									isGroupChatId(chat.chatId)
+										? goto(ROUTES.GROUP_CHAT(chat.chatId))
+										: goto(ROUTES.CHAT(chat.chatId))}
+								role="button"
+								tabindex="0"
+							>
+								<Container grow>
+									<div class="chat">
+										{#if isGroupChatId(chat.chatId)}
+											<Avatar size={70} picture={chat?.avatar} />
+										{:else}
+											<Avatar size={70} picture={otherUser?.avatar} />
+										{/if}
+										<div class="content">
+											<div class="user-info">
+												<span class="username text-lg text-bold">
+													{#if isGroupChatId(chat.chatId)}
+														{chat?.name}
+													{:else}
+														{otherUser?.name}
+													{/if}
+													{#if chat.unread > 0}
+														<Badge dark>
+															{chat.unread}
+														</Badge>
+													{/if}
+												</span>
+											</div>
+											<p class={`message text-serif ${myMessage ? 'my-message' : ''}`}>
+												{myMessage ? 'You: ' : ''}
+												{lastMessage && lastMessage.type === 'user'
+													? lastMessage.text.substring(0, 50)
+													: 'No messages yet'}
+											</p>
 										</div>
-										<p class={`message text-serif ${myMessage ? 'my-message' : ''}`}>
-											{myMessage ? 'You: ' : ''}
-											{lastMessage && lastMessage.type === 'user'
-												? lastMessage.text.substring(0, 50)
-												: 'No messages yet'}
-										</p>
 									</div>
-								</div>
-							</Container>
-						</div>
-					</li>
-				{/each}
-			</ul>
-		</div>
-	{/if}
-</div>
+								</Container>
+							</div>
+						</li>
+					{/each}
+				</ul>
+			</div>
+		{/if}
+	</div>
+</AuthenticatedOnly>
 
 <style lang="scss">
 	.wrapper {
@@ -260,16 +233,6 @@
 		font-size: var(--font-size-sm);
 		color: var(--color-step-40);
 		margin-left: auto;
-	}
-
-	.chatbot {
-		display: flex;
-		flex-direction: column;
-		gap: var(--spacing-6);
-		margin-bottom: var(--spacing-12);
-		div {
-			line-height: 0;
-		}
 	}
 
 	.my-message {

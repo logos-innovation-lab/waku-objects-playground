@@ -5,21 +5,18 @@
 	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
 	import Checkmark from '$lib/components/icons/checkmark.svelte'
 	import CopyLink from '$lib/components/icons/copy-link.svelte'
-	import ChatBot from '$lib/components/icons/chat-bot.svelte'
-	import UserFollow from '$lib/components/icons/user-follow.svelte'
-	import Login from '$lib/components/icons/login.svelte'
 
 	import Button from '$lib/components/button.svelte'
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
 	import ReadonlyText from '$lib/components/readonly-text.svelte'
+	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 
 	import { goto } from '$app/navigation'
 	import routes from '$lib/routes'
 	import { page } from '$app/stores'
 	import { type DraftChat, chats } from '$lib/stores/chat'
-	import { walletStore } from '$lib/stores/wallet'
-	import { profile } from '$lib/stores/profile'
+	// import { walletStore } from '$lib/stores/wallet'
 	import adapters from '$lib/adapters'
 	import { Html5Qrcode } from 'html5-qrcode'
 	import Camera from '$lib/components/icons/camera.svelte'
@@ -82,16 +79,13 @@
 		console.warn(`Code scan error = ${error}`)
 	}
 
-	async function startChat() {
-		const wallet = $walletStore.wallet
-		if (!wallet) return
-
+	async function startChat(address: string) {
 		loading = true
 
 		const chat: DraftChat = {
-			users: [$page.params.address, wallet.address],
+			users: [$page.params.address, address],
 		}
-		const chatId = await adapters.startChat(wallet.address, chat)
+		const chatId = await adapters.startChat(address, chat)
 		loading = false
 		goto(routes.CHAT(chatId))
 	}
@@ -107,85 +101,70 @@
 	</Button>
 </Header>
 
-{#if $walletStore.loading || $profile.loading || ($walletStore.wallet && $chats.loading)}
-	<Container align="center" grow gap={6} justify="center">
-		<div class="center">
-			<h2>Loading...</h2>
-		</div>
-	</Container>
-{:else if $walletStore.wallet?.address === $page.params.address}
-	<ButtonBlock borderBottom on:click={() => goto(routes.GROUP_NEW)}>
-		<Container direction="row" justify="space-between" align="center" alignItems="center">
-			<div class="icon">
-				<User size={20} /> Create group
-			</div>
-			<div>
-				<Button variant="icon">
-					<ChevronRight />
-				</Button>
+<AuthenticatedOnly let:wallet>
+	{#if wallet && $chats.loading}
+		<Container align="center" grow gap={6} justify="center">
+			<div class="center">
+				<h2>Loading...</h2>
 			</div>
 		</Container>
-	</ButtonBlock>
-	<Container gap={12} grow justify="flex-start" align="center" padX={24} padY={24}>
-		<p class="text-lg text-bold">Show QR code or share link below</p>
-		<div class="qr">
-			{#if !scanning}
-				<QRCode content={$page.url.href} size={'250'} padding={'0'} />
-			{/if}
-			<div id="reader" class={`${!scanning ? 'hidden' : ''}`} />
-			{#if !scanning}
-				<Button on:click={start}>
-					<Camera />
-					Scan QR code
-				</Button>
-			{:else}
-				<Button on:click={stop}><QrCodeIcon />Show my QR code</Button>
-			{/if}
-		</div>
-		<div class="link">
-			<ReadonlyText label="Invitation link" overflow={false}>
-				{$page.url.href}
-			</ReadonlyText>
-		</div>
-		<Button on:click={copyToClipboard} variant="strong">
-			{#if copied}
-				<Checkmark />
-				Copied
-			{:else}
-				<CopyLink />
-				Copy link
-			{/if}
-		</Button>
-	</Container>
-{:else if $walletStore.wallet}
-	<Container gap={6} grow justify="center" align="center" padX={24}>
-		<p class="text-lg text-bold">Start chatting</p>
-		<p class="text-lg description">
-			Click the button below to start a new chat with {$page.params.address}
-		</p>
-		<Button on:click={startChat}>
-			<CopyLink />
-			Start new chat
-		</Button>
-	</Container>
-{:else}
-	<Container align="center" alignItems="center" gap={12} justify="center" grow padX={24}>
-		<div class="chatbot">
-			<div>
-				<ChatBot size={32} />
+	{:else if wallet.address === $page.params.address}
+		<ButtonBlock borderBottom on:click={() => goto(routes.GROUP_NEW)}>
+			<Container direction="row" justify="space-between" align="center" alignItems="center">
+				<div class="icon">
+					<User size={20} /> Create group
+				</div>
+				<div>
+					<Button variant="icon">
+						<ChevronRight />
+					</Button>
+				</div>
+			</Container>
+		</ButtonBlock>
+		<Container gap={12} grow justify="flex-start" align="center" padX={24} padY={24}>
+			<p class="text-lg text-bold">Show QR code or share link below</p>
+			<div class="qr">
+				{#if !scanning}
+					<QRCode content={$page.url.href} size={'250'} padding={'0'} />
+				{/if}
+				<div id="reader" class={`${!scanning ? 'hidden' : ''}`} />
+				{#if !scanning}
+					<Button on:click={start}>
+						<Camera />
+						Scan QR code
+					</Button>
+				{:else}
+					<Button on:click={stop}><QrCodeIcon />Show my QR code</Button>
+				{/if}
 			</div>
-			<p class="text-lg text-bold">Waku Play</p>
-		</div>
-		<Button on:click={() => goto(routes.IDENTITY_NEW)}>
-			<UserFollow />
-			Create new identity
-		</Button>
-		<Button on:click={() => goto(routes.IDENTITY_CONNECT)}>
-			<Login />
-			Connect existing identity
-		</Button>
-	</Container>
-{/if}
+			<div class="link">
+				<ReadonlyText label="Invitation link" overflow={false}>
+					{$page.url.href}
+				</ReadonlyText>
+			</div>
+			<Button on:click={copyToClipboard} variant="strong">
+				{#if copied}
+					<Checkmark />
+					Copied
+				{:else}
+					<CopyLink />
+					Copy link
+				{/if}
+			</Button>
+		</Container>
+	{:else}
+		<Container gap={6} grow justify="center" align="center" padX={24}>
+			<p class="text-lg text-bold">Start chatting</p>
+			<p class="text-lg description">
+				Click the button below to start a new chat with {$page.params.address}
+			</p>
+			<Button on:click={() => startChat(wallet.address)}>
+				<CopyLink />
+				Start new chat
+			</Button>
+		</Container>
+	{/if}
+</AuthenticatedOnly>
 
 <style lang="scss">
 	.qr {

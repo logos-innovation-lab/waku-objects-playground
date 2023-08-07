@@ -7,17 +7,14 @@
 
 	import { onDestroy, onMount } from 'svelte'
 	import adapter from '$lib/adapters'
-	import { walletStore } from '$lib/stores/wallet'
 	import { changeColors } from '$lib/utils/color'
+
+	import { walletStore } from '$lib/stores/wallet'
 	import { theme } from '$lib/stores/theme'
 
 	let unsubscribeWalletStore: (() => void) | undefined = undefined
-	let unsubscribeThemeStore: (() => void) | undefined = undefined
 
 	onMount(() => {
-		unsubscribeThemeStore = theme.subscribe((theme) => {
-			changeColors(theme.baseColor, theme.darkMode)
-		})
 		unsubscribeWalletStore = walletStore.subscribe(({ wallet }) => {
 			if (wallet) {
 				adapter.onLogIn(wallet)
@@ -30,8 +27,9 @@
 	onDestroy(() => {
 		if ($walletStore.wallet) adapter.onLogOut()
 		if (unsubscribeWalletStore) unsubscribeWalletStore()
-		if (unsubscribeThemeStore) unsubscribeThemeStore()
 	})
+
+	$: changeColors($theme.baseColor, $theme.darkMode)
 </script>
 
 <div class="root">

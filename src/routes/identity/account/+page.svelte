@@ -18,24 +18,18 @@
 	import routes from '$lib/routes'
 	import { walletStore } from '$lib/stores/wallet'
 	import { balanceStore } from '$lib/stores/balances'
-	import { onMount } from 'svelte'
 	import { fetchBalances } from '$lib/adapters/balance'
+	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 
 	let copied = false
-	function copyAddressToClipboard() {
-		const address = $walletStore.wallet?.address
-		if (address === undefined) return
+	$: address = $walletStore.wallet?.address
 
+	$: if (address) fetchBalances(address)
+
+	function copyAddressToClipboard(address: string) {
 		copy(address)
 		copied = true
 	}
-
-	onMount(() => {
-		const address = $walletStore.wallet?.address
-		if (address === undefined) return
-
-		fetchBalances(address)
-	})
 </script>
 
 <Header title="Account">
@@ -43,50 +37,53 @@
 		<ChevronLeft />
 	</Button>
 </Header>
-{#if $profile.loading}
-	<Container align="center" grow gap={6} justify="center" padX={24}>
-		<h2>Loading...</h2>
-	</Container>
-{:else if $profile.error}
-	<Container align="center" grow gap={6} justify="center" padX={24}>
-		<h2>Failed to load profile: {$profile.error.message}</h2>
-	</Container>
-{:else}
-	<Container gap={6} align="center" padX={24}>
-		<p class="text-lg text-bold pad">Address</p>
-		<p class="text-lg">This address is used to send and receive tokens with Waku objects</p>
-	</Container>
-	<Container gap={6}>
-		<ReadonlyText label="Account address" overflow={false} breakWord>
-			{$walletStore.wallet?.address}
-		</ReadonlyText>
-		<Button on:click={copyAddressToClipboard}>
-			{#if copied}
-				<Checkmark />
-				Copied
-			{:else}
-				<Copy />
-				Copy
-			{/if}
-		</Button>
-	</Container>
-	<Divider pad={12} />
-	<Container align="center" direction="row" gap={6} justify="center" padX={24}>
-		Assets <Badge dark>{$balanceStore.balances.length}</Badge>
-	</Container>
-	<Divider pad={12} padBottom={0} />
-	<div class="assets">
-		{#each $balanceStore.balances as balance}
-			<Asset
-				name={balance.name}
-				token={balance.symbol}
-				amount={balance.amount}
-				decimals={balance.decimals}
-				image={balance.image}
-			/>
-		{/each}
-	</div>
-{/if}
+
+<AuthenticatedOnly let:wallet>
+	{#if $profile.loading}
+		<Container align="center" grow gap={6} justify="center" padX={24}>
+			<h2>Loading...</h2>
+		</Container>
+	{:else if $profile.error}
+		<Container align="center" grow gap={6} justify="center" padX={24}>
+			<h2>Failed to load profile: {$profile.error.message}</h2>
+		</Container>
+	{:else}
+		<Container gap={6} align="center" padX={24}>
+			<p class="text-lg text-bold pad">Address</p>
+			<p class="text-lg">This address is used to send and receive tokens with Waku objects</p>
+		</Container>
+		<Container gap={6}>
+			<ReadonlyText label="Account address" overflow={false} breakWord>
+				{wallet.address}
+			</ReadonlyText>
+			<Button on:click={() => copyAddressToClipboard(wallet.address)}>
+				{#if copied}
+					<Checkmark />
+					Copied
+				{:else}
+					<Copy />
+					Copy
+				{/if}
+			</Button>
+		</Container>
+		<Divider pad={12} />
+		<Container align="center" direction="row" gap={6} justify="center" padX={24}>
+			Assets <Badge dark>{$balanceStore.balances.length}</Badge>
+		</Container>
+		<Divider pad={12} padBottom={0} />
+		<div class="assets">
+			{#each $balanceStore.balances as balance}
+				<Asset
+					name={balance.name}
+					token={balance.symbol}
+					amount={balance.amount}
+					decimals={balance.decimals}
+					image={balance.image}
+				/>
+			{/each}
+		</div>
+	{/if}
+</AuthenticatedOnly>
 
 <style lang="scss">
 	.pad {

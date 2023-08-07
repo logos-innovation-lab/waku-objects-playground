@@ -12,10 +12,10 @@
 	import PaintPalette from '$lib/components/icons/paint-palette.svelte'
 	import CaretDown from '$lib/components/icons/caret-down.svelte'
 
-	import { profile } from '$lib/stores/profile'
 	import { goto } from '$app/navigation'
 	import routes from '$lib/routes'
 	import { theme } from '$lib/stores/theme'
+	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 
 	let baseColor = $theme.baseColor
 	$: if (/^#[0-9A-F]{6}$/i.test(baseColor)) {
@@ -28,15 +28,8 @@
 		<ChevronLeft />
 	</Button>
 </Header>
-{#if $profile.loading}
-	<Container align="center" grow gap={6} justify="center" padX={24}>
-		<h2>Loading...</h2>
-	</Container>
-{:else if $profile.error}
-	<Container align="center" grow gap={6} justify="center" padX={24}>
-		<h2>Failed to load profile: {$profile.error.message}</h2>
-	</Container>
-{:else}
+
+<AuthenticatedOnly>
 	<div class="preview">
 		<Container>
 			<ChatMessage bubble>This is a preview, use the menus below to customise</ChatMessage>
@@ -75,7 +68,7 @@
 			<input type="color" bind:value={baseColor} />
 		</label>
 	</Container>
-{/if}
+</AuthenticatedOnly>
 
 <style lang="scss">
 	.preview {

@@ -3,6 +3,7 @@
 	import ObjectUI from '$lib/objects/ui.svelte'
 	import { goto } from '$app/navigation'
 	import routes from '$lib/routes'
+	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 
 	const genRanHex = (size: number) =>
 		[...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')
@@ -17,4 +18,6 @@
 	}
 </script>
 
-<ObjectUI {objectId} {chatId} {instanceId} {onViewChange} {view} />
+<AuthenticatedOnly let:wallet>
+	<ObjectUI {objectId} {chatId} {instanceId} {onViewChange} {view} {wallet} />
+</AuthenticatedOnly>
