@@ -10,6 +10,13 @@
 	import type { User } from '$lib/types'
 	import { objectKey, objectStore } from '$lib/stores/objects'
 	import { throwError } from '$lib/utils/error'
+	import Container from '$lib/components/container.svelte'
+	import ChatBot from '$lib/components/icons/chat-bot.svelte'
+	import Button from '$lib/components/button.svelte'
+	import UserFollow from '$lib/components/icons/user-follow.svelte'
+	import { goto } from '$app/navigation'
+	import routes from '$lib/routes'
+	import Login from '$lib/components/icons/login.svelte'
 
 	export let objectId: string
 	export let instanceId: string
@@ -19,30 +26,23 @@
 
 	const component = lookup(objectId)?.standalone
 
-	const wallet = $walletStore.wallet
-	if (!wallet) {
-		// TODO: handle when there is not wallet (redirect to login)
-		throw 'no wallet'
-	}
-	const address = wallet.address
-
+	let args: WakuObjectArgs
 	let store: unknown
-	$: store = $objectStore.objects.get(objectKey(objectId, instanceId))
 	let tokens: Token[]
-	$: tokens = $balanceStore.balances
 	let chat: Chat
-	$: chat = $chats.chats.get(chatId) || throwError('chat not found')
-
 	let userProfile: User
-	$: if (address && !$profile.loading) {
-		userProfile = {
-			address,
-			name: $profile.name,
-			avatar: $profile.avatar,
-		}
-	}
 	let users: User[]
-	$: users = chat.users
+
+	$: wallet = $walletStore.wallet
+
+	$: loading =
+		$walletStore.loading ||
+		$chats.loading ||
+		$objectStore.loading ||
+		$balanceStore.loading ||
+		$profile.loading
+
+	$: noWallet = !wallet && !$walletStore.loading
 
 	function send(data: unknown): Promise<void> {
 		if (!$walletStore.wallet) throw new Error('not logged in')
@@ -50,30 +50,69 @@
 	}
 
 	function updateStore(updater: (state: unknown) => unknown) {
-		adapter.updateStore(address, objectId, instanceId, updater)
+		if (!$walletStore.wallet) throw new Error('not logged in')
+		adapter.updateStore($walletStore.wallet.address, objectId, instanceId, updater)
 	}
 
-	const wakuObjectAdapter = makeWakuObjectAdapter(adapter, wallet)
+	$: if (!loading && wallet) {
+		const address = wallet.address
 
-	let args: WakuObjectArgs
-	$: if (userProfile && users) {
-		args = {
-			instanceId,
-			profile: userProfile,
-			users,
-			tokens,
-			store,
-			send,
-			updateStore,
-			onViewChange,
-			view,
-			...wakuObjectAdapter,
+		store = $objectStore.objects.get(objectKey(objectId, instanceId))
+		tokens = $balanceStore.balances
+
+		if (address && !$profile.loading) {
+			userProfile = {
+				address,
+				name: $profile.name,
+				avatar: $profile.avatar,
+			}
+		}
+		//FIXME: user may not be part of this chat, handle that
+		chat = $chats.chats.get(chatId) || throwError('chat not found')
+		users = chat.users
+
+		const wakuObjectAdapter = makeWakuObjectAdapter(adapter, wallet)
+
+		if (userProfile && users) {
+			args = {
+				instanceId,
+				profile: userProfile,
+				users,
+				tokens,
+				store,
+				send,
+				updateStore,
+				onViewChange,
+				view,
+				...wakuObjectAdapter,
+			}
 		}
 	}
 </script>
 
-{#if !args}
-	<p>Loading...</p>
+{#if noWallet}
+	<Container align="center" alignItems="center" gap={12} justify="center" grow padX={24}>
+		<div class="chatbot">
+			<div>
+				<ChatBot size={32} />
+			</div>
+			<p class="text-lg text-bold">Waku Play</p>
+		</div>
+		<Button on:click={() => goto(routes.IDENTITY_NEW)}>
+			<UserFollow />
+			Create new identity
+		</Button>
+		<Button on:click={() => goto(routes.IDENTITY_CONNECT)}>
+			<Login />
+			Connect existing identity
+		</Button>
+	</Container>
+{:else if loading}
+	<Container align="center" grow gap={6} justify="center">
+		<div class="center">
+			<h2>Loading...</h2>
+		</div>
+	</Container>
 {:else}
 	<svelte:component this={component} {args} />
 {/if}
