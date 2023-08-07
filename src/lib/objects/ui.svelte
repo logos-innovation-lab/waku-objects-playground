@@ -11,12 +11,6 @@
 	import { objectKey, objectStore } from '$lib/stores/objects'
 	import { throwError } from '$lib/utils/error'
 	import Container from '$lib/components/container.svelte'
-	import ChatBot from '$lib/components/icons/chat-bot.svelte'
-	import Button from '$lib/components/button.svelte'
-	import UserFollow from '$lib/components/icons/user-follow.svelte'
-	import { goto } from '$app/navigation'
-	import routes from '$lib/routes'
-	import Login from '$lib/components/icons/login.svelte'
 
 	export let objectId: string
 	export let instanceId: string
@@ -41,8 +35,6 @@
 		$objectStore.loading ||
 		$balanceStore.loading ||
 		$profile.loading
-
-	$: noWallet = !wallet && !$walletStore.loading
 
 	function send(data: unknown): Promise<void> {
 		if (!$walletStore.wallet) throw new Error('not logged in')
@@ -90,24 +82,7 @@
 	}
 </script>
 
-{#if noWallet}
-	<Container align="center" alignItems="center" gap={12} justify="center" grow padX={24}>
-		<div class="chatbot">
-			<div>
-				<ChatBot size={32} />
-			</div>
-			<p class="text-lg text-bold">Waku Play</p>
-		</div>
-		<Button on:click={() => goto(routes.IDENTITY_NEW)}>
-			<UserFollow />
-			Create new identity
-		</Button>
-		<Button on:click={() => goto(routes.IDENTITY_CONNECT)}>
-			<Login />
-			Connect existing identity
-		</Button>
-	</Container>
-{:else if loading}
+{#if loading}
 	<Container align="center" grow gap={6} justify="center">
 		<div class="center">
 			<h2>Loading...</h2>
