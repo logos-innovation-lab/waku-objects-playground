@@ -29,6 +29,10 @@
 	import { throwError } from '$lib/utils/error'
 	import Grid from '$lib/components/grid.svelte'
 	import logo from './logo.svg'
+	import ObjectDetailItem from '$lib/components/object-detail-item.svelte'
+	import CheckmarkFilled from '$lib/components/icons/checkmark-filled.svelte'
+	import Pending from '$lib/components/icons/pending.svelte'
+	import Timestamp from '$lib/components/timestamp.svelte'
 
 	export let args: WakuObjectArgs<SendTransactionStore, SendTransactionDataMessage>
 
@@ -157,61 +161,96 @@
 		</Container>
 	{:else}
 		{@const isSender = store.transaction.from === args.profile.address}
-
-		{#if isSender}
-			<ArrowUpRight />
-		{:else}
-			<ArrowDownRight />
-		{/if}
-		{toSignificant(BigInt(store.transaction.token.amount), store.transaction.token.decimals)}
-		{store.transaction.token.symbol}
-		Payment {store.type}
-
-		<Container gap={6} direction="column" grow padX={24}>
-			<!-- TODO: format the timestamp -->
-			{formatDateAndTime(store.transaction.timestamp)}
-
-			{#if isSender}
-				You sent {toSignificant(
-					BigInt(store.transaction.token.amount),
-					store.transaction.token.decimals,
-				)}
-				{store.transaction.token.symbol} to {args.users.find(
-					(u) => store && store.type !== 'init' && u.address === store.transaction.to,
-				)?.name}
-			{:else}
-				You received {toSignificant(
-					BigInt(store.transaction.token.amount),
-					store.transaction.token.decimals,
-				)}
-				{store.transaction.token.symbol} from {args.users.find(
-					(u) => store && store.type !== 'init' && u.address === store.transaction.from,
-				)?.name}
-			{/if}
-			Payment {store.type}
-
-			<!-- Details -->
-			<ReadonlyText label="Amount">
-				<div class="row">
-					<div>
-						<div class="text-lg">{amount} {token.symbol}</div>
-						<div class="secondary text-sm">≈ 13.91 EUR at the time of transaction</div>
-					</div>
+		<div class="details-wrapper">
+			<div class="topper">
+				<Container gap={6} direction="column" padX={12} align="center">
+					<p class="title-amt">
+						{#if isSender}
+							<ArrowUpRight size={24} />
+						{:else}
+							<ArrowDownRight size={24} />
+						{/if}
+						{toSignificant(
+							BigInt(store.transaction.token.amount),
+							store.transaction.token.decimals,
+						)}
+						{store.transaction.token.symbol}
+					</p>
+					<p class="status">
+						{#if store.type === 'success'}
+							<CheckmarkFilled /> Transaction confirmed
+						{:else if store.type === 'pending'}
+							<Pending /> Transaction pending
+						{:else}
+							<WarningAltFilled /> Transaction failed
+						{/if}
+					</p>
+				</Container>
+			</div>
+			<div class="details-section">
+				<div class="detail-item">
+					<ObjectDetailItem buttonLink={store.transaction.hash}>
+						<svelte:fragment slot="top">
+							<Timestamp>
+								<!-- TODO: format the timestamp -->
+								{formatDateAndTime(store.transaction.timestamp)}
+							</Timestamp>
+							<div class="text-lg">
+								{#if isSender}
+									You sent {toSignificant(
+										BigInt(store.transaction.token.amount),
+										store.transaction.token.decimals,
+									)}
+									{store.transaction.token.symbol} to {args.users.find(
+										(u) => store && store.type !== 'init' && u.address === store.transaction.to,
+									)?.name}
+								{:else}
+									You received {toSignificant(
+										BigInt(store.transaction.token.amount),
+										store.transaction.token.decimals,
+									)}
+									{store.transaction.token.symbol} from {args.users.find(
+										(u) => store && store.type !== 'init' && u.address === store.transaction.from,
+									)?.name}
+								{/if}
+							</div>
+							<p class="status">
+								{#if store.type === 'success'}
+									<CheckmarkFilled /> Payment successful
+								{:else if store.type === 'pending'}
+									<Pending /> Payment pending
+								{:else}
+									<WarningAltFilled /> Payment failed
+								{/if}
+							</p>
+						</svelte:fragment>
+						<!-- <Container gap={6} direction="column" padX={24}> -->
+						<!-- Details -->
+						<ReadonlyText label="Amount">
+							<div class="row">
+								<div>
+									<div class="text-lg">{amount} {token.symbol}</div>
+									<div class="secondary text-sm">≈ 13.91 EUR at the time of transaction</div>
+								</div>
+							</div>
+						</ReadonlyText>
+						<ReadonlyText label="Transaction fee (max)">
+							<div class="text-lg">
+								{fee ? `${toSignificant(fee.amount, fee.decimals)} ${fee.symbol}` : 'unknown'}
+							</div>
+							<div class="secondary text-sm">≈ 1.56 EUR now</div>
+						</ReadonlyText>
+						<ReadonlyText label="Transaction ID">
+							<div class="text-lg">{store.transaction.hash}</div>
+						</ReadonlyText>
+						<ReadonlyText label="Transaction status">
+							<div class="text-lg">{store.type}</div>
+						</ReadonlyText>
+						<!-- </Container> -->
+					</ObjectDetailItem>
 				</div>
-			</ReadonlyText>
-			<ReadonlyText label="Transaction fee (max)">
-				<div class="text-lg">
-					{fee ? `${toSignificant(fee.amount, fee.decimals)} ${fee.symbol}` : 'unknown'}
-				</div>
-				<div class="secondary text-sm">≈ 1.56 EUR now</div>
-			</ReadonlyText>
-			<ReadonlyText label="Transaction ID">
-				<div class="text-lg">{store.transaction.hash}</div>
-			</ReadonlyText>
-			<ReadonlyText label="Transaction status">
-				<div class="text-lg">{store.type}</div>
-			</ReadonlyText>
-		</Container>
+			</div>
+		</div>
 	{/if}
 {:else}
 	<Header title="Payggy">
@@ -272,6 +311,25 @@
 {/if}
 
 <style lang="scss">
+	.details-wrapper {
+		display: flex;
+		flex-direction: column;
+		flex-grow: 1;
+		.topper {
+			background-color: var(--color-base, var(--color-dark-accent));
+			padding-top: 18px;
+			padding-bottom: var(--spacing-24);
+			flex-grow: 0;
+		}
+		.details-section {
+			background-color: var(--color-step-10, var(--color-dark-step-50));
+
+			flex-grow: 1;
+		}
+		.detail-item {
+			background-color: transparent;
+		}
+	}
 	.secondary {
 		color: var(--color-step-40, var(--color-dark-step-20));
 	}
@@ -293,6 +351,27 @@
 	.balance {
 		display: flex;
 		align-items: center;
+		gap: var(--spacing-6);
+	}
+	.title-amt {
+		font-size: calc(var(--font-size-normal) * 1.3);
+		font-weight: var(--font-weight-700);
+	}
+	.wrapper {
+		background-color: var(--color-step-10, --color-dark-step-50);
+	}
+	// .details {
+	// 	background-color: var(--color-step-10, --color-dark-step-50);
+	// 	flex-grow: 1;
+	// }
+
+	// .detail-item {
+	// 	margin-inline: var(--spacing-12);
+	// 	background-color: var(--color-base, --color-dark-accent);
+	// }
+	.status {
+		display: flex;
+		flex-direction: row;
 		gap: var(--spacing-6);
 	}
 </style>
