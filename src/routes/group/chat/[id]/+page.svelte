@@ -20,9 +20,10 @@
 	import { chats } from '$lib/stores/chat'
 	import adapters from '$lib/adapters'
 	import ROUTES from '$lib/routes'
-	import { walletStore } from '$lib/stores/wallet'
 	import { browser } from '$app/environment'
 	import ChatMessage from '$lib/components/chat-message.svelte'
+	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
+	import type { HDNodeWallet } from 'ethers/lib.commonjs'
 
 	let div: HTMLElement
 	let autoscroll = true
@@ -50,12 +51,9 @@
 	$: messages = $chats.chats.get($page.params.id)?.messages || []
 	let loading = false
 	let text = ''
-	$: if (browser && !$walletStore.loading && $walletStore.wallet === undefined) goto(ROUTES.HOME)
 
-	const sendMessage = async () => {
+	const sendMessage = async (wallet: HDNodeWallet) => {
 		loading = true
-		const wallet = $walletStore.wallet
-		if (!wallet) throw new Error('no wallet')
 		await adapters.sendChatMessage(wallet, $page.params.id, text)
 		text = ''
 		loading = false
@@ -64,97 +62,95 @@
 	$: chat = $chats.chats.get($page.params.id)
 </script>
 
-{#if $walletStore.loading || $chats.loading}
-	<Container align="center" grow gap={6} justify="center" padX={24}>
-		<h2>Loading...</h2>
-	</Container>
-{:else if $walletStore.error}
-	<Container align="center" grow gap={6} justify="center" padX={24}>
-		<h2>Failed to load chat: {$walletStore.error?.message}</h2>
-	</Container>
-{:else if !chat}
-	<Container align="center" grow gap={6} justify="center" padX={24}>
-		<h2>Chat not found</h2>
-	</Container>
-{:else}
-	<div class="chat">
-		<Header>
-			<Button variant="icon" slot="left" on:click={() => goto(ROUTES.HOME)}>
-				<ChevronLeft />
-			</Button>
-			<svelte:fragment slot="chat">
-				<Avatar picture={chat?.avatar ?? ''} />
-				{chat?.name}
-			</svelte:fragment>
-			<Button variant="icon" slot="right" on:click={() => goto(ROUTES.GROUP_EDIT($page.params.id))}>
-				<EditIcon />
-			</Button>
-		</Header>
-		<div class="chat-messages" bind:this={div}>
-			<Container grow>
-				<div class="messages">
-					<div class="messages-inner">
-						<!-- Chat bubbles -->
-						{#each messages as message}
-							{#if message.type === 'user' && message.text.length > 0}
-								<ChatMessage
-									myMessage={message.fromAddress === $walletStore.wallet?.address ? true : false}
-									bubble
-								>
-									{@html message.text.replaceAll('\n', '</br>')}
-								</ChatMessage>
-							{:else if message.type === 'data'}
-								<WakuObject {message} users={chat.users} />
-							{/if}
-						{/each}
+<AuthenticatedOnly let:wallet>
+	{#if !chat}
+		<Container align="center" grow gap={6} justify="center" padX={24}>
+			<h2>Chat not found</h2>
+		</Container>
+	{:else}
+		<div class="chat">
+			<Header>
+				<Button variant="icon" slot="left" on:click={() => goto(ROUTES.HOME)}>
+					<ChevronLeft />
+				</Button>
+				<svelte:fragment slot="chat">
+					<Avatar picture={chat?.avatar ?? ''} />
+					{chat?.name}
+				</svelte:fragment>
+				<Button
+					variant="icon"
+					slot="right"
+					on:click={() => goto(ROUTES.GROUP_EDIT($page.params.id))}
+				>
+					<EditIcon />
+				</Button>
+			</Header>
+			<div class="chat-messages" bind:this={div}>
+				<Container grow>
+					<div class="messages">
+						<div class="messages-inner">
+							<!-- Chat bubbles -->
+							{#each messages as message}
+								{#if message.type === 'user' && message.text.length > 0}
+									<ChatMessage
+										myMessage={message.fromAddress === wallet.address ? true : false}
+										bubble
+									>
+										{@html message.text.replaceAll('\n', '</br>')}
+									</ChatMessage>
+								{:else if message.type === 'data'}
+									<WakuObject {message} users={chat.users} />
+								{/if}
+							{/each}
+						</div>
 					</div>
-				</div>
-			</Container>
+				</Container>
+			</div>
+			<div class="chat-input-wrapper">
+				<Container>
+					<div class="chat-input">
+						<Dropdown up left>
+							<!-- TODO: make button "active" while dropdown is open -->
+							<Button variant="icon" slot="button">
+								<Add />
+							</Button>
+							<DropdownItem disabled onClick={() => console.log('Pic from Cam')}
+								>Pic from Cam</DropdownItem
+							>
+							<DropdownItem disabled onClick={() => console.log('Pic from Lib')}
+								>Pic from Lib</DropdownItem
+							>
+							<DropdownItem onClick={() => goto(ROUTES.OBJECTS($page.params.id))}
+								>Waku Object</DropdownItem
+							>
+						</Dropdown>
+						<Textarea
+							placeholder="Message"
+							bind:value={text}
+							on:keypress={(e) => {
+								// When enter is pressed without modifier keys, send the message
+								if (e.key === 'Enter' && !(e.shiftKey || e.ctrlKey || e.altKey)) {
+									sendMessage(wallet)
+									e.preventDefault()
+								}
+								// When shift+enter is pressed, add a newline
+								else if (e.key === 'Enter' && (e.altKey || e.ctrlKey)) {
+									text += '\n'
+									e.preventDefault()
+								}
+							}}
+						/>
+						{#if text.length > 0}
+							<Button variant="strong" disabled={loading} on:click={() => sendMessage(wallet)}>
+								<ArrowUp />
+							</Button>
+						{/if}
+					</div>
+				</Container>
+			</div>
 		</div>
-		<div class="chat-input-wrapper">
-			<Container>
-				<div class="chat-input">
-					<Dropdown up left>
-						<!-- TODO: make button "active" while dropdown is open -->
-						<Button variant="icon" slot="button">
-							<Add />
-						</Button>
-						<DropdownItem disabled onClick={() => console.log('Pic from Cam')}
-							>Pic from Cam</DropdownItem
-						>
-						<DropdownItem disabled onClick={() => console.log('Pic from Lib')}
-							>Pic from Lib</DropdownItem
-						>
-						<DropdownItem onClick={() => goto(ROUTES.OBJECTS($page.params.id))}
-							>Waku Object</DropdownItem
-						>
-					</Dropdown>
-					<Textarea
-						placeholder="Message"
-						bind:value={text}
-						on:keypress={(e) => {
-							// When enter is pressed without modifier keys, send the message
-							if (e.key === 'Enter' && !(e.shiftKey || e.ctrlKey || e.altKey)) {
-								sendMessage()
-								e.preventDefault()
-							}
-							// When shift+enter is pressed, add a newline
-							else if (e.key === 'Enter' && (e.altKey || e.ctrlKey)) {
-								text += '\n'
-								e.preventDefault()
-							}
-						}}
-					/>
-					{#if text.length > 0}
-						<Button variant="strong" disabled={loading} on:click={sendMessage}>
-							<ArrowUp />
-						</Button>
-					{/if}
-				</div>
-			</Container>
-		</div>
-	</div>
-{/if}
+	{/if}
+</AuthenticatedOnly>
 
 <style lang="scss">
 	.messages {

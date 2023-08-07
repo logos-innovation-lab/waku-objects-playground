@@ -17,7 +17,7 @@
 	import { chats, isGroupChatId, type Chat } from '$lib/stores/chat'
 
 	import ROUTES from '$lib/routes'
-	import Login from '$lib/components/login.svelte'
+	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 
 	$: orderedChats = Array.from($chats.chats)
 		.map(([, chat]) => chat)
@@ -31,8 +31,8 @@
 	$: loading = $profile.loading || $chats.loading
 </script>
 
-<div class="wrapper">
-	<Login let:wallet>
+<AuthenticatedOnly let:wallet>
+	<div class="wrapper">
 		{#if loading}
 			<Container align="center" grow gap={6} justify="center">
 				<h2>Loading...</h2>
@@ -148,8 +148,8 @@
 				</ul>
 			</div>
 		{/if}
-	</Login>
-</div>
+	</div>
+</AuthenticatedOnly>
 
 <style lang="scss">
 	.wrapper {

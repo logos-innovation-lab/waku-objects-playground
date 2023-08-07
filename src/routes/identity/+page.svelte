@@ -24,6 +24,7 @@
 	import { onDestroy } from 'svelte'
 	import { walletStore } from '$lib/stores/wallet'
 	import { get } from 'svelte/store'
+	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 
 	let avatar = $profile.avatar
 	let name = $profile.name
@@ -80,15 +81,8 @@
 		<ChevronLeft />
 	</Button>
 </Header>
-{#if $profile.loading}
-	<Container align="center" grow gap={6} justify="center" padX={24}>
-		<h2>Loading...</h2>
-	</Container>
-{:else if $profile.error}
-	<Container align="center" grow gap={6} justify="center" padX={24}>
-		<h2>Failed to load profile: {$profile.error.message}</h2>
-	</Container>
-{:else}
+
+<AuthenticatedOnly>
 	<Container gap={6}>
 		<div class="avatar">
 			{#if avatar}
@@ -157,7 +151,7 @@
 		</Button>
 	</Container>
 	<Spacer />
-{/if}
+</AuthenticatedOnly>
 
 <style lang="scss">
 	.avatar {

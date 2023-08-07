@@ -21,7 +21,7 @@
 	import ROUTES from '$lib/routes'
 	import { browser } from '$app/environment'
 	import ChatMessage from '$lib/components/chat-message.svelte'
-	import Login from '$lib/components/login.svelte'
+	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 	import type { HDNodeWallet } from 'ethers/lib.commonjs'
 
 	let div: HTMLElement
@@ -58,7 +58,7 @@
 	$: chat = $chats.chats.get($page.params.id)
 </script>
 
-<Login let:wallet>
+<AuthenticatedOnly let:wallet>
 	{#if !chat}
 		<Container align="center" grow gap={6} justify="center" padX={24}>
 			<h2>Chat not found</h2>
@@ -141,7 +141,7 @@
 			</div>
 		</div>
 	{/if}
-</Login>
+</AuthenticatedOnly>
 
 <style lang="scss">
 	.messages {

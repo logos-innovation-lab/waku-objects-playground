@@ -10,7 +10,7 @@
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
 	import ReadonlyText from '$lib/components/readonly-text.svelte'
-	import Login from '$lib/components/login.svelte'
+	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 
 	import { goto } from '$app/navigation'
 	import routes from '$lib/routes'
@@ -101,7 +101,7 @@
 	</Button>
 </Header>
 
-<Login let:wallet>
+<AuthenticatedOnly let:wallet>
 	{#if wallet && $chats.loading}
 		<Container align="center" grow gap={6} justify="center">
 			<div class="center">
@@ -164,7 +164,7 @@
 			</Button>
 		</Container>
 	{/if}
-</Login>
+</AuthenticatedOnly>
 
 <style lang="scss">
 	.qr {

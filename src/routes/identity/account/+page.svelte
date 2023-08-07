@@ -19,7 +19,7 @@
 	import { walletStore } from '$lib/stores/wallet'
 	import { balanceStore } from '$lib/stores/balances'
 	import { fetchBalances } from '$lib/adapters/balance'
-	import Login from '$lib/components/login.svelte'
+	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 
 	let copied = false
 	$: address = $walletStore.wallet?.address
@@ -38,7 +38,7 @@
 	</Button>
 </Header>
 
-<Login let:wallet>
+<AuthenticatedOnly let:wallet>
 	{#if $profile.loading}
 		<Container align="center" grow gap={6} justify="center" padX={24}>
 			<h2>Loading...</h2>
@@ -83,7 +83,7 @@
 			{/each}
 		</div>
 	{/if}
-</Login>
+</AuthenticatedOnly>
 
 <style lang="scss">
 	.pad {

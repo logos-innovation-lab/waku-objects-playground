@@ -15,7 +15,7 @@
 	import { goto } from '$app/navigation'
 	import routes from '$lib/routes'
 	import { theme } from '$lib/stores/theme'
-	import Login from '$lib/components/login.svelte'
+	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 
 	let baseColor = $theme.baseColor
 	$: if (/^#[0-9A-F]{6}$/i.test(baseColor)) {
@@ -29,7 +29,7 @@
 	</Button>
 </Header>
 
-<Login>
+<AuthenticatedOnly>
 	<div class="preview">
 		<Container>
 			<ChatMessage bubble>This is a preview, use the menus below to customise</ChatMessage>
@@ -68,7 +68,7 @@
 			<input type="color" bind:value={baseColor} />
 		</label>
 	</Container>
-</Login>
+</AuthenticatedOnly>
 
 <style lang="scss">
 	.preview {

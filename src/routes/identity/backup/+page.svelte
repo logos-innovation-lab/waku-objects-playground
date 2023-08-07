@@ -9,7 +9,7 @@
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'
 	import ReadonlyText from '$lib/components/readonly-text.svelte'
-	import Login from '$lib/components/login.svelte'
+	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 	import { walletStore } from '$lib/stores/wallet'
 
 	let copied = false
@@ -26,7 +26,7 @@
 	</Button>
 </Header>
 
-<Login>
+<AuthenticatedOnly>
 	<Container gap={6} grow justify="center" align="center">
 		<p class="text-lg text-bold">Keep your recovery phrase safe</p>
 		<p class="text-lg description">
@@ -45,7 +45,7 @@
 			{/if}
 		</Button>
 	</Container>
-</Login>
+</AuthenticatedOnly>
 
 <style lang="scss">
 	.description {

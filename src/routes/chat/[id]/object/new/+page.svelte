@@ -15,7 +15,7 @@
 	import ObjectLink from '$lib/components/object-link.svelte'
 	import ButtonBlock from '$lib/components/button-block.svelte'
 	import { wakuObjectList } from '$lib/objects/lookup'
-	import Login from '$lib/components/login.svelte'
+	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 
 	const objects = wakuObjectList.map((object) => ({
 		...object,
@@ -55,7 +55,7 @@
 		?.users.find((m) => m.address !== $walletStore.wallet?.address)
 </script>
 
-<Login>
+<AuthenticatedOnly>
 	<div class="main">
 		<ButtonBlock on:click={() => history.back()}>
 			<Header mainContent="left">
@@ -84,7 +84,7 @@
 			{/each}
 		</div>
 	</div>
-</Login>
+</AuthenticatedOnly>
 
 <style lang="scss">
 	.main {
