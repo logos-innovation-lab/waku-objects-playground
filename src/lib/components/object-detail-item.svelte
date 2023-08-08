@@ -44,7 +44,7 @@
 				</p>
 			</ButtonBlock>
 		</Container>
-		<Container padY={0} padX={24}>
+		<Container padY={0} padX={12}>
 			<div aria-expanded={visible} aria-controls={detailId}>
 				{#if visible}
 					<div

@@ -248,7 +248,6 @@
 						<ReadonlyText label="Transaction status">
 							<div class="text-lg">{store.type}</div>
 						</ReadonlyText>
-						<!-- </Container> -->
 					</ObjectDetailItem>
 				</div>
 			</div>
