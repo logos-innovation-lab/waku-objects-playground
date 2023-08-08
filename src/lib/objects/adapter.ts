@@ -1,9 +1,10 @@
 import type { Adapter } from '$lib/adapters'
-import { Contract, type BaseWallet, type TransactionReceipt } from 'ethers'
+import { Contract, type BaseWallet, type TransactionReceipt, Interface } from 'ethers'
 import type { WakuObjectAdapter } from '.'
 import type { Token } from '$lib/stores/balances'
 import {
 	defaultBlockchainNetwork,
+	getProvider,
 	getTransactionReceipt,
 	getTransactionResponse,
 	getTransactionTimestamp,
@@ -122,6 +123,10 @@ export function makeWakuObjectAdapter(adapter: Adapter, wallet: BaseWallet): Wak
 		return transactionReceiptToState(receipt)
 	}
 
+	function getContract(address: string, abi: Interface): Contract {
+		return new Contract(address, abi, getProvider())
+	}
+
 	return {
 		getTransaction,
 		getTransactionState,
@@ -129,5 +134,6 @@ export function makeWakuObjectAdapter(adapter: Adapter, wallet: BaseWallet): Wak
 		checkBalance: _checkBalance,
 		sendTransaction,
 		estimateTransaction,
+		getContract,
 	}
 }

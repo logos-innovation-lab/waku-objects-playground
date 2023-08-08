@@ -2,6 +2,7 @@ import type { Token } from '$lib/stores/balances'
 import type { DataMessage } from '$lib/stores/chat'
 import type { ComponentType } from 'svelte'
 import type { Transaction, User, TransactionState } from './schemas'
+import type { Contract, Interface } from 'ethers'
 
 export interface WakuObjectAdapter {
 	getTransaction(txHash: string): Promise<Transaction | undefined>
@@ -10,6 +11,7 @@ export interface WakuObjectAdapter {
 	checkBalance(token: Token): Promise<void>
 	sendTransaction: (to: string, token: Token, fee: Token) => Promise<string>
 	estimateTransaction: (to: string, token: Token) => Promise<Token>
+	getContract(address: string, abi: Interface): Contract
 }
 
 export interface WakuObjectArgs<StoreType = unknown, DataMessageType extends object = unknown>
