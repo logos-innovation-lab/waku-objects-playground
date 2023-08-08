@@ -60,7 +60,7 @@
 					{#if buttonLink}
 						<div class="view-btn">
 							<Button
-								on:click={() => window.open('https://etherscan.io/tx/' + buttonLink, '_blank')}
+								on:click={() => window.open(`${defaultBlockchainNetwork.explorer}/tx/${buttonLink}`, '_blank')}
 							>
 								<Launch />
 								View on Etherscan
