@@ -9,7 +9,7 @@
 
 	let detailId: string
 
-	export let buttonLink: undefined | string = undefined
+	export let txHash: undefined | string = undefined
 
 	onMount(() => {
 		// Generates unique ID for this detail instance (used for ARIA attributes)
