@@ -64,10 +64,17 @@
 			{/if}
 			{#if args.store && message.data && data}
 				<ReadonlyText
+					clickable
 					label={`${message.objectId} #${message.instanceId.slice(0, 4)}`}
 					marginBottom={0}
 				>
-					<div class="readonly">
+					<div
+						class="readonly"
+						on:click={onDetailsClick}
+						on:keypress={onDetailsClick}
+						role="button"
+						tabindex={0}
+					>
 						{#if myMessage}
 							<ArrowUpRight />
 						{:else}
@@ -82,13 +89,7 @@
 								{data.transaction.token.symbol}
 							</div>
 						{/if}
-						<div
-							class="change-view"
-							on:click={onDetailsClick}
-							on:keypress={onDetailsClick}
-							role="button"
-							tabindex={0}
-						>
+						<div class="change-view">
 							<DataViewAlt />
 						</div>
 					</div>

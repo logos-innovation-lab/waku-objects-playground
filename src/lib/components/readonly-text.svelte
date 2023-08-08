@@ -4,6 +4,7 @@
 	export let overflow = true
 	export let align: 'left' | 'right' | 'center' = 'left'
 	export let breakWord = false
+	export let clickable = false
 </script>
 
 <div
@@ -15,7 +16,7 @@
 			{label}
 		</div>
 	{/if}
-	<div class={`main ${breakWord ? 'break' : ''}`}>
+	<div class={`main ${breakWord ? 'break' : ''} ${clickable ? 'pointer' : ''}`}>
 		<slot />
 	</div>
 </div>
@@ -47,5 +48,9 @@
 		font-size: var(--font-size-sm);
 		margin-left: var(--spacing-12);
 		color: var(--color-step-40, var(--color-dark-step-20));
+	}
+
+	.pointer {
+		cursor: pointer;
 	}
 </style>
