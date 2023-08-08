@@ -41,8 +41,19 @@ function getTopic(contentTopic: ContentTopic, id: string | '' = '') {
 	return `/${topicApp}/${topicVersion}/${contentTopic}/${id}`
 }
 
-export async function connectWaku() {
+interface ConnectWakuOptions {
+	onDisconnect?: () => void
+}
+
+export async function connectWaku(options?: ConnectWakuOptions) {
 	const waku = await createLightNode()
+
+	waku.libp2p.addEventListener('peer:disconnect', () => {
+		if (options?.onDisconnect && waku.libp2p.getConnections().length === 0) {
+			options.onDisconnect()
+		}
+	})
+
 	await waku.start()
 	await waku.dial(peerMultiaddr)
 	await waitForRemotePeer(waku, [Protocols.Filter, Protocols.LightPush, Protocols.Store])
