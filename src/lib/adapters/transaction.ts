@@ -13,6 +13,7 @@ import abi from '$lib/abis/erc20.json'
 interface BlockchainNetwork {
 	name: string
 	provider: string
+	explorer: string
 	nativeToken: Token
 	tokens?: Token[]
 }
@@ -21,6 +22,7 @@ interface BlockchainNetwork {
 const testBlockchain: BlockchainNetwork = {
 	name: 'Local testnet',
 	provider: 'http://127.0.0.1:8545',
+	explorer: '',
 	nativeToken: {
 		name: 'Test Ether',
 		symbol: 'ETH',
@@ -33,8 +35,7 @@ const testBlockchain: BlockchainNetwork = {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const chiadoBlockchain: BlockchainNetwork = {
 	name: 'Chiado testnet',
-	// provider: 'https://rpc.chiadochain.net/',
-	// provider: 'https://rpc.chiado.gnosis.gateway.fm',
+	explorer: 'https://gnosis-chiado.blockscout.com',
 	provider: 'https://rpc.chiado.apyos.dev/',
 	nativeToken: {
 		name: 'Chiado xDai',
@@ -58,7 +59,7 @@ const chiadoBlockchain: BlockchainNetwork = {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const sepoliaBlockchain: BlockchainNetwork = {
 	name: 'Sepolia testnet',
-	// provider: 'https://rpc.sepolia.org/',
+	explorer: 'https://sepolia.etherscan.io/',
 	provider: 'https://rpc2.sepolia.org/ ',
 	nativeToken: {
 		name: 'Sepolia ETH',
