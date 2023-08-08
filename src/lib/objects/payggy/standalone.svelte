@@ -96,7 +96,7 @@
 		</Button>
 	</Header>
 
-	<Container gap={6} direction="column" grow justify="center" padX={24}>
+	<Container gap={6} direction="column" grow justify="center" padX={12}>
 		<ReadonlyText label="Amount">
 			<div class="row">
 				<div>
@@ -122,17 +122,19 @@
 			</div>
 			<div class="secondary text-sm">≈ 1.56 EUR now</div>
 		</ReadonlyText>
-		<p
-			class={`balance ${
-				Number(amount) > Number(toSignificant(token.amount, token.decimals)) ? 'text-bold' : ''
-			}`}
+		<Container padY={0}>
+			<p
+				class={`balance ${
+					Number(amount) > Number(toSignificant(token.amount, token.decimals)) ? 'text-bold' : ''
+				}`}
+			>
+				{#if Number(amount) > Number(toSignificant(token.amount, token.decimals))}
+					<WarningAltFilled />
+				{/if}
+				You have {toSignificant(token.amount, token.decimals)}
+				{token.symbol} in your account.
+			</p></Container
 		>
-			{#if Number(amount) > Number(toSignificant(token.amount, token.decimals))}
-				<WarningAltFilled />
-			{/if}
-			You have {toSignificant(token.amount, token.decimals)}
-			{token.symbol} in your account.
-		</p>
 	</Container>
 	<Container direction="row" justify="space-between" alignItems="center" padX={24}>
 		<div class="secondary text-normal">
@@ -246,7 +248,6 @@
 						<ReadonlyText label="Transaction status">
 							<div class="text-lg">{store.type}</div>
 						</ReadonlyText>
-						<!-- </Container> -->
 					</ObjectDetailItem>
 				</div>
 			</div>

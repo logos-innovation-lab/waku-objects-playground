@@ -137,11 +137,13 @@
 					<Button on:click={stop}><QrCodeIcon />Show my QR code</Button>
 				{/if}
 			</div>
-			<div class="link">
-				<ReadonlyText label="Invitation link" overflow={false}>
-					{$page.url.href}
-				</ReadonlyText>
-			</div>
+		</Container>
+		<Container padY={0}>
+			<ReadonlyText label="Invitation link" marginBottom={0}>
+				{$page.url.href}
+			</ReadonlyText>
+		</Container>
+		<Container padY={12} padX={24}>
 			<Button on:click={copyToClipboard} variant="strong">
 				{#if copied}
 					<Checkmark />

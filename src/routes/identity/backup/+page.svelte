@@ -32,7 +32,7 @@
 		<p class="text-lg description">
 			Anyone with your recovery phrase will be able to access your identity and account
 		</p>
-		<ReadonlyText label="Recovery phrase" overflow={false} marginBottom={0} align="left">
+		<ReadonlyText label="Recovery phrase" marginBottom={0} align="left">
 			{walletStore.getMnemonics()}
 		</ReadonlyText>
 		<Button on:click={copyToClipboard}>
