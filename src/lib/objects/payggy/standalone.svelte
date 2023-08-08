@@ -50,11 +50,8 @@
 	let fee: Token | undefined = undefined
 	const nativeToken = defaultBlockchainNetwork.nativeToken
 
-	$: if (!token) {
-		token =
-			args.tokens.find((token) => token.symbol === nativeToken.symbol) ||
-			throwError('invalid token')
-	}
+	$: if (!token) token = nativeToken
+	// FIXME: improve error handling, this will cause error 500
 	let toUser =
 		args.users.find((user) => user.address !== args.profile.address) || throwError('invalid user')
 	$: if (amount && token) {

@@ -22,10 +22,6 @@
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 	import type { HDNodeWallet } from 'ethers/lib.commonjs'
 
-	$: contacts = Array.from($chats.chats)
-		.filter(([, chat]) => !isGroupChatId(chat.chatId))
-		.map(([, chat]) => chat.users[0])
-
 	let groupMembers: string[] = []
 	let screen: 'create' | 'details' = 'create'
 	let picture = ''
