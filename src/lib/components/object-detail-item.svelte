@@ -34,7 +34,7 @@
 		/>
 		<Container>
 			<ButtonBlock on:click={() => (visible = !visible)} on:keypress={() => (visible = !visible)}>
-				<p class={`text-bold details-trigger ${visible ? 'open' : 'closed'}`}>
+				<p class={`details-trigger ${visible ? 'open' : 'closed'}`}>
 					Details
 					<Button variant="icon" align="right">
 						<div class={`chevron`}>
@@ -88,7 +88,8 @@
 		justify-content: space-between;
 		align-items: center;
 		font-size: var(--font-size-normal);
-		transition: font-size 0.3s;
+		font-weight: var(--font-wright-400);
+		transition: font-size 0.3s, font-weight 0.3s;
 	}
 	.chevron {
 		transform: rotate(-90deg);
@@ -98,7 +99,8 @@
 
 	.open {
 		font-size: var(--font-size-lg);
-		transition: font-size 0.3s;
+		transition: font-size 0.3s, font-weight 0.3s;
+		font-weight: var(--font-weight-700);
 		.chevron {
 			transform: rotate(90deg);
 			transition: transform 0.3s;
