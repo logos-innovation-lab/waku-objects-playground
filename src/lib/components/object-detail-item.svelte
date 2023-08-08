@@ -9,6 +9,7 @@
 	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 
 	let detailId: string
+	let visible = false
 
 	export let txHash: undefined | string = undefined
 
@@ -16,8 +17,6 @@
 		// Generates unique ID for this detail instance (used for ARIA attributes)
 		detailId = `id-${Math.random().toString(36).substring(7)}`
 	})
-
-	let visible = false
 </script>
 
 <Container>
@@ -27,8 +26,6 @@
 		</Container>
 	</div>
 	<div class="details">
-		<!-- <Container gap={6} direction="column">
-	</Container> -->
 		<input
 			type="checkbox"
 			style="display: none;"

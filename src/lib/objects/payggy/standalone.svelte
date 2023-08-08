@@ -8,6 +8,7 @@
 	import Close from '$lib/components/icons/close.svelte'
 	import ArrowDownRight from '$lib/components/icons/arrow-down-right.svelte'
 	import ArrowUpRight from '$lib/components/icons/arrow-up-right.svelte'
+	import Pending from '$lib/components/icons/pending.svelte'
 
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'
@@ -16,6 +17,12 @@
 	import Input from '$lib/components/input-field.svelte'
 	import Dropdown from '$lib/components/dropdown.svelte'
 	import DropdownItem from '$lib/components/dropdown-item.svelte'
+	import Grid from '$lib/components/grid.svelte'
+	import ObjectDetailItem from '$lib/components/object-detail-item.svelte'
+	import CheckmarkFilled from '$lib/components/icons/checkmark-filled.svelte'
+	import Timestamp from '$lib/components/timestamp.svelte'
+
+	import logo from './logo.svg'
 
 	import { formatAddress, toSignificant, toBigInt, formatDateAndTime } from '$lib/utils/format'
 	import type { WakuObjectArgs } from '..'
@@ -27,12 +34,6 @@
 	import type { Token } from '../schemas'
 	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 	import { throwError } from '$lib/utils/error'
-	import Grid from '$lib/components/grid.svelte'
-	import logo from './logo.svg'
-	import ObjectDetailItem from '$lib/components/object-detail-item.svelte'
-	import CheckmarkFilled from '$lib/components/icons/checkmark-filled.svelte'
-	import Pending from '$lib/components/icons/pending.svelte'
-	import Timestamp from '$lib/components/timestamp.svelte'
 
 	export let args: WakuObjectArgs<SendTransactionStore, SendTransactionDataMessage>
 
@@ -357,18 +358,6 @@
 		font-size: calc(var(--font-size-normal) * 1.3);
 		font-weight: var(--font-weight-700);
 	}
-	.wrapper {
-		background-color: var(--color-step-10, --color-dark-step-50);
-	}
-	// .details {
-	// 	background-color: var(--color-step-10, --color-dark-step-50);
-	// 	flex-grow: 1;
-	// }
-
-	// .detail-item {
-	// 	margin-inline: var(--spacing-12);
-	// 	background-color: var(--color-base, --color-dark-accent);
-	// }
 	.status {
 		display: flex;
 		flex-direction: row;
