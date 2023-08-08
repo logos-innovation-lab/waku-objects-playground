@@ -53,7 +53,7 @@
 			<p class="text-lg">This address is used to send and receive tokens with Waku objects</p>
 		</Container>
 		<Container gap={6}>
-			<ReadonlyText label="Account address" overflow={false} breakWord>
+			<ReadonlyText label="Account address" breakWord>
 				{wallet.address}
 			</ReadonlyText>
 			<Button on:click={() => copyAddressToClipboard(wallet.address)}>

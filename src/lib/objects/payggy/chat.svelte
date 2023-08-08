@@ -16,6 +16,7 @@
 	import CheckmarkFilled from '$lib/components/icons/checkmark-filled.svelte'
 	import Container from '$lib/components/container.svelte'
 	import logo from './logo.svg'
+	import Spacer from '$lib/components/spacer.svelte'
 
 	export let message: DataMessage<SendTransactionDataMessage>
 	export let args: WakuObjectArgs<SendTransactionStore, SendTransactionDataMessage>
@@ -41,8 +42,8 @@
 </script>
 
 <ChatMessage {myMessage} object bubble>
-	<Container>
-		<div class="wo text-normal">
+	<div class="wo text-normal">
+		<Container gap={12}>
 			<ObjectHeader name="Payggy" logoImg={logo} logoAlt="Payggy logo" />
 			{#if !args.store || !message.data || !otherUser}
 				Loading...
@@ -62,7 +63,9 @@
 				)}
 				{data.transaction.token.symbol} from {otherUser.name}
 			{/if}
-			{#if args.store && message.data && data}
+		</Container>
+		{#if args.store && message.data && data}
+			<Container padY={0} padX={0}>
 				<ReadonlyText
 					clickable
 					label={`${message.objectId} #${message.instanceId.slice(0, 4)}`}
@@ -94,6 +97,9 @@
 						</div>
 					</div>
 				</ReadonlyText>
+			</Container>
+			<Spacer height={12} />
+			<Container padY={0}>
 				<!-- TODO: add check for transaction status -->
 				<p class="transaction-status">
 					{#if data.type === 'success'}
@@ -102,16 +108,16 @@
 						Payment pending...
 					{/if}
 				</p>
-			{/if}
-		</div>
-	</Container>
+			</Container>
+		{/if}
+	</div>
 </ChatMessage>
 
 <style lang="scss">
 	.wo {
 		display: flex;
 		flex-direction: column;
-		gap: var(--spacing-12);
+		// gap: var(--spacing-12);
 		font-family: var(--font-body);
 		font-style: normal;
 		text-align: left;

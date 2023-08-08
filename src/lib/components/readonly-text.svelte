@@ -1,14 +1,14 @@
 <script lang="ts">
 	export let label: string | undefined = undefined
 	export let marginBottom = 24
-	export let overflow = true
+	export let pad = false
 	export let align: 'left' | 'right' | 'center' = 'left'
 	export let breakWord = false
 	export let clickable = false
 </script>
 
 <div
-	class={`readonly ${overflow ? 'overflow' : ''}`}
+	class={`readonly ${pad ? 'pad' : ''}`}
 	style={`margin-bottom: ${marginBottom}px; text-align: ${align};`}
 >
 	{#if label}
@@ -27,10 +27,8 @@
 		flex-direction: column;
 		gap: var(--spacing-6);
 
-		&.overflow {
-			width: calc(100% + var(--spacing-24));
-			margin-left: calc(-1 * var(--spacing-12));
-			margin-right: calc(-1 * var(--spacing-12));
+		&.pad {
+			padding-inline: var(--spacing-12);
 		}
 	}
 	.main {
