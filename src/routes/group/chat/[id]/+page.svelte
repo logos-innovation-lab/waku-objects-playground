@@ -65,7 +65,7 @@
 <AuthenticatedOnly let:wallet>
 	{#if !chat}
 		<Container align="center" grow gap={6} justify="center" padX={24}>
-			<h2>Chat not found</h2>
+			<h2>Could not find group chat.</h2>
 		</Container>
 	{:else}
 		<div class="chat">

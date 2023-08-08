@@ -15,15 +15,17 @@
 	import { clipAndResize } from '$lib/utils/image'
 	import Renew from '$lib/components/icons/renew.svelte'
 	import { page } from '$app/stores'
-	import { throwError } from '$lib/utils/error'
 	import type { HDNodeWallet } from 'ethers'
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 
 	$: chatId = $page.params.id
-	$: groupChat = $chats.chats.get(chatId) || throwError(`no chat found with id ${chatId}`)
-	$: groupMembers = groupChat.users
-	$: picture = groupChat.avatar
-	$: name = groupChat.name
+	$: groupChat = $chats.chats.get(chatId)
+	let picture: string | undefined
+	let name: string | undefined
+	$: if (groupChat) {
+		picture = picture ?? groupChat.avatar
+		name = name ?? groupChat.name
+	}
 
 	let invitedMembers: string[] = []
 	let screen: 'settings' | 'invite' = 'settings'
@@ -52,18 +54,21 @@
 	}
 
 	function isGroupMember(address: string) {
-		return groupMembers.map((user) => user.address).includes(address)
+		return groupChat?.users.map((user) => user.address).includes(address)
 	}
 </script>
 
 <AuthenticatedOnly let:wallet>
 	{#if $chats.loading}
 		<Container align="center" grow gap={6} justify="center">
-			<div class="center">
-				<h2>Loading...</h2>
-			</div>
+			<h2>Loading...</h2>
+		</Container>
+	{:else if !groupChat}
+		<Container align="center" grow gap={6} justify="center">
+			<h2>Could not find group chat.</h2>
 		</Container>
 	{:else if screen === 'settings'}
+		{@const groupMembers = groupChat.users}
 		<Header title="Group settings">
 			<svelte:fragment slot="left">
 				<div class="header-btns">
@@ -168,17 +173,6 @@
 </AuthenticatedOnly>
 
 <style lang="scss">
-	.center {
-		text-align: center;
-		margin-inline: auto;
-		display: flex;
-		flex-direction: column;
-		gap: var(--spacing-6);
-		justify-content: center;
-		align-items: center;
-		place-items: center;
-	}
-
 	.chats {
 		list-style: none;
 		padding: 0;

@@ -8,7 +8,6 @@
 	import { makeWakuObjectAdapter } from './adapter'
 	import type { User } from '$lib/types'
 	import { objectKey, objectStore } from '$lib/stores/objects'
-	import { throwError } from '$lib/utils/error'
 	import Container from '$lib/components/container.svelte'
 	import type { HDNodeWallet } from 'ethers/lib.commonjs'
 
@@ -24,7 +23,7 @@
 	let args: WakuObjectArgs
 	let store: unknown
 	let tokens: Token[]
-	let chat: Chat
+	let chat: Chat | undefined
 	let userProfile: User
 	let users: User[]
 
@@ -51,8 +50,10 @@
 				avatar: $profile.avatar,
 			}
 		}
-		//FIXME: user may not be part of this chat, handle that
-		chat = $chats.chats.get(chatId) || throwError('chat not found')
+		chat = $chats.chats.get(chatId)
+	}
+
+	$: if (chat) {
 		users = chat.users
 
 		const wakuObjectAdapter = makeWakuObjectAdapter(adapter, wallet)
@@ -79,6 +80,10 @@
 		<div class="center">
 			<h2>Loading...</h2>
 		</div>
+	</Container>
+{:else if !chat}
+	<Container align="center" grow gap={6} justify="center">
+		<h2>Chat not found</h2>
 	</Container>
 {:else}
 	<svelte:component this={component} {args} />
