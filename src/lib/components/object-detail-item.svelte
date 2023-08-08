@@ -54,18 +54,18 @@
 						id={detailId}
 					>
 						<slot />
+						{#if txHash}
+							<div class="view-btn">
+								<Button
+									on:click={() =>
+										window.open(`${defaultBlockchainNetwork.explorer}/tx/${txHash}`, '_blank')}
+								>
+									<Launch />
+									View on Etherscan
+								</Button>
+							</div>
+						{/if}
 					</div>
-					{#if txHash}
-						<div class="view-btn">
-							<Button
-								on:click={() =>
-									window.open(`${defaultBlockchainNetwork.explorer}/tx/${txHash}`, '_blank')}
-							>
-								<Launch />
-								View on Etherscan
-							</Button>
-						</div>
-					{/if}
 				{/if}
 			</div>
 		</Container>
@@ -106,6 +106,6 @@
 	}
 	.view-btn {
 		text-align: center;
-		margin-bottom: var(--spacing-12);
+		padding-bottom: var(--spacing-12);
 	}
 </style>
