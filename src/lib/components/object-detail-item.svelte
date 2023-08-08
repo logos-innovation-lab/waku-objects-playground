@@ -6,6 +6,7 @@
 	import Button from './button.svelte'
 	import ChevronLeft from './icons/chevron-left.svelte'
 	import Launch from './icons/launch.svelte'
+	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 
 	let detailId: string
 
@@ -57,10 +58,11 @@
 					>
 						<slot />
 					</div>
-					{#if buttonLink}
+					{#if txHash}
 						<div class="view-btn">
 							<Button
-								on:click={() => window.open(`${defaultBlockchainNetwork.explorer}/tx/${buttonLink}`, '_blank')}
+								on:click={() =>
+									window.open(`${defaultBlockchainNetwork.explorer}/tx/${txHash}`, '_blank')}
 							>
 								<Launch />
 								View on Etherscan

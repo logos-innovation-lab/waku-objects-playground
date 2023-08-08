@@ -189,7 +189,7 @@
 			</div>
 			<div class="details-section">
 				<div class="detail-item">
-					<ObjectDetailItem buttonLink={store.transaction.hash}>
+					<ObjectDetailItem txHash={store.transaction.hash}>
 						<svelte:fragment slot="top">
 							<Timestamp>
 								<!-- TODO: format the timestamp -->
