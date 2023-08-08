@@ -225,7 +225,6 @@
 								{/if}
 							</p>
 						</svelte:fragment>
-						<!-- <Container gap={6} direction="column" padX={24}> -->
 						<!-- Details -->
 						<ReadonlyText label="Amount">
 							<div class="row">
