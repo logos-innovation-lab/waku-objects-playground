@@ -5,7 +5,6 @@
 	import Add from '$lib/components/icons/add.svelte'
 	import ArrowUp from '$lib/components/icons/arrow-up.svelte'
 	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
-	import EditIcon from '$lib/components/icons/edit.svelte'
 
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
@@ -24,6 +23,9 @@
 	import ChatMessage from '$lib/components/chat-message.svelte'
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 	import type { HDNodeWallet } from 'ethers/lib.commonjs'
+	import Layout from '$lib/components/layout.svelte'
+	import OverflowMenuVertical from '$lib/components/icons/overflow-menu-vertical.svelte'
+	import Events from '$lib/components/icons/events.svelte'
 
 	let div: HTMLElement
 	let autoscroll = true
@@ -64,11 +66,13 @@
 
 <AuthenticatedOnly let:wallet>
 	{#if !chat}
-		<Container align="center" grow gap={6} justify="center" padX={24}>
-			<h2>Could not find group chat.</h2>
-		</Container>
+		<Layout>
+			<Container align="center" gap={6} justify="center" padX={24}>
+				<h2>Could not find group chat.</h2>
+			</Container>
+		</Layout>
 	{:else}
-		<div class="chat">
+		<Layout bgColor="shade">
 			<Header>
 				<Button variant="icon" slot="left" on:click={() => goto(ROUTES.HOME)}>
 					<ChevronLeft />
@@ -76,13 +80,15 @@
 				<svelte:fragment slot="chat">
 					<Avatar picture={chat?.avatar ?? ''} />
 					{chat?.name}
+					<Events />
 				</svelte:fragment>
+				<!-- FIXME: THIS SHOULD BE A DROPDOWN MENU -->
 				<Button
 					variant="icon"
 					slot="right"
 					on:click={() => goto(ROUTES.GROUP_EDIT($page.params.id))}
 				>
-					<EditIcon />
+					<OverflowMenuVertical />
 				</Button>
 			</Header>
 			<div class="chat-messages" bind:this={div}>
@@ -95,8 +101,14 @@
 									<ChatMessage
 										myMessage={message.fromAddress === wallet.address ? true : false}
 										bubble
+										group
 									>
 										{@html message.text.replaceAll('\n', '</br>')}
+										<svelte:fragment slot="avatar">
+											{#if message.fromAddress !== wallet.address}
+												<Avatar size={40} />
+											{/if}
+										</svelte:fragment>
 									</ChatMessage>
 								{:else if message.type === 'data'}
 									<WakuObject {message} users={chat.users} />
@@ -148,7 +160,7 @@
 					</div>
 				</Container>
 			</div>
-		</div>
+		</Layout>
 	{/if}
 </AuthenticatedOnly>
 
@@ -159,14 +171,6 @@
 	.messages-inner {
 		padding-top: var(--spacing-48);
 		overflow-y: auto;
-	}
-
-	.chat {
-		display: flex;
-		flex-direction: column;
-		height: 100dvh;
-		height: 100vh;
-		background-color: var(--color-step-10, var(--color-dark-step-50));
 	}
 
 	.chat-messages {

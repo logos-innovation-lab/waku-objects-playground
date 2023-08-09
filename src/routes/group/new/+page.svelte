@@ -21,6 +21,8 @@
 	import Renew from '$lib/components/icons/renew.svelte'
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 	import type { HDNodeWallet } from 'ethers/lib.commonjs'
+	import Layout from '$lib/components/layout.svelte'
+	import Checkbox from '$lib/components/checkbox.svelte'
 
 	let groupMembers: string[] = []
 	let screen: 'create' | 'details' = 'create'
@@ -58,115 +60,132 @@
 
 <AuthenticatedOnly let:wallet>
 	{#if $chats.loading}
-		<Container align="center" grow gap={6} justify="center">
-			<div class="center">
-				<h2>Loading...</h2>
-			</div>
-		</Container>
+		<Layout>
+			<Container align="center" gap={6} justify="center">
+				<div class="center">
+					<h2>Loading...</h2>
+				</div>
+			</Container>
+		</Layout>
 	{:else if $chats.chats.size === 0}
 		{@const address = wallet.address}
-		<Header title="Create group">
-			<svelte:fragment slot="left">
-				<div class="header-btns">
-					<Button variant="icon" on:click={() => history.go(-1)}>
-						<ChevronLeft />
+		<Layout>
+			<svelte:fragment slot="header">
+				<Header title="Create group">
+					<svelte:fragment slot="left">
+						<div class="header-btns">
+							<Button variant="icon" on:click={() => history.go(-1)}>
+								<ChevronLeft />
+							</Button>
+						</div>
+					</svelte:fragment>
+				</Header>
+			</svelte:fragment>
+			<Container align="center" gap={6} justify="center" padX={24}>
+				<p class="text-lg text-bold">No contacts</p>
+				<p class="text-lg">You can only create groups from existing chat contacts</p>
+				<div class="btn-spacing">
+					<Button on:click={() => goto(routes.INVITE(address))}>
+						<AddComment />
+						Invite to chat
 					</Button>
 				</div>
-			</svelte:fragment>
-		</Header>
-		<Container align="center" grow gap={6} justify="center" padX={24}>
-			<p class="text-lg text-bold">No contacts</p>
-			<p class="text-lg">You can only create groups from existing chat contacts</p>
-			<div class="btn-spacing">
-				<Button on:click={() => goto(routes.INVITE(address))}>
-					<AddComment />
-					Invite to chat
-				</Button>
-			</div>
-		</Container>
+			</Container>
+		</Layout>
 	{:else if screen === 'create'}
-		<Header title="Create group">
-			<svelte:fragment slot="left">
-				<div class="header-btns">
-					<Button variant="icon" on:click={() => history.go(-1)}>
-						<ChevronLeft />
-					</Button>
-				</div>
+		<Layout>
+			<svelte:fragment slot="header">
+				<Header title="Create group">
+					<svelte:fragment slot="left">
+						<div class="header-btns">
+							<Button variant="icon" on:click={() => history.go(-1)}>
+								<ChevronLeft />
+							</Button>
+						</div>
+					</svelte:fragment>
+				</Header>
 			</svelte:fragment>
-		</Header>
-		<ul class="chats" aria-label="Contact List">
-			{#each [...$chats.chats] as [id, chat]}
-				{#if !isGroupChatId(id)}
-					<li>
-						<div class="chat-button" role="listitem">
-							<Container grow>
-								<div class="chat">
-									<Avatar size={70} picture={chat.users[0].avatar} />
-									<div class="content">
-										<div class="user-info">
-											<span class="username text-lg text-bold">
-												{chat.users[0].name}
-											</span>
+			<ul class="chats" aria-label="Contact List">
+				{#each [...$chats.chats] as [id, chat]}
+					{#if !isGroupChatId(id)}
+						<li>
+							<label>
+								<div class="chat-button" role="listitem">
+									<Container grow>
+										<div class="chat">
+											<Avatar size={48} picture={chat.users[0].avatar} />
+											<div class="content">
+												<div class="user-info">
+													<span class="username">
+														{chat.users[0].name}
+													</span>
+												</div>
+											</div>
+											<input type="checkbox" bind:group={groupMembers} value={id} />
 										</div>
-									</div>
-									<input type="checkbox" bind:group={groupMembers} value={id} />
+									</Container>
 								</div>
-							</Container>
-						</div>
-					</li>
-				{/if}
-			{/each}
-		</ul>
-		<Container grow justify="flex-end">
-			<Button
-				variant="strong"
-				disabled={groupMembers.length === 0}
-				on:click={() => (screen = 'details')}
-			>
-				<ArrowRight />
-			</Button>
-		</Container>
+							</label>
+						</li>
+					{/if}
+				{/each}
+			</ul>
+			<Container padX={0} padY={0} grow />
+			<Container justify="flex-end">
+				<Button
+					variant="strong"
+					disabled={groupMembers.length === 0}
+					on:click={() => (screen = 'details')}
+				>
+					<ArrowRight />
+				</Button>
+			</Container>
+		</Layout>
 	{:else if screen === 'details'}
-		<Header mainContent="right" title="Set group details">
-			<svelte:fragment slot="left">
-				<div class="header-btns">
-					<Button variant="icon" on:click={() => (screen = 'create')}>
-						<ChevronLeft />
-					</Button>
-				</div>
-			</svelte:fragment>
-		</Header>
-		<Container gap={12}>
-			<div class="avatar">
-				{#if picture}
-					<div class="img">
-						<img src={adapters.getPicture(picture)} alt="profile" />
-					</div>
-				{:else}
-					<div class="no-img">
-						<div class="profile-default">
-							<UserIcon size={70} />
+		<Layout>
+			<svelte:fragment slot="header">
+				<Header mainContent="right" title="Set group details">
+					<svelte:fragment slot="left">
+						<div class="header-btns">
+							<Button variant="icon" on:click={() => (screen = 'create')}>
+								<ChevronLeft />
+							</Button>
 						</div>
-					</div>
-				{/if}
-			</div>
-			<InputFile bind:files={pictureFiles}>
-				<Renew />
-				Change picture
-			</InputFile>
-			<InputField autofocus bind:value={name} label="Group name" />
-		</Container>
-
-		<Container grow justify="flex-end">
-			<Button
-				variant="strong"
-				disabled={buttonDisabled || name.length === 0}
-				on:click={() => createGroup(wallet)}
-			>
-				<Checkmark />
-				Create group
-			</Button>
-		</Container>
+					</svelte:fragment>
+				</Header>
+			</svelte:fragment>
+			<Container gap={12}>
+				<div class="avatar">
+					{#if picture}
+						<div class="img">
+							<img src={adapters.getPicture(picture)} alt="profile" />
+						</div>
+					{:else}
+						<div class="no-img">
+							<div class="profile-default">
+								<UserIcon size={70} />
+							</div>
+						</div>
+					{/if}
+				</div>
+				<InputFile bind:files={pictureFiles}>
+					<Renew />
+					Change picture
+				</InputFile>
+				<InputField autofocus bind:value={name} label="Group name" />
+			</Container>
+			<Container padX={0} padY={0} grow />
+			<Container justify="flex-end">
+				<Button
+					variant="strong"
+					disabled={buttonDisabled || name.length === 0}
+					on:click={() => createGroup(wallet)}
+				>
+					<Checkmark />
+					Create group
+				</Button>
+			</Container>
+		</Layout>
 	{/if}
 </AuthenticatedOnly>
 
@@ -196,14 +215,20 @@
 		margin: 0;
 
 		li {
-			display: flex;
-			align-items: center;
-			gap: var(--spacing-12);
-			border-bottom: 1px solid var(--color-step-20, var(--color-dark-step-40));
+			label {
+				display: flex;
+				align-items: center;
+				gap: var(--spacing-12);
+				border-bottom: 1px solid var(--color-step-20, var(--color-dark-step-40));
 
-			.chat-button {
-				width: 100%;
-				cursor: pointer;
+				:has(input[type='checkbox']:checked) {
+					background-color: var(--color-step-10, var(--color-dark-step-50));
+				}
+
+				.chat-button {
+					width: 100%;
+					cursor: pointer;
+				}
 			}
 		}
 	}
@@ -213,10 +238,41 @@
 		flex-direction: row;
 		gap: var(--spacing-12);
 		justify-content: flex-start;
-		align-items: flex-start;
+		align-items: center;
 
 		.content {
 			flex-grow: 1;
+		}
+		input[type='checkbox'] {
+			position: relative;
+			&::before {
+				content: '';
+				display: inline-block;
+				width: 18px;
+				height: 18px;
+				position: absolute;
+				right: 0;
+				top: 50%;
+				transform: translateY(-50%);
+				background-color: var(--color-base, var(--color-dark-accent));
+				border: var(--border);
+				border-color: var(--color-accent, var(--color-dark-base));
+			}
+			&:checked::before {
+				background-color: var(--color-accent, var(--color-dark-base));
+			}
+			&:checked::after {
+				content: '';
+				position: absolute;
+				top: 50%;
+				bottom: 50%;
+				transform: translate(-85%, -65%) rotate(45deg);
+				height: 10px;
+				width: 6px;
+				margin-left: 50%;
+				border-bottom: 2px solid var(--color-base, var(--color-dark-accent));
+				border-right: 2px solid var(--color-base, var(--color-dark-accent));
+			}
 		}
 	}
 

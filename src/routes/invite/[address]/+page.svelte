@@ -188,4 +188,9 @@
 	.hidden {
 		display: none;
 	}
+	.icon {
+		display: flex;
+		gap: var(--spacing-6);
+		justify-content: center;
+	}
 </style>

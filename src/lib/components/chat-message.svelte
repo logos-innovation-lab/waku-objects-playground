@@ -2,6 +2,8 @@
 	export let bubble = false
 	export let myMessage = false
 	export let object = false
+	export let group = false
+	export let lastMessage = false
 
 	const isFF = () => {
 		let browserInfo = navigator.userAgent
@@ -12,11 +14,16 @@
 <div
 	class={`message ${myMessage ? 'my-message' : 'their-message'} ${isFF() ? 'ff' : ''} ${
 		object ? 'object' : ''
-	}`}
+	} ${group ? 'group' : ''} ${lastMessage ? 'last' : ''}`}
 >
 	<div class={` ${bubble ? 'bubble message-content message-text text-lg' : ''}`}>
 		<slot />
 	</div>
+	{#if $$slots.avatar}
+		<div class="avatar">
+			<slot name="avatar" />
+		</div>
+	{/if}
 </div>
 
 <style lang="scss">
@@ -28,6 +35,7 @@
 		max-width: 75%;
 		margin-right: auto;
 		margin-left: 0;
+
 		&:not(:last-child) {
 			margin-bottom: var(--spacing-12);
 		}
@@ -70,6 +78,7 @@
 	.their-message {
 		align-items: flex-start;
 		text-align: left;
+		position: relative;
 
 		//The + combinator matches the second element only if it immediately follows the first element.
 		& + .their-message:not(.ff) .message-text {
@@ -86,6 +95,20 @@
 
 		.message-content {
 			text-align: left;
+		}
+
+		&.group {
+			padding-left: 34px;
+		}
+
+		.avatar {
+			position: absolute;
+			bottom: 0;
+			left: 0;
+
+			&:empty {
+				display: none;
+			}
 		}
 	}
 </style>

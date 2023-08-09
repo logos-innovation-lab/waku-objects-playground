@@ -37,7 +37,7 @@
 			display: flex;
 			justify-content: center;
 			align-items: center;
-			background-color: var(--color-step-10, var(--color-dark-step-50));
+			background-color: var(--color-step-20, var(--color-dark-step-50));
 			margin-inline: auto;
 			position: relative;
 
