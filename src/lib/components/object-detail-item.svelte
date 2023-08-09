@@ -74,13 +74,13 @@
 
 <style lang="scss">
 	.toptab {
-		background-color: var(--color-base);
+		background-color: var(--color-base, var(--color-dark-accent));
 		border-radius: var(--border-radius) var(--border-radius) 0 0;
 		margin-bottom: 1px;
 	}
 
 	.details {
-		background-color: var(--color-base);
+		background-color: var(--color-base, var(--color-dark-accent));
 		border-radius: 0 0 var(--border-radius) var(--border-radius);
 	}
 	.details-trigger {
@@ -98,9 +98,6 @@
 	}
 
 	.open {
-		font-size: var(--font-size-lg);
-		transition: font-size 0.3s, font-weight 0.3s;
-		font-weight: var(--font-weight-700);
 		.chevron {
 			transform: rotate(90deg);
 			transition: transform 0.3s;

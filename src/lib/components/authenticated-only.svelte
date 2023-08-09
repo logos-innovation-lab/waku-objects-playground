@@ -26,17 +26,17 @@
 </script>
 
 {#if $profile.loading || $walletStore.loading}
-	<Container align="center" grow gap={6} justify="center">
+	<Container align="center" gap={6} justify="center">
 		<h2>Loading...</h2>
 	</Container>
 {:else if $profile.error}
-	<Container align="center" grow gap={6} justify="center" padX={24}>
+	<Container align="center" gap={6} justify="center" padX={24}>
 		<h2>Failed to load profile: {$profile.error.message}</h2>
 	</Container>
 {:else if wallet !== undefined}
 	<slot {wallet} />
 {:else}
-	<Container align="center" alignItems="center" gap={12} justify="center" grow padX={24}>
+	<Container align="center" alignItems="center" gap={12} justify="center" padX={24}>
 		<div class="chatbot">
 			<div>
 				<ChatBot size={32} />

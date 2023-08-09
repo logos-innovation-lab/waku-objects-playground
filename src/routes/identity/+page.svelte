@@ -25,6 +25,7 @@
 	import { walletStore } from '$lib/stores/wallet'
 	import { get } from 'svelte/store'
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
+	import Layout from '$lib/components/layout.svelte'
 
 	let avatar = $profile.avatar
 	let name = $profile.name
@@ -76,82 +77,85 @@
 	})
 </script>
 
-<Header title="Identity">
-	<Button slot="left" variant="icon" on:click={() => goto(routes.HOME)}>
-		<ChevronLeft />
-	</Button>
-</Header>
-
-<AuthenticatedOnly>
-	<Container gap={6}>
-		<div class="avatar">
-			{#if avatar}
-				<div class="img">
-					<img src={adapters.getPicture(avatar)} alt="your avatar" />
-				</div>
-			{:else}
-				<div class="no-img">
-					<div class="profile-default">
-						<User size={70} />
+<Layout>
+	<svelte:fragment slot="header">
+		<Header title="Identity">
+			<Button slot="left" variant="icon" on:click={() => goto(routes.HOME)}>
+				<ChevronLeft />
+			</Button>
+		</Header>
+	</svelte:fragment>
+	<AuthenticatedOnly>
+		<Container gap={6}>
+			<div class="avatar">
+				{#if avatar}
+					<div class="img">
+						<img src={adapters.getPicture(avatar)} alt="your avatar" />
 					</div>
+				{:else}
+					<div class="no-img">
+						<div class="profile-default">
+							<User size={70} />
+						</div>
+					</div>
+				{/if}
+			</div>
+			<InputFile bind:files>
+				<Renew />
+				Change picture
+			</InputFile>
+			<div class="displayname">
+				<InputField bind:value={name} label="Display name" />
+			</div>
+		</Container>
+		<ButtonBlock borderTop on:click={() => goto(routes.IDENTITY_ACCOUNT)}>
+			<Container direction="row" justify="space-between" align="center" alignItems="center">
+				<div class="icon">
+					<Wallet size={20} /> Account
 				</div>
-			{/if}
-		</div>
-		<InputFile bind:files>
-			<Renew />
-			Change picture
-		</InputFile>
-		<div class="displayname">
-			<InputField bind:value={name} label="Display name" />
-		</div>
-	</Container>
-	<ButtonBlock borderTop on:click={() => goto(routes.IDENTITY_ACCOUNT)}>
-		<Container direction="row" justify="space-between" align="center" alignItems="center">
-			<div class="icon">
-				<Wallet size={20} /> Account
-			</div>
-			<div>
-				<Button variant="icon">
-					<ChevronRight />
-				</Button>
-			</div>
+				<div>
+					<Button variant="icon">
+						<ChevronRight />
+					</Button>
+				</div>
+			</Container>
+		</ButtonBlock>
+		<ButtonBlock borderTop borderBottom on:click={() => goto(routes.IDENTITY_CHAT)}>
+			<Container direction="row" justify="space-between" align="center" alignItems="center">
+				<div class="icon">
+					<SettingsView size={20} /> Chat appearance
+				</div>
+				<div>
+					<Button variant="icon">
+						<ChevronRight />
+					</Button>
+				</div>
+			</Container>
+		</ButtonBlock>
+		<Container align="center" gap={12} padX={24} padY={24}>
+			<p>
+				If you disconnect or need to recover access to your identity you will need your recovery
+				phrase
+			</p>
 		</Container>
-	</ButtonBlock>
-	<ButtonBlock borderTop borderBottom on:click={() => goto(routes.IDENTITY_CHAT)}>
-		<Container direction="row" justify="space-between" align="center" alignItems="center">
-			<div class="icon">
-				<SettingsView size={20} /> Chat appearance
-			</div>
-			<div>
-				<Button variant="icon">
-					<ChevronRight />
-				</Button>
-			</div>
+		<Container align="center" gap={12} padX={24} padY={0}>
+			<Button on:click={() => goto(routes.IDENTITY_BACKUP)}>
+				<DocumentSigned />
+				Backup recovery phrase
+			</Button>
+			<Button
+				on:click={async () => {
+					walletStore.disconnectWallet()
+					goto(routes.HOME)
+				}}
+			>
+				<Logout />
+				Disconnect identity from device
+			</Button>
 		</Container>
-	</ButtonBlock>
-	<Container align="center" gap={12} padX={24} padY={24}>
-		<p>
-			If you disconnect or need to recover access to your identity you will need your recovery
-			phrase
-		</p>
-	</Container>
-	<Container align="center" gap={12} padX={24} padY={0}>
-		<Button on:click={() => goto(routes.IDENTITY_BACKUP)}>
-			<DocumentSigned />
-			Backup recovery phrase
-		</Button>
-		<Button
-			on:click={async () => {
-				walletStore.disconnectWallet()
-				goto(routes.HOME)
-			}}
-		>
-			<Logout />
-			Disconnect identity from device
-		</Button>
-	</Container>
-	<Spacer />
-</AuthenticatedOnly>
+		<Spacer />
+	</AuthenticatedOnly>
+</Layout>
 
 <style lang="scss">
 	.avatar {

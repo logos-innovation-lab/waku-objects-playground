@@ -4,11 +4,19 @@
 </script>
 
 <div class={`wrapper ${bgColor}`}>
-	<slot name="header" />
+	{#if $$slots.header}
+		<div class="header">
+			<slot name="header" />
+		</div>
+	{/if}
 	<div class={`grow ${align}`}>
 		<slot />
+		{#if $$slots.footer}
+			<div class="footer">
+				<slot name="footer" />
+			</div>
+		{/if}
 	</div>
-	<slot name="footer" />
 </div>
 
 <style lang="scss">
@@ -41,5 +49,9 @@
 
 	.center {
 		justify-content: center;
+	}
+	.footer {
+		position: sticky;
+		inset: auto 0 0 0;
 	}
 </style>

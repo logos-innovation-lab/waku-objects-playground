@@ -8,6 +8,7 @@
 
 	import Textarea from '$lib/components/textarea.svelte'
 	import { walletStore } from '$lib/stores/wallet'
+	import Layout from '$lib/components/layout.svelte'
 
 	let phrase = ''
 	let restoring = false
@@ -28,32 +29,36 @@
 	}
 </script>
 
-<Header title="Connect your existing identity">
-	<Button slot="left" variant="icon" on:click={() => history.back()}>
-		<ChevronLeft />
-	</Button>
-</Header>
-<Container gap={6} grow justify="center" align="left">
-	<div class="pad">
-		<p class="text-lg text-bold">Connect your identity</p>
-		<p class="text-lg description">
-			You need your recovery phrase in order to connect your identity and account
-		</p>
-	</div>
-	<Textarea
-		autofocus
-		bind:value={phrase}
-		label="Recovery phrase"
-		placeholder="Paste or type recovery phrase here..."
-		height={120}
-	/>
-</Container>
-<Container>
-	<Button disabled={restoring || !phrase} variant="strong" on:click={restoreWallet}>
-		<Checkmark />
-		{restoring ? 'Connecting...' : 'Connect identity'}
-	</Button>
-</Container>
+<Layout>
+	<svelte:fragment slot="header">
+		<Header title="Connect your existing identity">
+			<Button slot="left" variant="icon" on:click={() => history.back()}>
+				<ChevronLeft />
+			</Button>
+		</Header>
+	</svelte:fragment>
+	<Container gap={6} justify="center" align="left">
+		<div class="pad">
+			<p class="text-lg text-bold">Connect your identity</p>
+			<p class="text-lg description">
+				You need your recovery phrase in order to connect your identity and account
+			</p>
+		</div>
+		<Textarea
+			autofocus
+			bind:value={phrase}
+			label="Recovery phrase"
+			placeholder="Paste or type recovery phrase here..."
+			height={120}
+		/>
+	</Container>
+	<Container>
+		<Button disabled={restoring || !phrase} variant="strong" on:click={restoreWallet}>
+			<Checkmark />
+			{restoring ? 'Connecting...' : 'Connect identity'}
+		</Button>
+	</Container>
+</Layout>
 
 <style lang="scss">
 	.description {

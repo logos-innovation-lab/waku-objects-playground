@@ -18,6 +18,7 @@
 
 	import ROUTES from '$lib/routes'
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
+	import Layout from '$lib/components/layout.svelte'
 
 	$: orderedChats = Array.from($chats.chats)
 		.map(([, chat]) => chat)
@@ -43,53 +44,59 @@
 			</Container>
 		{:else if $chats.chats.size === 0}
 			{@const address = wallet.address}
-			<Header mainContent="right">
-				<svelte:fragment slot="left">
-					<div class="header-btns">
-						<Button variant="icon" on:click={() => goto(ROUTES.INVITE(address))}>
-							<NewChat size={24} />
+			<Layout>
+				<svelte:fragment slot="header">
+					<Header mainContent="right">
+						<svelte:fragment slot="left">
+							<div class="header-btns">
+								<Button variant="icon" on:click={() => goto(ROUTES.INVITE(address))}>
+									<NewChat size={24} />
+								</Button>
+							</div>
+						</svelte:fragment>
+						<svelte:fragment slot="right">
+							<Button align="right" variant="account" on:click={() => goto(ROUTES.IDENTITY)}>
+								<svelte:fragment slot="avatar">
+									<Avatar size={48} picture={$profile.avatar} />
+								</svelte:fragment>
+								{$profile.name}
+							</Button>
+						</svelte:fragment>
+					</Header>
+				</svelte:fragment>
+				<Container align="center" gap={6} justify="center" padX={24}>
+					<p class="text-lg text-bold">No active chats</p>
+					<p class="text-lg">Invite someone to chat</p>
+					<div class="btn-spacing">
+						<Button on:click={() => goto(ROUTES.INVITE(address))}>
+							<AddComment />
+							Invite to chat
 						</Button>
 					</div>
-				</svelte:fragment>
-				<svelte:fragment slot="right">
-					<Button align="right" variant="account" on:click={() => goto(ROUTES.IDENTITY)}>
-						<svelte:fragment slot="avatar">
-							<Avatar size={48} picture={$profile.avatar} />
-						</svelte:fragment>
-						{$profile.name}
-					</Button>
-				</svelte:fragment>
-			</Header>
-			<Container align="center" grow gap={6} justify="center" padX={24}>
-				<p class="text-lg text-bold">No active chats</p>
-				<p class="text-lg">Invite someone to chat</p>
-				<div class="btn-spacing">
-					<Button on:click={() => goto(ROUTES.INVITE(address))}>
-						<AddComment />
-						Invite to chat
-					</Button>
-				</div>
-			</Container>
+				</Container>
+			</Layout>
 		{:else}
 			{@const address = wallet.address}
-			<Header mainContent="right">
-				<svelte:fragment slot="left">
-					<div class="header-btns">
-						<Button variant="icon" on:click={() => goto(ROUTES.INVITE(address))}>
-							<NewChat size={24} />
-						</Button>
-					</div>
-				</svelte:fragment>
-				<svelte:fragment slot="right">
-					<Button align="right" variant="account" on:click={() => goto(ROUTES.IDENTITY)}>
-						<svelte:fragment slot="avatar">
-							<Avatar size={48} picture={$profile.avatar} />
+			<Layout>
+				<svelte:fragment slot="header">
+					<Header mainContent="right">
+						<svelte:fragment slot="left">
+							<div class="header-btns">
+								<Button variant="icon" on:click={() => goto(ROUTES.INVITE(address))}>
+									<NewChat size={24} />
+								</Button>
+							</div>
 						</svelte:fragment>
-						{$profile.name}
-					</Button>
+						<svelte:fragment slot="right">
+							<Button align="right" variant="account" on:click={() => goto(ROUTES.IDENTITY)}>
+								<svelte:fragment slot="avatar">
+									<Avatar size={48} picture={$profile.avatar} />
+								</svelte:fragment>
+								{$profile.name}
+							</Button>
+						</svelte:fragment>
+					</Header>
 				</svelte:fragment>
-			</Header>
-			<div class="grow">
 				<ul class="chats" aria-label="Chat List">
 					{#each orderedChats as chat}
 						{@const userMessages = chat.messages.filter((message) => message.type === 'user')}
@@ -146,7 +153,7 @@
 						</li>
 					{/each}
 				</ul>
-			</div>
+			</Layout>
 		{/if}
 	</div>
 </AuthenticatedOnly>
@@ -159,10 +166,10 @@
 		height: 100dvh;
 	}
 
-	.grow {
-		flex-grow: 1;
-		overflow-y: auto;
-	}
+	// .grow {
+	// 	flex-grow: 1;
+	// 	overflow-y: auto;
+	// }
 
 	.center {
 		text-align: center;

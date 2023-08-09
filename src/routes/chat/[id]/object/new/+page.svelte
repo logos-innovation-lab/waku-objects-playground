@@ -16,6 +16,7 @@
 	import ButtonBlock from '$lib/components/button-block.svelte'
 	import { wakuObjectList } from '$lib/objects/lookup'
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
+	import Layout from '$lib/components/layout.svelte'
 
 	const objects = wakuObjectList.map((object) => ({
 		...object,
@@ -56,21 +57,23 @@
 </script>
 
 <AuthenticatedOnly>
-	<div class="main">
-		<ButtonBlock on:click={() => history.back()}>
-			<Header mainContent="left">
-				<svelte:fragment slot="left">
-					<div class="gray">
-						<ArrowUp /> to {otherUser?.name}
-					</div>
-				</svelte:fragment>
-				<svelte:fragment slot="right">
-					<Button variant="icon">
-						<Close />
-					</Button>
-				</svelte:fragment>
-			</Header>
-		</ButtonBlock>
+	<Layout bgColor="shade">
+		<svelte:fragment slot="header">
+			<ButtonBlock on:click={() => history.back()}>
+				<Header mainContent="left">
+					<svelte:fragment slot="left">
+						<div class="back-arrow">
+							<ArrowUp /> to {otherUser?.name}
+						</div>
+					</svelte:fragment>
+					<svelte:fragment slot="right">
+						<Button variant="icon">
+							<Close />
+						</Button>
+					</svelte:fragment>
+				</Header>
+			</ButtonBlock>
+		</svelte:fragment>
 		<div class="object-list">
 			{#each objects as object}
 				<div class="object" {...object}>
@@ -83,24 +86,17 @@
 				</div>
 			{/each}
 		</div>
-	</div>
+	</Layout>
 </AuthenticatedOnly>
 
 <style lang="scss">
-	.main {
-		min-height: 100dvh;
-		min-height: 100vh;
-		height: 100%;
-		background-color: var(--color-step-10, var(--color-dark-step-50));
-	}
-
 	.object-list {
 		display: flex;
 		flex-direction: column;
 		gap: var(--spacing-12);
 		padding: var(--spacing-12);
 	}
-	.gray {
+	.back-arrow {
 		display: flex;
 		align-items: center;
 		gap: var(--spacing-6);
