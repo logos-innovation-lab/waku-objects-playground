@@ -34,6 +34,7 @@
 	import type { Token } from '../schemas'
 	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 	import { throwError } from '$lib/utils/error'
+	import Layout from '$lib/components/layout.svelte'
 
 	export let args: WakuObjectArgs<SendTransactionStore, SendTransactionDataMessage>
 
@@ -87,42 +88,213 @@
 </script>
 
 {#if store?.type === 'init'}
-	<Header title="Payggy">
-		<Button slot="left" variant="icon" on:click={() => history.back()}>
-			<ChevronLeft />
-		</Button>
-		<Button slot="right" variant="icon" on:click={() => history.go(-3)}>
-			<Close />
-		</Button>
-	</Header>
-
-	<Container gap={6} direction="column" grow justify="center" padX={12}>
-		<ReadonlyText label="Amount">
-			<div class="row">
-				<div>
-					<div class="text-lg">{amount} {token.symbol}</div>
-					<div class="secondary text-sm">≈ 13.91 EUR now</div>
-				</div>
-				<Button variant="icon" align="right" on:click={() => history.back()}>
-					<Edit />
+	<Layout>
+		<svelte:fragment slot="header">
+			<Header title="Payggy">
+				<Button slot="left" variant="icon" on:click={() => history.back()}>
+					<ChevronLeft />
 				</Button>
+				<Button slot="right" variant="icon" on:click={() => history.go(-3)}>
+					<Close />
+				</Button>
+			</Header>
+		</svelte:fragment>
+		<Container gap={6} direction="column" justify="center" padX={12}>
+			<ReadonlyText label="Amount">
+				<div class="row">
+					<div>
+						<div class="text-lg">{amount} {token.symbol}</div>
+						<div class="secondary text-sm">≈ 13.91 EUR now</div>
+					</div>
+					<Button variant="icon" align="right" on:click={() => history.back()}>
+						<Edit />
+					</Button>
+				</div>
+			</ReadonlyText>
+			<ReadonlyText label="From">
+				<div class="text-lg">Your account</div>
+				<div class="secondary text-sm">{formatAddress(args.profile.address, 4, 4)}</div>
+			</ReadonlyText>
+			<ReadonlyText label="To">
+				<div class="text-lg">{toUser.name}'s account</div>
+				<div class="secondary text-sm">{formatAddress(toUser.address, 4, 4)}</div>
+			</ReadonlyText>
+			<ReadonlyText label="Transaction fee (max)">
+				<div class="text-lg">
+					{fee ? `${toSignificant(fee.amount, fee.decimals)} ${fee.symbol}` : 'unknown'}
+				</div>
+				<div class="secondary text-sm">≈ 1.56 EUR now</div>
+			</ReadonlyText>
+			<Container padY={0}>
+				<p
+					class={`balance ${
+						Number(amount) > Number(toSignificant(token.amount, token.decimals)) ? 'text-bold' : ''
+					}`}
+				>
+					{#if Number(amount) > Number(toSignificant(token.amount, token.decimals))}
+						<WarningAltFilled />
+					{/if}
+					You have {toSignificant(token.amount, token.decimals)}
+					{token.symbol} in your account.
+				</p></Container
+			>
+		</Container>
+		<Container direction="row" justify="space-between" alignItems="center" padX={24}>
+			<div class="secondary text-normal">
+				{toUser.name ?? formatAddress(toUser.address, 4, 4)}
 			</div>
-		</ReadonlyText>
-		<ReadonlyText label="From">
-			<div class="text-lg">Your account</div>
-			<div class="secondary text-sm">{formatAddress(args.profile.address, 4, 4)}</div>
-		</ReadonlyText>
-		<ReadonlyText label="To">
-			<div class="text-lg">{toUser.name}'s account</div>
-			<div class="secondary text-sm">{formatAddress(toUser.address, 4, 4)}</div>
-		</ReadonlyText>
-		<ReadonlyText label="Transaction fee (max)">
-			<div class="text-lg">
-				{fee ? `${toSignificant(fee.amount, fee.decimals)} ${fee.symbol}` : 'unknown'}
+			<Button
+				variant="strong"
+				align="right"
+				disabled={!amount || transactionSent}
+				on:click={sendTransaction}
+			>
+				<ArrowUp /> Send now
+			</Button>
+		</Container>
+	</Layout>
+{:else if args.view === 'details'}
+	<Layout>
+		<svelte:fragment slot="header">
+			<Header title={`Transaction #${args.instanceId}`}>
+				<div slot="left">
+					<img src={logo} alt="Payggy logo" class="logo" />
+				</div>
+				<Button slot="right" variant="icon" on:click={() => history.back()}>
+					<Close />
+				</Button>
+			</Header>
+		</svelte:fragment>
+		{#if !store}
+			<Container align="center" grow gap={6} justify="center" padX={24}>
+				<h2>Loading details...</h2>
+			</Container>
+		{:else}
+			{@const isSender = store.transaction.from === args.profile.address}
+			<div class="details-wrapper">
+				<div class="topper">
+					<Container gap={6} direction="column" padX={12} align="center">
+						<p class="title-amt">
+							{#if isSender}
+								<ArrowUpRight size={24} />
+							{:else}
+								<ArrowDownRight size={24} />
+							{/if}
+							{toSignificant(
+								BigInt(store.transaction.token.amount),
+								store.transaction.token.decimals,
+							)}
+							{store.transaction.token.symbol}
+						</p>
+						<p class="status">
+							{#if store.type === 'success'}
+								<CheckmarkFilled /> Transaction confirmed
+							{:else if store.type === 'pending'}
+								<Pending /> Transaction pending
+							{:else}
+								<WarningAltFilled /> Transaction failed
+							{/if}
+						</p>
+					</Container>
+				</div>
+				<div class="details-section">
+					<div class="detail-item">
+						<ObjectDetailItem txHash={store.transaction.hash}>
+							<svelte:fragment slot="top">
+								<Timestamp>
+									<!-- TODO: format the timestamp -->
+									{formatDateAndTime(store.transaction.timestamp)}
+								</Timestamp>
+								<div class="text-lg">
+									{#if isSender}
+										You sent {toSignificant(
+											BigInt(store.transaction.token.amount),
+											store.transaction.token.decimals,
+										)}
+										{store.transaction.token.symbol} to {args.users.find(
+											(u) => store && store.type !== 'init' && u.address === store.transaction.to,
+										)?.name}
+									{:else}
+										You received {toSignificant(
+											BigInt(store.transaction.token.amount),
+											store.transaction.token.decimals,
+										)}
+										{store.transaction.token.symbol} from {args.users.find(
+											(u) => store && store.type !== 'init' && u.address === store.transaction.from,
+										)?.name}
+									{/if}
+								</div>
+								<p class="status">
+									{#if store.type === 'success'}
+										<CheckmarkFilled /> Payment successful
+									{:else if store.type === 'pending'}
+										<Pending /> Payment pending
+									{:else}
+										<WarningAltFilled /> Payment failed
+									{/if}
+								</p>
+							</svelte:fragment>
+							<!-- Details -->
+							<ReadonlyText label="Amount">
+								<div class="row">
+									<div>
+										<div class="text-lg">{amount} {token.symbol}</div>
+										<div class="secondary text-sm">≈ 13.91 EUR at the time of transaction</div>
+									</div>
+								</div>
+							</ReadonlyText>
+							<ReadonlyText label="Transaction fee (max)">
+								<div class="text-lg">
+									{fee ? `${toSignificant(fee.amount, fee.decimals)} ${fee.symbol}` : 'unknown'}
+								</div>
+								<div class="secondary text-sm">≈ 1.56 EUR now</div>
+							</ReadonlyText>
+							<ReadonlyText label="Transaction ID">
+								<div class="text-lg">{store.transaction.hash}</div>
+							</ReadonlyText>
+							<ReadonlyText label="Transaction status">
+								<div class="text-lg">{store.type}</div>
+							</ReadonlyText>
+						</ObjectDetailItem>
+					</div>
+				</div>
 			</div>
-			<div class="secondary text-sm">≈ 1.56 EUR now</div>
-		</ReadonlyText>
-		<Container padY={0}>
+		{/if}
+	</Layout>
+{:else}
+	<Layout>
+		<svelte:fragment slot="header">
+			<Header title="Payggy">
+				<Button slot="left" variant="icon" on:click={() => history.back()}>
+					<ChevronLeft />
+				</Button>
+				<Button slot="right" variant="icon" on:click={() => history.go(-2)}>
+					<Close />
+				</Button>
+			</Header>
+		</svelte:fragment>
+		<Container gap={24} justify="center" padX={24}>
+			<p>How much would you like to send?</p>
+			<div class="amt-drop">
+				<Grid>
+					<div>
+						<Input autofocus bind:value={amount} placeholder="0" />
+					</div>
+					<div>
+						<Dropdown>
+							<Button grow align="block" slot="button">{token.symbol} <CaretDown /></Button>
+							{#each args.tokens as t}
+								<DropdownItem
+									onClick={() => {
+										token = t
+									}}>{t.symbol}</DropdownItem
+								>
+							{/each}
+						</Dropdown>
+					</div>
+				</Grid>
+				<p class="fiat text-sm">x EUR {amount ? 'now' : ''}</p>
+			</div>
 			<p
 				class={`balance ${
 					Number(amount) > Number(toSignificant(token.amount, token.decimals)) ? 'text-bold' : ''
@@ -133,182 +305,21 @@
 				{/if}
 				You have {toSignificant(token.amount, token.decimals)}
 				{token.symbol} in your account.
-			</p></Container
-		>
-	</Container>
-	<Container direction="row" justify="space-between" alignItems="center" padX={24}>
-		<div class="secondary text-normal">
-			{toUser.name ?? formatAddress(toUser.address, 4, 4)}
-		</div>
-		<Button
-			variant="strong"
-			align="right"
-			disabled={!amount || transactionSent}
-			on:click={sendTransaction}
-		>
-			<ArrowUp /> Send now
-		</Button>
-	</Container>
-{:else if args.view === 'details'}
-	<Header title={`Transaction #${args.instanceId}`}>
-		<div slot="left">
-			<img src={logo} alt="Payggy logo" />
-		</div>
-		<Button slot="right" variant="icon" on:click={() => history.back()}>
-			<Close />
-		</Button>
-	</Header>
-	{#if !store}
-		<Container align="center" grow gap={6} justify="center" padX={24}>
-			<h2>Loading details...</h2>
+			</p>
 		</Container>
-	{:else}
-		{@const isSender = store.transaction.from === args.profile.address}
-		<div class="details-wrapper">
-			<div class="topper">
-				<Container gap={6} direction="column" padX={12} align="center">
-					<p class="title-amt">
-						{#if isSender}
-							<ArrowUpRight size={24} />
-						{:else}
-							<ArrowDownRight size={24} />
-						{/if}
-						{toSignificant(
-							BigInt(store.transaction.token.amount),
-							store.transaction.token.decimals,
-						)}
-						{store.transaction.token.symbol}
-					</p>
-					<p class="status">
-						{#if store.type === 'success'}
-							<CheckmarkFilled /> Transaction confirmed
-						{:else if store.type === 'pending'}
-							<Pending /> Transaction pending
-						{:else}
-							<WarningAltFilled /> Transaction failed
-						{/if}
-					</p>
-				</Container>
-			</div>
-			<div class="details-section">
-				<div class="detail-item">
-					<ObjectDetailItem txHash={store.transaction.hash}>
-						<svelte:fragment slot="top">
-							<Timestamp>
-								<!-- TODO: format the timestamp -->
-								{formatDateAndTime(store.transaction.timestamp)}
-							</Timestamp>
-							<div class="text-lg">
-								{#if isSender}
-									You sent {toSignificant(
-										BigInt(store.transaction.token.amount),
-										store.transaction.token.decimals,
-									)}
-									{store.transaction.token.symbol} to {args.users.find(
-										(u) => store && store.type !== 'init' && u.address === store.transaction.to,
-									)?.name}
-								{:else}
-									You received {toSignificant(
-										BigInt(store.transaction.token.amount),
-										store.transaction.token.decimals,
-									)}
-									{store.transaction.token.symbol} from {args.users.find(
-										(u) => store && store.type !== 'init' && u.address === store.transaction.from,
-									)?.name}
-								{/if}
-							</div>
-							<p class="status">
-								{#if store.type === 'success'}
-									<CheckmarkFilled /> Payment successful
-								{:else if store.type === 'pending'}
-									<Pending /> Payment pending
-								{:else}
-									<WarningAltFilled /> Payment failed
-								{/if}
-							</p>
-						</svelte:fragment>
-						<!-- Details -->
-						<ReadonlyText label="Amount">
-							<div class="row">
-								<div>
-									<div class="text-lg">{amount} {token.symbol}</div>
-									<div class="secondary text-sm">≈ 13.91 EUR at the time of transaction</div>
-								</div>
-							</div>
-						</ReadonlyText>
-						<ReadonlyText label="Transaction fee (max)">
-							<div class="text-lg">
-								{fee ? `${toSignificant(fee.amount, fee.decimals)} ${fee.symbol}` : 'unknown'}
-							</div>
-							<div class="secondary text-sm">≈ 1.56 EUR now</div>
-						</ReadonlyText>
-						<ReadonlyText label="Transaction ID">
-							<div class="text-lg">{store.transaction.hash}</div>
-						</ReadonlyText>
-						<ReadonlyText label="Transaction status">
-							<div class="text-lg">{store.type}</div>
-						</ReadonlyText>
-					</ObjectDetailItem>
-				</div>
-			</div>
-		</div>
-	{/if}
-{:else}
-	<Header title="Payggy">
-		<Button slot="left" variant="icon" on:click={() => history.back()}>
-			<ChevronLeft />
-		</Button>
-		<Button slot="right" variant="icon" on:click={() => history.go(-2)}>
-			<Close />
-		</Button>
-	</Header>
-
-	<Container gap={24} grow justify="center" padX={24}>
-		<p>How much would you like to send?</p>
-		<div class="amt-drop">
-			<Grid>
-				<div>
-					<Input autofocus bind:value={amount} placeholder="0" />
-				</div>
-				<div>
-					<Dropdown>
-						<Button grow align="block" slot="button">{token.symbol} <CaretDown /></Button>
-						{#each args.tokens as t}
-							<DropdownItem
-								onClick={() => {
-									token = t
-								}}>{t.symbol}</DropdownItem
-							>
-						{/each}
-					</Dropdown>
-				</div>
-			</Grid>
-			<p class="fiat text-sm">x EUR {amount ? 'now' : ''}</p>
-		</div>
-		<p
-			class={`balance ${
-				Number(amount) > Number(toSignificant(token.amount, token.decimals)) ? 'text-bold' : ''
-			}`}
-		>
-			{#if Number(amount) > Number(toSignificant(token.amount, token.decimals))}
-				<WarningAltFilled />
-			{/if}
-			You have {toSignificant(token.amount, token.decimals)}
-			{token.symbol} in your account.
-		</p>
-	</Container>
-	<Container justify="flex-end">
-		<Button
-			variant="strong"
-			disabled={!amount || Number(amount) > Number(toSignificant(token.amount, token.decimals))}
-			on:click={() => {
-				args.updateStore(() => ({ type: 'init' }))
-				args.onViewChange && args.onViewChange('overview')
-			}}
-		>
-			<ArrowRight />
-		</Button>
-	</Container>
+		<Container justify="flex-end">
+			<Button
+				variant="strong"
+				disabled={!amount || Number(amount) > Number(toSignificant(token.amount, token.decimals))}
+				on:click={() => {
+					args.updateStore(() => ({ type: 'init' }))
+					args.onViewChange && args.onViewChange('overview')
+				}}
+			>
+				<ArrowRight />
+			</Button>
+		</Container>
+	</Layout>
 {/if}
 
 <style lang="scss">
@@ -362,5 +373,8 @@
 		display: flex;
 		flex-direction: row;
 		gap: var(--spacing-6);
+	}
+	.logo {
+		border-radius: var(--spacing-12);
 	}
 </style>

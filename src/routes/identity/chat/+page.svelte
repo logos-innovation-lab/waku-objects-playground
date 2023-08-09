@@ -16,6 +16,7 @@
 	import routes from '$lib/routes'
 	import { theme } from '$lib/stores/theme'
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
+	import Layout from '$lib/components/layout.svelte'
 
 	let baseColor = $theme.baseColor
 	$: if (/^#[0-9A-F]{6}$/i.test(baseColor)) {
@@ -23,52 +24,55 @@
 	}
 </script>
 
-<Header title="Chat appearance">
-	<Button slot="left" variant="icon" on:click={() => goto(routes.IDENTITY)}>
-		<ChevronLeft />
-	</Button>
-</Header>
-
-<AuthenticatedOnly>
-	<div class="preview">
-		<Container>
-			<ChatMessage bubble>This is a preview, use the menus below to customise</ChatMessage>
-			<ChatMessage bubble myMessage>Hey this is really nice!</ChatMessage>
-		</Container>
-	</div>
-	<Spacer height={12} />
-	<Container padY={12}>
-		<Dropdown label="Mode">
-			<Button grow align="block" slot="button">
-				{#if $theme.darkMode === 'system'}
-					Automatic
-				{:else if $theme.darkMode === 'dark'}
-					Dark
-				{:else}
-					Light
-				{/if}
-				<CaretDown />
+<Layout>
+	<svelte:fragment slot="header">
+		<Header title="Chat appearance">
+			<Button slot="left" variant="icon" on:click={() => goto(routes.IDENTITY)}>
+				<ChevronLeft />
 			</Button>
-			<DropdownItem onClick={() => theme.setDarkMode('system')}>Automatic</DropdownItem>
-			<DropdownItem onClick={() => theme.setDarkMode('dark')}>Dark</DropdownItem>
-			<DropdownItem onClick={() => theme.setDarkMode('light')}>Light</DropdownItem>
-		</Dropdown>
-	</Container>
-	<Container direction="row" gap={12}>
-		<div class="grow">
-			<InputField bind:value={baseColor}>
-				{baseColor}
-			</InputField>
+		</Header>
+	</svelte:fragment>
+	<AuthenticatedOnly>
+		<div class="preview">
+			<Container>
+				<ChatMessage bubble>This is a preview, use the menus below to customise</ChatMessage>
+				<ChatMessage bubble myMessage>Hey this is really nice!</ChatMessage>
+			</Container>
 		</div>
-		<label>
-			<div class="palette-overlay" />
-			<div class="palette-icon">
-				<PaintPalette />
+		<Spacer height={12} />
+		<Container padY={12}>
+			<Dropdown label="Mode">
+				<Button grow align="block" slot="button">
+					{#if $theme.darkMode === 'system'}
+						Automatic
+					{:else if $theme.darkMode === 'dark'}
+						Dark
+					{:else}
+						Light
+					{/if}
+					<CaretDown />
+				</Button>
+				<DropdownItem onClick={() => theme.setDarkMode('system')}>Automatic</DropdownItem>
+				<DropdownItem onClick={() => theme.setDarkMode('dark')}>Dark</DropdownItem>
+				<DropdownItem onClick={() => theme.setDarkMode('light')}>Light</DropdownItem>
+			</Dropdown>
+		</Container>
+		<Container direction="row" gap={12}>
+			<div class="grow">
+				<InputField bind:value={baseColor}>
+					{baseColor}
+				</InputField>
 			</div>
-			<input type="color" bind:value={baseColor} />
-		</label>
-	</Container>
-</AuthenticatedOnly>
+			<label>
+				<div class="palette-overlay" />
+				<div class="palette-icon">
+					<PaintPalette />
+				</div>
+				<input type="color" bind:value={baseColor} />
+			</label>
+		</Container>
+	</AuthenticatedOnly>
+</Layout>
 
 <style lang="scss">
 	.preview {

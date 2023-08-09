@@ -35,7 +35,7 @@
 		font-size: var(--font-size-lg);
 		padding: var(--spacing-12);
 		border-radius: var(--border-radius);
-		background-color: var(--color-step-10, var(--color-dark-step-40));
+		background-color: var(--color-step-10, var(--color-dark-step-50));
 
 		&.break {
 			word-break: break-all;

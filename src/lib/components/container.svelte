@@ -50,6 +50,9 @@
 
 	.row {
 		flex-direction: row;
+		&.center {
+			justify-content: center;
+		}
 	}
 	.column {
 		flex-direction: column;
@@ -58,8 +61,9 @@
 	.space-between {
 		justify-content: space-between;
 	}
-	.center {
-		justify-content: center;
+	:not(.row).center {
+		margin-top: auto;
+		margin-bottom: auto;
 	}
 	.flex-start {
 		justify-content: flex-start;

@@ -16,6 +16,7 @@
 	import routes from '$lib/routes'
 	import { HDNodeWallet, Wallet } from 'ethers'
 	import { walletStore } from '$lib/stores/wallet'
+	import Layout from '$lib/components/layout.svelte'
 
 	let picture = ''
 	let name = ''
@@ -60,37 +61,44 @@
 	}
 </script>
 
-<Header title="Create new identity">
-	<Button slot="left" variant="icon" on:click={() => history.back()}>
-		<ChevronLeft />
-	</Button>
-</Header>
-
-<Container gap={12}>
-	<div class="avatar">
-		{#if picture}
-			<div class="img">
-				<img src={adapters.getPicture(picture)} alt="profile" />
-			</div>
-		{:else}
-			<div class="no-img">
-				<div class="profile-default">
-					<User size={70} />
+<Layout>
+	<svelte:fragment slot="header">
+		<Header title="Create new identity">
+			<Button slot="left" variant="icon" on:click={() => history.back()}>
+				<ChevronLeft />
+			</Button>
+		</Header>
+	</svelte:fragment>
+	<Container gap={12} justify="center">
+		<div class="avatar">
+			{#if picture}
+				<div class="img">
+					<img src={adapters.getPicture(picture)} alt="profile" />
 				</div>
-			</div>
-		{/if}
-	</div>
-	<InputFile bind:files={pictureFiles}>
-		<Renew />
-		Change picture
-	</InputFile>
-	<InputField autofocus bind:value={name} label="Display name" />
-</Container>
-<Container grow justify="flex-end">
-	<Button variant="strong" disabled={isCreatingIdentity || !name || saving} on:click={saveProfile}>
-		<ArrowRight />
-	</Button>
-</Container>
+			{:else}
+				<div class="no-img">
+					<div class="profile-default">
+						<User size={70} />
+					</div>
+				</div>
+			{/if}
+		</div>
+		<InputFile bind:files={pictureFiles}>
+			<Renew />
+			Change picture
+		</InputFile>
+		<InputField autofocus bind:value={name} label="Display name" />
+	</Container>
+	<Container grow justify="flex-end">
+		<Button
+			variant="strong"
+			disabled={isCreatingIdentity || !name || saving}
+			on:click={saveProfile}
+		>
+			<ArrowRight />
+		</Button>
+	</Container>
+</Layout>
 
 <style lang="scss">
 	.avatar {
