@@ -54,7 +54,7 @@
 	let amount = ''
 	let fee: Token | undefined = undefined
 
-	$: if (!token) token = args.tokens.find(t => t.address === undefined) ?? tokens[0]
+	$: if (!token) token = args.tokens.find((t) => t.address === undefined) ?? args.tokens[0]
 	// FIXME: improve error handling, this will cause error 500
 	let toUser =
 		args.users.find((user) => user.address !== args.profile.address) || throwError('invalid user')
