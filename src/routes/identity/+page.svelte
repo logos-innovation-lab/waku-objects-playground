@@ -153,7 +153,7 @@
 				Disconnect identity from device
 			</Button>
 		</Container>
-		<Spacer />
+		<Spacer height={12} />
 	</AuthenticatedOnly>
 </Layout>
 

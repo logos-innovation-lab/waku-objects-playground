@@ -2,4 +2,4 @@
 	export let height = 24
 </script>
 
-<div class="spacer" style={`height: ${height}px`} />
+<div class="spacer" style={`padding-block: ${height / 2}px`} />
