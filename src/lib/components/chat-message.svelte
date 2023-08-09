@@ -3,7 +3,7 @@
 	export let myMessage = false
 	export let object = false
 	export let group = false
-	export let lastMessage = false
+	export let author: undefined | string = undefined
 
 	const isFF = () => {
 		let browserInfo = navigator.userAgent
@@ -14,10 +14,15 @@
 <div
 	class={`message ${myMessage ? 'my-message' : 'their-message'} ${isFF() ? 'ff' : ''} ${
 		object ? 'object' : ''
-	} ${group ? 'group' : ''} ${lastMessage ? 'last' : ''}`}
+	} ${group ? 'group' : ''}`}
 >
 	<div class={` ${bubble ? 'bubble message-content message-text text-lg' : ''}`}>
 		<slot />
+		{#if author}
+			<div class="author">
+				{author}
+			</div>
+		{/if}
 	</div>
 	{#if $$slots.avatar}
 		<div class="avatar">
@@ -99,16 +104,20 @@
 
 		&.group {
 			padding-left: 34px;
-		}
 
-		.avatar {
-			position: absolute;
-			bottom: 0;
-			left: 0;
+			.avatar {
+				position: absolute;
+				bottom: 0;
+				left: 0;
 
-			&:empty {
-				display: none;
+				&:empty {
+					display: none;
+				}
 			}
 		}
+	}
+	.author {
+		font-family: sans-serif;
+		font-size: var(--font-size-sm);
 	}
 </style>

@@ -29,6 +29,7 @@
 
 	let div: HTMLElement
 	let autoscroll = true
+	let author: undefined | string
 
 	beforeUpdate(() => {
 		autoscroll = div && div.offsetHeight + div.scrollTop > div.scrollHeight - 74
@@ -98,15 +99,18 @@
 							<!-- Chat bubbles -->
 							{#each messages as message}
 								{#if message.type === 'user' && message.text.length > 0}
+									{@const thisUser = chat.users.find((u) => message.fromAddress === u.address)}
+									<!-- {(author = thisUser?.address)} -->
 									<ChatMessage
 										myMessage={message.fromAddress === wallet.address ? true : false}
 										bubble
 										group
+										author={message.fromAddress === wallet.address ? undefined : thisUser?.name}
 									>
 										{@html message.text.replaceAll('\n', '</br>')}
 										<svelte:fragment slot="avatar">
 											{#if message.fromAddress !== wallet.address}
-												<Avatar size={40} />
+												<Avatar size={40} picture={thisUser?.avatar} />
 											{/if}
 										</svelte:fragment>
 									</ChatMessage>
