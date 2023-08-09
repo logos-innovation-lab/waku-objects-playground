@@ -106,7 +106,7 @@
 	</svelte:fragment>
 	<AuthenticatedOnly let:wallet>
 		{#if wallet && $chats.loading}
-			<Container align="center" grow gap={6} justify="center">
+			<Container align="center" gap={6} justify="center">
 				<div class="center">
 					<h2>Loading...</h2>
 				</div>

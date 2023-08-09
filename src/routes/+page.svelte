@@ -35,13 +35,17 @@
 <AuthenticatedOnly let:wallet>
 	<div class="wrapper">
 		{#if loading}
-			<Container align="center" grow gap={6} justify="center">
-				<h2>Loading...</h2>
-			</Container>
+			<Layout>
+				<Container align="center" gap={6} justify="center">
+					<h2>Loading...</h2>
+				</Container>
+			</Layout>
 		{:else if $chats.error}
-			<Container align="center" grow gap={6} justify="center" padX={24}>
-				<h2>Failed to load chats: {$chats.error.message}</h2>
-			</Container>
+			<Layout>
+				<Container align="center" gap={6} justify="center" padX={24}>
+					<h2>Failed to load chats: {$chats.error.message}</h2>
+				</Container>
+			</Layout>
 		{:else if $chats.chats.size === 0}
 			{@const address = wallet.address}
 			<Layout>
