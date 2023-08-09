@@ -24,6 +24,7 @@
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 	import type { HDNodeWallet } from 'ethers/lib.commonjs'
 	import Layout from '$lib/components/layout.svelte'
+	import { textToHTML } from '$lib/utils/text'
 
 	let div: HTMLElement
 	let autoscroll = true
@@ -91,7 +92,7 @@
 										myMessage={message.fromAddress === wallet.address ? true : false}
 										bubble
 									>
-										{@html message.text.replaceAll('\n', '</br>')}
+										{@html textToHTML(message.text)}
 									</ChatMessage>
 								{:else if message.type === 'data'}
 									<WakuObject {message} users={chat.users} />
