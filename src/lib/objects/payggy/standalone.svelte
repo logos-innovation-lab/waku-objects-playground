@@ -32,7 +32,6 @@
 		type SendTransactionDataMessage,
 	} from './schemas'
 	import type { Token } from '../schemas'
-	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 	import { throwError } from '$lib/utils/error'
 	import Layout from '$lib/components/layout.svelte'
 
@@ -54,9 +53,8 @@
 	let token: Token
 	let amount = ''
 	let fee: Token | undefined = undefined
-	const nativeToken = defaultBlockchainNetwork.nativeToken
 
-	$: if (!token) token = nativeToken
+	$: if (!token) token = args.tokens.find((t) => t.address === undefined) ?? args.tokens[0]
 	// FIXME: improve error handling, this will cause error 500
 	let toUser =
 		args.users.find((user) => user.address !== args.profile.address) || throwError('invalid user')
