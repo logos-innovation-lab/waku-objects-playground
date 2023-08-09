@@ -124,7 +124,10 @@ export function makeWakuObjectAdapter(adapter: Adapter, wallet: BaseWallet): Wak
 	}
 
 	function getContract(address: string, abi: Interface): Contract {
-		return new Contract(address, abi, getProvider())
+		const provider = getProvider()
+		const txWallet = wallet.connect(provider)
+
+		return new Contract(address, abi, txWallet)
 	}
 
 	return {
