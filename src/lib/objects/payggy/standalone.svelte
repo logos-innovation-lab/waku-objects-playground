@@ -54,9 +54,8 @@
 	let token: Token
 	let amount = ''
 	let fee: Token | undefined = undefined
-	const nativeToken = defaultBlockchainNetwork.nativeToken
 
-	$: if (!token) token = nativeToken
+	$: if (!token) token = args.tokens[0]
 	// FIXME: improve error handling, this will cause error 500
 	let toUser =
 		args.users.find((user) => user.address !== args.profile.address) || throwError('invalid user')
