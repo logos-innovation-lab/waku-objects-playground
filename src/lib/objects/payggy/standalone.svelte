@@ -32,7 +32,6 @@
 		type SendTransactionDataMessage,
 	} from './schemas'
 	import type { Token } from '../schemas'
-	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 	import { throwError } from '$lib/utils/error'
 	import Layout from '$lib/components/layout.svelte'
 
