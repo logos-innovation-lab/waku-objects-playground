@@ -109,6 +109,7 @@
 				{#each [...$chats.chats] as [id, chat]}
 					{#if !isGroupChatId(id)}
 						<li>
+							<!-- svelte-ignore a11y-label-has-associated-control -->
 							<label>
 								<div class="chat-button" role="listitem">
 									<Container grow>
@@ -121,7 +122,7 @@
 													</span>
 												</div>
 											</div>
-											<input type="checkbox" bind:group={groupMembers} value={id} />
+											<Checkbox bind:bindGroup={groupMembers} value={id} />
 										</div>
 									</Container>
 								</div>
@@ -242,37 +243,6 @@
 
 		.content {
 			flex-grow: 1;
-		}
-		input[type='checkbox'] {
-			position: relative;
-			&::before {
-				content: '';
-				display: inline-block;
-				width: 18px;
-				height: 18px;
-				position: absolute;
-				right: 0;
-				top: 50%;
-				transform: translateY(-50%);
-				background-color: var(--color-base, var(--color-dark-accent));
-				border: var(--border);
-				border-color: var(--color-accent, var(--color-dark-base));
-			}
-			&:checked::before {
-				background-color: var(--color-accent, var(--color-dark-base));
-			}
-			&:checked::after {
-				content: '';
-				position: absolute;
-				top: 50%;
-				bottom: 50%;
-				transform: translate(-85%, -65%) rotate(45deg);
-				height: 10px;
-				width: 6px;
-				margin-left: 50%;
-				border-bottom: 2px solid var(--color-base, var(--color-dark-accent));
-				border-right: 2px solid var(--color-base, var(--color-dark-accent));
-			}
 		}
 	}
 
