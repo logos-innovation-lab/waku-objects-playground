@@ -1,14 +1,9 @@
-import anchorme from 'anchorme'
+import linkifyHMTL from 'linkify-html'
 
 export function replaceUrlToLink(text: string) {
-	return anchorme({
-		input: text,
-		options: {
-			protocol: 'https://',
-			attributes: {
-				target: '_blank',
-			},
-		},
+	return linkifyHMTL(text, {
+		target: '_blank',
+		defaultProtocol: 'https',
 	})
 }
 
