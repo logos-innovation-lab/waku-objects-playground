@@ -40,7 +40,7 @@
 
 <Container gap={24} justify="center" padX={24}>
 	<p class="text-lg">Who would you like to send tokens to?</p>
-	<InputField bind:value={filterText} placeholder="Search froup members..." />
+	<InputField bind:value={filterText} placeholder="Search group members..." />
 </Container>
 
 <Divider />
