@@ -16,7 +16,6 @@
 	import { toSignificant } from '$lib/utils/format'
 	import type { Token } from '../../schemas'
 	import type { SendTransactionStore } from '../schemas'
-	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 	import Layout from '$lib/components/layout.svelte'
 
 	export let amount: string
