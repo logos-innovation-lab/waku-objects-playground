@@ -172,11 +172,6 @@
 		height: 100dvh;
 	}
 
-	// .grow {
-	// 	flex-grow: 1;
-	// 	overflow-y: auto;
-	// }
-
 	.center {
 		text-align: center;
 		margin-inline: auto;

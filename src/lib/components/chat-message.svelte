@@ -3,7 +3,7 @@
 	export let myMessage = false
 	export let object = false
 	export let group = false
-	export let author: undefined | string = undefined
+	export let sender: undefined | string = undefined
 
 	const isFF = () => {
 		let browserInfo = navigator.userAgent
@@ -18,9 +18,9 @@
 >
 	<div class={` ${bubble ? 'bubble message-content message-text text-lg' : ''}`}>
 		<slot />
-		{#if author}
+		{#if sender}
 			<div class="author">
-				{author}
+				{sender}
 			</div>
 		{/if}
 	</div>

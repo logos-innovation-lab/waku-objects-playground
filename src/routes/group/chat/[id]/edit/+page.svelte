@@ -17,6 +17,9 @@
 	import { page } from '$app/stores'
 	import type { HDNodeWallet } from 'ethers'
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
+	import Layout from '$lib/components/layout.svelte'
+	import Divider from '$lib/components/divider.svelte'
+	import Checkbox from '$lib/components/checkbox.svelte'
 
 	$: chatId = $page.params.id
 	$: groupChat = $chats.chats.get(chatId)
@@ -60,73 +63,84 @@
 
 <AuthenticatedOnly let:wallet>
 	{#if $chats.loading}
-		<Container align="center" grow gap={6} justify="center">
-			<h2>Loading...</h2>
-		</Container>
+		<Layout>
+			<Container align="center" grow gap={6} justify="center">
+				<h2>Loading...</h2>
+			</Container>
+		</Layout>
 	{:else if !groupChat}
-		<Container align="center" grow gap={6} justify="center">
-			<h2>Could not find group chat.</h2>
-		</Container>
+		<Layout>
+			<Container align="center" grow gap={6} justify="center">
+				<h2>Could not find group chat.</h2>
+			</Container>
+		</Layout>
 	{:else if screen === 'settings'}
 		{@const groupMembers = groupChat.users}
-		<Header title="Group settings">
-			<svelte:fragment slot="left">
-				<div class="header-btns">
-					<Button variant="icon" on:click={() => history.go(-1)}>
-						<ChevronLeft />
-					</Button>
-				</div>
-			</svelte:fragment>
-		</Header>
-		<Container gap={12}>
-			<div class="avatar">
-				{#if picture}
-					<div class="img">
-						<img src={adapters.getPicture(picture)} alt="profile" />
-					</div>
-				{:else}
-					<div class="no-img">
-						<div class="profile-default">
-							<UserIcon size={70} />
+		<Layout>
+			<svelte:fragment slot="header">
+				<Header title="Group settings">
+					<svelte:fragment slot="left">
+						<div class="header-btns">
+							<Button variant="icon" on:click={() => history.go(-1)}>
+								<ChevronLeft />
+							</Button>
 						</div>
-					</div>
-				{/if}
-			</div>
-			<InputFile bind:files={pictureFiles}>
-				<Renew />
-				Change picture
-			</InputFile>
-			<InputField autofocus bind:value={name} label="Group name" />
-		</Container>
-		<Container alignItems="center">
-			{groupMembers?.length} Members
-			<Button disabled={buttonDisabled} on:click={() => (screen = 'invite')}>
-				<UserIcon />
-				Invite to group
-			</Button>
-		</Container>
-		<ul class="chats" aria-label="Contact List">
-			{#each groupMembers as user}
-				<li>
-					<div class="chat-button" role="listitem">
-						<Container grow>
-							<div class="chat">
-								<Avatar size={70} picture={user.avatar} />
-								<div class="content">
-									<div class="user-info">
-										<span class="username text-lg text-bold">
-											{user.name}
-										</span>
+					</svelte:fragment>
+				</Header>
+			</svelte:fragment>
+			<Container gap={12}>
+				<div class="avatar">
+					{#if picture}
+						<div class="img">
+							<img src={adapters.getPicture(picture)} alt="profile" />
+						</div>
+					{:else}
+						<div class="no-img">
+							<div class="profile-default">
+								<UserIcon size={70} />
+							</div>
+						</div>
+					{/if}
+				</div>
+				<InputFile bind:files={pictureFiles}>
+					<Renew />
+					Change picture
+				</InputFile>
+				<InputField autofocus bind:value={name} label="Group name" />
+			</Container>
+			<Divider padTop={24} />
+			<Container gap={12} alignItems="center" padY={24}>
+				<p class="text-bold text-lg">
+					{groupMembers?.length} Members
+				</p>
+				<Button disabled={buttonDisabled} on:click={() => (screen = 'invite')}>
+					<UserIcon />
+					Invite to group
+				</Button>
+			</Container>
+			<ul class="chats" aria-label="Contact List">
+				{#each groupMembers as user}
+					<li>
+						<div class="chat-button" role="listitem">
+							<Container grow>
+								<div class="chat">
+									<Avatar size={48} picture={user.avatar} />
+									<div class="content">
+										<div class="user-info">
+											<span class="username">
+												{user.name}
+											</span>
+										</div>
 									</div>
 								</div>
-							</div>
-						</Container>
-					</div>
-				</li>
-			{/each}
-		</ul>
+							</Container>
+						</div>
+					</li>
+				{/each}
+			</ul>
+		</Layout>
 	{:else if screen === 'invite'}
-		<Header mainContent="right" title="Invite to group">
+		<Header title="Invite to group">
 			<svelte:fragment slot="left">
 				<div class="header-btns">
 					<Button variant="icon" on:click={() => (screen = 'settings')}>
@@ -135,31 +149,34 @@
 				</div>
 			</svelte:fragment>
 		</Header>
-		<ul class="chats" aria-label="Contact List">
+		<ul class="chats invite" aria-label="Contact List">
 			{#each [...$chats.chats] as [id, chat]}
 				{#if !isGroupChatId(id) && !isGroupMember(id)}
 					<li>
-						<div class="chat-button" role="listitem">
-							<Container grow>
-								<div class="chat">
-									<Avatar size={70} picture={chat.users[0].avatar} />
-									<div class="content">
-										<div class="user-info">
-											<span class="username text-lg text-bold">
-												{chat.users[0].name}
-											</span>
+						<label for={id}>
+							<div class="chat-button" role="listitem">
+								<Container grow>
+									<div class="chat">
+										<Avatar size={48} picture={chat.users[0].avatar} />
+										<div class="content">
+											<div class="user-info">
+												<span class="username">
+													{chat.users[0].name}
+												</span>
+											</div>
 										</div>
+										<Checkbox bind:bindGroup={invitedMembers} value={id} domId={id} />
 									</div>
-									<input type="checkbox" bind:group={invitedMembers} value={id} />
-								</div>
-							</Container>
-						</div>
+								</Container>
+							</div>
+						</label>
 					</li>
 				{/if}
 			{/each}
 		</ul>
-
-		<Container grow justify="flex-end">
+		<Container grow />
+		<Divider />
+		<Container justify="flex-end">
 			<Button
 				variant="strong"
 				disabled={buttonDisabled || invitedMembers.length === 0}
@@ -173,7 +190,7 @@
 </AuthenticatedOnly>
 
 <style lang="scss">
-	.chats {
+	.chats:not(.invite) {
 		list-style: none;
 		padding: 0;
 		margin: 0;
@@ -184,9 +201,31 @@
 			gap: var(--spacing-12);
 			border-bottom: 1px solid var(--color-step-20, var(--color-dark-step-40));
 
+			&:first-child {
+				border-top: 1px solid var(--color-step-20, var(--color-dark-step-40));
+			}
+
 			.chat-button {
 				width: 100%;
-				cursor: pointer;
+			}
+		}
+	}
+	.chats.invite {
+		li {
+			label {
+				display: flex;
+				align-items: center;
+				gap: var(--spacing-12);
+				border-bottom: 1px solid var(--color-step-20, var(--color-dark-step-40));
+
+				:has(input[type='checkbox']:checked) {
+					background-color: var(--color-step-10, var(--color-dark-step-50));
+				}
+
+				.chat-button {
+					width: 100%;
+					cursor: pointer;
+				}
 			}
 		}
 	}
@@ -196,7 +235,7 @@
 		flex-direction: row;
 		gap: var(--spacing-12);
 		justify-content: flex-start;
-		align-items: flex-start;
+		align-items: center;
 
 		.content {
 			flex-grow: 1;

@@ -26,10 +26,10 @@
 	import Layout from '$lib/components/layout.svelte'
 	import OverflowMenuVertical from '$lib/components/icons/overflow-menu-vertical.svelte'
 	import Events from '$lib/components/icons/events.svelte'
+	import Edit from '$lib/components/icons/edit.svelte'
 
 	let div: HTMLElement
 	let autoscroll = true
-	let author: undefined | string
 
 	beforeUpdate(() => {
 		autoscroll = div && div.offsetHeight + div.scrollTop > div.scrollHeight - 74
@@ -83,13 +83,12 @@
 					{chat?.name}
 					<Events />
 				</svelte:fragment>
-				<!-- FIXME: THIS SHOULD BE A DROPDOWN MENU -->
 				<Button
 					variant="icon"
 					slot="right"
 					on:click={() => goto(ROUTES.GROUP_EDIT($page.params.id))}
 				>
-					<OverflowMenuVertical />
+					<Edit />
 				</Button>
 			</Header>
 			<div class="chat-messages" bind:this={div}>
@@ -99,18 +98,17 @@
 							<!-- Chat bubbles -->
 							{#each messages as message}
 								{#if message.type === 'user' && message.text.length > 0}
-									{@const thisUser = chat.users.find((u) => message.fromAddress === u.address)}
-									<!-- {(author = thisUser?.address)} -->
+									{@const sender = chat.users.find((u) => message.fromAddress === u.address)}
 									<ChatMessage
 										myMessage={message.fromAddress === wallet.address ? true : false}
 										bubble
 										group
-										author={message.fromAddress === wallet.address ? undefined : thisUser?.name}
+										sender={message.fromAddress === wallet.address ? undefined : sender?.name}
 									>
 										{@html message.text.replaceAll('\n', '</br>')}
 										<svelte:fragment slot="avatar">
 											{#if message.fromAddress !== wallet.address}
-												<Avatar size={40} picture={thisUser?.avatar} />
+												<Avatar size={40} picture={sender?.avatar} />
 											{/if}
 										</svelte:fragment>
 									</ChatMessage>
