@@ -1,6 +1,7 @@
 <script lang="ts">
 	export let value: string
 	export let bindGroup: string[]
+	export let domId: undefined | string = undefined
 
 	function onChange(event: Event & { currentTarget: EventTarget & HTMLInputElement }) {
 		const { value, checked } = event.currentTarget
@@ -12,7 +13,13 @@
 	}
 </script>
 
-<input type="checkbox" {value} checked={bindGroup.includes(value)} on:change={onChange} />
+<input
+	type="checkbox"
+	{value}
+	checked={bindGroup.includes(value)}
+	on:change={onChange}
+	id={domId}
+/>
 
 <style lang="scss">
 	input[type='checkbox'] {

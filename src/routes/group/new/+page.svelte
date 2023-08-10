@@ -109,8 +109,7 @@
 				{#each [...$chats.chats] as [id, chat]}
 					{#if !isGroupChatId(id)}
 						<li>
-							<!-- svelte-ignore a11y-label-has-associated-control -->
-							<label>
+							<label for={id}>
 								<div class="chat-button" role="listitem">
 									<Container grow>
 										<div class="chat">
@@ -122,7 +121,7 @@
 													</span>
 												</div>
 											</div>
-											<Checkbox bind:bindGroup={groupMembers} value={id} />
+											<Checkbox bind:bindGroup={groupMembers} value={id} domId={id} />
 										</div>
 									</Container>
 								</div>
