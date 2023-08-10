@@ -9,9 +9,9 @@
 	import type { Token } from '../schemas'
 	import type { User } from '$lib/types'
 
-	import Amount from './views/amount.svelte'
-	import Confirm from './views/confirm.svelte'
-	import SelectUser from './views/selectUser.svelte'
+	import ChooseAmount from './views/choose-amount.svelte'
+	import ConfirmSend from './views/confirm-send.svelte'
+	import SelectUser from './views/select-user.svelte'
 
 	export let args: WakuObjectArgs<SendTransactionStore, SendTransactionDataMessage>
 
@@ -33,7 +33,7 @@
 </script>
 
 {#if store?.type === 'init' && toUser}
-	<Confirm
+	<ConfirmSend
 		{toUser}
 		{token}
 		{amount}
@@ -51,7 +51,7 @@
 		status={store.type}
 	/>
 {:else if args.view === 'amount'}
-	<Amount
+	<ChooseAmount
 		bind:amount
 		bind:token
 		tokens={args.tokens}
