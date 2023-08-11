@@ -1,30 +1,35 @@
 <script lang="ts">
 	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
 	import UserIcon from '$lib/components/icons/user.svelte'
+	import Checkmark from '$lib/components/icons/checkmark.svelte'
+	import Renew from '$lib/components/icons/renew.svelte'
+	import AddComment from '$lib/components/icons/add-comment.svelte'
 
 	import Button from '$lib/components/button.svelte'
 	import Header from '$lib/components/header.svelte'
 	import Container from '$lib/components/container.svelte'
 	import InputField from '$lib/components/input-field.svelte'
-
-	import Avatar from '$lib/components/avatar.svelte'
-	import { chats, isGroupChatId } from '$lib/stores/chat'
-	import Checkmark from '$lib/components/icons/checkmark.svelte'
-	import InputFile from '$lib/components/input-file.svelte'
-	import adapters from '$lib/adapters'
-	import { clipAndResize } from '$lib/utils/image'
-	import Renew from '$lib/components/icons/renew.svelte'
-	import { page } from '$app/stores'
-	import type { HDNodeWallet } from 'ethers'
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 	import Layout from '$lib/components/layout.svelte'
 	import Divider from '$lib/components/divider.svelte'
 	import Checkbox from '$lib/components/checkbox.svelte'
+	import Avatar from '$lib/components/avatar.svelte'
+	import InputFile from '$lib/components/input-file.svelte'
+
+	import { chats, isGroupChatId } from '$lib/stores/chat'
+	import adapters from '$lib/adapters'
+	import { clipAndResize } from '$lib/utils/image'
+	import { page } from '$app/stores'
+	import type { HDNodeWallet } from 'ethers'
+	import routes from '$lib/routes'
+	import { goto } from '$app/navigation'
+	import ChatBot from '$lib/components/icons/chat-bot.svelte'
 
 	$: chatId = $page.params.id
 	$: groupChat = $chats.chats.get(chatId)
 	let picture: string | undefined
 	let name: string | undefined
+
 	$: if (groupChat) {
 		picture = picture ?? groupChat.avatar
 		name = name ?? groupChat.name
@@ -120,18 +125,35 @@
 			</Container>
 			<ul class="chats" aria-label="Contact List">
 				{#each groupMembers as user}
-					<li>
+					{@const isContact = Array.from($chats.chats)
+						.map(([, chat]) => chat.chatId)
+						.includes(user.address)}
+					{@const isMe = user.address === wallet.address}
+					<li class={`${isContact ? 'contact' : 'not-contact'} ${isMe ? 'me' : ''}`}>
 						<div class="chat-button" role="listitem">
 							<Container grow>
 								<div class="chat">
-									<Avatar size={48} picture={user.avatar} />
+									<div class="chat-avatar">
+										<Avatar size={48} picture={user.avatar} />
+									</div>
 									<div class="content">
 										<div class="user-info">
-											<span class="username">
-												{user.name}
-											</span>
+											{#if isMe}
+												<span class="username text-italic"> You </span>
+											{:else}
+												<span class="username">{user.name}</span>
+											{/if}
 										</div>
 									</div>
+									{#if !isContact && !isMe}
+										<Button variant="icon" on:click={() => goto(routes.INVITE(user.address))}>
+											<AddComment />
+										</Button>
+									{:else if isContact}
+										<Button variant="icon" on:click={() => goto(routes.CHAT(user.address))}>
+											<ChatBot />
+										</Button>
+									{/if}
 								</div>
 							</Container>
 						</div>
@@ -190,44 +212,56 @@
 </AuthenticatedOnly>
 
 <style lang="scss">
-	.chats:not(.invite) {
-		list-style: none;
-		padding: 0;
-		margin: 0;
+	.chats {
+		&:not(.invite) {
+			list-style: none;
+			padding: 0;
+			margin: 0;
 
-		li {
-			display: flex;
-			align-items: center;
-			gap: var(--spacing-12);
-			border-bottom: 1px solid var(--color-step-20, var(--color-dark-step-40));
-
-			&:first-child {
-				border-top: 1px solid var(--color-step-20, var(--color-dark-step-40));
-			}
-
-			.chat-button {
-				width: 100%;
-			}
-		}
-	}
-	.chats.invite {
-		li {
-			label {
+			li {
 				display: flex;
 				align-items: center;
 				gap: var(--spacing-12);
 				border-bottom: 1px solid var(--color-step-20, var(--color-dark-step-40));
 
-				:has(input[type='checkbox']:checked) {
-					background-color: var(--color-step-10, var(--color-dark-step-50));
+				&.not-contact:not(.me) {
+					.chat-avatar,
+					.content {
+						opacity: 0.5;
+					}
 				}
 
-				.chat-button {
-					width: 100%;
-					cursor: pointer;
+				&.me {
+					opacity: 1;
+				}
+
+				&:first-child {
+					border-top: 1px solid var(--color-step-20, var(--color-dark-step-40));
 				}
 			}
 		}
+
+		&.invite {
+			li {
+				label {
+					display: flex;
+					align-items: center;
+					gap: var(--spacing-12);
+					border-bottom: 1px solid var(--color-step-20, var(--color-dark-step-40));
+
+					:has(input[type='checkbox']:checked) {
+						background-color: var(--color-step-10, var(--color-dark-step-50));
+					}
+				}
+			}
+			.chat-button {
+				cursor: pointer;
+			}
+		}
+	}
+
+	.chat-button {
+		width: 100%;
 	}
 
 	.chat {

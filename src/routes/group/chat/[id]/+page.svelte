@@ -24,7 +24,6 @@
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 	import type { HDNodeWallet } from 'ethers/lib.commonjs'
 	import Layout from '$lib/components/layout.svelte'
-	import OverflowMenuVertical from '$lib/components/icons/overflow-menu-vertical.svelte'
 	import Events from '$lib/components/icons/events.svelte'
 	import Edit from '$lib/components/icons/edit.svelte'
 
