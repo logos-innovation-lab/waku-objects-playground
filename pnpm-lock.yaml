@@ -61,6 +61,12 @@ devDependencies:
   knip:
     specifier: ^2.17.1
     version: 2.17.1
+  linkify-html:
+    specifier: ^4.1.1
+    version: 4.1.1(linkifyjs@4.1.1)
+  linkifyjs:
+    specifier: ^4.1.1
+    version: 4.1.1
   prettier:
     specifier: ^2.8.8
     version: 2.8.8
@@ -4926,6 +4932,18 @@ packages:
       xsalsa20: 1.2.0
     transitivePeerDependencies:
       - supports-color
+    dev: true
+
+  /linkify-html@4.1.1(linkifyjs@4.1.1):
+    resolution: {integrity: sha512-7RcF7gIhEOGBBvs7orCJ2tevaz7iF0ZLZSRPWNNBOnW/uGjOOQYB+ztSeHF6dchMC2dM9H8zZlt6Z959bjteaw==}
+    peerDependencies:
+      linkifyjs: ^4.0.0
+    dependencies:
+      linkifyjs: 4.1.1
+    dev: true
+
+  /linkifyjs@4.1.1:
+    resolution: {integrity: sha512-zFN/CTVmbcVef+WaDXT63dNzzkfRBKT1j464NJQkV7iSgJU0sLBus9W0HBwnXK13/hf168pbrx/V/bjEHOXNHA==}
     dev: true
 
   /local-pkg@0.4.3:
