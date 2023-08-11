@@ -27,7 +27,7 @@ export interface WakuObjectArgs<StoreType = unknown, DataMessageType extends obj
 	send: (data: DataMessageType) => Promise<void>
 
 	readonly view?: string
-	onViewChange?: (view: string) => void
+	onViewChange: (view: string) => void
 }
 
 type WakuStoreType = unknown

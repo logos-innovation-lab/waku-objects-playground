@@ -11,10 +11,10 @@
 	const objectId = $page.params.object_id
 	const instanceId = $page.params.instance_id === 'new' ? genRanHex(12) : $page.params.instance_id
 	const chatId = $page.params.id
-	let view = $page.params.view
+	$: view = $page.params.view
 
 	function onViewChange(view: string) {
-		goto(routes.OBJECT(chatId, objectId, view))
+		goto(routes.OBJECT(chatId, objectId, instanceId, view))
 	}
 </script>
 

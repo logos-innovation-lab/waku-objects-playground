@@ -14,7 +14,7 @@
 	export let objectId: string
 	export let instanceId: string
 	export let chatId: string
-	export let onViewChange: ((view: string) => void) | undefined = undefined
+	export let onViewChange: (view: string) => void
 	export let view: string | undefined = undefined
 	export let wallet: HDNodeWallet
 

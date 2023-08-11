@@ -26,6 +26,7 @@
 	import { get } from 'svelte/store'
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 	import Layout from '$lib/components/layout.svelte'
+	import { getPicture, uploadPicture } from '$lib/adapters/ipfs'
 
 	let avatar = $profile.avatar
 	let name = $profile.name
@@ -38,7 +39,7 @@
 	let files: FileList | undefined = undefined
 	async function resizePersonaPicture(p?: File) {
 		try {
-			avatar = p ? await adapters.uploadPicture(await clipAndResize(p, 200, 200)) : avatar
+			avatar = p ? await uploadPicture(await clipAndResize(p, 200, 200)) : avatar
 		} catch (error) {
 			console.error(error)
 		}
@@ -90,7 +91,7 @@
 			<div class="avatar">
 				{#if avatar}
 					<div class="img">
-						<img src={adapters.getPicture(avatar)} alt="your avatar" />
+						<img src={getPicture(avatar)} alt="your avatar" />
 					</div>
 				{:else}
 					<div class="no-img">

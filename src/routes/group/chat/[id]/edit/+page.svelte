@@ -17,6 +17,7 @@
 	import { page } from '$app/stores'
 	import type { HDNodeWallet } from 'ethers'
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
+	import { getPicture, uploadPicture } from '$lib/adapters/ipfs'
 
 	$: chatId = $page.params.id
 	$: groupChat = $chats.chats.get(chatId)
@@ -34,7 +35,7 @@
 
 	async function resizePersonaPicture(p?: File) {
 		try {
-			picture = p ? await adapters.uploadPicture(await clipAndResize(p, 200, 200)) : picture
+			picture = p ? await uploadPicture(await clipAndResize(p, 200, 200)) : picture
 		} catch (error) {
 			console.error(error)
 		}
@@ -82,7 +83,7 @@
 			<div class="avatar">
 				{#if picture}
 					<div class="img">
-						<img src={adapters.getPicture(picture)} alt="profile" />
+						<img src={getPicture(picture)} alt="profile" />
 					</div>
 				{:else}
 					<div class="no-img">
