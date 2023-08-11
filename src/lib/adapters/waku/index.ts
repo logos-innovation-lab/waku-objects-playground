@@ -23,7 +23,6 @@ import {
 	subscribe,
 } from './waku'
 import type { BaseWallet, Wallet } from 'ethers'
-import { ipfs, IPFS_GATEWAY } from '$lib/adapters/ipfs'
 import { get } from 'svelte/store'
 import { objectStore, type ObjectState, objectKey } from '$lib/stores/objects'
 import { lookup } from '$lib/objects/lookup'
@@ -575,17 +574,6 @@ export default class WakuAdapter implements Adapter {
 		for (const user of users) {
 			await sendMessage(this.waku, user, message)
 		}
-	}
-
-	async uploadPicture(picture: string): Promise<string> {
-		const blob = await (await fetch(picture)).blob()
-		const res = await ipfs.add(blob)
-
-		return res.cid.toString()
-	}
-
-	getPicture(cid: string): string {
-		return `${IPFS_GATEWAY}/${cid}`
 	}
 
 	async updateStore(

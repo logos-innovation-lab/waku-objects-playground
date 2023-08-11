@@ -1,7 +1,7 @@
 import type { DraftChat } from '$lib/stores/chat'
-import type { BaseWallet } from 'ethers'
-import WakuAdapter from './waku'
 import type { Token } from '$lib/stores/balances'
+import WakuAdapter from '$lib/adapters/waku'
+import type { BaseWallet } from 'ethers'
 
 export interface Adapter {
 	onLogIn: (wallet: BaseWallet) => Promise<void>
@@ -22,9 +22,6 @@ export interface Adapter {
 		data: unknown,
 	): Promise<void>
 	sendInvite(wallet: BaseWallet, chatId: string, users: string[]): Promise<void>
-
-	uploadPicture(picture: string): Promise<string>
-	getPicture(cid: string): string
 
 	updateStore(
 		address: string,

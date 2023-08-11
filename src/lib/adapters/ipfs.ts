@@ -12,3 +12,14 @@ export const ipfs = create({
 		authorization: IPFS_AUTH,
 	},
 })
+
+export async function uploadPicture(picture: string): Promise<string> {
+	const blob = await (await fetch(picture)).blob()
+	const res = await ipfs.add(blob)
+
+	return res.cid.toString()
+}
+
+export function getPicture(cid: string): string {
+	return `${IPFS_GATEWAY}/${cid}`
+}

@@ -1,6 +1,6 @@
 <script lang="ts">
-	import adapters from '$lib/adapters'
-	import User from './icons/user.svelte'
+	import { getPicture } from '$lib/adapters/ipfs'
+	import User from '$lib/components/icons/user.svelte'
 
 	export let picture: string | undefined = undefined
 	export let size = 48
@@ -17,38 +17,39 @@
 >
 	<div class="img" style={`height: ${size}px;`}>
 		{#if picture}
-			<img src={adapters.getPicture(picture)} alt="profile" />
+			<img src={getPicture(picture)} alt="profile" />
 		{:else}
 			<User size={avatarSize} />
 		{/if}
 	</div>
 </div>
 
-<style lang="scss">
+<style>
 	.click {
 		cursor: pointer;
 	}
+
 	.avatar {
 		border-radius: 100px;
+	}
 
-		.img {
-			aspect-ratio: 1;
-			border-radius: 100px;
-			display: flex;
-			justify-content: center;
-			align-items: center;
-			background-color: var(--color-step-10, var(--color-dark-step-50));
-			margin-inline: auto;
-			position: relative;
+	.img {
+		aspect-ratio: 1;
+		border-radius: 100px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		background-color: var(--color-step-10, var(--color-dark-step-50));
+		margin-inline: auto;
+		position: relative;
+	}
 
-			img {
-				aspect-ratio: 1;
-				object-fit: cover;
-				border-radius: 100px;
-			}
-		}
-		:global(svg) {
-			fill: var(--color-step-50, var(--color-dark-step-10));
-		}
+	img {
+		aspect-ratio: 1;
+		object-fit: cover;
+		border-radius: 100px;
+	}
+	:global(svg) {
+		fill: var(--color-step-50, var(--color-dark-step-10));
 	}
 </style>
