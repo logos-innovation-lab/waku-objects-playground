@@ -15,14 +15,13 @@
 
 	import { toSignificant } from '$lib/utils/format'
 	import type { Token } from '../../schemas'
-	import type { SendTransactionStore } from '../schemas'
 	import Layout from '$lib/components/layout.svelte'
 
 	export let amount: string
 	export let token: Token
 	export let tokens: Token[]
 	export let onViewChange: (view: string) => void
-	export let updateStore: (updater: (state: SendTransactionStore) => SendTransactionStore) => void
+	export let exitObject: () => void
 
 	$: if (!token) token = tokens.find((t) => t.address === undefined) ?? tokens[0]
 </script>
@@ -33,7 +32,7 @@
 			<Button slot="left" variant="icon" on:click={() => history.back()}>
 				<ChevronLeft />
 			</Button>
-			<Button slot="right" variant="icon" on:click={() => history.go(-2)}>
+			<Button slot="right" variant="icon" on:click={exitObject}>
 				<Close />
 			</Button>
 		</Header>
@@ -76,10 +75,7 @@
 		<Button
 			variant="strong"
 			disabled={!amount || Number(amount) > Number(toSignificant(token.amount, token.decimals))}
-			on:click={() => {
-				updateStore(() => ({ type: 'init' }))
-				onViewChange && onViewChange('overview')
-			}}
+			on:click={() => onViewChange('overview')}
 		>
 			<ArrowRight />
 		</Button>

@@ -23,6 +23,7 @@
 	export let profile: User
 	export let amount: string
 	export let token: Token
+	export let exitObject: () => void
 
 	let transactionSent = false
 	let fee: Token | undefined = undefined
@@ -44,11 +45,9 @@
 			const tokenToTransfer = { ...token, amount: toBigInt(amount, token.decimals) }
 			const transactionHash = await sendTransaction(toUser.address, tokenToTransfer, fee)
 
-			await send({
-				hash: transactionHash,
-			})
+			await send({ hash: transactionHash })
 
-			history.go(-4)
+			exitObject()
 		}
 	}
 </script>
@@ -59,7 +58,7 @@
 			<Button slot="left" variant="icon" on:click={() => history.back()}>
 				<ChevronLeft />
 			</Button>
-			<Button slot="right" variant="icon" on:click={() => history.go(-3)}>
+			<Button slot="right" variant="icon" on:click={exitObject}>
 				<Close />
 			</Button>
 		</Header>

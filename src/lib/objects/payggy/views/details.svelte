@@ -25,6 +25,7 @@
 	export let instanceId: string
 	export let profile: User
 	export let status: string
+	export let exitObject: () => void
 
 	$: isSender = transaction.from === profile.address
 </script>
@@ -35,7 +36,7 @@
 			<div slot="left">
 				<img src={logo} alt="Payggy logo" class="logo" />
 			</div>
-			<Button slot="right" variant="icon" on:click={() => history.back()}>
+			<Button slot="right" variant="icon" on:click={exitObject}>
 				<Close />
 			</Button>
 		</Header>

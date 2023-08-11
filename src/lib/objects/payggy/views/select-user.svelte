@@ -15,15 +15,11 @@
 	export let toUser: User | undefined = undefined
 	export let profile: User
 	export let onViewChange: (view: string) => void
-	export let view: string | undefined
+	export let exitObject: () => void
 
 	const setUser = (user: User) => {
 		toUser = user
 		onViewChange('amount')
-	}
-
-	$: if (otherUsers.length === 1 && !view) {
-		setUser(otherUsers[0])
 	}
 	$: otherUsers = users.filter((user) => user.address !== profile.address)
 	let filterText = ''
@@ -33,7 +29,7 @@
 	<Button slot="left" variant="icon" on:click={() => history.back()}>
 		<ChevronLeft />
 	</Button>
-	<Button slot="right" variant="icon" on:click={() => history.go(-2)}>
+	<Button slot="right" variant="icon" on:click={exitObject}>
 		<Close />
 	</Button>
 </Header>
@@ -48,8 +44,8 @@
 <Container gap={24} grow justify="center" padX={24}>
 	<ul>
 		{#each otherUsers.filter((u) => u.name?.includes(filterText)) as user}
-			<!-- svelte-ignore a11y-click-events-have-key-events -->
 			<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
+			<!-- svelte-ignore a11y-click-events-have-key-events -->
 			<li on:click={() => setUser(user)}>
 				<Container grow>
 					<div class="chat">

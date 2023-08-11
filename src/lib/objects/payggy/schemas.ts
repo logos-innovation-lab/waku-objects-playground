@@ -4,9 +4,6 @@ import { TransactionHashSchema } from '$lib/utils/schemas'
 
 export const SendTransactionStoreSchema = z.union([
 	z.object({
-		type: z.literal('init'),
-	}),
-	z.object({
 		type: z.literal('pending'),
 		transaction: TransactionSchema,
 		hash: TransactionHashSchema,
