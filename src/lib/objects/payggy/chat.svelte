@@ -21,7 +21,7 @@
 	export let message: DataMessage<SendTransactionDataMessage>
 	export let args: WakuObjectArgs<SendTransactionStore, SendTransactionDataMessage>
 
-	let data: SendTransactionStore
+	let data: SendTransactionStore | undefined
 	$: {
 		if (args.store) {
 			const res = SendTransactionStoreSchema.safeParse(args.store)
@@ -33,35 +33,47 @@
 		}
 	}
 
-	$: myMessage = message.fromAddress === args.profile.address
-	// FIXME: will not work for group chats
-	$: otherUser = args.users.find((u) => u.address !== args.profile.address)
 	function onDetailsClick() {
 		if (args.onViewChange) args.onViewChange('details')
 	}
+
+	$: sender = args.users.find((u) => u.address === data?.transaction.from)
+	$: recipient = args.users.find((u) => u.address === data?.transaction.to)
+
+	$: myMessage = args.profile.address === message.fromAddress
+	$: isSender = args.profile.address === sender?.address
+	$: isRecipient = args.profile.address === recipient?.address
 </script>
 
 <ChatMessage {myMessage} object bubble>
 	<div class="wo text-normal">
 		<Container gap={12}>
 			<ObjectHeader name="Payggy" logoImg={logo} logoAlt="Payggy logo" />
-			{#if !args.store || !message.data || !otherUser}
+			{#if !args.store || !message.data || !sender || !recipient}
 				Loading...
 			{:else if !data}
 				<!-- This is an error state -->
 				Failed to parse store or message data. Check console for details.
-			{:else if myMessage && (data.type === 'pending' || data.type === 'success')}
+			{:else if data.type === 'error'}
+				Transaction failed
+			{:else if isSender}
 				You sent {toSignificant(
 					BigInt(data.transaction.token.amount),
 					data.transaction.token.decimals,
 				)}
-				{data.transaction.token.symbol} to {otherUser.name}
-			{:else if data.type === 'pending' || data.type === 'success'}
+				{data.transaction.token.symbol} to {recipient.name}
+			{:else if isRecipient}
 				You received {toSignificant(
 					BigInt(data.transaction.token.amount),
 					data.transaction.token.decimals,
 				)}
-				{data.transaction.token.symbol} from {otherUser.name}
+				{data.transaction.token.symbol} from {sender.name}
+			{:else}
+				{sender?.name} sent {toSignificant(
+					BigInt(data.transaction.token.amount),
+					data.transaction.token.decimals,
+				)}
+				{data.transaction.token.symbol} to {recipient?.name}
 			{/if}
 		</Container>
 		{#if args.store && message.data && data}
@@ -78,10 +90,10 @@
 						role="button"
 						tabindex={0}
 					>
-						{#if myMessage}
-							<ArrowUpRight />
-						{:else}
+						{#if isRecipient}
 							<ArrowDownRight />
+						{:else}
+							<ArrowUpRight />
 						{/if}
 						{#if data.type === 'pending' || data.type === 'success'}
 							<div class="grow text-lg">

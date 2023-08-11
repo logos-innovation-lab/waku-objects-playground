@@ -27,7 +27,11 @@
 	export let status: string
 	export let exitObject: () => void
 
-	$: isSender = transaction.from === profile.address
+	$: sender = users.find((u) => u.address === transaction.from)
+	$: recipient = users.find((u) => u.address === transaction.to)
+
+	$: isSender = profile.address === sender?.address
+	$: isRecipient = profile.address === recipient?.address
 </script>
 
 <Layout>
@@ -45,10 +49,10 @@
 		<div class="topper">
 			<Container gap={6} direction="column" padX={12} align="center">
 				<p class="title-amt">
-					{#if isSender}
-						<ArrowUpRight size={24} />
-					{:else}
+					{#if isRecipient}
 						<ArrowDownRight size={24} />
+					{:else}
+						<ArrowUpRight size={24} />
 					{/if}
 					{toSignificant(BigInt(transaction.token.amount), transaction.token.decimals)}
 					{transaction.token.symbol}
@@ -78,15 +82,19 @@
 									BigInt(transaction.token.amount),
 									transaction.token.decimals,
 								)}
-								{transaction.token.symbol} to {users.find((u) => u.address === transaction.to)
-									?.name}
-							{:else}
+								{transaction.token.symbol} to {recipient?.name}
+							{:else if isRecipient}
 								You received {toSignificant(
 									BigInt(transaction.token.amount),
 									transaction.token.decimals,
 								)}
-								{transaction.token.symbol} from {users.find((u) => u.address === transaction.from)
-									?.name}
+								{transaction.token.symbol} from {sender?.name}
+							{:else}
+								{sender?.name} sent {toSignificant(
+									BigInt(transaction.token.amount),
+									transaction.token.decimals,
+								)}
+								{transaction.token.symbol} to {recipient?.name}
 							{/if}
 						</div>
 						<p class="status">
