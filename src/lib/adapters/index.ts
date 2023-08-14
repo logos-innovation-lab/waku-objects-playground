@@ -2,11 +2,13 @@ import type { DraftChat } from '$lib/stores/chat'
 import type { Token } from '$lib/stores/balances'
 import WakuAdapter from '$lib/adapters/waku'
 import type { BaseWallet } from 'ethers'
+import type { User } from '$lib/objects/schemas'
 
 export interface Adapter {
 	onLogIn: (wallet: BaseWallet) => Promise<void>
 	onLogOut: () => void
 	saveUserProfile(address: string, name?: string, avatar?: string): Promise<void>
+	getUserProfile(address: string): Promise<User | undefined>
 
 	startChat(address: string, chat: DraftChat): Promise<string>
 	startGroupChat(wallet: BaseWallet, chat: DraftChat): Promise<string>

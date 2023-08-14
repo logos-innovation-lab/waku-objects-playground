@@ -415,9 +415,16 @@ export default class WakuAdapter implements Adapter {
 		}
 	}
 
+	async getUserProfile(address: string): Promise<User | undefined> {
+		if (!this.waku) {
+			this.waku = await connectWaku()
+		}
+		return readUserFromProfile(this.waku, address)
+	}
+
 	async startChat(address: string, chat: DraftChat): Promise<string> {
 		if (!this.waku) {
-			throw 'no waku'
+			this.waku = await connectWaku()
 		}
 		if (chat.users.length !== 2) {
 			throw 'invalid chat'
@@ -442,7 +449,7 @@ export default class WakuAdapter implements Adapter {
 
 	async startGroupChat(wallet: BaseWallet, chat: DraftChat): Promise<string> {
 		if (!this.waku) {
-			throw 'no waku'
+			this.waku = await connectWaku()
 		}
 		if (chat.users.length === 0) {
 			throw 'invalid chat'
@@ -474,7 +481,7 @@ export default class WakuAdapter implements Adapter {
 
 	async addMemberToGroupChat(chatId: string, users: string[]): Promise<void> {
 		if (!this.waku) {
-			throw 'no waku'
+			this.waku = await connectWaku()
 		}
 
 		const waku = this.waku
@@ -510,7 +517,7 @@ export default class WakuAdapter implements Adapter {
 
 	async sendChatMessage(wallet: BaseWallet, chatId: string, text: string): Promise<void> {
 		if (!this.waku) {
-			throw 'no waku'
+			this.waku = await connectWaku()
 		}
 
 		const fromAddress = wallet.address
@@ -535,7 +542,7 @@ export default class WakuAdapter implements Adapter {
 		data: unknown,
 	): Promise<void> {
 		if (!this.waku) {
-			throw 'no waku'
+			this.waku = await connectWaku()
 		}
 
 		const fromAddress = wallet.address
@@ -556,7 +563,7 @@ export default class WakuAdapter implements Adapter {
 
 	async sendInvite(wallet: BaseWallet, chatId: string, users: string[]): Promise<void> {
 		if (!this.waku) {
-			throw 'no waku'
+			this.waku = await connectWaku()
 		}
 
 		if (!isGroupChatId(chatId)) {
@@ -584,7 +591,7 @@ export default class WakuAdapter implements Adapter {
 		updater: (state: unknown) => unknown,
 	): Promise<void> {
 		if (!this.waku) {
-			throw 'no waku'
+			this.waku = await connectWaku()
 		}
 
 		const key = objectKey(objectId, instanceId)
