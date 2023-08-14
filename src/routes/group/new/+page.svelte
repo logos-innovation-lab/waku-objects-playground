@@ -114,7 +114,7 @@
 								<div class="chat-button" role="listitem">
 									<Container grow>
 										<div class="chat">
-											<Avatar size={48} picture={chat.users[0].avatar} />
+											<Avatar size={48} picture={chat.users[0].avatar || chat.users[0].address} />
 											<div class="content">
 												<div class="user-info">
 													<span class="username">

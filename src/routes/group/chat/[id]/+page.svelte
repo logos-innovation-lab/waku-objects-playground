@@ -78,7 +78,7 @@
 					<ChevronLeft />
 				</Button>
 				<svelte:fragment slot="chat">
-					<Avatar picture={chat?.avatar ?? ''} />
+					<Avatar picture={chat.avatar || chat.chatId} />
 					{chat?.name}
 					<Events />
 				</svelte:fragment>
@@ -107,7 +107,7 @@
 										{@html textToHTML(message.text)}
 										<svelte:fragment slot="avatar">
 											{#if message.fromAddress !== wallet.address}
-												<Avatar size={40} picture={sender?.avatar} />
+												<Avatar size={40} picture={sender?.avatar || sender?.address || ''} />
 											{/if}
 										</svelte:fragment>
 									</ChatMessage>

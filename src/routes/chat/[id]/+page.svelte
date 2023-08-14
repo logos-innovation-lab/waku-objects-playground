@@ -76,7 +76,7 @@
 						<ChevronLeft />
 					</Button>
 					<svelte:fragment slot="chat">
-						<Avatar picture={otherUser?.avatar ?? ''} />
+						<Avatar picture={otherUser?.avatar || otherUser?.address || ''} />
 						{otherUser?.name}
 					</svelte:fragment>
 				</Header>

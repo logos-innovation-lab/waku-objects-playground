@@ -1,11 +1,14 @@
 <script lang="ts">
 	import { getPicture } from '$lib/adapters/ipfs'
-	import User from '$lib/components/icons/user.svelte'
+	import Dicebear from './dicebear.svelte'
 
-	export let picture: string | undefined = undefined
+	export let picture: string
 	export let size = 48
 	export let onClick: (() => unknown) | undefined = undefined
-	export let avatarSize = size / 2
+
+	function isCID(s: string) {
+		return s.length === 46 && s.startsWith('Qm')
+	}
 </script>
 
 <div
@@ -16,10 +19,10 @@
 	tabindex={0}
 >
 	<div class="img" style={`height: ${size}px;`}>
-		{#if picture}
+		{#if picture && isCID(picture)}
 			<img src={getPicture(picture)} alt="profile" />
 		{:else}
-			<User size={avatarSize} />
+			<Dicebear name={picture || ''} {size} />
 		{/if}
 	</div>
 </div>

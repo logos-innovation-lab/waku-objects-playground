@@ -24,7 +24,7 @@
 	import routes from '$lib/routes'
 	import { goto } from '$app/navigation'
 	import ChatBot from '$lib/components/icons/chat-bot.svelte'
-	import { getPicture, uploadPicture } from '$lib/adapters/ipfs'
+	import { uploadPicture } from '$lib/adapters/ipfs'
 
 	$: chatId = $page.params.id
 	$: groupChat = $chats.chats.get(chatId)
@@ -32,7 +32,7 @@
 	let name: string | undefined
 
 	$: if (groupChat) {
-		picture = picture ?? groupChat.avatar
+		picture = picture ?? (groupChat.avatar || groupChat.chatId)
 		name = name ?? groupChat.name
 	}
 
@@ -95,7 +95,7 @@
 				</Header>
 			</svelte:fragment>
 			<Container gap={12}>
-				<div class="avatar">
+				<!-- <div class="avatar">
 					{#if picture}
 						<div class="img">
 							<img src={getPicture(picture)} alt="profile" />
@@ -107,7 +107,8 @@
 							</div>
 						</div>
 					{/if}
-				</div>
+				</div> -->
+				<Avatar picture={picture || ''} size={140} />
 				<InputFile bind:files={pictureFiles}>
 					<Renew />
 					Change picture
@@ -135,7 +136,7 @@
 							<Container grow>
 								<div class="chat">
 									<div class="chat-avatar">
-										<Avatar size={48} picture={user.avatar} />
+										<Avatar size={48} picture={user.avatar || user.address} />
 									</div>
 									<div class="content">
 										<div class="user-info">
@@ -180,7 +181,7 @@
 							<div class="chat-button" role="listitem">
 								<Container grow>
 									<div class="chat">
-										<Avatar size={48} picture={chat.users[0].avatar} />
+										<Avatar size={48} picture={chat.users[0].avatar || chat.users[0].address} />
 										<div class="content">
 											<div class="user-info">
 												<span class="username">
