@@ -25,7 +25,6 @@
 	import type { HDNodeWallet } from 'ethers/lib.commonjs'
 	import Layout from '$lib/components/layout.svelte'
 	import Events from '$lib/components/icons/events.svelte'
-	import Edit from '$lib/components/icons/edit.svelte'
 	import { textToHTML } from '$lib/utils/text'
 
 	let div: HTMLElement
@@ -88,7 +87,7 @@
 					slot="right"
 					on:click={() => goto(ROUTES.GROUP_EDIT($page.params.id))}
 				>
-					<Edit />
+					<Events />
 				</Button>
 			</Header>
 			<div class="chat-messages" bind:this={div}>
