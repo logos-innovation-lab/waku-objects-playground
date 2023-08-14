@@ -39,7 +39,7 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		background-color: var(--color-step-10, var(--color-dark-step-50));
+		background-color: var(--color-step-20, var(--color-dark-step-20));
 		margin-inline: auto;
 		position: relative;
 	}
@@ -50,6 +50,6 @@
 		border-radius: 100px;
 	}
 	:global(svg) {
-		fill: var(--color-step-50, var(--color-dark-step-10));
+		fill: var(--color-step-10, var(--color-dark-step-50));
 	}
 </style>
