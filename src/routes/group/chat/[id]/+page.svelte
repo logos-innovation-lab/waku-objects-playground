@@ -26,6 +26,9 @@
 	import Layout from '$lib/components/layout.svelte'
 	import Events from '$lib/components/icons/events.svelte'
 	import { textToHTML } from '$lib/utils/text'
+	import Spacer from '$lib/components/spacer.svelte'
+	import Checkmark from '$lib/components/icons/checkmark.svelte'
+	import Close from '$lib/components/icons/close.svelte'
 
 	let div: HTMLElement
 	let autoscroll = true
@@ -62,6 +65,8 @@
 	}
 
 	$: chat = $chats.chats.get($page.params.id)
+
+	let invite = false
 </script>
 
 <AuthenticatedOnly let:wallet>
@@ -73,94 +78,123 @@
 		</Layout>
 	{:else}
 		<Layout bgColor="shade">
-			<Header>
-				<Button variant="icon" slot="left" on:click={() => goto(ROUTES.HOME)}>
-					<ChevronLeft />
-				</Button>
-				<svelte:fragment slot="chat">
-					<Avatar picture={chat?.avatar ?? ''} />
-					{chat?.name}
-					<Events />
-				</svelte:fragment>
-				<Button
-					variant="icon"
-					slot="right"
-					on:click={() => goto(ROUTES.GROUP_EDIT($page.params.id))}
-				>
-					<Events />
-				</Button>
-			</Header>
-			<div class="chat-messages" bind:this={div}>
-				<Container grow>
-					<div class="messages">
-						<div class="messages-inner">
-							<!-- Chat bubbles -->
-							{#each messages as message}
-								{#if message.type === 'user' && message.text.length > 0}
-									{@const sender = chat.users.find((u) => message.fromAddress === u.address)}
-									<ChatMessage
-										myMessage={message.fromAddress === wallet.address ? true : false}
-										bubble
-										group
-										sender={message.fromAddress === wallet.address ? undefined : sender?.name}
-									>
-										{@html textToHTML(message.text)}
-										<svelte:fragment slot="avatar">
-											{#if message.fromAddress !== wallet.address}
-												<Avatar size={40} picture={sender?.avatar} />
-											{/if}
-										</svelte:fragment>
-									</ChatMessage>
-								{:else if message.type === 'data'}
-									<WakuObject {message} users={chat.users} />
-								{/if}
-							{/each}
+			<svelte:fragment slot="header">
+				<Header>
+					<Button variant="icon" slot="left" on:click={() => goto(ROUTES.HOME)}>
+						<ChevronLeft />
+					</Button>
+					<svelte:fragment slot="chat">
+						<Avatar picture={chat?.avatar ?? ''} />
+						{chat?.name}
+						<Events />
+					</svelte:fragment>
+					{#if !invite}
+						<Button
+							variant="icon"
+							slot="right"
+							on:click={() => goto(ROUTES.GROUP_EDIT($page.params.id))}
+						>
+							<Events />
+						</Button>
+					{/if}
+				</Header>
+			</svelte:fragment>
+			{#if invite}
+				<Container justify="center" alignItems="center" gap={0} padX={24}>
+					<Avatar picture={chat?.avatar ?? ''} size={140} />
+					<Spacer />
+					<p class="text-lg text-bold text-center">Join "{chat?.name}"?</p>
+					<Spacer height={12} />
+					<!-- TODO: ADD INVITER'S NAME -->
+					<p class="text-lg text-center">
+						MEMBER invited you to join the "{chat?.name}" group chat.
+					</p>
+					<Spacer />
+					<Container direction="row" justify="center" gap={12} alignItems="center" padY={0}>
+						<!-- TODO: ADD ACTIONS TO BUTTONS -->
+						<Button align="right" variant="strong">
+							<Checkmark />
+							Join group
+						</Button>
+						<Button align="left">
+							<Close />
+							Ignore
+						</Button>
+					</Container>
+				</Container>
+			{:else}
+				<div class="chat-messages" bind:this={div}>
+					<Container grow>
+						<div class="messages">
+							<div class="messages-inner">
+								<!-- Chat bubbles -->
+								{#each messages as message}
+									{#if message.type === 'user' && message.text.length > 0}
+										{@const sender = chat.users.find((u) => message.fromAddress === u.address)}
+										<ChatMessage
+											myMessage={message.fromAddress === wallet.address ? true : false}
+											bubble
+											group
+											sender={message.fromAddress === wallet.address ? undefined : sender?.name}
+										>
+											{@html textToHTML(message.text)}
+											<svelte:fragment slot="avatar">
+												{#if message.fromAddress !== wallet.address}
+													<Avatar size={40} picture={sender?.avatar} />
+												{/if}
+											</svelte:fragment>
+										</ChatMessage>
+									{:else if message.type === 'data'}
+										<WakuObject {message} users={chat.users} />
+									{/if}
+								{/each}
+							</div>
 						</div>
-					</div>
-				</Container>
-			</div>
-			<div class="chat-input-wrapper">
-				<Container>
-					<div class="chat-input">
-						<Dropdown up left>
-							<!-- TODO: make button "active" while dropdown is open -->
-							<Button variant="icon" slot="button">
-								<Add />
-							</Button>
-							<DropdownItem disabled onClick={() => console.log('Pic from Cam')}
-								>Pic from Cam</DropdownItem
-							>
-							<DropdownItem disabled onClick={() => console.log('Pic from Lib')}
-								>Pic from Lib</DropdownItem
-							>
-							<DropdownItem onClick={() => goto(ROUTES.OBJECTS($page.params.id))}
-								>Waku Object</DropdownItem
-							>
-						</Dropdown>
-						<Textarea
-							placeholder="Message"
-							bind:value={text}
-							on:keypress={(e) => {
-								// When enter is pressed without modifier keys, send the message
-								if (e.key === 'Enter' && !(e.shiftKey || e.ctrlKey || e.altKey)) {
-									sendMessage(wallet)
-									e.preventDefault()
-								}
-								// When shift+enter is pressed, add a newline
-								else if (e.key === 'Enter' && (e.altKey || e.ctrlKey)) {
-									text += '\n'
-									e.preventDefault()
-								}
-							}}
-						/>
-						{#if text.length > 0}
-							<Button variant="strong" disabled={loading} on:click={() => sendMessage(wallet)}>
-								<ArrowUp />
-							</Button>
-						{/if}
-					</div>
-				</Container>
-			</div>
+					</Container>
+				</div>
+				<div class="chat-input-wrapper">
+					<Container>
+						<div class="chat-input">
+							<Dropdown up left>
+								<!-- TODO: make button "active" while dropdown is open -->
+								<Button variant="icon" slot="button">
+									<Add />
+								</Button>
+								<DropdownItem disabled onClick={() => console.log('Pic from Cam')}
+									>Pic from Cam</DropdownItem
+								>
+								<DropdownItem disabled onClick={() => console.log('Pic from Lib')}
+									>Pic from Lib</DropdownItem
+								>
+								<DropdownItem onClick={() => goto(ROUTES.OBJECTS($page.params.id))}
+									>Waku Object</DropdownItem
+								>
+							</Dropdown>
+							<Textarea
+								placeholder="Message"
+								bind:value={text}
+								on:keypress={(e) => {
+									// When enter is pressed without modifier keys, send the message
+									if (e.key === 'Enter' && !(e.shiftKey || e.ctrlKey || e.altKey)) {
+										sendMessage(wallet)
+										e.preventDefault()
+									}
+									// When shift+enter is pressed, add a newline
+									else if (e.key === 'Enter' && (e.altKey || e.ctrlKey)) {
+										text += '\n'
+										e.preventDefault()
+									}
+								}}
+							/>
+							{#if text.length > 0}
+								<Button variant="strong" disabled={loading} on:click={() => sendMessage(wallet)}>
+									<ArrowUp />
+								</Button>
+							{/if}
+						</div>
+					</Container>
+				</div>
+			{/if}
 		</Layout>
 	{/if}
 </AuthenticatedOnly>
@@ -191,5 +225,9 @@
 		display: flex;
 		gap: var(--spacing-12);
 		align-items: center;
+	}
+
+	.text-center {
+		text-align: center;
 	}
 </style>
