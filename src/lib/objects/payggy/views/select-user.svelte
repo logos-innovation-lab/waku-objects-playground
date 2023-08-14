@@ -65,8 +65,6 @@
 			</li>
 		{/each}
 	</ul>
-	<!-- <Container gap={24} grow justify="center" padX={24}>
-</Container> -->
 </Layout>
 
 <style>
