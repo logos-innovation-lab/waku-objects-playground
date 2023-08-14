@@ -10,6 +10,7 @@
 	import ArrowRight from '$lib/components/icons/arrow-right.svelte'
 	import Divider from '$lib/components/divider.svelte'
 	import InputField from '$lib/components/input-field.svelte'
+	import Layout from '$lib/components/layout.svelte'
 
 	export let users: User[]
 	export let toUser: User | undefined = undefined
@@ -25,23 +26,24 @@
 	let filterText = ''
 </script>
 
-<Header title="Send transaction">
-	<Button slot="left" variant="icon" on:click={() => history.back()}>
-		<ChevronLeft />
-	</Button>
-	<Button slot="right" variant="icon" on:click={exitObject}>
-		<Close />
-	</Button>
-</Header>
+<Layout>
+	<svelte:fragment slot="header">
+		<Header title="Send transaction">
+			<Button slot="left" variant="icon" on:click={() => history.back()}>
+				<ChevronLeft />
+			</Button>
+			<Button slot="right" variant="icon" on:click={exitObject}>
+				<Close />
+			</Button>
+		</Header>
+	</svelte:fragment>
+	<Container gap={24} justify="flex-start" padX={24} padY={24}>
+		<p class="text-lg">Who would you like to send tokens to?</p>
+		<InputField bind:value={filterText} placeholder="Search group members..." />
+	</Container>
 
-<Container gap={24} justify="center" padX={24}>
-	<p class="text-lg">Who would you like to send tokens to?</p>
-	<InputField bind:value={filterText} placeholder="Search group members..." />
-</Container>
+	<Divider />
 
-<Divider />
-
-<Container gap={24} grow justify="center" padX={24}>
 	<ul>
 		{#each otherUsers.filter((u) => u.name?.includes(filterText)) as user}
 			<!-- svelte-ignore a11y-no-noninteractive-element-interactions -->
@@ -63,7 +65,7 @@
 			</li>
 		{/each}
 	</ul>
-</Container>
+</Layout>
 
 <style>
 	li {
