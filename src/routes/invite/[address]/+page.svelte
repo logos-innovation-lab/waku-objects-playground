@@ -158,7 +158,7 @@
 				</Button>
 			</Container>
 		{:else}
-			<Container gap={6} grow justify="center" align="center" padX={24}>
+			<Container gap={6} justify="center" align="center" padX={24}>
 				<p class="text-lg text-bold">Start chatting</p>
 				<p class="text-lg description">
 					Click the button below to start a new chat with {$page.params.address}
@@ -187,5 +187,10 @@
 	}
 	.hidden {
 		display: none;
+	}
+	.icon {
+		display: flex;
+		gap: var(--spacing-6);
+		justify-content: center;
 	}
 </style>

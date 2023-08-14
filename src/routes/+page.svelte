@@ -19,6 +19,7 @@
 	import ROUTES from '$lib/routes'
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 	import Layout from '$lib/components/layout.svelte'
+	import Events from '$lib/components/icons/events.svelte'
 
 	$: orderedChats = Array.from($chats.chats)
 		.map(([, chat]) => chat)
@@ -134,6 +135,7 @@
 												<span class="username text-lg text-bold">
 													{#if isGroupChatId(chat.chatId)}
 														{chat?.name}
+														<Events />
 													{:else}
 														{otherUser?.name}
 													{/if}
@@ -169,11 +171,6 @@
 		height: 100vh;
 		height: 100dvh;
 	}
-
-	// .grow {
-	// 	flex-grow: 1;
-	// 	overflow-y: auto;
-	// }
 
 	.center {
 		text-align: center;
