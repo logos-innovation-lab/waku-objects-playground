@@ -16,7 +16,6 @@
 	import routes from '$lib/routes'
 	import { page } from '$app/stores'
 	import { type DraftChat, chats } from '$lib/stores/chat'
-	// import { walletStore } from '$lib/stores/wallet'
 	import adapters from '$lib/adapters'
 	import { Html5Qrcode } from 'html5-qrcode'
 	import Camera from '$lib/components/icons/camera.svelte'
@@ -26,6 +25,10 @@
 	import User from '$lib/components/icons/user.svelte'
 	import ChevronRight from '$lib/components/icons/chevron-right.svelte'
 	import Layout from '$lib/components/layout.svelte'
+	import type { User as UserType } from '$lib/types'
+	import { profile } from '$lib/stores/profile'
+	import { walletStore } from '$lib/stores/wallet'
+	import Avatar from '$lib/components/avatar.svelte'
 
 	// check if the chat already exists
 	$: if ($chats.chats.has($page.params.address)) {
@@ -41,6 +44,21 @@
 	let scanning = false
 
 	let html5Qrcode: Html5Qrcode
+
+	let counterParty: UserType | undefined = undefined
+	$: if (
+		!counterParty &&
+		!$profile.loading &&
+		!$walletStore.loading &&
+		$walletStore.wallet?.address !== $page.params.address
+	) {
+		adapters
+			.getUserProfile($page.params.address)
+			.then((user) => {
+				counterParty = user
+			})
+			.catch(console.error)
+	}
 
 	function start() {
 		html5Qrcode = new Html5Qrcode('reader')
@@ -159,9 +177,11 @@
 			</Container>
 		{:else}
 			<Container gap={6} justify="center" align="center" padX={24}>
-				<p class="text-lg text-bold">Start chatting</p>
+				<Avatar picture={counterParty?.avatar} size={140} />
+				<p class="text-lg text-bold">Chat with {counterParty?.name ?? $page.params.address}</p>
 				<p class="text-lg description">
-					Click the button below to start a new chat with {$page.params.address}
+					Connect with {counterParty?.name ?? $page.params.address} and start a private chat on Waku
+					chats
 				</p>
 				<Button on:click={() => startChat(wallet.address)}>
 					<CopyLink />
