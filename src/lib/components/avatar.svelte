@@ -39,17 +39,18 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		background-color: var(--color-step-10, var(--color-dark-step-50));
+		background-color: var(--color-step-40, var(--color-dark-step-20));
 		margin-inline: auto;
 		position: relative;
+	}
+
+	:global(.avatar svg) {
+		fill: var(--color-step-10, var(--color-dark-step-50));
 	}
 
 	img {
 		aspect-ratio: 1;
 		object-fit: cover;
 		border-radius: 100px;
-	}
-	:global(svg) {
-		fill: var(--color-step-50, var(--color-dark-step-10));
 	}
 </style>
