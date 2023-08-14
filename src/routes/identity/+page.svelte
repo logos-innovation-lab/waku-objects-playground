@@ -4,7 +4,6 @@
 	import Renew from '$lib/components/icons/renew.svelte'
 	import Wallet from '$lib/components/icons/wallet.svelte'
 	import SettingsView from '$lib/components/icons/settings-view.svelte'
-	import User from '$lib/components/icons/user.svelte'
 	import Logout from '$lib/components/icons/logout.svelte'
 	import DocumentSigned from '$lib/components/icons/document-signed.svelte'
 
@@ -26,7 +25,8 @@
 	import { get } from 'svelte/store'
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 	import Layout from '$lib/components/layout.svelte'
-	import { getPicture, uploadPicture } from '$lib/adapters/ipfs'
+	import { uploadPicture } from '$lib/adapters/ipfs'
+	import Avatar from '$lib/components/avatar.svelte'
 
 	let avatar = $profile.avatar
 	let name = $profile.name
@@ -86,21 +86,9 @@
 			</Button>
 		</Header>
 	</svelte:fragment>
-	<AuthenticatedOnly>
+	<AuthenticatedOnly let:wallet>
 		<Container gap={6}>
-			<div class="avatar">
-				{#if avatar}
-					<div class="img">
-						<img src={getPicture(avatar)} alt="your avatar" />
-					</div>
-				{:else}
-					<div class="no-img">
-						<div class="profile-default">
-							<User size={70} />
-						</div>
-					</div>
-				{/if}
-			</div>
+			<Avatar picture={avatar || wallet.address} size={140} />
 			<InputFile bind:files>
 				<Renew />
 				Change picture

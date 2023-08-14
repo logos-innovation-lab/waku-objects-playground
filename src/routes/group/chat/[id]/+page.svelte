@@ -204,7 +204,7 @@
 											{@html replaceAddressesWithNames(textToHTML(htmlize(message.text)))}
 											<svelte:fragment slot="avatar">
 												{#if message.fromAddress !== wallet.address && lastMessage}
-													<Avatar size={40} picture={sender?.avatar} />
+													<Avatar size={40} picture={sender?.avatar ?? sender?.address ?? ''} />
 												{/if}
 											</svelte:fragment>
 										</ChatMessage>

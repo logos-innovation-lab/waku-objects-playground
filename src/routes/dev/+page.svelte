@@ -1,7 +1,59 @@
 <script lang="ts">
+	import { browser } from '$app/environment'
+
 	import Header from '$lib/components/header.svelte'
 	import Container from '$lib/components/container.svelte'
 	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
+	import Dropdown from '$lib/components/dropdown.svelte'
+	import DropdownItem from '$lib/components/dropdown-item.svelte'
+	import Button from '$lib/components/button.svelte'
+	import Dicebear from '$lib/components/dicebear.svelte'
+
+	let style = getStyle() || ''
+
+	const dicebearStyles = [
+		'user',
+		// "adventurer",
+		// "adventurer-neutral",
+		// "avataaars",
+		'avataaars-neutral',
+		// "big-ears",
+		'big-ears-neutral',
+		// "big-smile",
+		// "bottts",
+		'bottts-neutral',
+		// "croodles",
+		// "croodles-neutral",
+		'fun-emoji',
+		'icons',
+		'identicon',
+		// "initials",
+		// "lorelei",
+		// "lorelei-neutral",
+		// "micah",
+		// "miniavs",
+		// "notionists",
+		// "notionists-neutral",
+		// "open-peeps",
+		// "personas",
+		// "pixel-art",
+		'pixel-art-neutral',
+		// "shapes",
+		// "thumbs",
+	]
+
+	function setStyle(s: string) {
+		style = s
+		localStorage?.setItem('dicebearStyle', style)
+	}
+
+	function getStyle() {
+		if (!browser || !localStorage) {
+			console.error('Error getting from local storage: not in browser')
+			return
+		}
+		return localStorage.getItem('dicebearStyle')
+	}
 </script>
 
 <Header title="DEV DASHBOARD" />
@@ -9,6 +61,18 @@
 	<section>
 		<div class="label">Network</div>
 		<div class="value">{defaultBlockchainNetwork.name}</div>
+	</section>
+	<section>
+		<Dropdown>
+			<Button slot="button">
+				Dicebear style: {style}
+			</Button>
+			{#each dicebearStyles as style}
+				<DropdownItem onClick={() => setStyle(style)}
+					><Dicebear name={'hello'} {style} size={48} />{style}</DropdownItem
+				>
+			{/each}
+		</Dropdown>
 	</section>
 </Container>
 

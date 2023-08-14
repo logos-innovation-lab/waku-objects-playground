@@ -51,7 +51,7 @@
 			<li on:click={() => setUser(user)}>
 				<Container grow>
 					<div class="chat">
-						<Avatar size={48} picture={user.avatar} />
+						<Avatar size={48} picture={user.avatar || user.address} />
 						<div class="content">
 							<div class="user-info">
 								<span class="username text-lg">
