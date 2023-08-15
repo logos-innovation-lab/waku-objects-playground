@@ -4,6 +4,7 @@
 
 	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
 	import Checkmark from '$lib/components/icons/checkmark.svelte'
+	import Events from '$lib/components/icons/events.svelte'
 	import CopyLink from '$lib/components/icons/copy-link.svelte'
 
 	import Button from '$lib/components/button.svelte'
@@ -133,7 +134,7 @@
 			<ButtonBlock borderBottom on:click={() => goto(routes.GROUP_NEW)}>
 				<Container direction="row" justify="space-between" align="center" alignItems="center">
 					<div class="icon">
-						<User size={20} /> Create group
+						<Events size={20} /> Create group
 					</div>
 					<div>
 						<Button variant="icon">
@@ -209,6 +210,7 @@
 		display: none;
 	}
 	.icon {
+		padding-left: var(--spacing-12);
 		display: flex;
 		gap: var(--spacing-6);
 		justify-content: center;

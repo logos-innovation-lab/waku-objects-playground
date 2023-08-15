@@ -16,7 +16,7 @@
 	import WakuObject from '$lib/objects/chat.svelte'
 
 	import { goto } from '$app/navigation'
-	import { chats } from '$lib/stores/chat'
+	import { chats, type Chat } from '$lib/stores/chat'
 	import adapters from '$lib/adapters'
 	import ROUTES from '$lib/routes'
 	import { browser } from '$app/environment'
@@ -66,7 +66,37 @@
 
 	$: chat = $chats.chats.get($page.params.id)
 
-	let isInvite = true
+	$: inviter = chat?.users.find((user) => user.address === chat?.inviter)
+
+	function join() {
+		chats.update((state) => {
+			const newChats = new Map<string, Chat>(state.chats)
+			const chat = newChats.get($page.params.id)
+			if (chat) {
+				chat.joined = true
+			}
+
+			return {
+				...state,
+				chats: newChats,
+				loading: false,
+			}
+		})
+	}
+
+	function decline() {
+		chats.update((state) => {
+			const newChats = new Map<string, Chat>(state.chats)
+			newChats.delete($page.params.id)
+
+			return {
+				...state,
+				chats: newChats,
+				loading: false,
+			}
+		})
+		goto(ROUTES.HOME)
+	}
 </script>
 
 <AuthenticatedOnly let:wallet>
@@ -89,7 +119,7 @@
 						<Events />
 					</svelte:fragment>
 					<svelte:fragment slot="right">
-						{#if !isInvite}
+						{#if chat.joined}
 							<Button variant="icon" on:click={() => goto(ROUTES.GROUP_EDIT($page.params.id))}>
 								<Events />
 							</Button>
@@ -97,27 +127,26 @@
 					</svelte:fragment>
 				</Header>
 			</svelte:fragment>
-			{#if isInvite}
+			{#if !chat.joined}
 				<Container justify="center" alignItems="center" gap={0} padX={24}>
 					<Avatar picture={chat?.avatar ?? ''} size={140} />
 					<Spacer />
 					<p class="text-lg text-bold text-center">Join "{chat?.name}"?</p>
 					<Spacer height={12} />
-					<!-- TODO: ADD INVITER'S NAME -->
 					<p class="text-lg text-center">
-						MEMBER invited you to join the "{chat?.name}" group chat.
+						{inviter?.name} invited you to join the "{chat?.name}" group chat.
 					</p>
 					<Spacer />
 					<Container direction="row" justify="center" gap={12} alignItems="center" padY={0}>
-						<!-- TODO: ADD ACTIONS TO BUTTONS -->
-						<Button align="right" variant="strong">
+						<Button align="center" variant="strong" on:click={() => join()}>
 							<Checkmark />
 							Join group
 						</Button>
-						<Button align="left">
+						<!-- THIS BUTTON WILL BE UN-COMMENTED ONCE THE REMOVE CHAT FUNCTIONALITY IS IMPLEMENTED -->
+						<!-- <Button align="left" on:click={() => decline()}>
 							<Close />
-							Ignore
-						</Button>
+							Decline
+						</Button> -->
 					</Container>
 				</Container>
 			{:else}

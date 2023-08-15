@@ -39,6 +39,8 @@ export interface Chat {
 	users: User[]
 	name?: string
 	avatar?: string
+	joined?: boolean
+	inviter?: string
 }
 
 export interface ChatData {
