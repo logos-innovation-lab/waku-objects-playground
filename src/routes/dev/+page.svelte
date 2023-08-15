@@ -9,7 +9,7 @@
 	import Button from '$lib/components/button.svelte'
 	import Dicebear from '$lib/components/dicebear.svelte'
 
-	let style = getStyle() || ''
+	let style = getStyle() || 'user'
 
 	const dicebearStyles = [
 		'user',
