@@ -189,7 +189,14 @@ async function subscribeToPrivateMessages(
 					const userPromises = groupChat.users.map((address) => readUserFromProfile(waku, address))
 					const allUsers = await Promise.all(userPromises)
 					const users = allUsers.filter((user) => user) as User[]
-					createGroupChat(chatMessage.chatId, users, groupChat.name, groupChat.avatar, false, chatMessage.fromAddress)
+					createGroupChat(
+						chatMessage.chatId,
+						users,
+						groupChat.name,
+						groupChat.avatar,
+						false,
+						chatMessage.fromAddress,
+					)
 
 					await subscribeToPrivateMessages(
 						waku,
@@ -285,7 +292,14 @@ async function readGroupChatInvites(waku: LightNode, address: string) {
 				const userPromises = groupChat.users.map((address) => readUserFromProfile(waku, address))
 				const allUsers = await Promise.all(userPromises)
 				const users = allUsers.filter((user) => user) as User[]
-				createGroupChat(message.chatId, users, groupChat.name, groupChat.avatar, false, message.fromAddress)
+				createGroupChat(
+					message.chatId,
+					users,
+					groupChat.name,
+					groupChat.avatar,
+					false,
+					message.fromAddress,
+				)
 			}
 		}
 	}
