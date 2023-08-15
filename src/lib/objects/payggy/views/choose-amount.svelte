@@ -16,6 +16,7 @@
 	import { toSignificant } from '$lib/utils/format'
 	import type { Token } from '../../schemas'
 	import Layout from '$lib/components/layout.svelte'
+	import { payggyDescriptor } from '..'
 
 	export let amount: string
 	export let token: Token
@@ -28,7 +29,7 @@
 
 <Layout>
 	<svelte:fragment slot="header">
-		<Header title="Payggy">
+		<Header title={payggyDescriptor.name}>
 			<Button slot="left" variant="icon" on:click={() => history.back()}>
 				<ChevronLeft />
 			</Button>

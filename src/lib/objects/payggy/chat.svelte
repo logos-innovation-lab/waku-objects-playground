@@ -15,8 +15,8 @@
 	import DataViewAlt from '$lib/components/icons/data-view-alt.svelte'
 	import CheckmarkFilled from '$lib/components/icons/checkmark-filled.svelte'
 	import Container from '$lib/components/container.svelte'
-	import logo from './logo.svg'
 	import Spacer from '$lib/components/spacer.svelte'
+	import { payggyDescriptor } from '.'
 
 	export let message: DataMessage<SendTransactionDataMessage>
 	export let args: WakuObjectArgs<SendTransactionStore, SendTransactionDataMessage>
@@ -48,7 +48,11 @@
 <ChatMessage {myMessage} object bubble>
 	<div class="wo text-normal">
 		<Container gap={12}>
-			<ObjectHeader name="Payggy" logoImg={logo} logoAlt="Payggy logo" />
+			<ObjectHeader
+				name={payggyDescriptor.name}
+				logoImg={payggyDescriptor.logo}
+				logoAlt={`${payggyDescriptor.name} logo`}
+			/>
 			{#if !args.store || !message.data || !sender || !recipient}
 				Loading...
 			{:else if !data}

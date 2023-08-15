@@ -13,12 +13,11 @@
 	import CheckmarkFilled from '$lib/components/icons/checkmark-filled.svelte'
 	import Timestamp from '$lib/components/timestamp.svelte'
 
-	import logo from '../logo.svg'
-
 	import { toSignificant, formatDateAndTime } from '$lib/utils/format'
 	import type { Transaction } from '../../schemas'
 	import type { User } from '$lib/types'
 	import Layout from '$lib/components/layout.svelte'
+	import { payggyDescriptor } from '..'
 
 	export let transaction: Transaction
 	export let users: User[]
@@ -38,7 +37,7 @@
 	<svelte:fragment slot="header">
 		<Header title={`Transaction #${instanceId}`}>
 			<div slot="left">
-				<img src={logo} alt="Payggy logo" class="logo" />
+				<img src={payggyDescriptor.logo} alt="Payggy logo" class="logo" />
 			</div>
 			<Button slot="right" variant="icon" on:click={exitObject}>
 				<Close />
