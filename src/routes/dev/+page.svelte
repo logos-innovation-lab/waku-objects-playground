@@ -8,6 +8,9 @@
 	import DropdownItem from '$lib/components/dropdown-item.svelte'
 	import Button from '$lib/components/button.svelte'
 	import Dicebear from '$lib/components/dicebear.svelte'
+	import routes from '$lib/routes'
+	import { goto } from '$app/navigation'
+	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
 
 	let style = getStyle() || 'user'
 
@@ -56,7 +59,16 @@
 	}
 </script>
 
-<Header title="DEV DASHBOARD" />
+<Header title="DEV DASHBOARDp">
+	<svelte:fragment slot="left">
+		<div class="header-btns">
+			<Button variant="icon" on:click={() => goto(routes.HOME)}>
+				<ChevronLeft />
+			</Button>
+		</div>
+	</svelte:fragment>
+</Header>
+
 <Container>
 	<section>
 		<div class="label">Network</div>
