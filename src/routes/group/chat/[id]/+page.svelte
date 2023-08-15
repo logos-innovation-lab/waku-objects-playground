@@ -66,7 +66,7 @@
 
 	$: chat = $chats.chats.get($page.params.id)
 
-	let invite = false
+	let isInvite = true
 </script>
 
 <AuthenticatedOnly let:wallet>
@@ -88,18 +88,16 @@
 						{chat?.name}
 						<Events />
 					</svelte:fragment>
-					{#if !invite}
-						<Button
-							variant="icon"
-							slot="right"
-							on:click={() => goto(ROUTES.GROUP_EDIT($page.params.id))}
-						>
-							<Events />
-						</Button>
-					{/if}
+					<svelte:fragment slot="right">
+						{#if !isInvite}
+							<Button variant="icon" on:click={() => goto(ROUTES.GROUP_EDIT($page.params.id))}>
+								<Events />
+							</Button>
+						{/if}
+					</svelte:fragment>
 				</Header>
 			</svelte:fragment>
-			{#if invite}
+			{#if isInvite}
 				<Container justify="center" alignItems="center" gap={0} padX={24}>
 					<Avatar picture={chat?.avatar ?? ''} size={140} />
 					<Spacer />
