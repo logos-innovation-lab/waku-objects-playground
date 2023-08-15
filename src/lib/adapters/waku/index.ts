@@ -33,30 +33,15 @@ import { makeWakuObjectAdapter } from '$lib/objects/adapter'
 import { fetchBalances } from '$lib/adapters/balance'
 
 function createChat(chatId: string, user: User, address: string): string {
-	chats.update((state) => {
-		if (state.chats.has(chatId)) {
-			return state
-		}
-		if (!user) {
-			return state
-		}
+	const chat = {
+		chatId: chatId,
+		messages: [],
+		users: [user, { address }],
+		name: user.name ?? user.address,
+		unread: 0, // FIXME: this should be calculated
+	}
+	chats.createChat(chat)
 
-		const newChats = new Map<string, Chat>(state.chats)
-		const chat = {
-			chatId: chatId,
-			messages: [],
-			users: [user, { address }],
-			name: user.name ?? user.address,
-			unread: 0, // FIXME: this should be calculated
-		}
-		newChats.set(chatId, chat)
-
-		return {
-			...state,
-			chats: newChats,
-			loading: false,
-		}
-	})
 	return chatId
 }
 
@@ -66,31 +51,16 @@ function createGroupChat(
 	name: string | undefined = undefined,
 	avatar: string | undefined = undefined,
 ): string {
-	chats.update((state) => {
-		if (state.chats.has(chatId)) {
-			return state
-		}
-		if (users.length === 0) {
-			return state
-		}
+	const groupChat = {
+		chatId: chatId,
+		messages: [],
+		users,
+		name,
+		avatar,
+		unread: 0,
+	}
+	chats.createChat(groupChat)
 
-		const newChats = new Map<string, Chat>(state.chats)
-		const groupChat = {
-			chatId: chatId,
-			messages: [],
-			users,
-			name,
-			avatar,
-			unread: 0,
-		}
-		newChats.set(chatId, groupChat)
-
-		return {
-			...state,
-			chats: newChats,
-			loading: false,
-		}
-	})
 	return chatId
 }
 
@@ -104,23 +74,7 @@ async function addMessageToChat(
 		await executeOnDataMessage(address, adapter, message)
 	}
 
-	chats.update((state) => {
-		if (!state.chats.has(chatId)) {
-			return state
-		}
-
-		const newChats = new Map<string, Chat>(state.chats)
-		const chat = newChats.get(chatId)
-		if (chat) {
-			chat.messages = [...chat.messages, message]
-		}
-
-		return {
-			...state,
-			chats: newChats,
-			loading: false,
-		}
-	})
+	chats.updateChat(chatId, (chat) => ({ ...chat, messages: [...chat.messages, message] }))
 }
 
 async function executeOnDataMessage(
@@ -496,23 +450,7 @@ export default class WakuAdapter implements Adapter {
 		const newResolvedUsers = await Promise.all(newUserPromises)
 		const newUsers = newResolvedUsers.filter((user) => user) as User[]
 
-		chats.update((state) => {
-			if (!state.chats.has(chatId)) {
-				return state
-			}
-
-			const newChats = new Map<string, Chat>(state.chats)
-			const chat = newChats.get(chatId)
-			if (chat) {
-				chat.users = [...chat.users, ...newUsers]
-			}
-
-			return {
-				...state,
-				chats: newChats,
-				loading: false,
-			}
-		})
+		chats.updateChat(chatId, (chat) => ({ ...chat, users: [...chat.users, ...newUsers] }))
 	}
 
 	async sendChatMessage(wallet: BaseWallet, chatId: string, text: string): Promise<void> {
