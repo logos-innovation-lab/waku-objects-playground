@@ -15,6 +15,7 @@
 	import type { Token } from '../../schemas'
 	import type { User } from '$lib/types'
 	import Layout from '$lib/components/layout.svelte'
+	import { payggyDescriptor } from '..'
 
 	export let toUser: User
 	export let estimateTransaction: (to: string, token: Token) => Promise<Token>
@@ -54,7 +55,7 @@
 
 <Layout>
 	<svelte:fragment slot="header">
-		<Header title="Payggy">
+		<Header title={payggyDescriptor.name}>
 			<Button slot="left" variant="icon" on:click={() => history.back()}>
 				<ChevronLeft />
 			</Button>
