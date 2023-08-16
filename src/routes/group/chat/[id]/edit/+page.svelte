@@ -3,7 +3,8 @@
 	import UserIcon from '$lib/components/icons/user.svelte'
 	import Checkmark from '$lib/components/icons/checkmark.svelte'
 	import Renew from '$lib/components/icons/renew.svelte'
-	import AddComment from '$lib/components/icons/add-comment.svelte'
+	import UserFollow from '$lib/components/icons/user-follow.svelte'
+	import ChatLaunch from '$lib/components/icons/chat-launch.svelte'
 
 	import Button from '$lib/components/button.svelte'
 	import Header from '$lib/components/header.svelte'
@@ -23,7 +24,6 @@
 	import type { HDNodeWallet } from 'ethers'
 	import routes from '$lib/routes'
 	import { goto } from '$app/navigation'
-	import ChatBot from '$lib/components/icons/chat-bot.svelte'
 	import { getPicture, uploadPicture } from '$lib/adapters/ipfs'
 
 	$: chatId = $page.params.id
@@ -148,11 +148,11 @@
 									</div>
 									{#if !isContact && !isMe}
 										<Button variant="icon" on:click={() => goto(routes.INVITE(user.address))}>
-											<AddComment />
+											<UserFollow />
 										</Button>
 									{:else if isContact}
 										<Button variant="icon" on:click={() => goto(routes.CHAT(user.address))}>
-											<ChatBot />
+											<ChatLaunch />
 										</Button>
 									{/if}
 								</div>

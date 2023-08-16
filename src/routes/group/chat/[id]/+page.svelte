@@ -5,6 +5,7 @@
 	import Add from '$lib/components/icons/add.svelte'
 	import ArrowUp from '$lib/components/icons/arrow-up.svelte'
 	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
+	import Close from '$lib/components/icons/close.svelte'
 
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
@@ -28,7 +29,7 @@
 	import { textToHTML } from '$lib/utils/text'
 	import Spacer from '$lib/components/spacer.svelte'
 	import Checkmark from '$lib/components/icons/checkmark.svelte'
-	import Close from '$lib/components/icons/close.svelte'
+	import Settings from '$lib/components/icons/settings.svelte'
 
 	let div: HTMLElement
 	let autoscroll = true
@@ -121,7 +122,7 @@
 					<svelte:fragment slot="right">
 						{#if chat.joined}
 							<Button variant="icon" on:click={() => goto(ROUTES.GROUP_EDIT($page.params.id))}>
-								<Events />
+								<Settings />
 							</Button>
 						{/if}
 					</svelte:fragment>
