@@ -72,12 +72,11 @@ function createChatStore(): ChatStore {
 					return state
 				}
 
-				const newChats = new Map<string, Chat>(state.chats)
-				newChats.set(chat.chatId, chat)
+				state.chats.set(chat.chatId, chat)
 
 				return {
 					...state,
-					chats: newChats,
+					chats: state.chats,
 					loading: false,
 				}
 			})
@@ -87,16 +86,15 @@ function createChatStore(): ChatStore {
 				if (!state.chats.has(chatId)) {
 					return state
 				}
-				const newChats = new Map<string, Chat>(state.chats)
-				const oldChat = newChats.get(chatId)
+				const oldChat = state.chats.get(chatId)
 				if (!oldChat) {
 					return state
 				}
-				newChats.set(chatId, update(oldChat))
+				state.chats.set(chatId, update(oldChat))
 
 				return {
 					...state,
-					chats: newChats,
+					chats: state.chats,
 				}
 			})
 		},
@@ -105,12 +103,11 @@ function createChatStore(): ChatStore {
 				if (!state.chats.has(chatId)) {
 					return state
 				}
-				const newChats = new Map<string, Chat>(state.chats)
-				newChats.delete(chatId)
+				state.chats.delete(chatId)
 
 				return {
 					...state,
-					chats: newChats,
+					chats: state.chats,
 				}
 			})
 		},
