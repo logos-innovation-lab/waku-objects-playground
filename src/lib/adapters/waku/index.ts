@@ -50,6 +50,8 @@ function createGroupChat(
 	users: User[],
 	name: string | undefined = undefined,
 	avatar: string | undefined = undefined,
+	joined: boolean | undefined = undefined,
+	inviter: string | undefined = undefined,
 ): string {
 	const groupChat = {
 		chatId: chatId,
@@ -58,6 +60,8 @@ function createGroupChat(
 		name,
 		avatar,
 		unread: 0,
+		joined,
+		inviter,
 	}
 	chats.createChat(groupChat)
 
@@ -185,7 +189,14 @@ async function subscribeToPrivateMessages(
 					const userPromises = groupChat.users.map((address) => readUserFromProfile(waku, address))
 					const allUsers = await Promise.all(userPromises)
 					const users = allUsers.filter((user) => user) as User[]
-					createGroupChat(chatMessage.chatId, users, groupChat.name, groupChat.avatar)
+					createGroupChat(
+						chatMessage.chatId,
+						users,
+						groupChat.name,
+						groupChat.avatar,
+						false,
+						chatMessage.fromAddress,
+					)
 
 					await subscribeToPrivateMessages(
 						waku,
@@ -281,7 +292,14 @@ async function readGroupChatInvites(waku: LightNode, address: string) {
 				const userPromises = groupChat.users.map((address) => readUserFromProfile(waku, address))
 				const allUsers = await Promise.all(userPromises)
 				const users = allUsers.filter((user) => user) as User[]
-				createGroupChat(message.chatId, users, groupChat.name, groupChat.avatar)
+				createGroupChat(
+					message.chatId,
+					users,
+					groupChat.name,
+					groupChat.avatar,
+					false,
+					message.fromAddress,
+				)
 			}
 		}
 	}
@@ -420,7 +438,7 @@ export default class WakuAdapter implements Adapter {
 
 		const wakuObjectAdapter = makeWakuObjectAdapter(this, wallet)
 
-		createGroupChat(chatId, users, chat.name, chat.avatar)
+		createGroupChat(chatId, users, chat.name, chat.avatar, true)
 		await storeGroupChat(this.waku, chatId, chat)
 		await subscribeToPrivateMessages(
 			this.waku,
