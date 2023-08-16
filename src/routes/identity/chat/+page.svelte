@@ -83,13 +83,22 @@
 		position: relative;
 		line-height: 0;
 		cursor: pointer;
+		border-radius: 50%;
+		overflow: hidden;
+		background-color: transparent;
+		width: 48px;
+		height: 48px;
+		display: flex;
+		justify-content: center;
+		align-items: center;
 	}
 	input[type='color'] {
 		border-radius: 50%;
-		width: 48px;
-		height: 48px;
+		width: 50px;
+		height: 50px;
 		border: none;
 		background-color: transparent;
+		flex-shrink: 0;
 	}
 
 	::-webkit-color-swatch-wrapper {
