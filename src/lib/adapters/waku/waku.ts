@@ -25,17 +25,9 @@ const peerMultiaddr = multiaddr(
 	// '/ip4/127.0.0.1/tcp/8000/ws/p2p/16Uiu2HAm53sojJN72rFbYg6GV2LpRRER9XeWkiEAhjKy3aL9cN5Z',
 )
 
-type ContentTopic =
-	| 'private-message'
-	| 'profile'
-	| 'contact'
-	| 'chats'
-	| 'objects'
-	| 'balances'
-	| 'transactions'
-	| 'group-chats'
+export type ContentTopic = 'private-message' | 'profile' | 'chats' | 'objects' | 'group-chats'
 
-type QueryResult = AsyncGenerator<Promise<DecodedMessage | undefined>[]>
+export type QueryResult = AsyncGenerator<Promise<DecodedMessage | undefined>[]>
 
 const topicApp = 'wakuobjects-playground'
 const topicVersion = '1'
@@ -132,8 +124,11 @@ export async function readStore(
 export async function parseQueryResults<T>(results: QueryResult): Promise<T[]> {
 	const typedResults: T[] = []
 	for await (const messagePromises of results) {
+		console.debug({ messagePromises })
 		for (const messagePromise of messagePromises) {
+			console.debug({ messagePromise })
 			const message = await messagePromise
+			console.debug({ message })
 			if (message) {
 				const decodedPayload = decodeMessagePayload(message)
 
