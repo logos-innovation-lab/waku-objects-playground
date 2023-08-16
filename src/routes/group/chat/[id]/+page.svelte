@@ -116,8 +116,12 @@
 					</Button>
 					<svelte:fragment slot="chat">
 						<Avatar picture={chat?.avatar ?? ''} />
-						{chat?.name}
-						<Events />
+						<span class="truncate">
+							{chat?.name}
+						</span>
+						<span class="group-icon">
+							<Events />
+						</span>
 					</svelte:fragment>
 					<svelte:fragment slot="right">
 						{#if chat.joined}
@@ -257,5 +261,17 @@
 
 	.text-center {
 		text-align: center;
+	}
+
+	.truncate {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.group-icon {
+		width: 20px;
+		height: 20px;
+		aspect-ratio: 1;
 	}
 </style>

@@ -68,6 +68,7 @@
 				gap: var(--spacing-12);
 				justify-content: center;
 				align-items: center;
+				overflow: hidden;
 
 				:global(img) {
 					border-radius: var(--border-radius);

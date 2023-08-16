@@ -131,13 +131,17 @@
 											<Avatar size={70} picture={otherUser?.avatar} />
 										{/if}
 										<div class="content">
-											<div class="user-info">
-												<span class="username text-lg text-bold">
+											<div class="chat-info">
+												<span class="chat-name text-lg text-bold">
 													{#if isGroupChatId(chat.chatId)}
-														{chat?.name}
+														<span class="truncate">
+															{chat?.name}
+														</span>
 														<Events />
 													{:else}
-														{otherUser?.name}
+														<span class="truncate">
+															{otherUser?.name}
+														</span>
 													{/if}
 													{#if chat.unread > 0}
 														<Badge dark>
@@ -218,10 +222,11 @@
 
 		.content {
 			flex-grow: 1;
+			overflow: hidden;
 		}
 	}
 
-	.user-info {
+	.chat-info {
 		margin-bottom: var(--spacing-3);
 		display: flex;
 		flex-direction: row;
@@ -230,11 +235,19 @@
 		justify-content: space-between;
 	}
 
-	.username {
+	.chat-name {
 		display: inline-flex;
 		flex-direction: row;
 		gap: var(--spacing-6);
 		align-items: center;
+		max-width: 100%;
+	}
+
+	.truncate {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		width: 100%;
 	}
 
 	.timestamp {
