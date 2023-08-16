@@ -23,7 +23,6 @@
 	import QrCodeIcon from '$lib/components/icons/qr-code.svelte'
 	import { onDestroy } from 'svelte'
 	import ButtonBlock from '$lib/components/button-block.svelte'
-	import User from '$lib/components/icons/user.svelte'
 	import ChevronRight from '$lib/components/icons/chevron-right.svelte'
 	import Layout from '$lib/components/layout.svelte'
 	import type { User as UserType } from '$lib/types'
