@@ -47,7 +47,11 @@ export interface ChatData {
 	error?: Error
 }
 
-type ChatStore = Writable<ChatData>
+interface ChatStore extends Writable<ChatData> {
+	createChat: (chat: Chat) => void
+	updateChat: (chatId: string, update: (chat: Chat) => Chat) => void
+	removeChat: (chatId: string) => void
+}
 
 // FIXME temporary hack
 export function isGroupChatId(id: string) {
@@ -60,7 +64,54 @@ function createChatStore(): ChatStore {
 		chats: new Map<string, Chat>(),
 	})
 
-	return store
+	return {
+		...store,
+		createChat: (chat: Chat) => {
+			store.update((state) => {
+				if (state.chats.has(chat.chatId)) {
+					return state
+				}
+
+				state.chats.set(chat.chatId, chat)
+
+				return {
+					...state,
+					chats: state.chats,
+					loading: false,
+				}
+			})
+		},
+		updateChat: (chatId: string, update: (chat: Chat) => Chat) => {
+			store.update((state) => {
+				if (!state.chats.has(chatId)) {
+					return state
+				}
+				const oldChat = state.chats.get(chatId)
+				if (!oldChat) {
+					return state
+				}
+				state.chats.set(chatId, update(oldChat))
+
+				return {
+					...state,
+					chats: state.chats,
+				}
+			})
+		},
+		removeChat: (chatId: string) => {
+			store.update((state) => {
+				if (!state.chats.has(chatId)) {
+					return state
+				}
+				state.chats.delete(chatId)
+
+				return {
+					...state,
+					chats: state.chats,
+				}
+			})
+		},
+	}
 }
 
 export const chats = createChatStore()
