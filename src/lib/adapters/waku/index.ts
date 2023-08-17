@@ -9,20 +9,10 @@ import {
 	type DataMessage,
 } from '$lib/stores/chat'
 import type { User } from '$lib/types'
-import { PageDirection, type LightNode, type StoreQueryOptions } from '@waku/interfaces'
-import type { DecodedMessage } from '@waku/sdk'
-import {
-	connectWaku,
-	decodeMessagePayload,
-	parseQueryResults,
-	readLatestDocument,
-	readStore,
-	sendMessage,
-	storeDocument,
-	subscribe,
-} from './waku'
+import { PageDirection, type LightNode, type TimeFilter } from '@waku/interfaces'
+import { connectWaku, readLatestDocument, sendMessage, storeDocument } from './waku'
 import type { BaseWallet, Wallet } from 'ethers'
-import { get, type Writable } from 'svelte/store'
+import { get } from 'svelte/store'
 import { objectStore, type ObjectState, objectKey } from '$lib/stores/objects'
 import { lookup } from '$lib/objects/lookup'
 import type { Token } from '$lib/stores/balances'
@@ -31,11 +21,11 @@ import type { WakuObjectAdapter } from '$lib/objects'
 import { makeWakuObjectAdapter } from '$lib/objects/adapter'
 import { fetchBalances } from '$lib/adapters/balance'
 import { makeWakustore } from './wakustore'
-import type { StorageChatEntry, StorageProfile } from './types'
+import type { StorageChat, StorageChatEntry, StorageProfile } from './types'
 
 function createChat(chatId: string, user: User, address: string): string {
 	const chat = {
-		chatId: chatId,
+		chatId,
 		messages: [],
 		users: [user, { address }],
 		name: user.name ?? user.address,
@@ -55,7 +45,7 @@ function createGroupChat(
 	inviter: string | undefined = undefined,
 ): string {
 	const groupChat = {
-		chatId: chatId,
+		chatId,
 		messages: [],
 		users,
 		name,
@@ -145,85 +135,6 @@ async function readUserFromProfile(waku: LightNode, address: string) {
 	}
 }
 
-async function subscribeToPrivateMessages(
-	waku: LightNode,
-	adapter: WakuObjectAdapter,
-	address: string,
-	ids: string[],
-	subscriptions: Array<() => void>,
-): Promise<void> {
-	for (const id of ids) {
-		const subscription = await subscribe(
-			waku,
-			'private-message',
-			id,
-			async (msg: DecodedMessage) => {
-				const decodedPayload = decodeMessagePayload(msg)
-				const chatMessage = JSON.parse(decodedPayload) as Message
-				const chatsMap = get(chats).chats
-
-				// FIXME: the message should be checked for validity
-				if (!chatMessage) {
-					console.error('Invalid message received')
-					return
-				}
-
-				// ignore messages coming from own address
-				if (chatMessage.fromAddress === address) {
-					return
-				}
-
-				if (chatMessage.type === 'invite') {
-					const groupChat = await readGroupChat(waku, chatMessage.chatId)
-					const userPromises = groupChat.users.map((address) => readUserFromProfile(waku, address))
-					const allUsers = await Promise.all(userPromises)
-					const users = allUsers.filter((user) => user) as User[]
-					createGroupChat(
-						chatMessage.chatId,
-						users,
-						groupChat.name,
-						groupChat.avatar,
-						false,
-						chatMessage.fromAddress,
-					)
-
-					await subscribeToPrivateMessages(
-						waku,
-						adapter,
-						address,
-						[chatMessage.chatId],
-						subscriptions,
-					)
-				} else {
-					if (!isGroupChatId(id)) {
-						if (!chatsMap.has(chatMessage.fromAddress)) {
-							const storedProfile = (await readLatestDocument(
-								waku,
-								'profile',
-								chatMessage.fromAddress,
-							)) as Profile
-
-							if (storedProfile) {
-								const user = {
-									name: storedProfile.name,
-									avatar: storedProfile.avatar,
-									address: chatMessage.fromAddress,
-								}
-								createChat(chatMessage.fromAddress, user, address)
-							}
-						}
-
-						await addMessageToChat(address, adapter, chatMessage.fromAddress, chatMessage)
-					} else {
-						await addMessageToChat(address, adapter, id, chatMessage)
-					}
-				}
-			},
-		)
-		subscriptions.push(subscription)
-	}
-}
-
 async function updateContactProfiles(waku: LightNode) {
 	// look for changes in users profile name and picture
 	const contacts = Array.from(get(chats).chats).flatMap(([, chat]) => chat.users)
@@ -261,43 +172,170 @@ async function updateContactProfiles(waku: LightNode) {
 	}
 }
 
-async function readGroupChatInvites(waku: LightNode, address: string) {
-	const storeQueryOptions: StoreQueryOptions = {
-		pageDirection: PageDirection.BACKWARD,
-		pageSize: 100,
-	}
-
-	const results = await readStore(waku, 'private-message', address, storeQueryOptions)
-	const messages = await parseQueryResults<Message>(results)
-
-	const storeChats = get(chats).chats
-	for (const message of messages) {
-		if (message.type === 'invite') {
-			if (!storeChats.get(message.chatId)) {
-				const groupChat = await readGroupChat(waku, message.chatId)
-				if (!groupChat) {
-					continue
-				}
-				const userPromises = groupChat.users.map((address) => readUserFromProfile(waku, address))
-				const allUsers = await Promise.all(userPromises)
-				const users = allUsers.filter((user) => user) as User[]
-				createGroupChat(
-					message.chatId,
-					users,
-					groupChat.name,
-					groupChat.avatar,
-					false,
-					message.fromAddress,
-				)
-			}
+function getLastSeenMessageTime(chats: Chat[]) {
+	let lastMessageTime = 0
+	for (const chat of chats) {
+		const time = getLastMessageTime(chat)
+		if (time > lastMessageTime) {
+			lastMessageTime = time
 		}
 	}
+	return lastMessageTime
+}
+
+function getLastMessageTime(chat?: Chat) {
+	const lastMessage = chat?.messages.slice(-1)[0]
+	return lastMessage ? lastMessage.timestamp : 0
 }
 
 export default class WakuAdapter implements Adapter {
 	private waku: LightNode | undefined
 	private subscriptions: Array<() => void> = []
-	private updating: Array<Writable<unknown>> = []
+
+	private async storageChatToChat(chatId: string, storageChat: StorageChat): Promise<Chat> {
+		if (!this.waku) {
+			throw 'no waku'
+		}
+
+		const waku = this.waku
+		const userPromises = storageChat.users.map((address) => readUserFromProfile(waku, address))
+		const allUsers = await Promise.all(userPromises)
+		const users = allUsers.filter((user) => user) as User[]
+
+		return {
+			chatId,
+			messages: [],
+			unread: 0,
+			users,
+			name: storageChat.name,
+			avatar: storageChat.avatar,
+		}
+	}
+
+	private async storageProfileToUser(address: string): Promise<User | undefined> {
+		if (!this.waku) {
+			throw 'no waku'
+		}
+
+		const waku = this.waku
+		const storageProfile = await readUserFromProfile(waku, address)
+		if (!storageProfile) {
+			return
+		}
+
+		const user = {
+			name: storageProfile.name,
+			avatar: storageProfile.avatar,
+			address,
+		}
+
+		return user
+	}
+
+	private async subscribeToGroupChat(
+		groupChatId: string,
+		address: string,
+		wakuObjectAdapter: WakuObjectAdapter,
+		timeFilter?: TimeFilter,
+	) {
+		if (!this.waku) {
+			return
+		}
+
+		const ws = makeWakustore(this.waku)
+
+		const groupChatSubscription = await ws.onSnapshot<StorageChat>(
+			ws.docQuery('group-chats', groupChatId),
+			async (groupChat) => {
+				const updatedGroupChat = await this.storageChatToChat(groupChatId, groupChat)
+				chats.updateChat(groupChatId, (chat) => ({
+					...chat,
+					chatId: groupChatId,
+					users: updatedGroupChat.users,
+					name: updatedGroupChat.name,
+					avatar: updatedGroupChat.avatar,
+				}))
+			},
+		)
+		this.subscriptions.push(groupChatSubscription)
+
+		await this.subscribeToPrivateMessages(groupChatId, address, wakuObjectAdapter, timeFilter)
+	}
+
+	private async subscribeToPrivateMessages(
+		id: string,
+		address: string,
+		wakuObjectAdapter: WakuObjectAdapter,
+		timeFilter?: TimeFilter,
+	) {
+		if (!this.waku) {
+			return
+		}
+
+		const ws = makeWakustore(this.waku)
+
+		const startTime = new Date(getLastMessageTime(get(chats).chats.get(id)))
+		const endTime = new Date()
+
+		const subscription = await ws.onSnapshot<Message>(
+			ws.collectionQuery('private-message', id, {
+				timeFilter: timeFilter || { startTime, endTime },
+				pageDirection: PageDirection.BACKWARD,
+				pageSize: 1000,
+			}),
+			(message) => {
+				this.handleMessage(message, address, id, wakuObjectAdapter)
+			},
+		)
+		this.subscriptions.push(subscription)
+	}
+
+	private async handleMessage(
+		message: Message,
+		address: string,
+		id: string,
+		adapter: WakuObjectAdapter,
+	) {
+		// ignore messages coming from own address
+		if (message.fromAddress === address) {
+			return
+		}
+
+		const chatsMap = get(chats).chats
+
+		if (isGroupChatId(id)) {
+			if (!chatsMap.has(id)) {
+				return
+			}
+
+			await addMessageToChat(address, adapter, id, message)
+
+			return
+		}
+
+		// create group chat when invited
+		if (message.type === 'invite') {
+			if (chatsMap.has(message.chatId)) {
+				return
+			}
+			createGroupChat(message.chatId, [])
+			await this.subscribeToGroupChat(message.chatId, address, adapter)
+
+			return
+		}
+
+		// create chat if does not exist yet
+		if (!chatsMap.has(message.fromAddress)) {
+			const user = await this.storageProfileToUser(message.fromAddress)
+			if (!user) {
+				return
+			}
+
+			createChat(message.fromAddress, user, address)
+		}
+
+		await addMessageToChat(address, adapter, message.fromAddress, message)
+	}
 
 	async onLogIn(wallet: BaseWallet): Promise<void> {
 		const address = wallet.address
@@ -310,51 +348,46 @@ export default class WakuAdapter implements Adapter {
 		const storageProfile = await ws.getDoc<StorageProfile>('profile', address)
 		profile.update((state) => ({ ...state, ...storageProfile, address, loading: false }))
 
+		console.debug({ storageProfile })
+
 		const storageChatEntries = await ws.getDoc<StorageChatEntry[]>('chats', address)
 		chats.update((state) => ({ ...state, chats: new Map(storageChatEntries), loading: false }))
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		const lastSeenMessageTimestamp = storageChatEntries.reduce(
-			(prev, curr) =>
-				curr[1].messages.reduce((pm, cm) => (cm.timestamp > pm ? cm.timestamp : pm), prev),
-			0,
-		)
+
+		console.debug({ storageChatEntries })
+
+		console.debug({ chats: get(chats) })
 
 		// eslint-disable-next-line @typescript-eslint/no-this-alias
 		const adapter = this
-		const subscribeChatStore = chats.subscribe((chatData) => {
-			if (adapter.updating.includes(chats)) {
-				return
-			}
-			ws.setDoc<StorageChatEntry[]>('chats', address, Array.from(chatData.chats))
-		})
-		this.subscriptions.push(subscribeChatStore)
+		// const subscribeChatStore = chats.subscribe((chatData) => {
+		// 	if (adapter.updating.includes(chats)) {
+		// 		return
+		// 	}
+		// 	ws.setDoc<StorageChatEntry[]>('chats', address, Array.from(chatData.chats))
+		// })
+		// this.subscriptions.push(subscribeChatStore)
 
-		await readGroupChatInvites(this.waku, address)
+		const allChats = Array.from(get(chats).chats)
 
-		const groupChatIds = Array.from(get(chats).chats)
-			.filter(([id]) => isGroupChatId(id))
-			.map(([id]) => id)
+		// private chats
+		const privateChats = allChats.filter(([id]) => !isGroupChatId(id)).map(([, chat]) => chat)
+
+		const lastSeenMessageTime = getLastSeenMessageTime(privateChats)
+		const now = new Date()
+		const timeFilter = {
+			startTime: new Date(lastSeenMessageTime),
+			endTime: now,
+		}
+		await this.subscribeToPrivateMessages(address, address, wakuObjectAdapter, timeFilter)
+
+		// group chats
+		const groupChatIds = allChats.filter(([id]) => isGroupChatId(id)).map(([id]) => id)
 
 		for (const groupChatId of groupChatIds) {
-			const groupChatSubscription = await ws.onSnapshot<Chat>(
-				ws.docQuery('group-chats', groupChatId),
-				(groupChat) => {
-					chats.updateChat(groupChatId, () => groupChat)
-				},
-			)
-			this.subscriptions.push(groupChatSubscription)
+			await this.subscribeToGroupChat(groupChatId, address, wakuObjectAdapter)
 		}
 
-		// TODO update and subscribe to contact profiles
-
-		subscribeToPrivateMessages(
-			this.waku,
-			wakuObjectAdapter,
-			address,
-			[address, ...groupChatIds],
-			this.subscriptions,
-		)
-
+		// object store
 		const objects = await readObjectStore(this.waku, address)
 		objectStore.update((state) => ({ ...state, ...objects, loading: false }))
 
@@ -366,6 +399,7 @@ export default class WakuAdapter implements Adapter {
 		})
 		this.subscriptions.push(subscribeObjectStore)
 
+		// deferred updates
 		fetchBalances(address)
 		updateContactProfiles(this.waku)
 	}
@@ -450,13 +484,7 @@ export default class WakuAdapter implements Adapter {
 
 		createGroupChat(chatId, users, chat.name, chat.avatar, true)
 		await storeGroupChat(this.waku, chatId, chat)
-		await subscribeToPrivateMessages(
-			this.waku,
-			wakuObjectAdapter,
-			wallet.address,
-			[chatId],
-			this.subscriptions,
-		)
+		await this.subscribeToGroupChat(chatId, wallet.address, wakuObjectAdapter)
 
 		return chatId
 	}

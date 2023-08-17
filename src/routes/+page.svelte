@@ -109,58 +109,56 @@
 							userMessages.length > 0 ? userMessages[userMessages.length - 1] : undefined}
 						{@const myMessage = lastMessage && lastMessage.fromAddress === wallet.address}
 						{@const otherUser = chat.users.find((m) => m.address !== wallet.address)}
-						<li>
-							<div
-								class="chat-button"
-								on:click={() =>
-									isGroupChatId(chat.chatId)
-										? goto(ROUTES.GROUP_CHAT(chat.chatId))
-										: goto(ROUTES.CHAT(chat.chatId))}
-								on:keypress={() =>
-									isGroupChatId(chat.chatId)
-										? goto(ROUTES.GROUP_CHAT(chat.chatId))
-										: goto(ROUTES.CHAT(chat.chatId))}
-								role="button"
-								tabindex="0"
-							>
-								<Container grow>
-									<div class="chat">
-										{#if isGroupChatId(chat.chatId)}
-											<Avatar size={70} picture={chat?.avatar} />
-										{:else}
-											<Avatar size={70} picture={otherUser?.avatar} />
-										{/if}
-										<div class="content">
-											<div class="chat-info">
-												<span class="chat-name text-lg text-bold">
-													{#if isGroupChatId(chat.chatId)}
-														<span class="truncate">
+						{#if chat.chatId}
+							<li>
+								<div
+									class="chat-button"
+									on:click={() =>
+										isGroupChatId(chat.chatId)
+											? goto(ROUTES.GROUP_CHAT(chat.chatId))
+											: goto(ROUTES.CHAT(chat.chatId))}
+									on:keypress={() =>
+										isGroupChatId(chat.chatId)
+											? goto(ROUTES.GROUP_CHAT(chat.chatId))
+											: goto(ROUTES.CHAT(chat.chatId))}
+									role="button"
+									tabindex="0"
+								>
+									<Container grow>
+										<div class="chat">
+											{#if isGroupChatId(chat.chatId)}
+												<Avatar size={70} picture={chat?.avatar} />
+											{:else}
+												<Avatar size={70} picture={otherUser?.avatar} />
+											{/if}
+											<div class="content">
+												<div class="user-info">
+													<span class="username text-lg text-bold">
+														{#if isGroupChatId(chat.chatId)}
 															{chat?.name}
-														</span>
-														<Events />
-													{:else}
-														<span class="truncate">
+															<Events />
+														{:else}
 															{otherUser?.name}
-														</span>
-													{/if}
-													{#if chat.unread > 0}
-														<Badge dark>
-															{chat.unread}
-														</Badge>
-													{/if}
-												</span>
+														{/if}
+														{#if chat.unread > 0}
+															<Badge dark>
+																{chat.unread}
+															</Badge>
+														{/if}
+													</span>
+												</div>
+												<p class={`message text-serif ${myMessage ? 'my-message' : ''}`}>
+													{myMessage ? 'You: ' : ''}
+													{lastMessage && lastMessage.type === 'user'
+														? lastMessage.text.substring(0, 50)
+														: 'No messages yet'}
+												</p>
 											</div>
-											<p class={`message text-serif ${myMessage ? 'my-message' : ''}`}>
-												{myMessage ? 'You: ' : ''}
-												{lastMessage && lastMessage.type === 'user'
-													? lastMessage.text.substring(0, 50)
-													: 'No messages yet'}
-											</p>
 										</div>
-									</div>
-								</Container>
-							</div>
-						</li>
+									</Container>
+								</div>
+							</li>
+						{/if}
 					{/each}
 				</ul>
 			</Layout>

@@ -58,8 +58,8 @@ export function makeWakustore(waku: LightNode) {
 				const message = await messagePromise
 				if (message) {
 					const decodedPayload = decodeMessagePayload(message)
-					const timestamp = Number(message.timestamp)
-					console.debug({ decodedPayload, timestamp })
+					// const timestamp = Number(message.timestamp)
+					// console.debug({ decodedPayload, timestamp })
 
 					const typedPayload = JSON.parse(decodedPayload) as T
 					typedResults.push(typedPayload)
@@ -118,7 +118,7 @@ export function makeWakustore(waku: LightNode) {
 	}
 
 	return {
-		makeQuery,
+		waku,
 		docQuery,
 		collectionQuery,
 		onSnapshot,
