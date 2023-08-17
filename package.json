@@ -13,7 +13,9 @@
 		"format": "prettier --plugin-search-dir . --write . && eslint . --fix",
 		"knip": "knip",
 		"start:blockchain": "hardhat node",
-		"cli": "ts-node --esm --experimental-specifier-resolution=node ./src/cli/cli.ts"
+		"cli": "ts-node --esm --experimental-specifier-resolution=node ./src/cli/cli.ts",
+		"waku:start": "docker compose -f ./docker-compose.yaml up -d",
+		"waku:stop": "docker kill waku-objects-playground-waku-1"
 	},
 	"devDependencies": {
 		"@bonosoft/sveltekit-qrcode": "^0.0.3",
