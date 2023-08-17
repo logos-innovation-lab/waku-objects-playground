@@ -1,10 +1,21 @@
 <script lang="ts">
+	//draws the message bubble
 	export let bubble = false
+
+	//am I the sender of this message?
 	export let myMessage = false
+
+	//did this message come from an object?
 	export let object = false
+
+	//is this message in a group chat?
 	export let group = false
+
+	//is the sender of the current message the same as the previous message?
 	export let sameSender = false
-	export let sender: undefined | string = undefined
+
+	//name of the person who sent the message
+	export let senderName: undefined | string = undefined
 
 	const isFF = () => {
 		let browserInfo = navigator.userAgent
@@ -19,9 +30,9 @@
 >
 	<div class={` ${bubble ? 'bubble message-content message-text text-lg' : ''}`}>
 		<slot />
-		{#if sender}
+		{#if senderName}
 			<div class="author">
-				{sender}
+				{senderName}
 			</div>
 		{/if}
 	</div>

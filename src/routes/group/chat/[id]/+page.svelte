@@ -166,6 +166,7 @@
 										{@const sameSender =
 											messages[i].fromAddress === messages[(i + len - 1) % len].fromAddress}
 										{@const lastMessage =
+											i + 1 === messages.length ||
 											messages[i].fromAddress !== messages[(i + 1) % len].fromAddress ||
 											messages[(i + 1) % len].type !== 'user'}
 										{@const sender = chat.users.find((u) => message.fromAddress === u.address)}
@@ -174,7 +175,7 @@
 											bubble
 											group
 											{sameSender}
-											sender={message.fromAddress === wallet.address || !lastMessage
+											senderName={message.fromAddress === wallet.address || !lastMessage
 												? undefined
 												: sender?.name}
 										>
