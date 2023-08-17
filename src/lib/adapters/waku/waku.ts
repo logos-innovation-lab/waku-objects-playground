@@ -128,9 +128,9 @@ export async function parseQueryResults<T>(results: QueryResult): Promise<T[]> {
 		for (const messagePromise of messagePromises) {
 			console.debug({ messagePromise })
 			const message = await messagePromise
-			console.debug({ message })
 			if (message) {
 				const decodedPayload = decodeMessagePayload(message)
+				console.debug(message.timestamp)
 
 				const typedPayload = JSON.parse(decodedPayload) as T
 				typedResults.push(typedPayload)

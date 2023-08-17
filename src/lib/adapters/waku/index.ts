@@ -5,7 +5,6 @@ import {
 	type DraftChat,
 	type Chat,
 	type Message,
-	type ChatData,
 	isGroupChatId,
 	type DataMessage,
 } from '$lib/stores/chat'
@@ -23,7 +22,7 @@ import {
 	subscribe,
 } from './waku'
 import type { BaseWallet, Wallet } from 'ethers'
-import { get } from 'svelte/store'
+import { get, type Writable } from 'svelte/store'
 import { objectStore, type ObjectState, objectKey } from '$lib/stores/objects'
 import { lookup } from '$lib/objects/lookup'
 import type { Token } from '$lib/stores/balances'
@@ -31,6 +30,8 @@ import { defaultBlockchainNetwork, sendTransaction } from '$lib/adapters/transac
 import type { WakuObjectAdapter } from '$lib/objects'
 import { makeWakuObjectAdapter } from '$lib/objects/adapter'
 import { fetchBalances } from '$lib/adapters/balance'
+import { makeWakustore } from './wakustore'
+import type { StorageChatEntry, StorageProfile } from './types'
 
 function createChat(chatId: string, user: User, address: string): string {
 	const chat = {
@@ -106,18 +107,6 @@ async function executeOnDataMessage(
 		const store = objects.get(key)
 		await descriptor.onMessage(address, adapter, store, updateStore, chatMessage)
 	}
-}
-
-async function readChats(waku: LightNode, address: string): Promise<ChatData> {
-	const chatDataChats = (await readLatestDocument(waku, 'chats', address)) as [string, Chat][]
-	return {
-		loading: false,
-		chats: new Map(chatDataChats),
-	}
-}
-
-async function storeChats(waku: LightNode, address: string, chatData: ChatData) {
-	await storeDocument(waku, 'chats', address, Array.from(chatData.chats.entries()))
 }
 
 async function readObjectStore(waku: LightNode, address: string): Promise<ObjectState> {
@@ -308,6 +297,7 @@ async function readGroupChatInvites(waku: LightNode, address: string) {
 export default class WakuAdapter implements Adapter {
 	private waku: LightNode | undefined
 	private subscriptions: Array<() => void> = []
+	private updating: Array<Writable<unknown>> = []
 
 	async onLogIn(wallet: BaseWallet): Promise<void> {
 		const address = wallet.address
@@ -315,19 +305,27 @@ export default class WakuAdapter implements Adapter {
 
 		const wakuObjectAdapter = makeWakuObjectAdapter(this, wallet)
 
-		const profileData = (await readLatestDocument(this.waku, 'profile', address)) as Profile
-		profile.update((state) => ({ ...state, ...profileData, address, loading: false }))
+		const ws = makeWakustore(this.waku)
 
-		const chatData = await readChats(this.waku, address)
-		chats.update((state) => ({ ...state, ...chatData, loading: false }))
+		const storageProfile = await ws.getDoc<StorageProfile>('profile', address)
+		profile.update((state) => ({ ...state, ...storageProfile, address, loading: false }))
+
+		const storageChatEntries = await ws.getDoc<StorageChatEntry[]>('chats', address)
+		chats.update((state) => ({ ...state, chats: new Map(storageChatEntries), loading: false }))
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		const lastSeenMessageTimestamp = storageChatEntries.reduce(
+			(prev, curr) =>
+				curr[1].messages.reduce((pm, cm) => (cm.timestamp > pm ? cm.timestamp : pm), prev),
+			0,
+		)
 
 		// eslint-disable-next-line @typescript-eslint/no-this-alias
 		const adapter = this
-		const subscribeChatStore = chats.subscribe(async (chats) => {
-			if (!adapter.waku) {
+		const subscribeChatStore = chats.subscribe((chatData) => {
+			if (adapter.updating.includes(chats)) {
 				return
 			}
-			await storeChats(adapter.waku, address, chats)
+			ws.setDoc<StorageChatEntry[]>('chats', address, Array.from(chatData.chats))
 		})
 		this.subscriptions.push(subscribeChatStore)
 
@@ -336,6 +334,18 @@ export default class WakuAdapter implements Adapter {
 		const groupChatIds = Array.from(get(chats).chats)
 			.filter(([id]) => isGroupChatId(id))
 			.map(([id]) => id)
+
+		for (const groupChatId of groupChatIds) {
+			const groupChatSubscription = await ws.onSnapshot<Chat>(
+				ws.docQuery('group-chats', groupChatId),
+				(groupChat) => {
+					chats.updateChat(groupChatId, () => groupChat)
+				},
+			)
+			this.subscriptions.push(groupChatSubscription)
+		}
+
+		// TODO update and subscribe to contact profiles
 
 		subscribeToPrivateMessages(
 			this.waku,
