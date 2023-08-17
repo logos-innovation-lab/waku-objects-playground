@@ -3,6 +3,7 @@
 	export let myMessage = false
 	export let object = false
 	export let group = false
+	export let sameSender = false
 	export let sender: undefined | string = undefined
 
 	const isFF = () => {
@@ -14,7 +15,7 @@
 <div
 	class={`message ${myMessage ? 'my-message' : 'their-message'} ${isFF() ? 'ff' : ''} ${
 		object ? 'object' : ''
-	} ${group ? 'group' : ''}`}
+	} ${group ? 'group' : ''} ${sameSender ? 'same' : ''}`}
 >
 	<div class={` ${bubble ? 'bubble message-content message-text text-lg' : ''}`}>
 		<slot />
@@ -34,7 +35,6 @@
 <style lang="scss">
 	.message {
 		display: flex;
-		gap: var(--spacing-6);
 		flex-direction: column;
 		align-items: flex-end;
 		max-width: 75%;
@@ -86,12 +86,12 @@
 		position: relative;
 
 		//The + combinator matches the second element only if it immediately follows the first element.
-		& + .their-message:not(.ff) .message-text {
+		& + .their-message.same:not(.ff) .message-text {
 			border-top-left-radius: 0;
 		}
 
 		//This combination matches the first element only if it immediately precedes the second element.
-		&:has(+ .their-message) {
+		&:has(+ .their-message.same) {
 			margin-bottom: var(--spacing-6);
 			.message-text {
 				border-bottom-left-radius: 0;

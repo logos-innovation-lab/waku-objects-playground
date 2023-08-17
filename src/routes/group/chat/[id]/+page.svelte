@@ -160,18 +160,29 @@
 						<div class="messages">
 							<div class="messages-inner">
 								<!-- Chat bubbles -->
-								{#each messages as message}
+								{#each messages as message, i}
 									{#if message.type === 'user' && message.text.length > 0}
+										{@const len = messages.length}
+										{@const sameSender =
+											messages[i].fromAddress === messages[(i + len - 1) % len].fromAddress}
+										{@const lastMessage =
+											messages[i].fromAddress !== messages[(i + 1) % len].fromAddress ||
+											messages[(i + 1) % len].type !== 'user'}
 										{@const sender = chat.users.find((u) => message.fromAddress === u.address)}
 										<ChatMessage
 											myMessage={message.fromAddress === wallet.address ? true : false}
 											bubble
 											group
-											sender={message.fromAddress === wallet.address ? undefined : sender?.name}
+											{sameSender}
+											sender={message.fromAddress === wallet.address
+												? undefined
+												: lastMessage
+												? sender?.name
+												: undefined}
 										>
 											{@html textToHTML(message.text)}
 											<svelte:fragment slot="avatar">
-												{#if message.fromAddress !== wallet.address}
+												{#if message.fromAddress !== wallet.address && lastMessage}
 													<Avatar size={40} picture={sender?.avatar} />
 												{/if}
 											</svelte:fragment>
