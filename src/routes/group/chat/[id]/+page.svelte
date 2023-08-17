@@ -174,11 +174,9 @@
 											bubble
 											group
 											{sameSender}
-											sender={message.fromAddress === wallet.address
+											sender={message.fromAddress === wallet.address || !lastMessage
 												? undefined
-												: lastMessage
-												? sender?.name
-												: undefined}
+												: sender?.name}
 										>
 											{@html textToHTML(message.text)}
 											<svelte:fragment slot="avatar">
