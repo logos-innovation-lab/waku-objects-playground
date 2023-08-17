@@ -359,14 +359,6 @@ export default class WakuAdapter implements Adapter {
 
 		// eslint-disable-next-line @typescript-eslint/no-this-alias
 		const adapter = this
-		// const subscribeChatStore = chats.subscribe((chatData) => {
-		// 	if (adapter.updating.includes(chats)) {
-		// 		return
-		// 	}
-		// 	ws.setDoc<StorageChatEntry[]>('chats', address, Array.from(chatData.chats))
-		// })
-		// this.subscriptions.push(subscribeChatStore)
-
 		const allChats = Array.from(get(chats).chats)
 
 		// private chats
@@ -386,6 +378,12 @@ export default class WakuAdapter implements Adapter {
 		for (const groupChatId of groupChatIds) {
 			await this.subscribeToGroupChat(groupChatId, address, wakuObjectAdapter)
 		}
+
+		// chat store
+		const subscribeChatStore = chats.subscribe((chatData) => {
+			ws.setDoc<StorageChatEntry[]>('chats', address, Array.from(chatData.chats))
+		})
+		this.subscriptions.push(subscribeChatStore)
 
 		// object store
 		const objects = await readObjectStore(this.waku, address)
