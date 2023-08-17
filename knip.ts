@@ -21,6 +21,7 @@ const config: KnipConfig = {
 		css: (text: string) => [...text.matchAll(/(?<=@)import[^;]+/g)].join('\n'),
 	},
 	ignoreExportsUsedInFile: true,
+	ignoreBinaries: ['docker'],
 }
 
 export default config
