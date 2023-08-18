@@ -267,12 +267,26 @@ export default class WakuAdapter implements Adapter {
 			users: groupChat.users.concat(...users),
 		}
 		await ws.setDoc<StorageChat>('group-chats', chatId, updatedGroupChat)
+	}
 
-		const newUserPromises = users.map((address) => this.storageProfileToUser(address))
-		const newResolvedUsers = await Promise.all(newUserPromises)
-		const newUsers = newResolvedUsers.filter((user) => user) as User[]
+	async saveGroupChatProfile(chatId: string, name?: string, avatar?: string): Promise<void> {
+		if (!this.waku) {
+			this.waku = await connectWaku()
+		}
 
-		chats.updateChat(chatId, (chat) => ({ ...chat, users: [...chat.users, ...newUsers] }))
+		const ws = makeWakustore(this.waku)
+
+		const groupChat = await ws.getDoc<StorageChat>('group-chats', chatId)
+		if (!groupChat) {
+			return
+		}
+
+		const updatedGroupChat = {
+			...groupChat,
+			name: name ?? groupChat.name,
+			avatar: avatar ?? groupChat.avatar,
+		}
+		await ws.setDoc<StorageChat>('group-chats', chatId, updatedGroupChat)
 	}
 
 	async sendChatMessage(wallet: BaseWallet, chatId: string, text: string): Promise<void> {

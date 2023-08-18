@@ -25,6 +25,7 @@
 	import routes from '$lib/routes'
 	import { goto } from '$app/navigation'
 	import { getPicture, uploadPicture } from '$lib/adapters/ipfs'
+	import { onDestroy } from 'svelte'
 
 	$: chatId = $page.params.id
 	$: groupChat = $chats.chats.get(chatId)
@@ -65,6 +66,38 @@
 	function isGroupMember(address: string) {
 		return groupChat?.users.map((user) => user.address).includes(address)
 	}
+
+	$: if (
+		!$chats.loading &&
+		((name && name !== groupChat?.name) || (picture && picture !== groupChat?.avatar))
+	) {
+		debounceSaveProfile()
+	}
+
+	let timer: ReturnType<typeof setTimeout> | undefined
+
+	function saveProfileNow() {
+		if (!groupChat) {
+			return
+		}
+		adapters.saveGroupChatProfile(groupChat?.chatId, name, picture)
+	}
+
+	// Debounce saving profile
+	function debounceSaveProfile() {
+		if (timer) clearTimeout(timer)
+		timer = setTimeout(() => {
+			saveProfileNow()
+			timer = undefined
+		}, 1000)
+	}
+
+	onDestroy(() => {
+		if (timer) {
+			clearTimeout(timer)
+			saveProfileNow()
+		}
+	})
 </script>
 
 <AuthenticatedOnly let:wallet>

@@ -14,7 +14,6 @@ import {
 	type Callback,
 	type StoreQueryOptions,
 	type Unsubscribe,
-	PageDirection,
 } from '@waku/interfaces'
 
 const peerMultiaddr = multiaddr(
@@ -80,34 +79,6 @@ export async function storeDocument(
 	const payload = utf8ToBytes(json)
 
 	return await waku.lightPush.send(encoder, { payload })
-}
-
-export async function readLatestDocument(
-	waku: LightNode,
-	contentTopic: ContentTopic,
-	id: string,
-): Promise<unknown | undefined> {
-	const storeQueryOptions: StoreQueryOptions = {
-		pageDirection: PageDirection.BACKWARD,
-		pageSize: 1,
-	}
-	const decodedMessages = await readStore(waku, contentTopic, id, storeQueryOptions)
-	for await (const messagePromises of decodedMessages) {
-		for (const messagePromise of messagePromises) {
-			const message = await messagePromise
-			if (message) {
-				const decodedPayload = decodeMessagePayload(message)
-				// TODO HACK
-				if (!decodedPayload || decodedPayload === 'undefined') {
-					return
-				}
-
-				return JSON.parse(decodedPayload)
-			} else {
-				return
-			}
-		}
-	}
 }
 
 export async function readStore(
