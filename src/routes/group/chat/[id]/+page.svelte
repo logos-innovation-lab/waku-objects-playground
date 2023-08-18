@@ -167,7 +167,7 @@
 										{@const lastMessage =
 											i + 1 === messages.length ||
 											messages[i].fromAddress !== messages[i + 1]?.fromAddress ||
-											messages[(i + 1) % len].type !== 'user'}
+											messages[i + 1]?.type !== 'user'}
 										{@const sender = chat.users.find((u) => message.fromAddress === u.address)}
 										<ChatMessage
 											myMessage={message.fromAddress === wallet.address ? true : false}
