@@ -18,11 +18,6 @@ interface Query {
 	queryOptions?: QueryOptions
 }
 
-export const latestQueryOption = {
-	pageDirection: PageDirection.BACKWARD,
-	pageSize: 1,
-}
-
 export function makeWakustore(waku: LightNode) {
 	function makeQuery(contentTopic: ContentTopic, id: string, queryOptions?: QueryOptions): Query {
 		return {

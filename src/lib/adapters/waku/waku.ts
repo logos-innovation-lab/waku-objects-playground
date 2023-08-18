@@ -121,25 +121,6 @@ export async function readStore(
 	return waku.store.queryGenerator([decoder], storeQueryOptions)
 }
 
-export async function parseQueryResults<T>(results: QueryResult): Promise<T[]> {
-	const typedResults: T[] = []
-	for await (const messagePromises of results) {
-		console.debug({ messagePromises })
-		for (const messagePromise of messagePromises) {
-			console.debug({ messagePromise })
-			const message = await messagePromise
-			if (message) {
-				const decodedPayload = decodeMessagePayload(message)
-				console.debug(message.timestamp)
-
-				const typedPayload = JSON.parse(decodedPayload) as T
-				typedResults.push(typedPayload)
-			}
-		}
-	}
-	return typedResults
-}
-
 export function decodeMessagePayload(wakuMessage: DecodedMessage): string {
 	return bytesToUtf8(wakuMessage.payload)
 }

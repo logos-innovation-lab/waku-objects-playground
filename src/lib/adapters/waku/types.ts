@@ -1,5 +1,4 @@
 import type { Chat } from '$lib/stores/chat'
-import type { ObjectState } from '$lib/stores/objects'
 
 export interface StorageChat {
 	users: string[]
@@ -14,4 +13,4 @@ export interface StorageProfile {
 
 export type StorageChatEntry = [chatId: string, chat: Chat]
 
-export type StorageObjects = ObjectState
+export type StorageObjectEntry = [objectId: string, object: unknown]

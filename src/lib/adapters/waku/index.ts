@@ -21,7 +21,7 @@ import type { WakuObjectAdapter } from '$lib/objects'
 import { makeWakuObjectAdapter } from '$lib/objects/adapter'
 import { fetchBalances } from '$lib/adapters/balance'
 import { makeWakustore } from './wakustore'
-import type { StorageChat, StorageChatEntry, StorageProfile } from './types'
+import type { StorageChat, StorageChatEntry, StorageObjectEntry, StorageProfile } from './types'
 
 function createChat(chatId: string, user: User, address: string): string {
 	const chat = {
@@ -69,7 +69,12 @@ async function addMessageToChat(
 		await executeOnDataMessage(address, adapter, message)
 	}
 
-	chats.updateChat(chatId, (chat) => ({ ...chat, messages: [...chat.messages, message] }))
+	const unread = message.fromAddress !== address && message.type === 'user' ? 1 : 0
+	chats.updateChat(chatId, (chat) => ({
+		...chat,
+		messages: [...chat.messages, message],
+		unread: chat.unread + unread,
+	}))
 }
 
 async function executeOnDataMessage(
@@ -100,10 +105,11 @@ async function executeOnDataMessage(
 }
 
 async function readObjectStore(waku: LightNode, address: string): Promise<ObjectState> {
-	const objectStoreData = (await readLatestDocument(waku, 'objects', address)) as [
-		string,
-		unknown,
-	][]
+	const objectStoreData = (await readLatestDocument(
+		waku,
+		'objects',
+		address,
+	)) as StorageObjectEntry[]
 	return {
 		loading: false,
 		objects: new Map(objectStoreData),
@@ -274,7 +280,7 @@ export default class WakuAdapter implements Adapter {
 
 		const ws = makeWakustore(this.waku)
 
-		const startTime = new Date(getLastMessageTime(get(chats).chats.get(id)))
+		const startTime = new Date(getLastMessageTime(get(chats).chats.get(id)) + 1)
 		const endTime = new Date()
 
 		const subscription = await ws.onSnapshot<Message>(
@@ -348,12 +354,8 @@ export default class WakuAdapter implements Adapter {
 		const storageProfile = await ws.getDoc<StorageProfile>('profile', address)
 		profile.update((state) => ({ ...state, ...storageProfile, address, loading: false }))
 
-		console.debug({ storageProfile })
-
 		const storageChatEntries = await ws.getDoc<StorageChatEntry[]>('chats', address)
 		chats.update((state) => ({ ...state, chats: new Map(storageChatEntries), loading: false }))
-
-		console.debug({ storageChatEntries })
 
 		console.debug({ chats: get(chats) })
 
