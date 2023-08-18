@@ -129,6 +129,12 @@ h3 {
 	margin: 0;
 }
 
+a {
+	color: inherit;
+	background-color: inherit;
+	text-decoration: underline;
+}
+
 .text-title {
 	font-weight: var(--font-weight-700);
 	font-size: var(--font-size-lg);
