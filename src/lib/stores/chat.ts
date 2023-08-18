@@ -28,7 +28,7 @@ export type Message = UserMessage | DataMessage | InviteMessage
 
 export interface DraftChat {
 	users: string[]
-	name?: string
+	name: string
 	avatar?: string
 }
 
@@ -58,6 +58,22 @@ interface ChatStore extends Writable<ChatData> {
 // FIXME temporary hack
 export function isGroupChatId(id: string) {
 	return id.length === 64
+}
+
+export function getLastSeenMessageTime(chats: Chat[]) {
+	let lastMessageTime = 0
+	for (const chat of chats) {
+		const time = getLastMessageTime(chat)
+		if (time > lastMessageTime) {
+			lastMessageTime = time
+		}
+	}
+	return lastMessageTime
+}
+
+export function getLastMessageTime(chat?: Chat) {
+	const lastMessage = chat?.messages.slice(-1)[0]
+	return lastMessage ? lastMessage.timestamp : 0
 }
 
 function createChatStore(): ChatStore {

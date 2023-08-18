@@ -84,7 +84,7 @@ export function makeWakustore(waku: LightNode) {
 		return typedResults
 	}
 
-	async function getDoc<T>(contentTopic: ContentTopic, id: string): Promise<T> {
+	async function getDoc<T>(contentTopic: ContentTopic, id: string): Promise<T | undefined> {
 		const query = docQuery(contentTopic, id)
 		const queryOptions = {
 			...query.queryOptions,
@@ -97,7 +97,6 @@ export function makeWakustore(waku: LightNode) {
 		if (values.length === 1) {
 			return values[0]
 		}
-		throw 'not found'
 	}
 
 	async function setDoc<T>(contentTopic: ContentTopic, id: string, data: T) {

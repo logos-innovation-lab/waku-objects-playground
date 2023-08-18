@@ -16,7 +16,7 @@
 	import { goto } from '$app/navigation'
 	import routes from '$lib/routes'
 	import { page } from '$app/stores'
-	import { type DraftChat, chats } from '$lib/stores/chat'
+	import { chats } from '$lib/stores/chat'
 	import adapters from '$lib/adapters'
 	import { Html5Qrcode } from 'html5-qrcode'
 	import Camera from '$lib/components/icons/camera.svelte'
@@ -101,10 +101,8 @@
 	async function startChat(address: string) {
 		loading = true
 
-		const chat: DraftChat = {
-			users: [$page.params.address, address],
-		}
-		const chatId = await adapters.startChat(address, chat)
+		const chatId = await adapters.startChat(address, $page.params.address)
+
 		loading = false
 		goto(routes.CHAT(chatId))
 	}
