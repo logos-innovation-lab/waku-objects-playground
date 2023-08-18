@@ -34,6 +34,8 @@
 	let div: HTMLElement
 	let autoscroll = true
 
+	$: chat = $chats.chats.get($page.params.id)
+
 	beforeUpdate(() => {
 		autoscroll = div && div.offsetHeight + div.scrollTop > div.scrollHeight - 74
 	})
@@ -52,6 +54,8 @@
 				})
 			}
 		}, 0)
+
+		chats.updateChat($page.params.id, (chat) => ({ ...chat, unread: 0 }))
 	})
 
 	$: messages = $chats.chats.get($page.params.id)?.messages || []
@@ -64,8 +68,6 @@
 		text = ''
 		loading = false
 	}
-
-	$: chat = $chats.chats.get($page.params.id)
 
 	$: inviter = chat?.users.find((user) => user.address === chat?.inviter)
 
