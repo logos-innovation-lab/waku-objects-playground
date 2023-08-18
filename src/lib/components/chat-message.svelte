@@ -1,9 +1,21 @@
 <script lang="ts">
+	//draws the message bubble
 	export let bubble = false
+
+	//am I the sender of this message?
 	export let myMessage = false
+
+	//did this message come from an object?
 	export let object = false
+
+	//is this message in a group chat?
 	export let group = false
-	export let sender: undefined | string = undefined
+
+	//is the sender of the current message the same as the previous message?
+	export let sameSender = false
+
+	//name of the person who sent the message
+	export let senderName: undefined | string = undefined
 
 	const isFF = () => {
 		let browserInfo = navigator.userAgent
@@ -14,13 +26,13 @@
 <div
 	class={`message ${myMessage ? 'my-message' : 'their-message'} ${isFF() ? 'ff' : ''} ${
 		object ? 'object' : ''
-	} ${group ? 'group' : ''}`}
+	} ${group ? 'group' : ''} ${sameSender ? 'same' : ''}`}
 >
 	<div class={` ${bubble ? 'bubble message-content message-text text-lg' : ''}`}>
 		<slot />
-		{#if sender}
+		{#if senderName}
 			<div class="author">
-				{sender}
+				{senderName}
 			</div>
 		{/if}
 	</div>
@@ -34,7 +46,6 @@
 <style lang="scss">
 	.message {
 		display: flex;
-		gap: var(--spacing-6);
 		flex-direction: column;
 		align-items: flex-end;
 		max-width: 75%;
@@ -86,12 +97,12 @@
 		position: relative;
 
 		//The + combinator matches the second element only if it immediately follows the first element.
-		& + .their-message:not(.ff) .message-text {
+		& + .their-message.same:not(.ff) .message-text {
 			border-top-left-radius: 0;
 		}
 
 		//This combination matches the first element only if it immediately precedes the second element.
-		&:has(+ .their-message) {
+		&:has(+ .their-message.same) {
 			margin-bottom: var(--spacing-6);
 			.message-text {
 				border-bottom-left-radius: 0;
