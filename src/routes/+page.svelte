@@ -24,6 +24,7 @@
 	$: orderedChats = Array.from($chats.chats)
 		.map(([, chat]) => chat)
 		.sort((a, b) => lastChatMessageTimestamp(b) - lastChatMessageTimestamp(a))
+		.filter((chat) => chat.chatId) // HACK to remove early version broken group chats
 
 	function lastChatMessageTimestamp(chat: Chat) {
 		const lastMessage = chat.messages.slice(-1)[0]
@@ -109,56 +110,54 @@
 							userMessages.length > 0 ? userMessages[userMessages.length - 1] : undefined}
 						{@const myMessage = lastMessage && lastMessage.fromAddress === wallet.address}
 						{@const otherUser = chat.users.find((m) => m.address !== wallet.address)}
-						{#if chat.chatId}
-							<li>
-								<div
-									class="chat-button"
-									on:click={() =>
-										isGroupChatId(chat.chatId)
-											? goto(ROUTES.GROUP_CHAT(chat.chatId))
-											: goto(ROUTES.CHAT(chat.chatId))}
-									on:keypress={() =>
-										isGroupChatId(chat.chatId)
-											? goto(ROUTES.GROUP_CHAT(chat.chatId))
-											: goto(ROUTES.CHAT(chat.chatId))}
-									role="button"
-									tabindex="0"
-								>
-									<Container grow>
-										<div class="chat">
-											{#if isGroupChatId(chat.chatId)}
-												<Avatar size={70} picture={chat?.avatar} />
-											{:else}
-												<Avatar size={70} picture={otherUser?.avatar} />
-											{/if}
-											<div class="content">
-												<div class="user-info">
-													<span class="username text-lg text-bold">
-														{#if isGroupChatId(chat.chatId)}
-															{chat?.name}
-															<Events />
-														{:else}
-															{otherUser?.name}
-														{/if}
-														{#if chat.unread > 0}
-															<Badge dark>
-																{chat.unread}
-															</Badge>
-														{/if}
-													</span>
-												</div>
-												<p class={`message text-serif ${myMessage ? 'my-message' : ''}`}>
-													{myMessage ? 'You: ' : ''}
-													{lastMessage && lastMessage.type === 'user'
-														? lastMessage.text.substring(0, 50)
-														: 'No messages yet'}
-												</p>
+						<li>
+							<div
+								class="chat-button"
+								on:click={() =>
+									isGroupChatId(chat.chatId)
+										? goto(ROUTES.GROUP_CHAT(chat.chatId))
+										: goto(ROUTES.CHAT(chat.chatId))}
+								on:keypress={() =>
+									isGroupChatId(chat.chatId)
+										? goto(ROUTES.GROUP_CHAT(chat.chatId))
+										: goto(ROUTES.CHAT(chat.chatId))}
+								role="button"
+								tabindex="0"
+							>
+								<Container grow>
+									<div class="chat">
+										{#if isGroupChatId(chat.chatId)}
+											<Avatar size={70} picture={chat?.avatar} />
+										{:else}
+											<Avatar size={70} picture={otherUser?.avatar} />
+										{/if}
+										<div class="content">
+											<div class="user-info">
+												<span class="username text-lg text-bold">
+													{#if isGroupChatId(chat.chatId)}
+														{chat?.name}
+														<Events />
+													{:else}
+														{otherUser?.name}
+													{/if}
+													{#if chat.unread > 0}
+														<Badge dark>
+															{chat.unread}
+														</Badge>
+													{/if}
+												</span>
 											</div>
+											<p class={`message text-serif ${myMessage ? 'my-message' : ''}`}>
+												{myMessage ? 'You: ' : ''}
+												{lastMessage && lastMessage.type === 'user'
+													? lastMessage.text.substring(0, 50)
+													: 'No messages yet'}
+											</p>
 										</div>
-									</Container>
-								</div>
-							</li>
-						{/if}
+									</div>
+								</Container>
+							</div>
+						</li>
 					{/each}
 				</ul>
 			</Layout>
