@@ -357,8 +357,6 @@ export default class WakuAdapter implements Adapter {
 		const storageChatEntries = await ws.getDoc<StorageChatEntry[]>('chats', address)
 		chats.update((state) => ({ ...state, chats: new Map(storageChatEntries), loading: false }))
 
-		console.debug({ chats: get(chats) })
-
 		// eslint-disable-next-line @typescript-eslint/no-this-alias
 		const adapter = this
 		const allChats = Array.from(get(chats).chats)
@@ -369,7 +367,7 @@ export default class WakuAdapter implements Adapter {
 		const lastSeenMessageTime = getLastSeenMessageTime(privateChats)
 		const now = new Date()
 		const timeFilter = {
-			startTime: new Date(lastSeenMessageTime),
+			startTime: new Date(lastSeenMessageTime + 1),
 			endTime: now,
 		}
 		await this.subscribeToPrivateMessages(address, address, wakuObjectAdapter, timeFilter)

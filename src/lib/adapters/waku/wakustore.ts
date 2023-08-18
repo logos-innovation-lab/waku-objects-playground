@@ -53,11 +53,23 @@ export function makeWakustore(waku: LightNode) {
 				const message = await messagePromise
 				if (message) {
 					const decodedPayload = decodeMessagePayload(message)
-					// const timestamp = Number(message.timestamp)
-					// console.debug({ decodedPayload, timestamp })
+					const typedPayload = JSON.parse(decodedPayload) as T & { timestamp?: number }
 
-					const typedPayload = JSON.parse(decodedPayload) as T
-					typedResults.push(typedPayload)
+					// HACK to use waku timestamp instead of the type T's
+					if (
+						typedPayload &&
+						typeof typedPayload === 'object' &&
+						!Array.isArray(typedPayload) &&
+						typedPayload.timestamp
+					) {
+						typedResults.push({
+							...typedPayload,
+							timestamp: Number(message.timestamp),
+							origTimestamp: typedPayload.timestamp,
+						})
+					} else {
+						typedResults.push(typedPayload)
+					}
 
 					// reached the limit
 					if (
