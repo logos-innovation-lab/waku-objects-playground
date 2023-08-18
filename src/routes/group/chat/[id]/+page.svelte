@@ -163,11 +163,10 @@
 								{#each messages as message, i}
 									{#if message.type === 'user' && message.text.length > 0}
 										{@const len = messages.length}
-										{@const sameSender =
-											messages[i].fromAddress === messages[(i + len - 1) % len].fromAddress}
+										{@const sameSender = messages[i].fromAddress === messages[i - 1]?.fromAddress}
 										{@const lastMessage =
 											i + 1 === messages.length ||
-											messages[i].fromAddress !== messages[(i + 1) % len].fromAddress ||
+											messages[i].fromAddress !== messages[i + 1]?.fromAddress ||
 											messages[(i + 1) % len].type !== 'user'}
 										{@const sender = chat.users.find((u) => message.fromAddress === u.address)}
 										<ChatMessage
