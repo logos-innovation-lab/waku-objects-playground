@@ -89,6 +89,7 @@ export async function readStore(
 ): Promise<QueryResult> {
 	const topic = getTopic(contentTopic, id)
 	const decoder = createDecoder(topic)
+
 	return waku.store.queryGenerator([decoder], storeQueryOptions)
 }
 

@@ -100,7 +100,7 @@ export function makeWakustore(waku: LightNode) {
 	}
 
 	async function setDoc<T>(contentTopic: ContentTopic, id: string, data: T) {
-		await storeDocument(waku, contentTopic, id, data)
+		return await storeDocument(waku, contentTopic, id, data)
 	}
 
 	async function onSnapshot<T>(query: Query, callback: (value: T) => void): Promise<Unsubscribe> {

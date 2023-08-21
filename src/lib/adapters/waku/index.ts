@@ -9,6 +9,7 @@ import {
 	type DataMessage,
 	getLastMessageTime,
 	getLastSeenMessageTime,
+	type ChatData,
 } from '$lib/stores/chat'
 import type { User } from '$lib/types'
 import { PageDirection, type LightNode, type TimeFilter } from '@waku/interfaces'
@@ -24,6 +25,13 @@ import { makeWakuObjectAdapter } from '$lib/objects/adapter'
 import { fetchBalances } from '$lib/adapters/balance'
 import { makeWakustore } from './wakustore'
 import type { StorageChat, StorageChatEntry, StorageObjectEntry, StorageProfile } from './types'
+
+interface QueuedMessage {
+	message: Message
+	address: string
+	id: string
+	adapter: WakuObjectAdapter
+}
 
 function createChat(chatId: string, user: User, address: string): string {
 	const chat = {
@@ -109,6 +117,10 @@ async function executeOnDataMessage(
 export default class WakuAdapter implements Adapter {
 	private waku: LightNode | undefined
 	private subscriptions: Array<() => void> = []
+	private numWaitingSaveChats = 0
+	private isSavingChats = false
+	private queuedMessages: QueuedMessage[] = []
+	private isHandlingMessage = false
 
 	async onLogIn(wallet: BaseWallet): Promise<void> {
 		const address = wallet.address
@@ -147,8 +159,20 @@ export default class WakuAdapter implements Adapter {
 		}
 
 		// chat store
-		const subscribeChatStore = chats.subscribe((chatData) => {
-			ws.setDoc<StorageChatEntry[]>('chats', address, Array.from(chatData.chats))
+		const subscribeChatStore = chats.subscribe(async () => {
+			if (this.isSavingChats) {
+				this.numWaitingSaveChats++
+				return
+			}
+
+			this.isSavingChats = true
+
+			do {
+				this.numWaitingSaveChats = 0
+				await this.saveChatStore(address)
+			} while (this.numWaitingSaveChats > 0)
+
+			this.isSavingChats = false
 		})
 		this.subscriptions.push(subscribeChatStore)
 
@@ -264,6 +288,25 @@ export default class WakuAdapter implements Adapter {
 			...groupChat,
 			users: groupChat.users.concat(...users),
 		}
+		await ws.setDoc<StorageChat>('group-chats', chatId, updatedGroupChat)
+	}
+
+	async removeFromGroupChat(chatId: string, address: string): Promise<void> {
+		if (!this.waku) {
+			this.waku = await connectWaku()
+		}
+
+		const ws = makeWakustore(this.waku)
+
+		const groupChat = await ws.getDoc<StorageChat>('group-chats', chatId)
+		if (!groupChat) {
+			return
+		}
+		const updatedGroupChat = {
+			...groupChat,
+			users: groupChat.users.filter((user) => user !== address),
+		}
+
 		await ws.setDoc<StorageChat>('group-chats', chatId, updatedGroupChat)
 	}
 
@@ -448,14 +491,18 @@ export default class WakuAdapter implements Adapter {
 		const groupChatSubscription = await ws.onSnapshot<StorageChat>(
 			ws.docQuery('group-chats', groupChatId),
 			async (groupChat) => {
-				const updatedGroupChat = await this.storageChatToChat(groupChatId, groupChat)
-				chats.updateChat(groupChatId, (chat) => ({
-					...chat,
-					chatId: groupChatId,
-					users: updatedGroupChat.users,
-					name: updatedGroupChat.name,
-					avatar: updatedGroupChat.avatar,
-				}))
+				if (groupChat.users.includes(address)) {
+					const updatedGroupChat = await this.storageChatToChat(groupChatId, groupChat)
+					chats.updateChat(groupChatId, (chat) => ({
+						...chat,
+						chatId: groupChatId,
+						users: updatedGroupChat.users,
+						name: updatedGroupChat.name,
+						avatar: updatedGroupChat.avatar,
+					}))
+				} else {
+					chats.removeChat(groupChatId)
+				}
 			},
 		)
 		this.subscriptions.push(groupChatSubscription)
@@ -485,10 +532,44 @@ export default class WakuAdapter implements Adapter {
 				pageSize: 1000,
 			}),
 			(message) => {
-				this.handleMessage(message, address, id, wakuObjectAdapter)
+				this.queueMessage(message, address, id, wakuObjectAdapter)
 			},
 		)
 		this.subscriptions.push(subscription)
+	}
+
+	private async queueMessage(
+		message: Message,
+		address: string,
+		id: string,
+		adapter: WakuObjectAdapter,
+	) {
+		this.queuedMessages.push({
+			message,
+			address,
+			id,
+			adapter,
+		})
+
+		if (this.isHandlingMessage) {
+			return
+		}
+
+		this.isHandlingMessage = true
+
+		while (this.queuedMessages.length > 0) {
+			const queuedMessage = this.queuedMessages.shift()
+			if (queuedMessage) {
+				await this.handleMessage(
+					queuedMessage.message,
+					queuedMessage.address,
+					queuedMessage.id,
+					queuedMessage.adapter,
+				)
+			}
+		}
+
+		this.isHandlingMessage = false
 	}
 
 	private async handleMessage(
@@ -519,7 +600,9 @@ export default class WakuAdapter implements Adapter {
 			if (chatsMap.has(message.chatId)) {
 				return
 			}
-			createGroupChat(message.chatId, [])
+			createGroupChat(message.chatId, [], undefined, undefined, undefined, message.fromAddress)
+			// add the message to the private chat of the inviter
+			await addMessageToChat(address, adapter, message.fromAddress, message)
 			await this.subscribeToGroupChat(message.chatId, address, adapter)
 
 			return
@@ -568,5 +651,18 @@ export default class WakuAdapter implements Adapter {
 				}
 			})
 		}
+	}
+
+	private async saveChatStore(address: string) {
+		if (!this.waku) {
+			return
+		}
+
+		const ws = makeWakustore(this.waku)
+		const chatData: ChatData = get(chats)
+
+		const result = await ws.setDoc<StorageChatEntry[]>('chats', address, Array.from(chatData.chats))
+
+		return result
 	}
 }

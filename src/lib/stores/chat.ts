@@ -108,11 +108,12 @@ function createChatStore(): ChatStore {
 				if (!oldChat) {
 					return state
 				}
-				state.chats.set(chatId, update(oldChat))
+				const newMap = new Map(state.chats)
+				newMap.set(chatId, update(oldChat))
 
 				return {
 					...state,
-					chats: state.chats,
+					chats: newMap,
 				}
 			})
 		},

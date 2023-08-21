@@ -14,6 +14,7 @@ export interface Adapter {
 	startGroupChat(wallet: BaseWallet, chat: DraftChat): Promise<string>
 
 	addMemberToGroupChat(chatId: string, users: string[]): Promise<void>
+	removeFromGroupChat(chatId: string, address: string): Promise<void>
 	saveGroupChatProfile(chatId: string): Promise<void>
 
 	sendChatMessage(wallet: BaseWallet, chatId: string, text: string): Promise<void>

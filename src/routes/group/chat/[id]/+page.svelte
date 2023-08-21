@@ -17,7 +17,7 @@
 	import WakuObject from '$lib/objects/chat.svelte'
 
 	import { goto } from '$app/navigation'
-	import { chats, type Chat } from '$lib/stores/chat'
+	import { chats } from '$lib/stores/chat'
 	import adapters from '$lib/adapters'
 	import ROUTES from '$lib/routes'
 	import { browser } from '$app/environment'
@@ -30,6 +30,7 @@
 	import Spacer from '$lib/components/spacer.svelte'
 	import Checkmark from '$lib/components/icons/checkmark.svelte'
 	import Settings from '$lib/components/icons/settings.svelte'
+	import { walletStore } from '$lib/stores/wallet'
 
 	let div: HTMLElement
 	let autoscroll = true
@@ -42,6 +43,10 @@
 
 	afterUpdate(() => {
 		if (autoscroll) div.scrollTo({ top: div.scrollHeight, behavior: 'smooth' })
+
+		if (chat?.unread) {
+			chats.updateChat($page.params.id, (chat) => ({ ...chat, unread: 0 }))
+		}
 	})
 
 	onMount(() => {
@@ -55,7 +60,9 @@
 			}
 		}, 0)
 
-		chats.updateChat($page.params.id, (chat) => ({ ...chat, unread: 0 }))
+		if (chat?.unread) {
+			chats.updateChat($page.params.id, (chat) => ({ ...chat, unread: 0 }))
+		}
 	})
 
 	$: messages = $chats.chats.get($page.params.id)?.messages || []
@@ -70,14 +77,18 @@
 	}
 
 	$: inviter = chat?.users.find((user) => user.address === chat?.inviter)
+	$: wallet = $walletStore.wallet
 
 	function join() {
 		chats.updateChat($page.params.id, (chat) => ({ ...chat, joined: true }))
 	}
 
-	function decline() {
-		chats.removeChat($page.params.id)
-		goto(ROUTES.HOME)
+	async function decline() {
+		if (wallet?.address) {
+			chats.removeChat($page.params.id)
+			adapters.removeFromGroupChat($page.params.id, wallet.address)
+			goto(ROUTES.HOME)
+		}
 	}
 </script>
 

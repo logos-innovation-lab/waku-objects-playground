@@ -26,6 +26,9 @@
 	import { goto } from '$app/navigation'
 	import { getPicture, uploadPicture } from '$lib/adapters/ipfs'
 	import { onDestroy } from 'svelte'
+	import Logout from '$lib/components/icons/logout.svelte'
+	import { walletStore } from '$lib/stores/wallet'
+	import ROUTES from '$lib/routes'
 
 	$: chatId = $page.params.id
 	$: groupChat = $chats.chats.get(chatId)
@@ -74,6 +77,7 @@
 		debounceSaveProfile()
 	}
 
+	$: wallet = $walletStore.wallet
 	let timer: ReturnType<typeof setTimeout> | undefined
 
 	function saveProfileNow() {
@@ -98,6 +102,14 @@
 			saveProfileNow()
 		}
 	})
+
+	function leaveGroup() {
+		if (wallet?.address) {
+			chats.removeChat($page.params.id)
+			adapters.removeFromGroupChat($page.params.id, wallet.address)
+			goto(ROUTES.HOME)
+		}
+	}
 </script>
 
 <AuthenticatedOnly let:wallet>
@@ -194,6 +206,12 @@
 					</li>
 				{/each}
 			</ul>
+			<Container gap={12} alignItems="center" padY={24}>
+				<Button disabled={buttonDisabled} on:click={() => leaveGroup()}>
+					<Logout />
+					Leave group
+				</Button>
+			</Container>
 		</Layout>
 	{:else if screen === 'invite'}
 		<Header title="Invite to group">

@@ -37,6 +37,10 @@
 
 	afterUpdate(() => {
 		if (autoscroll) div.scrollTo({ top: div.scrollHeight, behavior: 'smooth' })
+
+		if (chat?.unread) {
+			chats.updateChat($page.params.id, (chat) => ({ ...chat, unread: 0 }))
+		}
 	})
 
 	onMount(() => {
@@ -46,7 +50,10 @@
 				behavior: 'auto',
 			})
 		}
-		chats.updateChat($page.params.id, (chat) => ({ ...chat, unread: 0 }))
+
+		if (chat?.unread) {
+			chats.updateChat($page.params.id, (chat) => ({ ...chat, unread: 0 }))
+		}
 	})
 
 	$: messages = $chats.chats.get($page.params.id)?.messages || []
