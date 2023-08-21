@@ -184,11 +184,9 @@ export default class WakuAdapter implements Adapter {
 		if (!this.waku) {
 			this.waku = await connectWaku()
 		}
-		const storageProfile = await this.getStorageProfile(address)
-		if (!storageProfile) {
-			console.error(`invalid user to save: ${address}`)
-			return
-		}
+
+		const defaultProfile: StorageProfile = { name: name ?? address }
+		const storageProfile = (await this.getStorageProfile(address)) || defaultProfile
 
 		if (avatar) storageProfile.avatar = avatar
 		if (name) storageProfile.name = name
