@@ -72,32 +72,11 @@
 	$: inviter = chat?.users.find((user) => user.address === chat?.inviter)
 
 	function join() {
-		chats.update((state) => {
-			const newChats = new Map<string, Chat>(state.chats)
-			const chat = newChats.get($page.params.id)
-			if (chat) {
-				chat.joined = true
-			}
-
-			return {
-				...state,
-				chats: newChats,
-				loading: false,
-			}
-		})
+		chats.updateChat($page.params.id, (chat) => ({ ...chat, joined: true }))
 	}
 
 	function decline() {
-		chats.update((state) => {
-			const newChats = new Map<string, Chat>(state.chats)
-			newChats.delete($page.params.id)
-
-			return {
-				...state,
-				chats: newChats,
-				loading: false,
-			}
-		})
+		chats.removeChat($page.params.id)
 		goto(ROUTES.HOME)
 	}
 </script>
@@ -149,11 +128,10 @@
 							<Checkmark />
 							Join group
 						</Button>
-						<!-- THIS BUTTON WILL BE UN-COMMENTED ONCE THE REMOVE CHAT FUNCTIONALITY IS IMPLEMENTED -->
-						<!-- <Button align="left" on:click={() => decline()}>
+						<Button align="left" on:click={() => decline()}>
 							<Close />
 							Decline
-						</Button> -->
+						</Button>
 					</Container>
 				</Container>
 			{:else}
