@@ -19,8 +19,8 @@ type JSONSerializable =
 	| number
 	| boolean
 	| null
-	| JSONValue[]
-	| { [key: string]: JSONValue }
+	| JSONSerializable[]
+	| Partial<Record<symbol, JSONSerializable>>
 
 export interface WakuObjectArgs<
 	StoreType extends JSONSerializable = JSONSerializable,
