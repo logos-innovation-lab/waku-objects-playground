@@ -1,12 +1,19 @@
 import type { WakuObjectDescriptor } from '..'
 import ChatComponent from './chat.svelte'
-import { SendTransactionDataMessageSchema } from './schemas'
+import {
+	SendTransactionDataMessageSchema,
+	type SendTransactionDataMessage,
+	type SendTransactionStore,
+} from './schemas'
 import StandaloneComponent from './standalone.svelte'
 import logo from './logo.svg'
 
 export const PAYGGY_OBJECT_ID = 'payggy'
 
-export const payggyDescriptor: WakuObjectDescriptor = {
+export const payggyDescriptor: WakuObjectDescriptor<
+	SendTransactionStore,
+	SendTransactionDataMessage
+> = {
 	objectId: PAYGGY_OBJECT_ID,
 	name: 'Payggy',
 	description: 'Send or request payments',

@@ -40,9 +40,10 @@ export interface WakuObjectArgs<
 	onViewChange: (view: string) => void
 }
 
-type WakuStoreType = JSONSerializable
-
-interface WakuObjectDescriptor {
+interface WakuObjectDescriptor<
+	StoreType extends JSONSerializable = JSONSerializable,
+	DataMessageType extends JSONSerializable = JSONSerializable,
+> {
 	readonly objectId: string
 	readonly name: string
 	readonly description: string
@@ -53,8 +54,8 @@ interface WakuObjectDescriptor {
 	onMessage?: (
 		address: string,
 		adapter: WakuObjectAdapter,
-		store: WakuStoreType,
-		updateStore: (updater: (state: WakuStoreType) => WakuStoreType) => void,
+		store: StoreType,
+		updateStore: (updater: (state: StoreType) => StoreType) => void,
 		message: DataMessage<DataMessageType>,
 	) => Promise<void>
 	// TODO onTransaction: (store: unknown, transaction: Transaction) => unknown
