@@ -15,7 +15,7 @@ export interface DataMessage<T extends JSONSerializable = JSONSerializable> {
 	fromAddress: string
 	objectId: string
 	instanceId: string
-	data?: T
+	data: T
 }
 
 export interface InviteMessage {
