@@ -6,7 +6,7 @@
 	import HelloWorldSender from './hello-world-sender.svelte'
 
 	export let message: DataMessage
-	export let args: WakuObjectArgs
+	export let args: WakuObjectArgs<HelloWorldStore>
 
 	$: helloWorldStore = args.store as HelloWorldStore | undefined
 	$: address = args.profile.address

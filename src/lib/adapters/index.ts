@@ -3,6 +3,7 @@ import type { Token } from '$lib/stores/balances'
 import WakuAdapter from '$lib/adapters/waku'
 import type { BaseWallet } from 'ethers'
 import type { User } from '$lib/objects/schemas'
+import type { JSONSerializable } from '$lib/objects'
 
 export interface Adapter {
 	onLogIn: (wallet: BaseWallet) => Promise<void>
@@ -23,7 +24,7 @@ export interface Adapter {
 		chatId: string,
 		objectId: string,
 		instanceId: string,
-		data: unknown,
+		data: JSONSerializable,
 	): Promise<void>
 	sendInvite(wallet: BaseWallet, chatId: string, users: string[]): Promise<void>
 
@@ -31,7 +32,7 @@ export interface Adapter {
 		address: string,
 		objectId: string,
 		instanceId: string,
-		updater: (state: unknown) => unknown,
+		updater: (state: JSONSerializable) => JSONSerializable,
 	): Promise<void>
 	sendTransaction(wallet: BaseWallet, to: string, token: Token): Promise<string>
 	estimateTransaction(wallet: BaseWallet, to: string, token: Token): Promise<Token>

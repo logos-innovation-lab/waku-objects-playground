@@ -1,3 +1,4 @@
+import type { JSONSerializable } from '$lib/objects'
 import type { Chat } from '$lib/stores/chat'
 
 export interface StorageChat {
@@ -13,4 +14,4 @@ export interface StorageProfile {
 
 export type StorageChatEntry = [chatId: string, chat: Chat]
 
-export type StorageObjectEntry = [objectId: string, object: unknown]
+export type StorageObjectEntry = [objectId: string, object: JSONSerializable]

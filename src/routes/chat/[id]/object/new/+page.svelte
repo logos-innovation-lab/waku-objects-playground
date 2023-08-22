@@ -17,6 +17,7 @@
 	import { wakuObjectList } from '$lib/objects/lookup'
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 	import Layout from '$lib/components/layout.svelte'
+	import type { JSONSerializable } from '$lib/objects'
 
 	const objects = wakuObjectList.map((object) => ({
 		...object,
@@ -34,7 +35,7 @@
 	let loading = false
 	let text = ''
 
-	const createObject = async <T>(objectId: string, t: T) => {
+	const createObject = async <T extends JSONSerializable>(objectId: string, t: T) => {
 		// TODO random
 		const genRanHex = (size: number) =>
 			[...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')
@@ -42,7 +43,7 @@
 		await sendData(objectId, instanceId, t)
 	}
 
-	const sendData = async (objectId: string, instanceId: string, data: unknown) => {
+	const sendData = async (objectId: string, instanceId: string, data: JSONSerializable) => {
 		loading = true
 		const wallet = $walletStore.wallet
 		if (!wallet) throw new Error('no wallet')
