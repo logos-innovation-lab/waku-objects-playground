@@ -210,7 +210,7 @@ export default class WakuAdapter implements Adapter {
 		}
 
 		const defaultProfile: StorageProfile = { name: name ?? address }
-		const storageProfile = (await this.getStorageProfile(address)) || defaultProfile
+		const storageProfile = (await this.fetchStorageProfile(address)) || defaultProfile
 
 		if (avatar) storageProfile.avatar = avatar
 		if (name) storageProfile.name = name
@@ -450,7 +450,8 @@ export default class WakuAdapter implements Adapter {
 		}
 	}
 
-	private async getStorageProfile(address: string): Promise<StorageProfile | undefined> {
+	// fetches the profile from the network
+	private async fetchStorageProfile(address: string): Promise<StorageProfile | undefined> {
 		if (!this.waku) {
 			throw 'no waku'
 		}
@@ -461,8 +462,18 @@ export default class WakuAdapter implements Adapter {
 		return storageProfile
 	}
 
+	// optimised version that first checks if the user is a contact
+	// then fetches from the network if not
 	private async storageProfileToUser(address: string): Promise<User | undefined> {
-		const storageProfile = await this.getStorageProfile(address)
+		const contactUser = Array.from(get(chats).chats)
+			.flatMap(([, chat]) => chat.users)
+			.find((user) => user.address === address)
+
+		if (contactUser) {
+			return contactUser
+		}
+
+		const storageProfile = await this.fetchStorageProfile(address)
 		if (!storageProfile) {
 			return
 		}
@@ -626,14 +637,14 @@ export default class WakuAdapter implements Adapter {
 		const contacts = Array.from(get(chats).chats).flatMap(([, chat]) => chat.users)
 		const changes = new Map<string, User>()
 		for (const contact of contacts) {
-			const contactUser = await this.storageProfileToUser(contact.address)
+			const storageProfile = await this.fetchStorageProfile(contact.address)
 
-			if (!contactUser) {
+			if (!storageProfile) {
 				continue
 			}
 
-			if (contactUser.name != contact.name || contactUser.avatar != contact.avatar) {
-				changes.set(contact.address, contactUser)
+			if (storageProfile.name != contact.name || storageProfile.avatar != contact.avatar) {
+				changes.set(contact.address, { ...storageProfile, address: contact.address })
 			}
 		}
 		if (changes.size > 0) {
