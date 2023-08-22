@@ -17,7 +17,7 @@
 	import WakuObject from '$lib/objects/chat.svelte'
 
 	import { goto } from '$app/navigation'
-	import { chats, type Chat } from '$lib/stores/chat'
+	import { chats } from '$lib/stores/chat'
 	import adapters from '$lib/adapters'
 	import ROUTES from '$lib/routes'
 	import { browser } from '$app/environment'
@@ -30,9 +30,12 @@
 	import Spacer from '$lib/components/spacer.svelte'
 	import Checkmark from '$lib/components/icons/checkmark.svelte'
 	import Settings from '$lib/components/icons/settings.svelte'
+	import { walletStore } from '$lib/stores/wallet'
 
 	let div: HTMLElement
 	let autoscroll = true
+
+	$: chat = $chats.chats.get($page.params.id)
 
 	beforeUpdate(() => {
 		autoscroll = div && div.offsetHeight + div.scrollTop > div.scrollHeight - 74
@@ -40,6 +43,10 @@
 
 	afterUpdate(() => {
 		if (autoscroll) div.scrollTo({ top: div.scrollHeight, behavior: 'smooth' })
+
+		if (chat?.unread) {
+			chats.updateChat($page.params.id, (chat) => ({ ...chat, unread: 0 }))
+		}
 	})
 
 	onMount(() => {
@@ -52,6 +59,10 @@
 				})
 			}
 		}, 0)
+
+		if (chat?.unread) {
+			chats.updateChat($page.params.id, (chat) => ({ ...chat, unread: 0 }))
+		}
 	})
 
 	$: messages = $chats.chats.get($page.params.id)?.messages || []
@@ -65,38 +76,19 @@
 		loading = false
 	}
 
-	$: chat = $chats.chats.get($page.params.id)
-
 	$: inviter = chat?.users.find((user) => user.address === chat?.inviter)
+	$: wallet = $walletStore.wallet
 
 	function join() {
-		chats.update((state) => {
-			const newChats = new Map<string, Chat>(state.chats)
-			const chat = newChats.get($page.params.id)
-			if (chat) {
-				chat.joined = true
-			}
-
-			return {
-				...state,
-				chats: newChats,
-				loading: false,
-			}
-		})
+		chats.updateChat($page.params.id, (chat) => ({ ...chat, joined: true }))
 	}
 
-	function decline() {
-		chats.update((state) => {
-			const newChats = new Map<string, Chat>(state.chats)
-			newChats.delete($page.params.id)
-
-			return {
-				...state,
-				chats: newChats,
-				loading: false,
-			}
-		})
-		goto(ROUTES.HOME)
+	async function decline() {
+		if (wallet?.address) {
+			chats.removeChat($page.params.id)
+			adapters.removeFromGroupChat($page.params.id, wallet.address)
+			goto(ROUTES.HOME)
+		}
 	}
 </script>
 
@@ -147,11 +139,10 @@
 							<Checkmark />
 							Join group
 						</Button>
-						<!-- THIS BUTTON WILL BE UN-COMMENTED ONCE THE REMOVE CHAT FUNCTIONALITY IS IMPLEMENTED -->
-						<!-- <Button align="left" on:click={() => decline()}>
+						<Button align="left" on:click={() => decline()}>
 							<Close />
 							Decline
-						</Button> -->
+						</Button>
 					</Container>
 				</Container>
 			{:else}

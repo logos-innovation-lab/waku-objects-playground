@@ -24,6 +24,7 @@
 	$: orderedChats = Array.from($chats.chats)
 		.map(([, chat]) => chat)
 		.sort((a, b) => lastChatMessageTimestamp(b) - lastChatMessageTimestamp(a))
+		.filter((chat) => chat.chatId) // HACK to remove early version broken group chats
 
 	function lastChatMessageTimestamp(chat: Chat) {
 		const lastMessage = chat.messages.slice(-1)[0]

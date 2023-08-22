@@ -10,10 +10,12 @@ export interface Adapter {
 	saveUserProfile(address: string, name?: string, avatar?: string): Promise<void>
 	getUserProfile(address: string): Promise<User | undefined>
 
-	startChat(address: string, chat: DraftChat): Promise<string>
+	startChat(address: string, peerAddress: string): Promise<string>
 	startGroupChat(wallet: BaseWallet, chat: DraftChat): Promise<string>
 
 	addMemberToGroupChat(chatId: string, users: string[]): Promise<void>
+	removeFromGroupChat(chatId: string, address: string): Promise<void>
+	saveGroupChatProfile(chatId: string): Promise<void>
 
 	sendChatMessage(wallet: BaseWallet, chatId: string, text: string): Promise<void>
 	sendData(

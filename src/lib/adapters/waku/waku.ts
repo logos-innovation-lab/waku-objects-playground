@@ -14,7 +14,6 @@ import {
 	type Callback,
 	type StoreQueryOptions,
 	type Unsubscribe,
-	PageDirection,
 } from '@waku/interfaces'
 
 const peerMultiaddr = multiaddr(
@@ -25,17 +24,9 @@ const peerMultiaddr = multiaddr(
 	// '/ip4/127.0.0.1/tcp/8000/ws/p2p/16Uiu2HAm53sojJN72rFbYg6GV2LpRRER9XeWkiEAhjKy3aL9cN5Z',
 )
 
-type ContentTopic =
-	| 'private-message'
-	| 'profile'
-	| 'contact'
-	| 'chats'
-	| 'objects'
-	| 'balances'
-	| 'transactions'
-	| 'group-chats'
+export type ContentTopic = 'private-message' | 'profile' | 'chats' | 'objects' | 'group-chats'
 
-type QueryResult = AsyncGenerator<Promise<DecodedMessage | undefined>[]>
+export type QueryResult = AsyncGenerator<Promise<DecodedMessage | undefined>[]>
 
 const topicApp = 'wakuobjects-playground'
 const topicVersion = '1'
@@ -90,34 +81,6 @@ export async function storeDocument(
 	return await waku.lightPush.send(encoder, { payload })
 }
 
-export async function readLatestDocument(
-	waku: LightNode,
-	contentTopic: ContentTopic,
-	id: string,
-): Promise<unknown | undefined> {
-	const storeQueryOptions: StoreQueryOptions = {
-		pageDirection: PageDirection.BACKWARD,
-		pageSize: 1,
-	}
-	const decodedMessages = await readStore(waku, contentTopic, id, storeQueryOptions)
-	for await (const messagePromises of decodedMessages) {
-		for (const messagePromise of messagePromises) {
-			const message = await messagePromise
-			if (message) {
-				const decodedPayload = decodeMessagePayload(message)
-				// TODO HACK
-				if (!decodedPayload || decodedPayload === 'undefined') {
-					return
-				}
-
-				return JSON.parse(decodedPayload)
-			} else {
-				return
-			}
-		}
-	}
-}
-
 export async function readStore(
 	waku: LightNode,
 	contentTopic: ContentTopic,
@@ -126,23 +89,8 @@ export async function readStore(
 ): Promise<QueryResult> {
 	const topic = getTopic(contentTopic, id)
 	const decoder = createDecoder(topic)
+
 	return waku.store.queryGenerator([decoder], storeQueryOptions)
-}
-
-export async function parseQueryResults<T>(results: QueryResult): Promise<T[]> {
-	const typedResults: T[] = []
-	for await (const messagePromises of results) {
-		for (const messagePromise of messagePromises) {
-			const message = await messagePromise
-			if (message) {
-				const decodedPayload = decodeMessagePayload(message)
-
-				const typedPayload = JSON.parse(decodedPayload) as T
-				typedResults.push(typedPayload)
-			}
-		}
-	}
-	return typedResults
 }
 
 export function decodeMessagePayload(wakuMessage: DecodedMessage): string {

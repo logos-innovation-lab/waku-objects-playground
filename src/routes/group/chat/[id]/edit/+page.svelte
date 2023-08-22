@@ -25,6 +25,10 @@
 	import routes from '$lib/routes'
 	import { goto } from '$app/navigation'
 	import { getPicture, uploadPicture } from '$lib/adapters/ipfs'
+	import { onDestroy } from 'svelte'
+	import Logout from '$lib/components/icons/logout.svelte'
+	import { walletStore } from '$lib/stores/wallet'
+	import ROUTES from '$lib/routes'
 
 	$: chatId = $page.params.id
 	$: groupChat = $chats.chats.get(chatId)
@@ -64,6 +68,47 @@
 
 	function isGroupMember(address: string) {
 		return groupChat?.users.map((user) => user.address).includes(address)
+	}
+
+	$: if (
+		!$chats.loading &&
+		((name && name !== groupChat?.name) || (picture && picture !== groupChat?.avatar))
+	) {
+		debounceSaveProfile()
+	}
+
+	$: wallet = $walletStore.wallet
+	let timer: ReturnType<typeof setTimeout> | undefined
+
+	function saveProfileNow() {
+		if (!groupChat) {
+			return
+		}
+		adapters.saveGroupChatProfile(groupChat?.chatId, name, picture)
+	}
+
+	// Debounce saving profile
+	function debounceSaveProfile() {
+		if (timer) clearTimeout(timer)
+		timer = setTimeout(() => {
+			saveProfileNow()
+			timer = undefined
+		}, 1000)
+	}
+
+	onDestroy(() => {
+		if (timer) {
+			clearTimeout(timer)
+			saveProfileNow()
+		}
+	})
+
+	function leaveGroup() {
+		if (wallet?.address) {
+			chats.removeChat($page.params.id)
+			adapters.removeFromGroupChat($page.params.id, wallet.address)
+			goto(ROUTES.HOME)
+		}
 	}
 </script>
 
@@ -161,6 +206,12 @@
 					</li>
 				{/each}
 			</ul>
+			<Container gap={12} alignItems="center" padY={24}>
+				<Button disabled={buttonDisabled} on:click={() => leaveGroup()}>
+					<Logout />
+					Leave group
+				</Button>
+			</Container>
 		</Layout>
 	{:else if screen === 'invite'}
 		<Header title="Invite to group">

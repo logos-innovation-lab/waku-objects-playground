@@ -29,12 +29,18 @@
 	let div: HTMLElement
 	let autoscroll = true
 
+	$: chat = $chats.chats.get($page.params.id)
+
 	beforeUpdate(() => {
 		autoscroll = div && div.offsetHeight + div.scrollTop > div.scrollHeight - 74
 	})
 
 	afterUpdate(() => {
 		if (autoscroll) div.scrollTo({ top: div.scrollHeight, behavior: 'smooth' })
+
+		if (chat?.unread) {
+			chats.updateChat($page.params.id, (chat) => ({ ...chat, unread: 0 }))
+		}
 	})
 
 	onMount(() => {
@@ -43,6 +49,10 @@
 				top: div.scrollHeight,
 				behavior: 'auto',
 			})
+		}
+
+		if (chat?.unread) {
+			chats.updateChat($page.params.id, (chat) => ({ ...chat, unread: 0 }))
 		}
 	})
 
@@ -56,8 +66,6 @@
 		text = ''
 		loading = false
 	}
-
-	$: chat = $chats.chats.get($page.params.id)
 </script>
 
 <AuthenticatedOnly let:wallet>
