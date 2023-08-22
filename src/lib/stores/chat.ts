@@ -1,3 +1,4 @@
+import type { JSONSerializable } from '$lib/objects'
 import type { User } from '$lib/types'
 import { writable, type Writable } from 'svelte/store'
 
@@ -8,7 +9,7 @@ export interface UserMessage {
 	text: string
 }
 
-export interface DataMessage<T = unknown> {
+export interface DataMessage<T extends JSONSerializable = JSONSerializable> {
 	type: 'data'
 	timestamp: number
 	fromAddress: string

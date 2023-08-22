@@ -1,9 +1,10 @@
+import type { JSONSerializable } from '$lib/objects'
 import { writable, type Writable } from 'svelte/store'
 
 export interface ObjectState {
 	loading: boolean
 	lastUpdated: number
-	objects: Map<string, unknown>
+	objects: Map<string, JSONSerializable>
 	error?: Error
 }
 
@@ -17,7 +18,7 @@ export function objectKey(objectId: string, instanceId: string): string {
 function createObjectStore(): ObjectStore {
 	const store = writable<ObjectState>({
 		loading: true,
-		objects: new Map<string, unknown>(),
+		objects: new Map<string, JSONSerializable>(),
 		lastUpdated: 0,
 	})
 	return {

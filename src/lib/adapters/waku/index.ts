@@ -20,7 +20,7 @@ import { objectStore, objectKey } from '$lib/stores/objects'
 import { lookup } from '$lib/objects/lookup'
 import type { Token } from '$lib/stores/balances'
 import { defaultBlockchainNetwork, sendTransaction } from '$lib/adapters/transaction'
-import type { WakuObjectAdapter } from '$lib/objects'
+import type { JSONSerializable, WakuObjectAdapter } from '$lib/objects'
 import { makeWakuObjectAdapter } from '$lib/objects/adapter'
 import { fetchBalances } from '$lib/adapters/balance'
 import { makeWakustore } from './wakustore'
@@ -98,8 +98,11 @@ async function executeOnDataMessage(
 
 	if (descriptor && descriptor.onMessage && wakuObjectStore.lastUpdated < chatMessage.timestamp) {
 		const objects = wakuObjectStore.objects
-		const updateStore = (updater: (_store: unknown) => unknown) => {
+		const updateStore = (updater: (_store: JSONSerializable) => JSONSerializable) => {
 			const store = objects.get(key)
+			if (!store) {
+				return
+			}
 			const newStore = updater(store)
 			const newObjects = new Map(objects)
 			newObjects.set(key, newStore)
@@ -110,6 +113,10 @@ async function executeOnDataMessage(
 			}))
 		}
 		const store = objects.get(key)
+		if (!store) {
+			return
+		}
+
 		await descriptor.onMessage(address, adapter, store, updateStore, chatMessage)
 	}
 }
@@ -354,7 +361,7 @@ export default class WakuAdapter implements Adapter {
 		chatId: string,
 		objectId: string,
 		instanceId: string,
-		data: unknown,
+		data: JSONSerializable,
 	): Promise<void> {
 		if (!this.waku) {
 			this.waku = await connectWaku()
@@ -403,7 +410,7 @@ export default class WakuAdapter implements Adapter {
 		_address: string,
 		objectId: string,
 		instanceId: string,
-		updater: (state: unknown) => unknown,
+		updater: (state: JSONSerializable) => JSONSerializable,
 	): Promise<void> {
 		if (!this.waku) {
 			this.waku = await connectWaku()
@@ -413,7 +420,11 @@ export default class WakuAdapter implements Adapter {
 		const wakuObjectStore = get(objectStore)
 
 		const objects = wakuObjectStore.objects
-		const newStore = updater(objects.get(key))
+		const object = objects.get(key)
+		if (!object) {
+			return
+		}
+		const newStore = updater(object)
 		const newObjects = new Map(objects)
 		newObjects.set(key, newStore)
 		objectStore.update((state) => ({ ...state, objects: newObjects, lastUpdated: Date.now() }))

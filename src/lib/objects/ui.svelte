@@ -3,7 +3,7 @@
 	import { lookup } from './lookup'
 	import { balanceStore, type Token } from '$lib/stores/balances'
 	import { chats, type Chat } from '$lib/stores/chat'
-	import type { WakuObjectArgs } from '.'
+	import type { JSONSerializable, WakuObjectArgs } from '.'
 	import { profile } from '$lib/stores/profile'
 	import { makeWakuObjectAdapter } from './adapter'
 	import type { User } from '$lib/types'
@@ -21,7 +21,7 @@
 	const component = lookup(objectId)?.standalone
 
 	let args: WakuObjectArgs
-	let store: unknown
+	let store: JSONSerializable | undefined
 	let tokens: Token[]
 	let chat: Chat | undefined
 	let userProfile: User
@@ -29,11 +29,11 @@
 
 	$: loading = $chats.loading || $objectStore.loading || $balanceStore.loading
 
-	function send(data: unknown): Promise<void> {
+	function send(data: JSONSerializable): Promise<void> {
 		return adapter.sendData(wallet, chatId, objectId, instanceId, data)
 	}
 
-	function updateStore(updater: (state: unknown) => unknown) {
+	function updateStore(updater: (state: JSONSerializable) => JSONSerializable) {
 		adapter.updateStore(wallet.address, objectId, instanceId, updater)
 	}
 
@@ -53,7 +53,7 @@
 		chat = $chats.chats.get(chatId)
 	}
 
-	$: if (chat) {
+	$: if (store && chat) {
 		users = chat.users
 
 		const wakuObjectAdapter = makeWakuObjectAdapter(adapter, wallet)

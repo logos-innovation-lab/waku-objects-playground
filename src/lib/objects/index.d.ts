@@ -14,8 +14,18 @@ export interface WakuObjectAdapter {
 	getContract(address: string, abi: Interface): Contract
 }
 
-export interface WakuObjectArgs<StoreType = unknown, DataMessageType extends object = unknown>
-	extends WakuObjectAdapter {
+type JSONSerializable =
+	| string
+	| number
+	| boolean
+	| null
+	| JSONValue[]
+	| { [key: string]: JSONValue }
+
+export interface WakuObjectArgs<
+	StoreType extends JSONSerializable = JSONSerializable,
+	DataMessageType extends JSONSerializable = JSONSerializable,
+> extends WakuObjectAdapter {
 	readonly instanceId: string
 	readonly profile: User
 	readonly users: User[]
@@ -30,7 +40,7 @@ export interface WakuObjectArgs<StoreType = unknown, DataMessageType extends obj
 	onViewChange: (view: string) => void
 }
 
-type WakuStoreType = unknown
+type WakuStoreType = JSONSerializable
 
 interface WakuObjectDescriptor {
 	readonly objectId: string
