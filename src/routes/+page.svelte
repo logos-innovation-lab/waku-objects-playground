@@ -14,7 +14,7 @@
 
 	// Stores
 	import { profile } from '$lib/stores/profile'
-	import { chats, isGroupChatId, type Chat } from '$lib/stores/chat'
+	import { chats, isGroupChatId, type Chat, type Message } from '$lib/stores/chat'
 
 	import ROUTES from '$lib/routes'
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
@@ -29,6 +29,19 @@
 	function lastChatMessageTimestamp(chat: Chat) {
 		const lastMessage = chat.messages.slice(-1)[0]
 		return lastMessage ? lastMessage.timestamp : 0
+	}
+
+	function lastSenderName(chat: Chat, myMessage?: boolean, lastMessage?: Message) {
+		if (myMessage) {
+			return 'You: '
+		}
+
+		if (isGroupChatId(chat.chatId)) {
+			const name = chat.users.find((user) => user.address === lastMessage?.fromAddress)?.name
+			return name ? `${name}: ` : ''
+		}
+
+		return ''
 	}
 
 	$: loading = $profile.loading || $chats.loading
@@ -110,6 +123,7 @@
 							userMessages.length > 0 ? userMessages[userMessages.length - 1] : undefined}
 						{@const myMessage = lastMessage && lastMessage.fromAddress === wallet.address}
 						{@const otherUser = chat.users.find((m) => m.address !== wallet.address)}
+						{@const senderName = lastSenderName(chat, myMessage, lastMessage)}
 						<li>
 							<div
 								class="chat-button"
@@ -152,7 +166,7 @@
 												</span>
 											</div>
 											<p class={`message text-serif ${myMessage ? 'my-message' : ''}`}>
-												{myMessage ? 'You: ' : ''}
+												{senderName}
 												{lastMessage && lastMessage.type === 'user'
 													? lastMessage.text.substring(0, 50)
 													: 'No messages yet'}
