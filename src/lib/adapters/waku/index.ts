@@ -25,6 +25,7 @@ import { makeWakuObjectAdapter } from '$lib/objects/adapter'
 import { fetchBalances } from '$lib/adapters/balance'
 import { makeWakustore } from './wakustore'
 import type { StorageChat, StorageChatEntry, StorageObjectEntry, StorageProfile } from './types'
+import { genRanHex } from '$lib/utils'
 
 interface QueuedMessage {
 	message: Message
@@ -260,8 +261,6 @@ export default class WakuAdapter implements Adapter {
 			throw 'invalid chat'
 		}
 
-		const genRanHex = (size: number) =>
-			[...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')
 		const chatId = genRanHex(64)
 
 		const userPromises = chat.users.map((address) => this.storageProfileToUser(address))
