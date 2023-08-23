@@ -4,12 +4,11 @@
 	import { goto } from '$app/navigation'
 	import routes from '$lib/routes'
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
-
-	const genRanHex = (size: number) =>
-		[...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')
+	import { genRandomHex } from '$lib/utils'
 
 	const objectId = $page.params.object_id
-	const instanceId = $page.params.instance_id === 'new' ? genRanHex(12) : $page.params.instance_id
+	const instanceId =
+		$page.params.instance_id === 'new' ? genRandomHex(12) : $page.params.instance_id
 	const chatId = $page.params.id
 	$: view = $page.params.view
 

@@ -18,6 +18,7 @@
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 	import Layout from '$lib/components/layout.svelte'
 	import type { JSONSerializable } from '$lib/objects'
+	import { genRandomHex } from '$lib/utils'
 
 	const objects = wakuObjectList.map((object) => ({
 		...object,
@@ -36,10 +37,7 @@
 	let text = ''
 
 	const createObject = async <T extends JSONSerializable>(objectId: string, t: T) => {
-		// TODO random
-		const genRanHex = (size: number) =>
-			[...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')
-		const instanceId = genRanHex(12)
+		const instanceId = genRandomHex(12)
 		await sendData(objectId, instanceId, t)
 	}
 
