@@ -53,7 +53,7 @@
 		chat = $chats.chats.get(chatId)
 	}
 
-	$: if (store && chat) {
+	$: if (chat) {
 		users = chat.users
 
 		const wakuObjectAdapter = makeWakuObjectAdapter(adapter, wallet)

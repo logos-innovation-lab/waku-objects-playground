@@ -14,7 +14,7 @@ export interface WakuObjectAdapter {
 	getContract(address: string, abi: Interface): Contract
 }
 
-type JSONSerializable =
+export type JSONSerializable =
 	| string
 	| number
 	| boolean
