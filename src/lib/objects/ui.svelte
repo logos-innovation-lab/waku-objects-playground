@@ -53,8 +53,6 @@
 		chat = $chats.chats.get(chatId)
 	}
 
-	$: console.debug({ store, chat, users, userProfile })
-
 	$: if (chat) {
 		users = chat.users
 
