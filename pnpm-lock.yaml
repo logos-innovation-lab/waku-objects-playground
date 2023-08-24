@@ -19,6 +19,9 @@ devDependencies:
   '@total-typescript/ts-reset':
     specifier: ^0.4.2
     version: 0.4.2
+  '@types/node':
+    specifier: ^20.5.4
+    version: 20.5.4
   '@typescript-eslint/eslint-plugin':
     specifier: ^5.61.0
     version: 5.61.0(@typescript-eslint/parser@5.61.0)(eslint@8.44.0)(typescript@5.1.6)
@@ -29,8 +32,8 @@ devDependencies:
     specifier: ^2.0.1
     version: 2.0.1
   '@waku-objects/sandbox-example':
-    specifier: ^0.0.2
-    version: 0.0.2
+    specifier: file:../waku-objects/objects/sandbox-example
+    version: link:../waku-objects/objects/sandbox-example
   '@waku/interfaces':
     specifier: ^0.0.15
     version: 0.0.15
@@ -90,13 +93,13 @@ devDependencies:
     version: 5.0.4(sass@1.63.6)(svelte@4.0.3)(typescript@5.1.6)
   ts-node:
     specifier: ^10.9.1
-    version: 10.9.1(typescript@5.1.6)
+    version: 10.9.1(@types/node@20.5.4)(typescript@5.1.6)
   typescript:
     specifier: ^5.1.6
     version: 5.1.6
   vite:
     specifier: ^4.3.9
-    version: 4.3.9(@types/node@18.15.13)(sass@1.63.6)
+    version: 4.3.9(@types/node@20.5.4)(sass@1.63.6)
   vitest:
     specifier: ^0.32.4
     version: 0.32.4(sass@1.63.6)
@@ -2174,7 +2177,7 @@ packages:
       sirv: 2.0.2
       svelte: 4.0.3
       undici: 5.22.1
-      vite: 4.3.9(@types/node@18.15.13)(sass@1.63.6)
+      vite: 4.3.9(@types/node@20.5.4)(sass@1.63.6)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -2190,7 +2193,7 @@ packages:
       '@sveltejs/vite-plugin-svelte': 2.4.4(svelte@4.0.3)(vite@4.3.9)
       debug: 4.3.4(supports-color@8.1.1)
       svelte: 4.0.3
-      vite: 4.3.9(@types/node@18.15.13)(sass@1.63.6)
+      vite: 4.3.9(@types/node@20.5.4)(sass@1.63.6)
     transitivePeerDependencies:
       - supports-color
     dev: true
@@ -2209,7 +2212,7 @@ packages:
       magic-string: 0.30.2
       svelte: 4.0.3
       svelte-hmr: 0.15.3(svelte@4.0.3)
-      vite: 4.3.9(@types/node@18.15.13)(sass@1.63.6)
+      vite: 4.3.9(@types/node@20.5.4)(sass@1.63.6)
       vitefu: 0.2.4(vite@4.3.9)
     transitivePeerDependencies:
       - supports-color
@@ -2238,13 +2241,13 @@ packages:
   /@types/bn.js@4.11.6:
     resolution: {integrity: sha512-pqr857jrp2kPuO9uRjZ3PwnJTjoQy+fcdxvBTvHm6dkmEL9q+hDD/2j/0ELOBPtPnS8LjCX0gI9nbl8lVkadpg==}
     dependencies:
-      '@types/node': 18.15.13
+      '@types/node': 20.5.4
     dev: true
 
   /@types/bn.js@5.1.1:
     resolution: {integrity: sha512-qNrYbZqMx0uJAfKnKclPh+dTwK33KfLHYqtyODwd5HnXOjnkhc4qgn3BrK6RWyGZm5+sIFE7Q7Vz6QQtJB7w7g==}
     dependencies:
-      '@types/node': 18.15.13
+      '@types/node': 20.5.4
     dev: true
 
   /@types/chai-subset@1.3.3:
@@ -2285,10 +2288,14 @@ packages:
     resolution: {integrity: sha512-N+0kuo9KgrUQ1Sn/ifDXsvg0TTleP7rIy4zOBGECxAljqvqfqpTfzx0Q1NUedOixRMBfe2Whhb056a42cWs26Q==}
     dev: true
 
+  /@types/node@20.5.4:
+    resolution: {integrity: sha512-Y9vbIAoM31djQZrPYjpTLo0XlaSwOIsrlfE3LpulZeRblttsLQRFRlBAppW0LOxyT3ALj2M5vU1ucQQayQH3jA==}
+    dev: true
+
   /@types/pbkdf2@3.1.0:
     resolution: {integrity: sha512-Cf63Rv7jCQ0LaL8tNXmEyqTHuIJxRdlS5vMh1mj5voN4+QFhVZnlZruezqpWYDiJ8UTzhP0VmeLXCmBk66YrMQ==}
     dependencies:
-      '@types/node': 18.15.13
+      '@types/node': 20.5.4
     dev: true
 
   /@types/pug@2.0.6:
@@ -2298,7 +2305,7 @@ packages:
   /@types/readable-stream@2.3.15:
     resolution: {integrity: sha512-oM5JSKQCcICF1wvGgmecmHldZ48OZamtMxcGGVICOJA8o8cahXC1zEVAif8iwoc5j8etxFaRFnf095+CDsuoFQ==}
     dependencies:
-      '@types/node': 18.15.13
+      '@types/node': 20.5.4
       safe-buffer: 5.1.2
     dev: true
 
@@ -2309,7 +2316,7 @@ packages:
   /@types/secp256k1@4.0.3:
     resolution: {integrity: sha512-Da66lEIFeIz9ltsdMZcpQvmrmmoqrfju8pm1BH8WbYjZSwUgCwXLb9C+9XYogwBITnbsSaMdVPb2ekf7TV+03w==}
     dependencies:
-      '@types/node': 18.15.13
+      '@types/node': 20.5.4
     dev: true
 
   /@types/semver@7.3.13:
@@ -2486,15 +2493,6 @@ packages:
 
   /@waku-objects/luminance@2.0.1:
     resolution: {integrity: sha512-/zmMsR9nXXzV5uwpMYxOjMzSOOyQFi6vqMuPBkvF0+XCnOHXFR6y/ONX2DeBkMLkvoueDG8rwADvZpyyvU3bWA==}
-    dev: true
-
-  /@waku-objects/sandbox-example@0.0.2:
-    resolution: {integrity: sha512-lIi+CHdE8PD1E9QHwvg65nSc5hWYVkQaZxgm9DHCrbJORSVmprVU5+a/YZVHGCtySjw8v2jb6vtJAxQs7IjuEg==}
-    dependencies:
-      ethers: 6.6.4
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
     dev: true
 
   /@waku/core@0.0.20(@multiformats/multiaddr@12.1.3)(libp2p@0.42.2):
@@ -4116,7 +4114,7 @@ packages:
       solc: 0.7.3(debug@4.3.4)
       source-map-support: 0.5.21
       stacktrace-parser: 0.1.10
-      ts-node: 10.9.1(typescript@5.1.6)
+      ts-node: 10.9.1(@types/node@20.5.4)(typescript@5.1.6)
       tsort: 0.0.1
       typescript: 5.1.6
       undici: 5.22.1
@@ -5706,7 +5704,7 @@ packages:
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
       '@types/long': 4.0.2
-      '@types/node': 18.15.13
+      '@types/node': 20.5.4
       long: 4.0.0
     dev: true
 
@@ -5725,7 +5723,7 @@ packages:
       '@protobufjs/path': 1.1.2
       '@protobufjs/pool': 1.1.0
       '@protobufjs/utf8': 1.1.0
-      '@types/node': 18.15.13
+      '@types/node': 20.5.4
       long: 5.2.3
     dev: true
 
@@ -6430,7 +6428,7 @@ packages:
       utf8-byte-length: 1.0.4
     dev: true
 
-  /ts-node@10.9.1(typescript@5.1.6):
+  /ts-node@10.9.1(@types/node@20.5.4)(typescript@5.1.6):
     resolution: {integrity: sha512-NtVysVPkxxrwFGUUxGYhfux8k78pQB3JqYBXlLRZgdGUqTO5wU/UyHop5p70iEbGhB7q5KmiZiU0Y3KlJrScEw==}
     hasBin: true
     peerDependencies:
@@ -6449,6 +6447,7 @@ packages:
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
+      '@types/node': 20.5.4
       acorn: 8.8.2
       acorn-walk: 8.2.0
       arg: 4.1.3
@@ -6629,7 +6628,7 @@ packages:
     resolution: {integrity: sha512-cXEIW6cfr15lFv563k4GuVuW/fiwjknytD37jIOLSdSWuOI6WnO/oKwmP2FQTU2l01LP8/M5TSAJpzUaGe3uWg==}
     dev: true
 
-  /vite-node@0.32.4(@types/node@18.15.13)(sass@1.63.6):
+  /vite-node@0.32.4(@types/node@20.5.4)(sass@1.63.6):
     resolution: {integrity: sha512-L2gIw+dCxO0LK14QnUMoqSYpa9XRGnTTTDjW2h19Mr+GR0EFj4vx52W41gFXfMLqpA00eK4ZjOVYo1Xk//LFEw==}
     engines: {node: '>=v14.18.0'}
     hasBin: true
@@ -6639,7 +6638,7 @@ packages:
       mlly: 1.4.0
       pathe: 1.1.1
       picocolors: 1.0.0
-      vite: 4.3.9(@types/node@18.15.13)(sass@1.63.6)
+      vite: 4.3.9(@types/node@20.5.4)(sass@1.63.6)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -6650,7 +6649,7 @@ packages:
       - terser
     dev: true
 
-  /vite@4.3.9(@types/node@18.15.13)(sass@1.63.6):
+  /vite@4.3.9(@types/node@20.5.4)(sass@1.63.6):
     resolution: {integrity: sha512-qsTNZjO9NoJNW7KnOrgYwczm0WctJ8m/yqYAMAK9Lxt4SoySUfS5S8ia9K7JHpa3KEeMfyF8LoJ3c5NeBJy6pg==}
     engines: {node: ^14.18.0 || >=16.0.0}
     hasBin: true
@@ -6675,7 +6674,7 @@ packages:
       terser:
         optional: true
     dependencies:
-      '@types/node': 18.15.13
+      '@types/node': 20.5.4
       esbuild: 0.17.16
       postcss: 8.4.27
       rollup: 3.27.2
@@ -6692,7 +6691,7 @@ packages:
       vite:
         optional: true
     dependencies:
-      vite: 4.3.9(@types/node@18.15.13)(sass@1.63.6)
+      vite: 4.3.9(@types/node@20.5.4)(sass@1.63.6)
     dev: true
 
   /vitest@0.32.4(sass@1.63.6):
@@ -6728,7 +6727,7 @@ packages:
     dependencies:
       '@types/chai': 4.3.5
       '@types/chai-subset': 1.3.3
-      '@types/node': 18.15.13
+      '@types/node': 20.5.4
       '@vitest/expect': 0.32.4
       '@vitest/runner': 0.32.4
       '@vitest/snapshot': 0.32.4
@@ -6747,8 +6746,8 @@ packages:
       strip-literal: 1.0.1
       tinybench: 2.5.0
       tinypool: 0.5.0
-      vite: 4.3.9(@types/node@18.15.13)(sass@1.63.6)
-      vite-node: 0.32.4(@types/node@18.15.13)(sass@1.63.6)
+      vite: 4.3.9(@types/node@20.5.4)(sass@1.63.6)
+      vite-node: 0.32.4(@types/node@20.5.4)(sass@1.63.6)
       why-is-node-running: 2.2.2
     transitivePeerDependencies:
       - less

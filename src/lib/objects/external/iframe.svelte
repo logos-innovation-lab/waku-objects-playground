@@ -28,15 +28,17 @@
 	window.addEventListener(
 		'message',
 		(event) => {
+			console.debug('external iframe', { event })
 			// Necessary to know from which frame this originated
-			if (event.origin === 'null' && event.source === iframe.contentWindow) {
+			if (event.origin === 'null' && event.source === iframe?.contentWindow) {
 				const { data } = event
 				if (typeof data === 'object') {
 					switch (data.type) {
-						case 'window-size':
+						case 'window-size': {
 							const { scrollWidth, scrollHeight } = data
 							iframe.style.width = `${scrollWidth}px`
 							iframe.style.height = `${scrollHeight}px`
+						}
 					}
 				}
 			}
@@ -52,7 +54,7 @@
 </script>
 
 {#if object}
-	<ChatMessage myMessage={args.profile.address === message?.fromAddress} bubble noText>
+	<ChatMessage myMessage={args?.profile.address === message?.fromAddress} bubble noText>
 		<iframe
 			title={object.name}
 			bind:this={iframe}
