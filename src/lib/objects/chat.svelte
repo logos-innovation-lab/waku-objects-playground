@@ -43,7 +43,7 @@
 	}
 
 	let args: WakuObjectArgs
-	$: if (store && userProfile) {
+	$: if (userProfile) {
 		const wakuObjectAdapter = makeWakuObjectAdapter(adapter, wallet)
 		args = {
 			instanceId: message.instanceId,

@@ -101,9 +101,6 @@ async function executeOnDataMessage(
 		const objects = wakuObjectStore.objects
 		const updateStore = (updater: (_store: JSONSerializable) => JSONSerializable) => {
 			const store = objects.get(key)
-			if (!store) {
-				return
-			}
 			const newStore = updater(store)
 			const newObjects = new Map(objects)
 			newObjects.set(key, newStore)
@@ -114,10 +111,6 @@ async function executeOnDataMessage(
 			}))
 		}
 		const store = objects.get(key)
-		if (!store) {
-			return
-		}
-
 		await descriptor.onMessage(address, adapter, store, updateStore, chatMessage)
 	}
 }
