@@ -8,6 +8,10 @@
 
 	// Types
 	import { getNPMObject, type LoadedObject } from './lib'
+	import { makeWakuObjectAdapter } from '../adapter'
+	import adapter from '$lib/adapters'
+	import { walletStore } from '$lib/stores/wallet'
+	import { makeIframeDispatcher } from './dispatch'
 
 	// TODO: This needs escaping for the CSP
 	const getIframeSource = (object: LoadedObject): string => {
@@ -25,26 +29,39 @@
 	let object: LoadedObject | null
 	let iframe: HTMLIFrameElement
 
-	window.addEventListener(
-		'message',
-		(event) => {
-			console.debug('external iframe', { event })
-			// Necessary to know from which frame this originated
-			if (event.origin === 'null' && event.source === iframe?.contentWindow) {
-				const { data } = event
-				if (typeof data === 'object') {
-					switch (data.type) {
-						case 'window-size': {
-							const { scrollWidth, scrollHeight } = data
-							iframe.style.width = `${scrollWidth}px`
-							iframe.style.height = `${scrollHeight}px`
+	$: wallet = $walletStore.wallet
+
+	let started = false
+	$: if (wallet && !started) {
+		const wakuObjectAdapter = makeWakuObjectAdapter(adapter, wallet)
+		const iframeDispatcher = makeIframeDispatcher(wakuObjectAdapter)
+		window.addEventListener(
+			'message',
+			(event) => {
+				// Necessary to know from which frame this originated
+				if (event.origin === 'null' && event.source && event.source === iframe?.contentWindow) {
+					const { data } = event
+					if (typeof data === 'object') {
+						switch (data.type) {
+							case 'window-size': {
+								const { scrollWidth, scrollHeight } = data
+								iframe.style.width = `${scrollWidth}px`
+								iframe.style.height = `${scrollHeight}px`
+								return
+							}
+							default: {
+								console.debug('external iframe', { event })
+								iframeDispatcher.onMessage(data, iframe.contentWindow)
+								return
+							}
 						}
 					}
 				}
-			}
-		},
-		false,
-	)
+			},
+			false,
+		)
+		started = true
+	}
 
 	export let message: DataMessage
 	export let args: WakuObjectArgs

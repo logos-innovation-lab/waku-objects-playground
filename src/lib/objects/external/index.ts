@@ -1,4 +1,5 @@
 import type { WakuObjectDescriptor } from '..'
+import type { IframeDataMessage } from './dispatch'
 import IframeComponent from './iframe.svelte'
 import logo from './logo.svg'
 
@@ -15,5 +16,13 @@ export const getExternalDescriptor = (objectId: string): WakuObjectDescriptor =>
 	logo,
 	wakuObject: IframeComponent,
 	customArgs: { name: objectId },
-	//onMessage: (_address, _store, message) => message.data,
+	onMessage: async (address, _adapter, store, _updateStore, message) => {
+		const iframeMessage: IframeDataMessage = {
+			type: 'on-message',
+			address,
+			store,
+			message,
+		}
+		window.postMessage(iframeMessage, { targetOrigin: '*' })
+	},
 })

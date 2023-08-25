@@ -9,7 +9,7 @@ export interface WakuObjectAdapter {
 	getTransactionState(txHash: string): Promise<TransactionState>
 	waitForTransaction(txHash: string): Promise<TransactionState>
 	checkBalance(token: Token): Promise<void>
-	sendTransaction: (to: string, token: Token, fee: Token) => Promise<string>
+	sendTransaction: (to: string, token: Token) => Promise<string>
 	estimateTransaction: (to: string, token: Token) => Promise<Token>
 	getContract(address: string, abi: Interface): Contract
 }
