@@ -14,31 +14,41 @@ export interface WakuObjectAdapter {
 	getContract(address: string, abi: Interface): Contract
 }
 
-export type JSONSerializable =
-	| string
-	| number
-	| boolean
-	| null
-	| JSONSerializable[]
-	| Partial<Record<symbol, JSONSerializable>>
+type JSONObject = Partial<Record<symbol, JSONValue>>
 
-export interface WakuObjectArgs<
-	StoreType extends JSONSerializable = JSONSerializable,
-	DataMessageType extends JSONSerializable = JSONSerializable,
-> extends WakuObjectAdapter {
+type JSONArray = Array<JSONValue>
+
+type JSONValue = string | number | boolean | JSONArray | JSONObject
+
+export type JSONSerializable = JSONValue
+
+export interface WakuObjectState {
+	readonly chatId: string
+	readonly objectId: string
 	readonly instanceId: string
 	readonly profile: User
 	readonly users: User[]
 	readonly tokens: Token[]
+}
 
-	readonly store: StoreType
-	updateStore: (updater: (state: StoreType) => StoreType) => void
+export interface WakuObjectContext<
+	StoreType extends JSONSerializable = JSONSerializable,
+	DataMessageType extends JSONSerializable = JSONSerializable,
+> extends WakuObjectAdapter {
+	readonly store?: StoreType
+	updateStore: (updater: (state?: StoreType) => StoreType) => void
 
 	send: (data: DataMessageType) => Promise<void>
 
 	readonly view?: string
 	onViewChange: (view: string) => void
 }
+
+export interface WakuObjectArgs<
+	StoreType extends JSONSerializable = JSONSerializable,
+	DataMessageType extends JSONSerializable = JSONSerializable,
+> extends WakuObjectContext<StoreType, DataMessageType>,
+		WakuObjectState {}
 
 interface WakuObjectDescriptor<
 	StoreType extends JSONSerializable = JSONSerializable,
@@ -49,16 +59,18 @@ interface WakuObjectDescriptor<
 	readonly description: string
 	readonly logo: string
 
+	onMessage?: (
+		message: DataMessage<DataMessageType>,
+		args: WakuObjectArgs<StoreType, DataMessageType>,
+	) => Promise<void>
+	// TODO onTransaction: (store: unknown, transaction: Transaction) => unknown
+}
+
+interface WakuObjectSvelteDescriptor<
+	StoreType extends JSONSerializable = JSONSerializable,
+	DataMessageType extends JSONSerializable = JSONSerializable,
+> extends WakuObjectDescriptor<StoreType, DataMessageType> {
 	readonly wakuObject: ComponentType
 	readonly standalone?: ComponentType
 	readonly customArgs?: CustomArgs
-
-	onMessage?: (
-		address: string,
-		adapter: WakuObjectAdapter,
-		store: StoreType,
-		updateStore: (updater: (state: StoreType) => StoreType) => void,
-		message: DataMessage<DataMessageType>,
-	) => Promise<void>
-	// TODO onTransaction: (store: unknown, transaction: Transaction) => unknown
 }

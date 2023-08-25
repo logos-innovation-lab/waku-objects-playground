@@ -20,7 +20,12 @@ import { objectStore, objectKey } from '$lib/stores/objects'
 import { lookup } from '$lib/objects/lookup'
 import type { Token } from '$lib/stores/balances'
 import { defaultBlockchainNetwork, sendTransaction } from '$lib/adapters/transaction'
-import type { JSONSerializable, WakuObjectAdapter } from '$lib/objects'
+import type {
+	JSONSerializable,
+	WakuObjectAdapter,
+	WakuObjectArgs,
+	WakuObjectContext,
+} from '$lib/objects'
 import { makeWakuObjectAdapter } from '$lib/objects/adapter'
 import { fetchBalances } from '$lib/adapters/balance'
 import { makeWakustore } from './wakustore'
@@ -77,7 +82,7 @@ async function addMessageToChat(
 	message: Message,
 ) {
 	if (message.type === 'data') {
-		await executeOnDataMessage(address, adapter, message)
+		await executeOnDataMessage(address, adapter, chatId, message)
 	}
 
 	const unread = message.fromAddress !== address && message.type === 'user' ? 1 : 0
@@ -91,15 +96,16 @@ async function addMessageToChat(
 async function executeOnDataMessage(
 	address: string,
 	adapter: WakuObjectAdapter,
-	chatMessage: DataMessage,
+	chatId: string,
+	dataMessage: DataMessage,
 ) {
-	const descriptor = lookup(chatMessage.objectId)
-	const key = objectKey(chatMessage.objectId, chatMessage.instanceId)
+	const descriptor = lookup(dataMessage.objectId)
+	const key = objectKey(dataMessage.objectId, dataMessage.instanceId)
 	const wakuObjectStore = get(objectStore)
 
-	if (descriptor && descriptor.onMessage && wakuObjectStore.lastUpdated < chatMessage.timestamp) {
+	if (descriptor && descriptor.onMessage && wakuObjectStore.lastUpdated < dataMessage.timestamp) {
 		const objects = wakuObjectStore.objects
-		const updateStore = (updater: (_store: JSONSerializable) => JSONSerializable) => {
+		const updateStore = (updater: (_store?: JSONSerializable) => JSONSerializable) => {
 			const store = objects.get(key)
 			const newStore = updater(store)
 			const newObjects = new Map(objects)
@@ -107,11 +113,31 @@ async function executeOnDataMessage(
 			objectStore.update((state) => ({
 				...state,
 				objects: newObjects,
-				lastUpdated: chatMessage.timestamp,
+				lastUpdated: dataMessage.timestamp,
 			}))
 		}
 		const store = objects.get(key)
-		await descriptor.onMessage(address, adapter, store, updateStore, chatMessage)
+		const context: WakuObjectContext = {
+			...adapter,
+			store,
+			updateStore,
+			send: () => {
+				throw 'not implemented'
+			},
+			onViewChange: () => {
+				throw 'not implemented'
+			},
+		}
+		const args: WakuObjectArgs = {
+			...context,
+			chatId,
+			objectId: dataMessage.objectId,
+			instanceId: dataMessage.instanceId,
+			profile: { ...get(profile), address },
+			users: [], // TODO
+			tokens: defaultBlockchainNetwork.tokens || [],
+		}
+		await descriptor.onMessage(dataMessage, args)
 	}
 }
 

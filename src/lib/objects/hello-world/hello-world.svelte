@@ -19,7 +19,6 @@
 		instanceId={message.instanceId}
 		name={helloWorldStore?.name}
 		send={args.send}
-		updateStore={args.updateStore}
 		ownName={args.profile.name || 'Anonymous'}
 	/>
 {/if}

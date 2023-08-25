@@ -46,6 +46,8 @@
 	$: if (userProfile) {
 		const wakuObjectAdapter = makeWakuObjectAdapter(adapter, wallet)
 		args = {
+			chatId,
+			objectId: message.objectId,
 			instanceId: message.instanceId,
 			profile: userProfile,
 			users,

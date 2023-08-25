@@ -1,4 +1,4 @@
-import type { WakuObjectDescriptor } from '..'
+import type { WakuObjectSvelteDescriptor } from '..'
 import ChatComponent from './chat.svelte'
 import {
 	SendTransactionDataMessageSchema,
@@ -10,7 +10,7 @@ import logo from './logo.svg'
 
 export const PAYGGY_OBJECT_ID = 'payggy'
 
-export const payggyDescriptor: WakuObjectDescriptor<
+export const payggyDescriptor: WakuObjectSvelteDescriptor<
 	SendTransactionStore,
 	SendTransactionDataMessage
 > = {
@@ -23,7 +23,7 @@ export const payggyDescriptor: WakuObjectDescriptor<
 
 	standalone: StandaloneComponent,
 
-	onMessage: async (address, adapter, store, updateStore, message) => {
+	onMessage: async (message, args) => {
 		if (!message?.data) {
 			return
 		}
@@ -33,14 +33,14 @@ export const payggyDescriptor: WakuObjectDescriptor<
 			return
 		}
 
-		const tx = await adapter.getTransaction(res.data.hash)
+		const tx = await args.getTransaction(res.data.hash)
 		if (!tx) {
 			return
 		}
 
-		const state = await adapter.getTransactionState(res.data.hash)
+		const state = await args.getTransactionState(res.data.hash)
 		if (state === 'reverted') {
-			updateStore(() => ({
+			args.updateStore(() => ({
 				type: 'error',
 				transaction: tx,
 				error: 'Transaction has failed!',
@@ -48,7 +48,7 @@ export const payggyDescriptor: WakuObjectDescriptor<
 			return
 		}
 
-		updateStore(() => ({
+		args.updateStore(() => ({
 			type: state === 'success' ? 'success' : 'pending',
 			transaction: tx,
 			hash: res.data.hash,
@@ -60,12 +60,12 @@ export const payggyDescriptor: WakuObjectDescriptor<
 			amount: BigInt(0), // the amount is not really necessary for checkBalance
 		}
 
-		adapter.checkBalance(token)
+		args.checkBalance(token)
 
 		if (state === 'pending' || state === 'unknown') {
-			adapter.waitForTransaction(res.data.hash).then((state) => {
+			args.waitForTransaction(res.data.hash).then((state) => {
 				if (state === 'reverted') {
-					updateStore(() => ({
+					args.updateStore(() => ({
 						type: 'error',
 						transaction: tx,
 						error: 'Transaction has failed!',
@@ -73,7 +73,7 @@ export const payggyDescriptor: WakuObjectDescriptor<
 					return
 				}
 
-				updateStore(() => ({
+				args.updateStore(() => ({
 					type: state === 'success' ? 'success' : 'pending',
 					transaction: tx,
 					hash: res.data.hash,
@@ -85,7 +85,7 @@ export const payggyDescriptor: WakuObjectDescriptor<
 					amount: BigInt(0), // the amount is not really necessary for checkBalance
 				}
 
-				adapter.checkBalance(token)
+				args.checkBalance(token)
 			})
 		}
 	},

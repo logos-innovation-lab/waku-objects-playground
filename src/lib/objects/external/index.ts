@@ -1,4 +1,4 @@
-import type { WakuObjectDescriptor } from '..'
+import type { WakuObjectSvelteDescriptor } from '..'
 import type { IframeDataMessage } from './dispatch'
 import IframeComponent from './iframe.svelte'
 import logo from './logo.svg'
@@ -9,20 +9,38 @@ export type CustomArgs = {
 	name: string
 }
 
-export const getExternalDescriptor = (objectId: string): WakuObjectDescriptor => ({
+const instanceWindowMap = new Map<string, Window>()
+
+export const getExternalDescriptor = (objectId: string): WakuObjectSvelteDescriptor => ({
 	objectId,
 	name: 'External',
 	description: 'External',
 	logo,
 	wakuObject: IframeComponent,
 	customArgs: { name: objectId },
-	onMessage: async (address, _adapter, store, _updateStore, message) => {
-		const iframeMessage: IframeDataMessage = {
-			type: 'on-message',
-			address,
-			store,
-			message,
+	onMessage: async (message, args) => {
+		const window = instanceWindowMap.get(message.instanceId)
+		if (!window) {
+			return
 		}
-		window.postMessage(iframeMessage, { targetOrigin: '*' })
+
+		const iframeDataMessage: IframeDataMessage = {
+			type: 'iframe-data-message',
+			message,
+			state: args,
+		}
+		window.postMessage(iframeDataMessage, { targetOrigin: '*' })
 	},
 })
+
+export function registerWindow(instanceId: string, window: Window) {
+	if (instanceWindowMap.has(instanceId)) {
+		return
+	}
+
+	instanceWindowMap.set(instanceId, window)
+}
+
+export function unregisterWindow(instanceId: string) {
+	instanceWindowMap.delete(instanceId)
+}

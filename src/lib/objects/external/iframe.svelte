@@ -8,10 +8,11 @@
 
 	// Types
 	import { getNPMObject, type LoadedObject } from './lib'
-	import { makeWakuObjectAdapter } from '../adapter'
-	import adapter from '$lib/adapters'
-	import { walletStore } from '$lib/stores/wallet'
 	import { makeIframeDispatcher } from './dispatch'
+	import { registerWindow, unregisterWindow } from '.'
+	import { onDestroy } from 'svelte'
+	import adapters from '$lib/adapters'
+	import { walletStore } from '$lib/stores/wallet'
 
 	// TODO: This needs escaping for the CSP
 	const getIframeSource = (object: LoadedObject): string => {
@@ -22,6 +23,9 @@
 	}
 
 	// Exports
+	export let message: DataMessage
+	export let args: WakuObjectArgs
+
 	export let customArgs: { name: string }
 	const { name } = customArgs
 
@@ -33,8 +37,8 @@
 
 	let started = false
 	$: if (wallet && !started) {
-		const wakuObjectAdapter = makeWakuObjectAdapter(adapter, wallet)
-		const iframeDispatcher = makeIframeDispatcher(wakuObjectAdapter)
+		const adapterWallet = wallet
+		const iframeDispatcher = makeIframeDispatcher(args, adapters)
 		window.addEventListener(
 			'message',
 			(event) => {
@@ -51,7 +55,8 @@
 							}
 							default: {
 								console.debug('external iframe', { event })
-								iframeDispatcher.onMessage(data, iframe.contentWindow)
+								const window = iframe.contentWindow
+								iframeDispatcher.onMessage(data, args, window, adapterWallet)
 								return
 							}
 						}
@@ -63,11 +68,13 @@
 		started = true
 	}
 
-	export let message: DataMessage
-	export let args: WakuObjectArgs
-
 	// TODO: Add option to add external objects
 	$: name && getNPMObject(name, message).then((result) => (object = result))
+	$: if (iframe && iframe.contentWindow) {
+		registerWindow(args.instanceId, iframe.contentWindow)
+	}
+
+	onDestroy(() => unregisterWindow(args.instanceId))
 </script>
 
 {#if object}
