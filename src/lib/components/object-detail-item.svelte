@@ -54,14 +54,14 @@
 						id={detailId}
 					>
 						<slot />
-						{#if txHash}
+						{#if txHash && defaultBlockchainNetwork.explorer}
 							<div class="view-btn">
 								<Button
 									on:click={() =>
-										window.open(`${defaultBlockchainNetwork.explorer}/tx/${txHash}`, '_blank')}
+										window.open(`${defaultBlockchainNetwork.explorer?.url}/tx/${txHash}`, '_blank')}
 								>
 									<Launch />
-									View on Etherscan
+									View on {defaultBlockchainNetwork.explorer.name}
 								</Button>
 							</div>
 						{/if}
