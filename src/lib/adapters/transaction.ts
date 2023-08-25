@@ -10,10 +10,15 @@ import {
 } from 'ethers'
 import abi from '$lib/abis/erc20.json'
 
+interface BlockchainExplorer {
+	name: string
+	url: string
+}
+
 interface BlockchainNetwork {
 	name: string
 	provider: string
-	explorer: string
+	explorer?: BlockchainExplorer
 	nativeToken: Token
 	tokens?: Token[]
 }
@@ -22,7 +27,6 @@ interface BlockchainNetwork {
 const testBlockchain: BlockchainNetwork = {
 	name: 'Local testnet',
 	provider: 'http://127.0.0.1:8545',
-	explorer: '',
 	nativeToken: {
 		name: 'Test Ether',
 		symbol: 'ETH',
@@ -35,8 +39,11 @@ const testBlockchain: BlockchainNetwork = {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const chiadoBlockchain: BlockchainNetwork = {
 	name: 'Chiado testnet',
-	explorer: 'https://gnosis-chiado.blockscout.com',
 	provider: 'https://rpc.chiado.apyos.dev/',
+	explorer: {
+		name: 'Blockscout',
+		url: 'https://gnosis-chiado.blockscout.com',
+	},
 	nativeToken: {
 		name: 'Chiado xDai',
 		symbol: 'xDai',
@@ -59,8 +66,11 @@ const chiadoBlockchain: BlockchainNetwork = {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const sepoliaBlockchain: BlockchainNetwork = {
 	name: 'Sepolia testnet',
-	explorer: 'https://sepolia.etherscan.io/',
 	provider: 'https://rpc2.sepolia.org/ ',
+	explorer: {
+		name: 'Etherscan',
+		url: 'https://sepolia.etherscan.io/',
+	},
 	nativeToken: {
 		name: 'Sepolia ETH',
 		symbol: 'SEP',
