@@ -7,10 +7,17 @@ import { WebSocket } from 'ws'
 
 import child_process from 'child_process'
 
+const host = '185.32.161.60'
+const port = '42391'
+
+const apiUrl = 'ws://185.32.161.60:42391/api/v1/chat-stream'
+
+const httpApiUrl = `https://4ccbu3ko70ouza-5000.proxy.runpod.net/api/v1/chat`
+
 const botAddress = process.argv[2] || process.env['BOT_ADDRESS']
 const botProfile = {
-	name: 'Daemon Zero',
-	avatar: 'QmahJdru5ooiPrn8FipC7tLb2t9o39Kdszohk2g5SFffnQ', // IPFS hash of image comes here
+	name: 'Victoria',
+	avatar: 'QmdDL2EXu1cCCsxoQViJpyLEgLfAvaNdQwMw3j1Y8sStmn', // IPFS hash of image comes here
 }
 
 const sessions = new Map<string, number[]>()
@@ -28,6 +35,7 @@ async function main() {
 	await storeDocument(waku, 'profile', botAddress, botProfile)
 
 	await subscribe(waku, 'private-message', botAddress, async (msg) => {
+		console.debug('subscribe')
 		const decodedPayload = decodeMessagePayload(msg)
 		const chatMessage = JSON.parse(decodedPayload) as { text: string; fromAddress: string }
 
@@ -52,44 +60,65 @@ async function main() {
 
 		const history = undefined
 
-		const ws = new WebSocket('ws://149.36.0.147:46930/api/v1/chat-stream')
+		// const ws = new WebSocket(apiUrl)
+		// const request = {
+		// 	user_input: chatMessage.text,
+		// 	max_new_tokens: 200,
+		// 	character: 'Sam Fox',
+		// 	mode: 'chat',
+		// 	// auto_max_new_tokens: true,
+		// 	// history: history,
+		// 	// regenerate: false,
+		// 	// _continue: false,
+		// 	// preset: 'Yara',
+		// 	// instruction_template: 'SamFox',
+		// }
+		// ws.on('open', () => {
+		// 	const jsonRequest = JSON.stringify(request)
+		// 	console.debug('opened ws', jsonRequest)
+		// 	ws.send(jsonRequest)
+		// })
+
+		// ws.on('error', (e) => {
+		// 	console.debug(e)
+		// })
+
+		// let responseText = ''
+		// ws.on('message', (event) => {
+		// 	console.debug({ event })
+		// 	const json = event.toString('utf-8')
+		// 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		// 	const jsonResponse = JSON.parse(json) as unknown as any
+		// 	console.debug({ jsonResponse })
+		// 	console.debug({ response: responseText })
+		// 	if (jsonResponse.event === 'text_stream') {
+		// 		responseText = jsonResponse.history.visible[0][1]
+		// 	} else if (jsonResponse.event === 'stream_end') {
+		// 		sendMessage(waku, chatMessage.fromAddress, {
+		// 			type: 'user',
+		// 			timestamp: Date.now(),
+		// 			text: responseText,
+		// 			fromAddress: botAddress,
+		// 		})
+
+		// 		speak(responseText)
+		// 	}
+		// })
+
 		const request = {
 			user_input: chatMessage.text,
 			max_new_tokens: 200,
-			character: 'Sam Fox',
+			character: 'Victoria',
 			mode: 'chat',
 			auto_max_new_tokens: true,
 			history: history,
 			regenerate: false,
 			_continue: false,
 			preset: 'Yara',
-			instruction_template: 'SamFox',
+			// instruction_template: 'SamFox',
 		}
-		ws.on('open', () => {
-			ws.send(JSON.stringify(request))
-		})
-
-		let responseText = ''
-		ws.on('message', (event) => {
-			// console.debug({ event })
-			const json = event.toString('utf-8')
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const jsonResponse = JSON.parse(json) as unknown as any
-			console.debug({ jsonResponse })
-			console.debug({ response: responseText })
-			if (jsonResponse.event === 'text_stream') {
-				responseText = jsonResponse.history.visible[0][1]
-			} else if (jsonResponse.event === 'stream_end') {
-				sendMessage(waku, chatMessage.fromAddress, {
-					type: 'user',
-					timestamp: Date.now(),
-					text: responseText,
-					fromAddress: botAddress,
-				})
-
-				speak(responseText)
-			}
-		})
+		const response = await axios.post(httpApiUrl, { data: request })
+		console.debug({ response })
 
 		// const responseText = (response.data as string)
 		// 	.split('\n')
