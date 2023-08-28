@@ -26,6 +26,7 @@
 		"@sveltejs/kit": "^1.21.0",
 		"@total-typescript/ts-reset": "^0.4.2",
 		"@types/node": "^20.4.7",
+		"@types/ws": "^8.5.5",
 		"@typescript-eslint/eslint-plugin": "^5.61.0",
 		"@typescript-eslint/parser": "^5.61.0",
 		"@waku-objects/luminance": "^2.0.1",
@@ -53,6 +54,7 @@
 		"typescript": "^5.1.6",
 		"vite": "^4.3.9",
 		"vitest": "^0.32.4",
+		"ws": "^8.13.0",
 		"zod": "^3.21.4"
 	},
 	"type": "module"
