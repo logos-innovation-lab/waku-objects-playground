@@ -117,8 +117,11 @@ async function main() {
 			preset: 'Yara',
 			// instruction_template: 'SamFox',
 		}
-		const response = await axios.post(httpApiUrl, { data: request })
-		console.debug({ response })
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const response = (await axios.post(httpApiUrl, request)) as unknown as any
+		const responseText = response.data.results[0].history.visible[0][1]
+
+		console.debug({ responseText })
 
 		// const responseText = (response.data as string)
 		// 	.split('\n')
@@ -141,14 +144,14 @@ async function main() {
 
 		// sessions.set(chatMessage.fromAddress, JSON.parse('[' + responseContext + ']') as number[])
 
-		// sendMessage(waku, chatMessage.fromAddress, {
-		// 	type: 'user',
-		// 	timestamp: Date.now(),
-		// 	text: responseText,
-		// 	fromAddress: botAddress,
-		// })
+		sendMessage(waku, chatMessage.fromAddress, {
+			type: 'user',
+			timestamp: Date.now(),
+			text: responseText,
+			fromAddress: botAddress,
+		})
 
-		// speak(responseText)
+		speak(responseText)
 	})
 }
 
