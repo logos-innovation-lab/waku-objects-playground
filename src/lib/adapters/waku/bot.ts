@@ -3,6 +3,8 @@
 import { connectWaku, decodeMessagePayload, sendMessage, storeDocument, subscribe } from './waku'
 import axios from 'axios'
 
+import { WebSocket } from 'ws'
+
 import child_process from 'child_process'
 
 const botAddress = process.argv[2] || process.env['BOT_ADDRESS']
@@ -10,7 +12,6 @@ const botProfile = {
 	name: 'Daemon Zero',
 	avatar: 'QmahJdru5ooiPrn8FipC7tLb2t9o39Kdszohk2g5SFffnQ', // IPFS hash of image comes here
 }
-const ollamaUrl = 'http://127.0.0.1:11434/api/generate'
 
 const sessions = new Map<string, number[]>()
 
@@ -40,44 +41,85 @@ async function main() {
 			fromAddress: botAddress,
 		})
 
-		const context = sessions.get(chatMessage.fromAddress)
-		const data = {
-			model: 'wakuchat',
-			prompt: chatMessage.text,
-			context,
+		// const context = sessions.get(chatMessage.fromAddress)
+		// const data = {
+		// 	model: 'wakuchat',
+		// 	prompt: chatMessage.text,
+		// 	context,
+		// }
+		// const response = await axios.post(ollamaUrl, data)
+		// console.debug({ response })
+
+		const history = undefined
+
+		const ws = new WebSocket('ws://149.36.0.147:46930/api/v1/chat-stream')
+		const request = {
+			user_input: chatMessage.text,
+			max_new_tokens: 200,
+			character: 'Sam Fox',
+			mode: 'chat',
+			auto_max_new_tokens: true,
+			history: history,
+			regenerate: false,
+			_continue: false,
+			preset: 'Yara',
+			instruction_template: 'SamFox',
 		}
-		const response = await axios.post(ollamaUrl, data)
-		console.debug({ response })
-
-		const responseText = (response.data as string)
-			.split('\n')
-			.filter((part) => part)
-			.map((part: string) => JSON.parse(part) as { response: string })
-			.filter((obj) => obj.response)
-			.map((obj) => obj.response)
-			.join('')
-			.trimStart()
-
-		const responseContext = (response.data as string)
-			.split('\n')
-			.filter((part) => part)
-			.map((part: string) => JSON.parse(part) as { context: number[] })
-			.filter((obj) => obj.context)
-			.map((obj) => obj.context)
-			.toString()
-
-		console.debug({ responseText, responseContext })
-
-		sessions.set(chatMessage.fromAddress, JSON.parse('[' + responseContext + ']') as number[])
-
-		sendMessage(waku, chatMessage.fromAddress, {
-			type: 'user',
-			timestamp: Date.now(),
-			text: responseText,
-			fromAddress: botAddress,
+		ws.on('open', () => {
+			ws.send(JSON.stringify(request))
 		})
 
-		speak(responseText)
+		let responseText = ''
+		ws.on('message', (event) => {
+			// console.debug({ event })
+			const json = event.toString('utf-8')
+			// eslint-disable-next-line @typescript-eslint/no-explicit-any
+			const jsonResponse = JSON.parse(json) as unknown as any
+			console.debug({ jsonResponse })
+			console.debug({ response: responseText })
+			if (jsonResponse.event === 'text_stream') {
+				responseText = jsonResponse.history.visible[0][1]
+			} else if (jsonResponse.event === 'stream_end') {
+				sendMessage(waku, chatMessage.fromAddress, {
+					type: 'user',
+					timestamp: Date.now(),
+					text: responseText,
+					fromAddress: botAddress,
+				})
+
+				speak(responseText)
+			}
+		})
+
+		// const responseText = (response.data as string)
+		// 	.split('\n')
+		// 	.filter((part) => part)
+		// 	.map((part: string) => JSON.parse(part) as { response: string })
+		// 	.filter((obj) => obj.response)
+		// 	.map((obj) => obj.response)
+		// 	.join('')
+		// 	.trimStart()
+
+		// const responseContext = (response.data as string)
+		// 	.split('\n')
+		// 	.filter((part) => part)
+		// 	.map((part: string) => JSON.parse(part) as { context: number[] })
+		// 	.filter((obj) => obj.context)
+		// 	.map((obj) => obj.context)
+		// 	.toString()
+
+		// console.debug({ responseText, responseContext })
+
+		// sessions.set(chatMessage.fromAddress, JSON.parse('[' + responseContext + ']') as number[])
+
+		// sendMessage(waku, chatMessage.fromAddress, {
+		// 	type: 'user',
+		// 	timestamp: Date.now(),
+		// 	text: responseText,
+		// 	fromAddress: botAddress,
+		// })
+
+		// speak(responseText)
 	})
 }
 
