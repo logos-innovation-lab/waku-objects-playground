@@ -10,6 +10,7 @@ const BOT_NAME = process.env.BOT_NAME || 'Wendy'
 const BOT_CHARACTER = process.env.BOT_CHARACTER || 'Wendy'
 const BOT_AVATAR = process.env.BOT_AVATAR || 'QmWtTDsyZBGZPhEEe3fnA24Q3NirqEYqFMifMnHMZkoQ97'
 const BOT_ADDRESS = process.env.BOT_ADDRESS || process.argv[2]
+const BOT_PRESET = process.env.BOT_PRESET || undefined
 
 const botProfile = {
 	name: BOT_NAME,
@@ -52,7 +53,7 @@ async function main() {
 			regenerate: false,
 			_continue: false,
 			your_name: chatMessage.fromAddress,
-			// instruction_template: 'SamFox',
+			preset: BOT_PRESET,
 		}
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -79,9 +80,11 @@ async function main() {
 function speak(text: string) {
 	try {
 		const input = decodeHTML(text)
-		child_process.spawn('speak-piper', [input])
+		child_process
+			.spawn('speak-piper', [input], { detached: true })
+			.on('error', (e) => console.error('speak failed'))
 	} catch (e) {
-		console.error('speak failed', e)
+		console.error('speak failed')
 	}
 }
 
