@@ -1,5 +1,6 @@
 // run with npx ts-node --esm --experimental-specifier-resolution=node ./src/lib/adapters/waku/cli.ts
 
+import { formatAddress } from '$lib/utils/format'
 import { connectWaku, decodeMessagePayload, sendMessage, storeDocument, subscribe } from './waku'
 import axios from 'axios'
 
@@ -52,6 +53,7 @@ async function main() {
 			regenerate: false,
 			_continue: false,
 			preset: 'Yara',
+			your_name: chatMessage.fromAddress,
 			// instruction_template: 'SamFox',
 		}
 
