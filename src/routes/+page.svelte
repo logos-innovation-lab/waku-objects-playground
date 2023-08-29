@@ -166,9 +166,9 @@
 												</span>
 											</div>
 											<p class={`message text-serif ${myMessage ? 'my-message' : ''}`}>
-												{senderName}
+												{myMessage ? 'You: ' : ''}
 												{lastMessage && lastMessage.type === 'user'
-													? lastMessage.text.substring(0, 50)
+													? lastMessage.text?.substring(0, 50)
 													: 'No messages yet'}
 											</p>
 										</div>

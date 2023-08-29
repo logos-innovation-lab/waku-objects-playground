@@ -95,7 +95,7 @@
 						<div class="messages-inner">
 							<!-- Chat bubbles -->
 							{#each messages as message}
-								{#if message.type === 'user' && message.text.length > 0}
+								{#if message.type === 'user' && message.text?.length > 0}
 									<ChatMessage
 										myMessage={message.fromAddress === wallet.address ? true : false}
 										bubble

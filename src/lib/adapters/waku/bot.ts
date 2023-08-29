@@ -17,10 +17,11 @@ const httpApiUrl = `https://4ccbu3ko70ouza-5000.proxy.runpod.net/api/v1/chat`
 const botAddress = process.argv[2] || process.env['BOT_ADDRESS']
 const botProfile = {
 	name: 'Victoria',
-	avatar: 'QmdDL2EXu1cCCsxoQViJpyLEgLfAvaNdQwMw3j1Y8sStmn', // IPFS hash of image comes here
+	avatar: 'QmWtTDsyZBGZPhEEe3fnA24Q3NirqEYqFMifMnHMZkoQ97', // IPFS hash of image comes here
 }
 
-const sessions = new Map<string, number[]>()
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const sessions = new Map<string, any>()
 
 async function main() {
 	if (!botAddress) {
@@ -32,6 +33,8 @@ async function main() {
 
 	const waku = await connectWaku()
 
+	console.debug('waku')
+
 	await storeDocument(waku, 'profile', botAddress, botProfile)
 
 	await subscribe(waku, 'private-message', botAddress, async (msg) => {
@@ -41,69 +44,15 @@ async function main() {
 
 		console.log({ chatMessage })
 
-		const waitResponse = '...'
-		await sendMessage(waku, chatMessage.fromAddress, {
-			type: 'user',
-			timestamp: Date.now(),
-			text: waitResponse,
-			fromAddress: botAddress,
-		})
-
-		// const context = sessions.get(chatMessage.fromAddress)
-		// const data = {
-		// 	model: 'wakuchat',
-		// 	prompt: chatMessage.text,
-		// 	context,
-		// }
-		// const response = await axios.post(ollamaUrl, data)
-		// console.debug({ response })
-
-		const history = undefined
-
-		// const ws = new WebSocket(apiUrl)
-		// const request = {
-		// 	user_input: chatMessage.text,
-		// 	max_new_tokens: 200,
-		// 	character: 'Sam Fox',
-		// 	mode: 'chat',
-		// 	// auto_max_new_tokens: true,
-		// 	// history: history,
-		// 	// regenerate: false,
-		// 	// _continue: false,
-		// 	// preset: 'Yara',
-		// 	// instruction_template: 'SamFox',
-		// }
-		// ws.on('open', () => {
-		// 	const jsonRequest = JSON.stringify(request)
-		// 	console.debug('opened ws', jsonRequest)
-		// 	ws.send(jsonRequest)
+		// const waitResponse = '...'
+		// await sendMessage(waku, chatMessage.fromAddress, {
+		// 	type: 'user',
+		// 	timestamp: Date.now(),
+		// 	text: waitResponse,
+		// 	fromAddress: botAddress,
 		// })
 
-		// ws.on('error', (e) => {
-		// 	console.debug(e)
-		// })
-
-		// let responseText = ''
-		// ws.on('message', (event) => {
-		// 	console.debug({ event })
-		// 	const json = event.toString('utf-8')
-		// 	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		// 	const jsonResponse = JSON.parse(json) as unknown as any
-		// 	console.debug({ jsonResponse })
-		// 	console.debug({ response: responseText })
-		// 	if (jsonResponse.event === 'text_stream') {
-		// 		responseText = jsonResponse.history.visible[0][1]
-		// 	} else if (jsonResponse.event === 'stream_end') {
-		// 		sendMessage(waku, chatMessage.fromAddress, {
-		// 			type: 'user',
-		// 			timestamp: Date.now(),
-		// 			text: responseText,
-		// 			fromAddress: botAddress,
-		// 		})
-
-		// 		speak(responseText)
-		// 	}
-		// })
+		let history = sessions.get(botAddress) || { internal: [ [] ], visible: [ []]}
 
 		const request = {
 			user_input: chatMessage.text,
@@ -113,36 +62,19 @@ async function main() {
 			auto_max_new_tokens: true,
 			history: history,
 			regenerate: false,
-			_continue: false,
+			_continue: true,
 			preset: 'Yara',
 			// instruction_template: 'SamFox',
 		}
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const response = (await axios.post(httpApiUrl, request)) as unknown as any
-		const responseText = response.data.results[0].history.visible[0][1]
+		history = response?.data?.results?.[0]?.history
+		console.debug({ response, history })
+		const responseText = history?.visible?.[0]?.[1]
 
 		console.debug({ responseText })
 
-		// const responseText = (response.data as string)
-		// 	.split('\n')
-		// 	.filter((part) => part)
-		// 	.map((part: string) => JSON.parse(part) as { response: string })
-		// 	.filter((obj) => obj.response)
-		// 	.map((obj) => obj.response)
-		// 	.join('')
-		// 	.trimStart()
-
-		// const responseContext = (response.data as string)
-		// 	.split('\n')
-		// 	.filter((part) => part)
-		// 	.map((part: string) => JSON.parse(part) as { context: number[] })
-		// 	.filter((obj) => obj.context)
-		// 	.map((obj) => obj.context)
-		// 	.toString()
-
-		// console.debug({ responseText, responseContext })
-
-		// sessions.set(chatMessage.fromAddress, JSON.parse('[' + responseContext + ']') as number[])
+		sessions.set(chatMessage.fromAddress, history)
 
 		sendMessage(waku, chatMessage.fromAddress, {
 			type: 'user',
