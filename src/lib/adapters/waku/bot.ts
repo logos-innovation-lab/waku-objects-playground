@@ -5,14 +5,11 @@ import axios from 'axios'
 
 import child_process from 'child_process'
 
-const BOT_HOST = process.env.BOT_HOST || '185.32.161.60'
-const BOT_PORT = process.env.BOT_PORT || '42391'
+const BOT_ENDPOINT = process.env.BOT_ENDPOINT || 'http://172.16.246.1:5000/api/v1/chat'
 const BOT_NAME = process.env.BOT_NAME || ''
 const BOT_CHARACTER = process.env.BOT_CHARACTER || 'Wendy'
 const BOT_AVATAR = process.env.BOT_AVATAR || 'QmWtTDsyZBGZPhEEe3fnA24Q3NirqEYqFMifMnHMZkoQ97'
 const BOT_ADDRESS = process.env.BOT_ADDRESS || process.argv[2]
-
-const httpApiUrl = `https://${BOT_HOST}:${BOT_PORT}/api/v1/chat`
 
 const botProfile = {
 	name: BOT_NAME,
@@ -59,7 +56,7 @@ async function main() {
 		}
 
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		const response = (await axios.post(httpApiUrl, request)) as unknown as any
+		const response = (await axios.post(BOT_ENDPOINT, request)) as unknown as any
 		history = response?.data?.results?.[0]?.history
 		console.debug({ response, history })
 		const responseText = history?.visible?.[0]?.[1]
