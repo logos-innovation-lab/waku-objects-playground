@@ -77,8 +77,12 @@ async function main() {
 }
 
 function speak(text: string) {
-	const input = decodeHTML(text)
-	child_process.spawn('speak-piper', [input])
+	try {
+		const input = decodeHTML(text)
+		child_process.spawn('speak-piper', [input])	
+	} catch (e) {
+		console.error('speak failed', e)
+	}
 }
 
 function decodeHTML(text: string) {
