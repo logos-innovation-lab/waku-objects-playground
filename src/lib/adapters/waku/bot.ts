@@ -6,7 +6,7 @@ import axios from 'axios'
 import child_process from 'child_process'
 
 const BOT_ENDPOINT = process.env.BOT_ENDPOINT || 'http://172.16.246.1:5000/api/v1/chat'
-const BOT_NAME = process.env.BOT_NAME || ''
+const BOT_NAME = process.env.BOT_NAME || 'Wendy'
 const BOT_CHARACTER = process.env.BOT_CHARACTER || 'Wendy'
 const BOT_AVATAR = process.env.BOT_AVATAR || 'QmWtTDsyZBGZPhEEe3fnA24Q3NirqEYqFMifMnHMZkoQ97'
 const BOT_ADDRESS = process.env.BOT_ADDRESS || process.argv[2]
@@ -51,7 +51,6 @@ async function main() {
 			history: history,
 			regenerate: false,
 			_continue: false,
-			preset: 'Yara',
 			your_name: chatMessage.fromAddress,
 			// instruction_template: 'SamFox',
 		}
@@ -78,8 +77,21 @@ async function main() {
 }
 
 function speak(text: string) {
-	child_process.spawnSync('speak-piper', {
-		input: text,
+	const input = decodeHTML(text)
+	child_process.spawn('speak-piper', [input])
+}
+
+function decodeHTML(text: string) {
+	const map: { [key: string]: string } = { gt: '>' /* , … */ }
+	return text.replace(/&(#(?:x[0-9a-f]+|\d+)|[a-z]+);?/gi, function ($0, $1) {
+		if ($1[0] === '#') {
+			return String.fromCharCode(
+				$1[1].toLowerCase() === 'x' ? parseInt($1.substr(2), 16) : parseInt($1.substr(1), 10),
+			)
+		} else {
+			// eslint-disable-next-line no-prototype-builtins
+			return map.hasOwnProperty($1) ? map[$1] : $0
+		}
 	})
 }
 
