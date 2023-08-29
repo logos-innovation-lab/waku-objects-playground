@@ -52,7 +52,8 @@ async function main() {
 		// 	fromAddress: botAddress,
 		// })
 
-		let history = sessions.get(botAddress) || { internal: [ [] ], visible: [ []]}
+		// let history = sessions.get(botAddress) || { internal: [[]], visible: [[]] }
+		let history = undefined
 
 		const request = {
 			user_input: chatMessage.text,
@@ -62,7 +63,7 @@ async function main() {
 			auto_max_new_tokens: true,
 			history: history,
 			regenerate: false,
-			_continue: true,
+			_continue: false,
 			preset: 'Yara',
 			// instruction_template: 'SamFox',
 		}
