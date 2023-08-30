@@ -8,7 +8,7 @@
 	export let message: DataMessage
 	export let args: WakuObjectArgs<HelloWorldStore>
 
-	$: helloWorldStore = args.store as HelloWorldStore | undefined
+	$: helloWorldStore = args.store
 	$: address = args.profile.address
 </script>
 

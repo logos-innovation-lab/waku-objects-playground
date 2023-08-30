@@ -14,11 +14,12 @@ export interface WakuObjectAdapter {
 	getContract(address: string, abi: Interface): Contract
 }
 
-type JSONObject = Partial<Record<symbol, JSONValue>>
+export type JSONPrimitive = string | number | boolean | null
+export type JSONObject = { [key: symbol]: JSONValue }
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface JSONArr extends Array<JSONValue> {}
 
-type JSONArray = Array<JSONValue>
-
-type JSONValue = string | number | boolean | JSONArray | JSONObject
+export type JSONValue = JSONPrimitive | JSONObject | JSONArr
 
 export type JSONSerializable = JSONValue
 
@@ -31,10 +32,8 @@ export interface WakuObjectState {
 	readonly tokens: Token[]
 }
 
-export interface WakuObjectContext<
-	StoreType extends JSONSerializable = JSONSerializable,
-	DataMessageType extends JSONSerializable = JSONSerializable,
-> extends WakuObjectAdapter {
+export interface WakuObjectContext<StoreType = JSONSerializable, DataMessageType = JSONSerializable>
+	extends WakuObjectAdapter {
 	readonly store?: StoreType
 	updateStore: (updater: (state?: StoreType) => StoreType) => void
 
