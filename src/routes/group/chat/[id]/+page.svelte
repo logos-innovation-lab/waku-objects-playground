@@ -152,7 +152,7 @@
 							<div class="messages-inner">
 								<!-- Chat bubbles -->
 								{#each messages as message, i}
-									{#if message.type === 'user' && message.text.length > 0}
+									{#if message.type === 'user' && message.text?.length > 0}
 										{@const sameSender = messages[i].fromAddress === messages[i - 1]?.fromAddress}
 										{@const lastMessage =
 											i + 1 === messages.length ||
