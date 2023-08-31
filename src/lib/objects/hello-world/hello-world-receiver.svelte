@@ -9,7 +9,6 @@
 	export let send: (data: HelloWorldStore) => Promise<void>
 
 	async function sendName() {
-		// TODO? updateStore was redundant, document behavior
 		await send({ name: ownName })
 	}
 </script>
