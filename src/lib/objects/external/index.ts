@@ -3,12 +3,6 @@ import type { IframeDataMessage } from './dispatch'
 import IframeComponent from './iframe.svelte'
 import logo from './logo.svg'
 
-export const SEND_TRANSACTION_OBJECT_ID = 'external'
-
-export type CustomArgs = {
-	name: string
-}
-
 const instanceWindowMap = new Map<string, Window>()
 
 export const getExternalDescriptor = (objectId: string): WakuObjectSvelteDescriptor => ({

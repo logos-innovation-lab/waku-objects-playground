@@ -1,10 +1,6 @@
 <script lang="ts">
 	import type { WakuObjectArgs } from '..'
-	import {
-		SendTransactionStoreSchema,
-		type SendTransactionStore,
-		type SendTransactionDataMessage,
-	} from './schemas'
+	import { SendTransactionStoreSchema, type SendTransactionStore } from './schemas'
 	import type { Token } from '../schemas'
 	import type { User } from '$lib/types'
 

@@ -1,10 +1,6 @@
 import type { WakuObjectSvelteDescriptor } from '..'
 import ChatComponent from './chat.svelte'
-import {
-	SendTransactionDataMessageSchema,
-	type SendTransactionDataMessage,
-	type SendTransactionStore,
-} from './schemas'
+import { SendTransactionDataMessageSchema } from './schemas'
 import StandaloneComponent from './standalone.svelte'
 import logo from './logo.svg'
 

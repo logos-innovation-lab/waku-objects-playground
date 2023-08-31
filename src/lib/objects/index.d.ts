@@ -3,6 +3,7 @@ import type { DataMessage } from '$lib/stores/chat'
 import type { ComponentType } from 'svelte'
 import type { Transaction, User, TransactionState } from './schemas'
 import type { Contract, Interface } from 'ethers'
+import type { CustomArgs } from ''
 
 export interface WakuObjectAdapter {
 	getTransaction(txHash: string): Promise<Transaction | undefined>
@@ -17,9 +18,9 @@ export interface WakuObjectAdapter {
 export type JSONPrimitive = string | number | boolean | null
 export type JSONObject = { [key: symbol]: JSONValue }
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface JSONArr extends Array<JSONValue> {}
+export interface JSONArray extends Array<JSONValue> {}
 
-export type JSONValue = JSONPrimitive | JSONObject | JSONArr
+export type JSONValue = JSONPrimitive | JSONObject | JSONArray
 
 export type JSONSerializable = JSONValue
 
@@ -55,6 +56,10 @@ interface WakuObjectDescriptor {
 
 	onMessage?: (message: DataMessage<DataMessageType>, args: WakuObjectArgs) => Promise<void>
 	// TODO onTransaction: (store: unknown, transaction: Transaction) => unknown
+}
+
+export type CustomArgs = {
+	name: string
 }
 
 interface WakuObjectSvelteDescriptor extends WakuObjectDescriptor {
