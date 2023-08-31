@@ -22,6 +22,7 @@ import type { Token } from '$lib/stores/balances'
 import { defaultBlockchainNetwork, sendTransaction } from '$lib/adapters/transaction'
 import type {
 	JSONSerializable,
+	JSONValue,
 	WakuObjectAdapter,
 	WakuObjectArgs,
 	WakuObjectContext,
@@ -77,12 +78,13 @@ function createGroupChat(
 
 async function addMessageToChat(
 	address: string,
-	adapter: WakuObjectAdapter,
+	blockchainAdapter: WakuObjectAdapter,
 	chatId: string,
 	message: Message,
+	send?: (data: JSONValue) => Promise<void>,
 ) {
-	if (message.type === 'data') {
-		await executeOnDataMessage(address, adapter, chatId, message)
+	if (message.type === 'data' && send) {
+		await executeOnDataMessage(address, blockchainAdapter, chatId, message, send)
 	}
 
 	const unread = message.fromAddress !== address && message.type === 'user' ? 1 : 0
@@ -95,9 +97,10 @@ async function addMessageToChat(
 
 async function executeOnDataMessage(
 	address: string,
-	adapter: WakuObjectAdapter,
+	blockchainAdapter: WakuObjectAdapter,
 	chatId: string,
 	dataMessage: DataMessage,
+	send: (data: JSONValue) => Promise<void>,
 ) {
 	const descriptor = lookup(dataMessage.objectId)
 	const key = objectKey(dataMessage.objectId, dataMessage.instanceId)
@@ -118,23 +121,24 @@ async function executeOnDataMessage(
 		}
 		const store = objects.get(key)
 		const context: WakuObjectContext = {
-			...adapter,
+			...blockchainAdapter,
 			store,
 			updateStore,
-			send: () => {
-				throw 'not implemented'
-			},
+			send,
 			onViewChange: () => {
+				// TODO this is not really needed for the `onMessage` handler anyways
 				throw 'not implemented'
 			},
 		}
+		const chat = get(chats).chats.get(chatId)
+		const users = chat ? chat.users : []
 		const args: WakuObjectArgs = {
 			...context,
 			chatId,
 			objectId: dataMessage.objectId,
 			instanceId: dataMessage.instanceId,
 			profile: { ...get(profile), address },
-			users: [], // TODO
+			users: users,
 			tokens: defaultBlockchainNetwork.tokens || [],
 		}
 		await descriptor.onMessage(dataMessage, args)
@@ -396,8 +400,9 @@ export default class WakuAdapter implements Adapter {
 		}
 
 		const wakuObjectAdapter = makeWakuObjectAdapter(this, wallet)
+		const send = (data: JSONValue) => this.sendData(wallet, chatId, objectId, instanceId, data)
 
-		await addMessageToChat(fromAddress, wakuObjectAdapter, chatId, message)
+		await addMessageToChat(fromAddress, wakuObjectAdapter, chatId, message, send)
 		await sendMessage(this.waku, chatId, message)
 	}
 

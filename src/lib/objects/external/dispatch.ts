@@ -60,9 +60,6 @@ export function makeIframeDispatcher(
 			id,
 			result,
 		}
-
-		console.debug('IframeDispatcher.postMessage', { response, window })
-
 		window.postMessage(response, { targetOrigin: '*' })
 	}
 
@@ -140,7 +137,6 @@ export function makeIframeDispatcher(
 		window: Window,
 		wallet: HDNodeWallet,
 	) {
-		console.debug({ data })
 		// TODO validation
 		const request = data as AdapterRequestMessage
 		try {

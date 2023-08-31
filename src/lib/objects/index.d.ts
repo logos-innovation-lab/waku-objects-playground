@@ -55,7 +55,6 @@ interface WakuObjectDescriptor {
 	readonly logo: string
 
 	onMessage?: (message: DataMessage<DataMessageType>, args: WakuObjectArgs) => Promise<void>
-	// TODO onTransaction: (store: unknown, transaction: Transaction) => unknown
 }
 
 export type CustomArgs = {

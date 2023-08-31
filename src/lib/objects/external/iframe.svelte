@@ -54,7 +54,6 @@
 								return
 							}
 							default: {
-								console.debug('external iframe', { event })
 								const window = iframe.contentWindow
 								iframeDispatcher.onMessage(data, args, window, adapterWallet)
 								return
