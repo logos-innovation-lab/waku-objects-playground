@@ -19,7 +19,7 @@
 	import { payggyDescriptor } from '.'
 
 	export let message: DataMessage<SendTransactionDataMessage>
-	export let args: WakuObjectArgs<SendTransactionStore, SendTransactionDataMessage>
+	export let args: WakuObjectArgs
 
 	let data: SendTransactionStore | undefined
 	$: {

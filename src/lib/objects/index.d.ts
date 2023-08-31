@@ -32,8 +32,10 @@ export interface WakuObjectState {
 	readonly tokens: Token[]
 }
 
-export interface WakuObjectContext<StoreType = JSONSerializable, DataMessageType = JSONSerializable>
-	extends WakuObjectAdapter {
+type StoreType = JSONSerializable
+type DataMessageType = JSONSerializable
+
+export interface WakuObjectContext extends WakuObjectAdapter {
 	readonly store?: StoreType
 	updateStore: (updater: (state?: StoreType) => StoreType) => void
 
@@ -43,32 +45,19 @@ export interface WakuObjectContext<StoreType = JSONSerializable, DataMessageType
 	onViewChange: (view: string) => void
 }
 
-export interface WakuObjectArgs<
-	StoreType extends JSONSerializable = JSONSerializable,
-	DataMessageType extends JSONSerializable = JSONSerializable,
-> extends WakuObjectContext<StoreType, DataMessageType>,
-		WakuObjectState {}
+export interface WakuObjectArgs extends WakuObjectContext, WakuObjectState {}
 
-interface WakuObjectDescriptor<
-	StoreType extends JSONSerializable = JSONSerializable,
-	DataMessageType extends JSONSerializable = JSONSerializable,
-> {
+interface WakuObjectDescriptor {
 	readonly objectId: string
 	readonly name: string
 	readonly description: string
 	readonly logo: string
 
-	onMessage?: (
-		message: DataMessage<DataMessageType>,
-		args: WakuObjectArgs<StoreType, DataMessageType>,
-	) => Promise<void>
+	onMessage?: (message: DataMessage<DataMessageType>, args: WakuObjectArgs) => Promise<void>
 	// TODO onTransaction: (store: unknown, transaction: Transaction) => unknown
 }
 
-interface WakuObjectSvelteDescriptor<
-	StoreType extends JSONSerializable = JSONSerializable,
-	DataMessageType extends JSONSerializable = JSONSerializable,
-> extends WakuObjectDescriptor<StoreType, DataMessageType> {
+interface WakuObjectSvelteDescriptor extends WakuObjectDescriptor {
 	readonly wakuObject: ComponentType
 	readonly standalone?: ComponentType
 	readonly customArgs?: CustomArgs

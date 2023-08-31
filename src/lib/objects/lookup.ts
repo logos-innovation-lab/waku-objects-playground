@@ -4,7 +4,7 @@ import { helloWorldDescriptor } from './hello-world'
 import { payggyDescriptor } from './payggy'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const wakuObjectList: WakuObjectSvelteDescriptor<any, any>[] = [
+export const wakuObjectList: WakuObjectSvelteDescriptor[] = [
 	helloWorldDescriptor,
 	payggyDescriptor,
 	getExternalDescriptor('@waku-objects/sandbox-example'),

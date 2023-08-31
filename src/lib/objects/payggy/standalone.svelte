@@ -13,7 +13,7 @@
 	import ConfirmSend from './views/confirm-send.svelte'
 	import SelectUser from './views/select-user.svelte'
 
-	export let args: WakuObjectArgs<SendTransactionStore, SendTransactionDataMessage>
+	export let args: WakuObjectArgs
 
 	let store: SendTransactionStore | undefined
 	$: {

@@ -10,10 +10,7 @@ import logo from './logo.svg'
 
 export const PAYGGY_OBJECT_ID = 'payggy'
 
-export const payggyDescriptor: WakuObjectSvelteDescriptor<
-	SendTransactionStore,
-	SendTransactionDataMessage
-> = {
+export const payggyDescriptor: WakuObjectSvelteDescriptor = {
 	objectId: PAYGGY_OBJECT_ID,
 	name: 'Payggy',
 	description: 'Send or request payments',
