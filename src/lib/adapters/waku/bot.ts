@@ -11,6 +11,9 @@ const BOT_CHARACTER = process.env.BOT_CHARACTER || 'Wendy'
 const BOT_AVATAR = process.env.BOT_AVATAR || 'QmWtTDsyZBGZPhEEe3fnA24Q3NirqEYqFMifMnHMZkoQ97'
 const BOT_ADDRESS = process.env.BOT_ADDRESS || process.argv[2]
 const BOT_PRESET = process.env.BOT_PRESET || undefined
+const BOT_HISTORY_LIMIT = process.env.BOT_HISTORY_LIMIT
+	? parseInt(process.env.BOT_HISTORY_LIMIT, 10)
+	: 1024
 
 const botProfile = {
 	name: BOT_NAME,
@@ -41,7 +44,7 @@ async function main() {
 
 		console.log({ chatMessage })
 
-		let history = undefined
+		let history = sessions.get(chatMessage.fromAddress)
 
 		const request = {
 			user_input: chatMessage.text,
@@ -59,10 +62,13 @@ async function main() {
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const response = (await axios.post(BOT_ENDPOINT, request)) as unknown as any
 		history = response?.data?.results?.[0]?.history
-		console.debug({ response, history })
-		const responseText = history?.visible?.[0]?.[1]
-
+		const responseText = history?.visible?.slice(-1)?.[0]?.[1]
 		console.debug({ responseText })
+
+		if (history?.visible?.length > BOT_HISTORY_LIMIT) {
+			history.visible.shift()
+			history.internal.shift()
+		}
 
 		sessions.set(chatMessage.fromAddress, history)
 
@@ -82,7 +88,7 @@ function speak(text: string) {
 		const input = decodeHTML(text)
 		child_process
 			.spawn('speak-piper', [input], { detached: true })
-			.on('error', (e) => console.error('speak failed'))
+			.on('error', () => console.error('speak failed'))
 	} catch (e) {
 		console.error('speak failed')
 	}
