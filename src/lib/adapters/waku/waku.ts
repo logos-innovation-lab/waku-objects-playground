@@ -78,7 +78,10 @@ export async function storeDocument(
 	const json = JSON.stringify(document)
 	const payload = utf8ToBytes(json)
 
-	return await waku.lightPush.send(encoder, { payload })
+	const { error } = await waku.lightPush.send(encoder, { payload })
+	if (error) {
+		console.error(error)
+	}
 }
 
 export async function readStore(
@@ -103,5 +106,8 @@ export async function sendMessage(waku: LightNode, id: string, message: unknown)
 	const contentTopic = getTopic('private-message', id)
 	const encoder = createEncoder({ contentTopic })
 
-	return await waku.lightPush.send(encoder, { payload })
+	const { error } = await waku.lightPush.send(encoder, { payload })
+	if (error) {
+		console.error(error)
+	}
 }
