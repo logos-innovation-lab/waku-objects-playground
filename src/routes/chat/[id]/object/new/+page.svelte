@@ -36,7 +36,7 @@
 	let loading = false
 	let text = ''
 
-	const createObject = async <T extends JSONSerializable>(objectId: string, t: T) => {
+	const createObject = async (objectId: string, t: JSONSerializable) => {
 		const instanceId = genRandomHex(12)
 		await sendData(objectId, instanceId, t)
 	}

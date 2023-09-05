@@ -3,36 +3,42 @@ import type { DataMessage } from '$lib/stores/chat'
 import type { ComponentType } from 'svelte'
 import type { Transaction, User, TransactionState } from './schemas'
 import type { Contract, Interface } from 'ethers'
+import type { CustomArgs } from ''
 
 export interface WakuObjectAdapter {
 	getTransaction(txHash: string): Promise<Transaction | undefined>
 	getTransactionState(txHash: string): Promise<TransactionState>
 	waitForTransaction(txHash: string): Promise<TransactionState>
 	checkBalance(token: Token): Promise<void>
-	sendTransaction: (to: string, token: Token, fee: Token) => Promise<string>
+	sendTransaction: (to: string, token: Token) => Promise<string>
 	estimateTransaction: (to: string, token: Token) => Promise<Token>
 	getContract(address: string, abi: Interface): Contract
 }
 
-export type JSONSerializable =
-	| string
-	| number
-	| boolean
-	| null
-	| JSONSerializable[]
-	| Partial<Record<symbol, JSONSerializable>>
+export type JSONPrimitive = string | number | boolean | null
+export type JSONObject = { [key: symbol]: JSONValue }
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface JSONArray extends Array<JSONValue> {}
 
-export interface WakuObjectArgs<
-	StoreType extends JSONSerializable = JSONSerializable,
-	DataMessageType extends JSONSerializable = JSONSerializable,
-> extends WakuObjectAdapter {
+export type JSONValue = JSONPrimitive | JSONObject | JSONArray
+
+export type JSONSerializable = JSONValue
+
+export interface WakuObjectState {
+	readonly chatId: string
+	readonly objectId: string
 	readonly instanceId: string
 	readonly profile: User
 	readonly users: User[]
 	readonly tokens: Token[]
+}
 
-	readonly store: StoreType
-	updateStore: (updater: (state: StoreType) => StoreType) => void
+type StoreType = JSONSerializable
+type DataMessageType = JSONSerializable
+
+export interface WakuObjectContext extends WakuObjectAdapter {
+	readonly store?: StoreType
+	updateStore: (updater: (state?: StoreType) => StoreType) => void
 
 	send: (data: DataMessageType) => Promise<void>
 
@@ -40,23 +46,23 @@ export interface WakuObjectArgs<
 	onViewChange: (view: string) => void
 }
 
-interface WakuObjectDescriptor<
-	StoreType extends JSONSerializable = JSONSerializable,
-	DataMessageType extends JSONSerializable = JSONSerializable,
-> {
+export interface WakuObjectArgs extends WakuObjectContext, WakuObjectState {}
+
+interface WakuObjectDescriptor {
 	readonly objectId: string
 	readonly name: string
 	readonly description: string
 	readonly logo: string
 
+	onMessage?: (message: DataMessage<DataMessageType>, args: WakuObjectArgs) => Promise<void>
+}
+
+export type CustomArgs = {
+	name: string
+}
+
+interface WakuObjectSvelteDescriptor extends WakuObjectDescriptor {
 	readonly wakuObject: ComponentType
 	readonly standalone?: ComponentType
-	onMessage?: (
-		address: string,
-		adapter: WakuObjectAdapter,
-		store: StoreType,
-		updateStore: (updater: (state: StoreType) => StoreType) => void,
-		message: DataMessage<DataMessageType>,
-	) => Promise<void>
-	// TODO onTransaction: (store: unknown, transaction: Transaction) => unknown
+	readonly customArgs?: CustomArgs
 }

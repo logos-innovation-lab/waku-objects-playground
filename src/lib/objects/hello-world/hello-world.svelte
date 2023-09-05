@@ -6,9 +6,9 @@
 	import HelloWorldSender from './hello-world-sender.svelte'
 
 	export let message: DataMessage
-	export let args: WakuObjectArgs<HelloWorldStore>
+	export let args: WakuObjectArgs
 
-	$: helloWorldStore = args.store as HelloWorldStore | undefined
+	$: helloWorldStore = args.store as HelloWorldStore
 	$: address = args.profile.address
 </script>
 
@@ -19,7 +19,6 @@
 		instanceId={message.instanceId}
 		name={helloWorldStore?.name}
 		send={args.send}
-		updateStore={args.updateStore}
 		ownName={args.profile.name || 'Anonymous'}
 	/>
 {/if}

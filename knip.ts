@@ -5,7 +5,12 @@ import type { KnipConfig } from 'knip'
 const sveltePreprocessor = sveltePreprocess()
 
 const config: KnipConfig = {
-	ignore: ['**/*.d.ts', '**/schemas.ts', 'src/lib/objects/hello-world/index.ts'],
+	ignore: [
+		'**/*.d.ts',
+		'**/schemas.ts',
+		'src/lib/objects/hello-world/index.ts',
+		'src/lib/objects/external/iframe.svelte',
+	],
 	paths: {
 		// This ain't pretty, but Svelte basically does the same
 		'$app/*': ['node_modules/@sveltejs/kit/src/runtime/app/*'],
@@ -22,6 +27,7 @@ const config: KnipConfig = {
 	},
 	ignoreExportsUsedInFile: true,
 	ignoreBinaries: ['docker'],
+	ignoreDependencies: ['@waku-objects/sandbox-example'],
 }
 
 export default config

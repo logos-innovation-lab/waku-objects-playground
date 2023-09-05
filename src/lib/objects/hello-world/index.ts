@@ -1,14 +1,14 @@
-import type { WakuObjectDescriptor } from '..'
+import type { WakuObjectSvelteDescriptor } from '..'
 import HelloWorld from './hello-world.svelte'
 import logo from './logo.svg'
 
-export interface HelloWorldStore {
-	name?: string
+export type HelloWorldStore = {
+	name: string
 }
 
 export const HELLO_WORLD_OBJECT_ID = 'hello-world'
 
-export const helloWorldDescriptor: WakuObjectDescriptor = {
+export const helloWorldDescriptor: WakuObjectSvelteDescriptor = {
 	objectId: HELLO_WORLD_OBJECT_ID,
 	name: 'Hello World',
 	description: 'Say hello',
@@ -16,7 +16,7 @@ export const helloWorldDescriptor: WakuObjectDescriptor = {
 
 	wakuObject: HelloWorld,
 
-	onMessage: async (address, adapter, store, updateStore, message) => {
-		updateStore(() => message.data)
+	onMessage: async (message, args) => {
+		args.updateStore(() => message.data)
 	},
 }

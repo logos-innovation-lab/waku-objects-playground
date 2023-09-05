@@ -16,7 +16,7 @@
 	export let message: DataMessage
 	export let users: User[]
 
-	const component = lookup(message.objectId)?.wakuObject
+	const { wakuObject, customArgs } = lookup(message.objectId) || {}
 
 	let store: JSONSerializable | undefined
 	$: store = $objectStore.objects.get(objectKey(message.objectId, message.instanceId))
@@ -46,6 +46,8 @@
 	$: if (userProfile) {
 		const wakuObjectAdapter = makeWakuObjectAdapter(adapter, wallet)
 		args = {
+			chatId,
+			objectId: message.objectId,
 			instanceId: message.instanceId,
 			profile: userProfile,
 			users,
@@ -62,4 +64,4 @@
 	}
 </script>
 
-<svelte:component this={component} {message} {args} />
+<svelte:component this={wakuObject} {message} {args} {customArgs} />

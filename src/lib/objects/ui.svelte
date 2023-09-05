@@ -60,6 +60,8 @@
 
 		if (userProfile && users) {
 			args = {
+				chatId,
+				objectId,
 				instanceId,
 				profile: userProfile,
 				users,

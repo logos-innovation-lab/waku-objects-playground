@@ -7,10 +7,8 @@
 	export let name: string | undefined
 	export let ownName: string
 	export let send: (data: HelloWorldStore) => Promise<void>
-	export let updateStore: (updater: (state: HelloWorldStore) => HelloWorldStore) => void
 
 	async function sendName() {
-		updateStore(() => ({ name: ownName }))
 		await send({ name: ownName })
 	}
 </script>

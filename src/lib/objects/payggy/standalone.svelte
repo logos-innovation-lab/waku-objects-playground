@@ -1,10 +1,6 @@
 <script lang="ts">
 	import type { WakuObjectArgs } from '..'
-	import {
-		SendTransactionStoreSchema,
-		type SendTransactionStore,
-		type SendTransactionDataMessage,
-	} from './schemas'
+	import { SendTransactionStoreSchema, type SendTransactionStore } from './schemas'
 	import type { Token } from '../schemas'
 	import type { User } from '$lib/types'
 
@@ -13,7 +9,7 @@
 	import ConfirmSend from './views/confirm-send.svelte'
 	import SelectUser from './views/select-user.svelte'
 
-	export let args: WakuObjectArgs<SendTransactionStore, SendTransactionDataMessage>
+	export let args: WakuObjectArgs
 
 	let store: SendTransactionStore | undefined
 	$: {
