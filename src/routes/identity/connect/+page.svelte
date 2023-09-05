@@ -18,7 +18,8 @@
 		restoring = true
 
 		try {
-			walletStore.restoreWallet(phrase)
+			const trimmedPhrase = phrase.trim()
+			walletStore.restoreWallet(trimmedPhrase)
 
 			history.back()
 		} catch (error) {
