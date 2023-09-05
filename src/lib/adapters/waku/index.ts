@@ -34,11 +34,17 @@ interface QueuedMessage {
 	adapter: WakuObjectAdapter
 }
 
-function createChat(chatId: string, user: User, address: string): string {
+function createPrivateChat(chatId: string, user: User, ownAddress: string): string {
+	const ownProfile = get(profile)
+	const ownUser = {
+		name: ownProfile.name,
+		avatar: ownProfile.avatar,
+		address: ownAddress,
+	}
 	const chat = {
 		chatId,
 		messages: [],
-		users: [user, { address }],
+		users: [user, ownUser],
 		name: user.name ?? user.address,
 		unread: 0,
 	}
@@ -241,7 +247,7 @@ export default class WakuAdapter implements Adapter {
 			throw 'invalid user'
 		}
 
-		createChat(chatId, user, address)
+		createPrivateChat(chatId, user, address)
 
 		return chatId
 	}
@@ -629,7 +635,7 @@ export default class WakuAdapter implements Adapter {
 				return
 			}
 
-			createChat(message.fromAddress, user, address)
+			createPrivateChat(message.fromAddress, user, address)
 		}
 
 		await addMessageToChat(address, adapter, message.fromAddress, message)
