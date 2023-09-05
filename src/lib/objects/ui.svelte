@@ -14,9 +14,10 @@
 	export let objectId: string
 	export let instanceId: string
 	export let chatId: string
-	export let onViewChange: (view: string) => void
+	export let onViewChange: (view: string, ...args: string[]) => void
 	export let view: string | undefined = undefined
 	export let wallet: HDNodeWallet
+	export let params: string[]
 
 	const component = lookup(objectId)?.standalone
 
@@ -66,11 +67,13 @@
 				profile: userProfile,
 				users,
 				tokens,
+				chatName: chat.name ?? 'unknown',
 				store,
 				send,
 				updateStore,
 				onViewChange,
 				view,
+				params,
 				...wakuObjectAdapter,
 			}
 		}

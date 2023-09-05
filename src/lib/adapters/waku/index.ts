@@ -117,17 +117,17 @@ async function executeOnDataMessage(
 		const updateStore = (updater: (_store?: JSONSerializable) => JSONSerializable) => {
 			const store = objects.get(key)
 			const newStore = updater(store)
-			const newObjects = new Map(objects)
-			newObjects.set(key, newStore)
+			objects.set(key, newStore)
 			objectStore.update((state) => ({
 				...state,
-				objects: newObjects,
+				objects,
 				lastUpdated: dataMessage.timestamp,
 			}))
 		}
 		const store = objects.get(key)
 		const context: WakuObjectContext = {
 			...blockchainAdapter,
+			params: [],
 			store,
 			updateStore,
 			send,
@@ -140,6 +140,7 @@ async function executeOnDataMessage(
 		const users = chat ? chat.users : []
 		const args: WakuObjectArgs = {
 			...context,
+			chatName: chat?.name ?? 'Unknown', // FIXME: figure out how to have a proper chatname
 			chatId,
 			objectId: dataMessage.objectId,
 			instanceId: dataMessage.instanceId,

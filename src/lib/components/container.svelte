@@ -2,6 +2,7 @@
 	export let direction: 'row' | 'column' = 'column'
 	export let gap = 0
 	export let justify: 'space-between' | 'flex-start' | 'flex-end' | 'center' = 'flex-start'
+	export let wrap: 'nowrap' | 'wrap' | 'wrap-rewerse' = 'nowrap'
 	export let align: 'left' | 'right' | 'center' | 'none' = 'none'
 	export let alignItems: 'left' | 'right' | 'center' | 'none' = 'none'
 	export let grow: boolean | undefined = undefined
@@ -14,7 +15,7 @@
 	class={`container text-${align} items-${alignItems} ${
 		sticky !== 'none' ? 'sticky-' + { sticky } : ''
 	} ${direction} ${justify} ${grow ? 'grow' : ''}`}
-	style={`gap: ${gap}px; padding-inline: ${padX}px; padding-block: ${padY}px;`}
+	style={`gap: ${gap}px; padding-inline: ${padX}px; padding-block: ${padY}px; flex-wrap: ${wrap}`}
 >
 	<slot />
 </div>

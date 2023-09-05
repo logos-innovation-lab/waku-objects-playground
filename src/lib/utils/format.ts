@@ -6,15 +6,15 @@ export function formatAddress(address: string, prefix = 4, suffix = 0) {
 }
 
 export function toSignificant(
-	amount: bigint,
+	amount: bigint | string,
 	decimals: number,
 	minDecimalsOrSignificantDigits = 2,
 ): string {
 	return toSignificantString(toDecimal(amount, decimals), minDecimalsOrSignificantDigits)
 }
 
-export function toDecimal(amount: bigint, decimals: number): string {
-	const str = amount.toString()
+export function toDecimal(amount: bigint | string, decimals: number): string {
+	const str = typeof amount === 'string' ? amount : amount.toString()
 
 	if (decimals === 0) return str
 

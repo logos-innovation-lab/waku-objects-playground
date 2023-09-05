@@ -4,10 +4,12 @@ import { helloWorldDescriptor } from './hello-world'
 import { payggyDescriptor } from './payggy'
 import sandboxLogo from '@waku-objects/sandbox-example/object/logo.svg'
 import sandboxMeta from '@waku-objects/sandbox-example/object/metadata.json'
+import { splitDescriptor } from './split'
 
 export const wakuObjectList: WakuObjectSvelteDescriptor[] = [
 	helloWorldDescriptor,
 	payggyDescriptor,
+	splitDescriptor as unknown as WakuObjectSvelteDescriptor, // FIXME: this is quite uggly
 	getExternalDescriptor(
 		'@waku-objects/sandbox-example',
 		sandboxMeta.name,

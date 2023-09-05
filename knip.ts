@@ -10,6 +10,7 @@ const config: KnipConfig = {
 		'**/schemas.ts',
 		'src/lib/objects/hello-world/index.ts',
 		'src/lib/objects/external/iframe.svelte',
+		'src/lib/objects/split/types.ts',
 	],
 	paths: {
 		// This ain't pretty, but Svelte basically does the same

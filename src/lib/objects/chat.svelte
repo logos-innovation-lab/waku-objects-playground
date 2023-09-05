@@ -53,12 +53,21 @@
 			users,
 			tokens,
 			store,
+			params: [],
+			chatName: 'unknown', // FIXME: this should be fetched from the chat store
 			send: (data: JSONSerializable) =>
 				adapter.sendData(wallet, chatId, message.objectId, message.instanceId, data),
 			updateStore,
 			...wakuObjectAdapter,
-			onViewChange: (view: string) => {
-				goto(routes.OBJECT(chatId, message.objectId, message.instanceId, view))
+			onViewChange: (view: string, ...rest) => {
+				goto(
+					routes.OBJECT(
+						chatId,
+						message.objectId,
+						message.instanceId,
+						`${[view, ...rest].join('/')}`,
+					),
+				)
 			},
 		}
 	}

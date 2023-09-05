@@ -21,6 +21,9 @@ interface BlockchainNetwork {
 	explorer?: BlockchainExplorer
 	nativeToken: Token
 	tokens?: Token[]
+	objects: {
+		splitterFactory: string
+	}
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -33,6 +36,9 @@ const testBlockchain: BlockchainNetwork = {
 		decimals: 18,
 		image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
 		amount: BigInt(0),
+	},
+	objects: {
+		splitterFactory: '0x0',
 	},
 }
 
@@ -61,6 +67,9 @@ const chiadoBlockchain: BlockchainNetwork = {
 			address: '0x19C653Da7c37c66208fbfbE8908A5051B57b4C70',
 		},
 	],
+	objects: {
+		splitterFactory: '0x941DDB22a33FC753d3E7b82cc34c47Ee605e60a3',
+	},
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -77,6 +86,9 @@ const sepoliaBlockchain: BlockchainNetwork = {
 		decimals: 18,
 		image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
 		amount: BigInt(0),
+	},
+	objects: {
+		splitterFactory: '0x0',
 	},
 }
 
