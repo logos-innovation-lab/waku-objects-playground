@@ -1,14 +1,18 @@
 import type { WakuObjectSvelteDescriptor } from '..'
 import type { IframeDataMessage } from './dispatch'
 import IframeComponent from './iframe.svelte'
-import logo from './logo.svg'
 
 const instanceWindowMap = new Map<string, Window>()
 
-export const getExternalDescriptor = (objectId: string): WakuObjectSvelteDescriptor => ({
+export const getExternalDescriptor = (
+	objectId: string,
+	name: string,
+	description: string,
+	logo: string,
+): WakuObjectSvelteDescriptor => ({
 	objectId,
-	name: 'External',
-	description: 'External',
+	name,
+	description,
 	logo,
 	wakuObject: IframeComponent,
 	customArgs: { name: objectId },
