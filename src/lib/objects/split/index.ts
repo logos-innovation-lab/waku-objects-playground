@@ -5,6 +5,7 @@ import StandaloneComponent from './standalone.svelte'
 import logo from './logo.svg'
 import type { View } from './types'
 import { getBalances } from './blockchain'
+import { calculateAmountOwed } from './utils'
 
 export const SPLIT_OBJECT_ID = 'split'
 
@@ -33,6 +34,13 @@ export const splitDescriptor: WakuObjectSvelteDescriptor<Store, DataMessage, Vie
 				balances = await getBalances(args.getContract, splitterAddress)
 			} catch (error) {
 				console.error(error)
+
+				const expenses = args.store?.expenses ?? []
+				const payments = args.store?.payments ?? []
+
+				expenses.push(expense)
+
+				balances = calculateAmountOwed(expenses, payments, res.data.users)
 			}
 
 			args.updateStore((s) => {
@@ -58,6 +66,18 @@ export const splitDescriptor: WakuObjectSvelteDescriptor<Store, DataMessage, Vie
 				balances = await getBalances(args.getContract, splitterAddress)
 			} catch (error) {
 				console.error(error)
+
+				const expenses = args.store?.expenses ?? []
+				const payments = args.store?.payments ?? []
+				const blnc = args.store?.balances ?? []
+
+				payments.push(payment)
+
+				balances = calculateAmountOwed(
+					expenses,
+					payments,
+					blnc.map((b) => b.address),
+				)
 			}
 
 			args.updateStore((s) => {
