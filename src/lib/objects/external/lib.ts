@@ -16,6 +16,7 @@ export type Csp = {
 
 export type WakuObject = {
 	name: string
+	standalone?: boolean
 	csp: Csp
 }
 
@@ -28,6 +29,7 @@ export type LoadedObject = {
 	script: string
 	csp: string
 	name: string
+	className: string
 }
 
 const DEFAULT_CSP: Csp = {
@@ -44,7 +46,10 @@ const formatCsp = (csp: Csp, add?: Csp): string => {
 		.join('; ')
 }
 
-export const getNPMObject = async (module: string): Promise<LoadedObject | null> => {
+export const getNPMObject = async (
+	module: string,
+	className: 'chat' | 'standalone',
+): Promise<LoadedObject | null> => {
 	try {
 		const object = (await objects[`/node_modules/${module}/object/metadata.json`]()) as WakuObject
 		const script = await scripts[`/node_modules/${module}/object/index.js`]()
@@ -58,6 +63,7 @@ export const getNPMObject = async (module: string): Promise<LoadedObject | null>
 			script,
 			csp: formatCsp(object.csp, added),
 			name: object.name,
+			className,
 		}
 	} catch (err) {
 		console.error(err)

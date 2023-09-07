@@ -10,13 +10,14 @@ export const getExternalDescriptor = (
 	name: string,
 	description: string,
 	logo: string,
+	hasStandalone?: boolean,
 ): WakuObjectSvelteDescriptor => ({
 	objectId,
 	name,
 	description,
 	logo,
 	wakuObject: ChatComponent,
-	standalone: StandaloneComponent,
+	standalone: hasStandalone ? StandaloneComponent : undefined,
 	onMessage: async (message, args) => {
 		const iframeDataMessage: IframeDataMessage = {
 			type: 'iframe-data-message',
