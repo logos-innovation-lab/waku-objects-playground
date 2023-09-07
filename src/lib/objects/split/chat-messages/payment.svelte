@@ -4,11 +4,14 @@
 	import { splitDescriptor } from '..'
 	import type { User } from '$lib/types'
 	import ChatMessage from '$lib/components/chat-message.svelte'
+	import { toSignificant } from '$lib/utils/format'
 
 	export let myMessage: boolean
 	export let amount: string
 	export let sender: User | undefined = undefined
 	export let instanceId: string
+	export let decimals: number
+	export let symbol: string
 </script>
 
 <ChatMessage {myMessage} object bubble>
@@ -25,7 +28,8 @@
 			{:else}
 				{sender?.name ?? 'Unknown'}
 			{/if}
-			paid {amount} DAI.
+			paid {toSignificant(amount, decimals)}
+			{symbol}.
 		</Container>
 	</div>
 </ChatMessage>

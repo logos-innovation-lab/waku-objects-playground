@@ -1,4 +1,4 @@
-import type { Contract, ContractTransactionResponse, Interface } from 'ethers'
+import type { BigNumberish, Contract, ContractTransactionResponse, Interface } from 'ethers'
 import type { Expense, Payment } from './schemas'
 
 export type View =
@@ -24,6 +24,14 @@ export type SplitterFactoryContract = Contract & {
 	create(metadata: string, token: string, members: string[]): Promise<ContractTransactionResponse>
 }
 
+type TransactionOverrides = {
+	nonce?: number
+	gasLimit?: BigNumberish
+	gasPrice?: BigNumberish
+	value?: BigNumberish
+	chainId?: number
+}
+
 export type SplitterContract = Contract & {
 	metadata(): Promise<string[]>
 	token(): Promise<string>
@@ -39,6 +47,6 @@ export type SplitterContract = Contract & {
 		targets: string[],
 	): Promise<ContractTransactionResponse>
 	getMembers(): Promise<string[]>
-	settleDebts(user: string): Promise<ContractTransactionResponse>
-	settleDebts(): Promise<ContractTransactionResponse>
+	settleDebts(user: string, overrides?: TransactionOverrides): Promise<ContractTransactionResponse>
+	settleDebts(overrides?: TransactionOverrides): Promise<ContractTransactionResponse>
 }

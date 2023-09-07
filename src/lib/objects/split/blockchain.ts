@@ -70,12 +70,15 @@ export async function addExpense(
 export async function settleDebt(
 	getContract: GetContract,
 	splitterAddress: string,
+	from: string,
 ): Promise<string> {
 	const splitter = getSplitterContract(getContract, splitterAddress)
-	const tx = await splitter.settleDebts()
+	const value = await splitter.debts(from)
+	const tx = await splitter.settleDebts(from, { gasLimit: 3000000n, value })
 	const receipt = await tx.wait()
 
 	if (!receipt || receipt.status !== 1) {
+		console.error(receipt)
 		throw new Error('Failed to settle debt')
 	}
 	return tx.hash

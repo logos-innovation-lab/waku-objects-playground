@@ -15,6 +15,7 @@
 	import { settleDebt } from '../blockchain'
 	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 	import type { Token } from '$lib/objects/schemas'
+	import { toSignificant } from '$lib/utils/format'
 
 	export let profile: UserType
 	export let balances: Balance[]
@@ -29,6 +30,7 @@
 
 	let owedAmount = BigInt(0)
 	let decimals: number = defaultBlockchainNetwork.nativeToken.decimals
+	let settling = false
 	$: {
 		const balance = balances.find(({ address }) => address === profile.address)
 		if (balance) {
@@ -40,18 +42,21 @@
 
 	async function settleNow() {
 		try {
-			const txHash = await settleDebt(getContract, splitterAddress)
+			settling = true
+			const txHash = await settleDebt(getContract, splitterAddress, profile.address)
 			send({
 				type: 'payment',
 				splitterAddress,
 				payment: {
 					txHash,
-					amount: (-owedAmount).toString(),
+					amount: owedAmount.toString(),
 					decimals,
 					paidBy: profile.address,
 					timestamp: Date.now(),
 				},
 			})
+			settling = false
+			exitObject()
 		} catch (error) {
 			console.log(error)
 		}
@@ -74,12 +79,18 @@
 
 	<Container gap={12} padX={24} padY={24} alignItems="center" grow>
 		<h2>Settle now</h2>
-		<p>{owedAmount}</p>
-		<p>Your amount {nativeToken?.amount} {nativeToken?.symbol}</p>
+		{#if nativeToken}
+			<p>{toSignificant(owedAmount, decimals)} {nativeToken.symbol}</p>
+			<p>
+				Your amount {toSignificant(nativeToken.amount, nativeToken.decimals)}
+				{nativeToken.symbol}
+			</p>
+		{/if}
 	</Container>
 
 	<Container padX={24} padY={24} gap={6} justify="flex-end" alignItems="center">
-		<Button variant="strong" on:click={settleNow}><ArrowUp /> Settle now</Button>
+		<Button variant="strong" on:click={settleNow} disabled={settling}><ArrowUp /> Settle now</Button
+		>
 	</Container>
 </Layout>
 
