@@ -16,14 +16,11 @@
 
 	// TODO: This needs escaping for the CSP
 	const getIframeSource = (object: LoadedObject): string => {
-		return template
-			.replace('__CSP__', object.csp)
-			.replace('__URL__', object.script)
-			.replace('__EMBED__', object.embed.message)
+		return template.replace('__CSP__', object.csp).replace('__URL__', object.script)
 	}
 
 	// Exports
-	export let message: DataMessage
+	export let message: DataMessage | undefined
 	export let args: WakuObjectArgs
 
 	// Local variables
@@ -44,12 +41,16 @@
 				if (event.origin === 'null' && event.source && event.source === iframe?.contentWindow) {
 					const { data } = event
 					if (typeof data === 'object') {
+						console.debug(data.type, { data })
 						switch (data.type) {
 							case 'window-size': {
-								console.debug('window-size', { data })
 								const { scrollWidth, scrollHeight } = data
 								// iframe.style.width = `${scrollWidth}px`
 								iframe.style.height = `${scrollHeight}px`
+								return
+							}
+							case 'init': {
+								updateContext(true)
 								return
 							}
 							default: {
@@ -66,14 +67,14 @@
 		started = true
 	}
 
-	$: args && getNPMObject(args.objectId, message).then((result) => (object = result))
+	$: args && getNPMObject(args.objectId).then((result) => (object = result))
 	$: if (iframe && iframe.contentWindow) {
 		registerWindow(args.instanceId, iframe.contentWindow)
 		updateContext()
 	}
 	onDestroy(() => unregisterWindow(args.instanceId))
 
-	function updateContext() {
+	function updateContext(force = false) {
 		const { chatId, objectId, instanceId, profile, users, tokens, view, store } = args
 		const iframeContextChange: IframeContextChange = {
 			type: 'iframe-context-change',
@@ -100,8 +101,8 @@
 
 		console.debug({ contextHash, lastContextHash, iframe, iframeContextChange })
 
-		if (lastContextHash !== contextHash) {
-			postWindowMessage(message.instanceId, iframeContextChange)
+		if (force || lastContextHash !== contextHash) {
+			postWindowMessage(args.instanceId, iframeContextChange)
 			lastContextHash = contextHash
 		}
 	}

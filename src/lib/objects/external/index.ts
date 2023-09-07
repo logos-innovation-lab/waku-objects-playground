@@ -1,6 +1,7 @@
 import type { WakuObjectSvelteDescriptor } from '..'
 import type { IframeDataMessage } from './dispatch'
-import IframeComponent from './iframe.svelte'
+import ChatComponent from './chat.svelte'
+import StandaloneComponent from './standalone.svelte'
 
 const instanceWindowMap = new Map<string, Window>()
 
@@ -14,7 +15,8 @@ export const getExternalDescriptor = (
 	name,
 	description,
 	logo,
-	wakuObject: IframeComponent,
+	wakuObject: ChatComponent,
+	standalone: StandaloneComponent,
 	onMessage: async (message, args) => {
 		const iframeDataMessage: IframeDataMessage = {
 			type: 'iframe-data-message',
