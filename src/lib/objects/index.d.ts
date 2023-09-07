@@ -48,12 +48,14 @@ export interface WakuObjectContext extends WakuObjectAdapter {
 
 export interface WakuObjectArgs extends WakuObjectContext, WakuObjectState {}
 
-interface WakuObjectDescriptor {
+interface WakuObjectMetadata {
 	readonly objectId: string
 	readonly name: string
 	readonly description: string
 	readonly logo: string
+}
 
+interface WakuObjectDescriptor extends WakuObjectMetadata {
 	onMessage?: (message: DataMessage<DataMessageType>, args: WakuObjectArgs) => Promise<void>
 }
 

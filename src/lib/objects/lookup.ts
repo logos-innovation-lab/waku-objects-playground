@@ -2,12 +2,18 @@ import type { WakuObjectSvelteDescriptor } from '.'
 import { getExternalDescriptor } from './external'
 import { helloWorldDescriptor } from './hello-world'
 import { payggyDescriptor } from './payggy'
+import sandboxLogo from '@waku-objects/sandbox-example/object/logo.svg'
+import sandboxMeta from '@waku-objects/sandbox-example/object/metadata.json'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const wakuObjectList: WakuObjectSvelteDescriptor[] = [
 	helloWorldDescriptor,
 	payggyDescriptor,
-	getExternalDescriptor('@waku-objects/sandbox-example'),
+	getExternalDescriptor(
+		'@waku-objects/sandbox-example',
+		sandboxMeta.name,
+		sandboxMeta.description,
+		sandboxLogo,
+	),
 ]
 
 const wakuObjectMap: Map<string, WakuObjectSvelteDescriptor> = new Map(
