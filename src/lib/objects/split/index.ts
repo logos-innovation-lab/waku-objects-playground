@@ -1,6 +1,6 @@
 import type { WakuObjectSvelteDescriptor } from '..'
 import ChatComponent from './chat.svelte'
-import { DataMessageSchema, type DataMessage, type Store } from './schemas'
+import { DataMessageSchema, type DataMessage, type Store, type Balance } from './schemas'
 import StandaloneComponent from './standalone.svelte'
 import logo from './logo.svg'
 import type { View } from './types'
@@ -19,19 +19,21 @@ export const splitDescriptor: WakuObjectSvelteDescriptor<Store, DataMessage, Vie
 	standalone: StandaloneComponent,
 
 	onMessage: async (message, args) => {
-		if (!message?.data) {
-			return
-		}
-
 		const res = DataMessageSchema.safeParse(message.data)
 		if (!res.success) {
+			console.error(res.error)
 			return
 		}
 
 		if (res.data.type === 'expense') {
 			const { expense, splitterAddress } = res.data
 
-			const balances = await getBalances(args.getContract, splitterAddress)
+			let balances: Balance[] = []
+			try {
+				balances = await getBalances(args.getContract, splitterAddress)
+			} catch (error) {
+				console.error(error)
+			}
 
 			args.updateStore((s) => {
 				const expenses = s?.expenses ?? []
@@ -51,7 +53,12 @@ export const splitDescriptor: WakuObjectSvelteDescriptor<Store, DataMessage, Vie
 		if (res.data.type === 'payment') {
 			const { payment, splitterAddress } = res.data
 
-			const balances = await getBalances(args.getContract, splitterAddress)
+			let balances: Balance[] = []
+			try {
+				balances = await getBalances(args.getContract, splitterAddress)
+			} catch (error) {
+				console.error(error)
+			}
 
 			args.updateStore((s) => {
 				const expenses = s?.expenses ?? []
