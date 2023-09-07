@@ -111,6 +111,7 @@
 		getContract={args.getContract}
 		users={args.users}
 		splitterAddress={args.store?.splitterAddress}
+		instanceId={args.instanceId}
 	/>
 {:else if args.view === 'images'}
 	<ChooseImages bind:images exitObject={exitObject(4)} goNext={goNext('summary')} {goBack} />

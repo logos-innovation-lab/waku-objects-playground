@@ -29,6 +29,7 @@
 	export let users: User[]
 	export let getContract: GetContract
 	export let splitterAddress: string | undefined
+	export let instanceId: string
 
 	const decimals = defaultBlockchainNetwork.nativeToken.decimals
 
@@ -92,7 +93,7 @@
 			<div class="text-lg">{chatName}</div>
 		</ReadonlyText>
 		<ReadonlyText label="Collection">
-			<div class="text-lg">TODO, missing in design</div>
+			<div class="text-lg">#{instanceId.slice(0, 4)}</div>
 		</ReadonlyText>
 		<ReadonlyText label="Paid amount">
 			<div class="text-lg">{amount} DAI</div>
