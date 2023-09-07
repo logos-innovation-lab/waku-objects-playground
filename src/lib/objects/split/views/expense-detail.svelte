@@ -2,7 +2,7 @@
 	import Close from '$lib/components/icons/close.svelte'
 	import Bullhorn from '$lib/components/icons/bullhorn.svelte'
 	import DataViewAlt from '$lib/components/icons/data-view-alt.svelte'
-	import ArrowUp from '$lib/components/icons/arrow-up.svelte'
+	import Renew from '$lib/components/icons/renew.svelte'
 
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'
@@ -103,7 +103,7 @@
 			<p>On this expense {paidBy} lend you</p>
 			<h1>{amountPerPerson} DAI</h1>
 			<Container direction="row" justify="center" alignItems="center">
-				<Button variant="strong" on:click={settleNow}><ArrowUp /> Settle now</Button>
+				<Button variant="strong" on:click={settleNow}><Renew /> Settle now</Button>
 				<Button on:click={viewAccounting}><DataViewAlt />View accounting</Button>
 			</Container>
 		{/if}
