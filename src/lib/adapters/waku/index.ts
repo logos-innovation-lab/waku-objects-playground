@@ -2,7 +2,6 @@ import { profile } from '$lib/stores/profile'
 import type { Adapter } from '..'
 import {
 	chats,
-	type DraftChat,
 	type Chat,
 	type Message,
 	isGroupChatId,
@@ -282,26 +281,34 @@ export default class WakuAdapter implements Adapter {
 		return chatId
 	}
 
-	async startGroupChat(wallet: BaseWallet, chat: DraftChat): Promise<string> {
+	async startGroupChat(
+		wallet: BaseWallet,
+		memberAddresses: string[],
+		name: string,
+		avatar?: string,
+	): Promise<string> {
 		if (!this.waku) {
 			this.waku = await connectWaku()
 		}
-		if (chat.users.length === 0) {
+		if (memberAddresses.length === 0) {
 			throw 'invalid chat'
 		}
 
 		const chatId = genRandomHex(64)
 
-		const userPromises = chat.users.map((address) => this.storageProfileToUser(address))
-		const allUsers = await Promise.all(userPromises)
-		const users = allUsers.filter((user) => user) as User[]
-
+		const userAddresses = [...memberAddresses, wallet.address]
+		const storageChat = {
+			users: userAddresses,
+			name,
+			avatar,
+		}
+		const chat = await this.storageChatToChat(chatId, storageChat)
 		const wakuObjectAdapter = makeWakuObjectAdapter(this, wallet)
 
-		createGroupChat(chatId, users, chat.name, chat.avatar, true)
+		createGroupChat(chatId, chat.users, name, avatar, true)
 
 		const ws = makeWakustore(this.waku)
-		await ws.setDoc<StorageChat>('group-chats', chatId, chat)
+		await ws.setDoc<StorageChat>('group-chats', chatId, storageChat)
 		await this.subscribeToGroupChat(chatId, wallet.address, wakuObjectAdapter)
 
 		return chatId

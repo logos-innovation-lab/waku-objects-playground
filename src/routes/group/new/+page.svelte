@@ -44,13 +44,7 @@
 	async function createGroup(wallet: HDNodeWallet) {
 		buttonDisabled = true
 
-		const groupChat = {
-			messages: [],
-			users: [...groupMembers, wallet.address],
-			name,
-			avatar: picture,
-		}
-		const chatId = await adapters.startGroupChat(wallet, groupChat)
+		const chatId = await adapters.startGroupChat(wallet, groupMembers, name, picture)
 		await adapters.sendInvite(wallet, chatId, groupMembers)
 
 		buttonDisabled = false
