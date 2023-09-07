@@ -17,7 +17,7 @@
 	export let message: DataMessage
 	export let users: User[]
 
-	const { wakuObject, customArgs } = lookup(message.objectId) || {}
+	const { wakuObject } = lookup(message.objectId) || {}
 
 	let store: JSONSerializable | undefined
 	$: store = $objectStore.objects.get(objectKey(message.objectId, message.instanceId))
@@ -78,4 +78,4 @@
 	}
 </script>
 
-<svelte:component this={wakuObject} {message} {args} {customArgs} />
+<svelte:component this={wakuObject} {message} {args} />

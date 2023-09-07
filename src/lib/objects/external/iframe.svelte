@@ -8,8 +8,8 @@
 
 	// Types
 	import { getNPMObject, type LoadedObject } from './lib'
-	import { makeIframeDispatcher } from './dispatch'
-	import { registerWindow, unregisterWindow } from '.'
+	import { makeIframeDispatcher, type IframeContextChange } from './dispatch'
+	import { postWindowMessage, registerWindow, unregisterWindow } from '.'
 	import { onDestroy } from 'svelte'
 	import adapters from '$lib/adapters'
 	import { walletStore } from '$lib/stores/wallet'
@@ -26,12 +26,10 @@
 	export let message: DataMessage
 	export let args: WakuObjectArgs
 
-	export let customArgs: { name: string }
-	const { name } = customArgs
-
 	// Local variables
 	let object: LoadedObject | null
 	let iframe: HTMLIFrameElement
+	let lastContextHash: number | undefined = undefined
 
 	$: wallet = $walletStore.wallet
 
@@ -48,8 +46,9 @@
 					if (typeof data === 'object') {
 						switch (data.type) {
 							case 'window-size': {
+								console.debug('window-size', { data })
 								const { scrollWidth, scrollHeight } = data
-								iframe.style.width = `${scrollWidth}px`
+								// iframe.style.width = `${scrollWidth}px`
 								iframe.style.height = `${scrollHeight}px`
 								return
 							}
@@ -67,13 +66,45 @@
 		started = true
 	}
 
-	// TODO: Add option to add external objects
-	$: name && getNPMObject(name, message).then((result) => (object = result))
+	$: args && getNPMObject(args.objectId, message).then((result) => (object = result))
 	$: if (iframe && iframe.contentWindow) {
 		registerWindow(args.instanceId, iframe.contentWindow)
+		updateContext()
 	}
-
 	onDestroy(() => unregisterWindow(args.instanceId))
+
+	function updateContext() {
+		const { chatId, objectId, instanceId, profile, users, tokens, view, store } = args
+		const iframeContextChange: IframeContextChange = {
+			type: 'iframe-context-change',
+			state: {
+				chatId,
+				objectId,
+				instanceId,
+				profile,
+				users,
+				tokens,
+			},
+			context: {
+				view,
+				store,
+			},
+		}
+		const json = JSON.stringify(iframeContextChange, (key, value) =>
+			typeof value === 'bigint' ? value.toString(10) : value,
+		)
+		const contextHash = Array.from(json).reduce(
+			(hash, char) => 0 | (31 * hash + char.charCodeAt(0)),
+			0,
+		)
+
+		console.debug({ contextHash, lastContextHash, iframe, iframeContextChange })
+
+		if (lastContextHash !== contextHash) {
+			postWindowMessage(message.instanceId, iframeContextChange)
+			lastContextHash = contextHash
+		}
+	}
 </script>
 
 {#if object}
@@ -90,6 +121,6 @@
 <style>
 	iframe {
 		all: unset;
-		overflow: hidden;
+		/* overflow: hidden; */
 	}
 </style>

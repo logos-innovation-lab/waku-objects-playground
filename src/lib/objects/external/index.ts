@@ -15,19 +15,13 @@ export const getExternalDescriptor = (
 	description,
 	logo,
 	wakuObject: IframeComponent,
-	customArgs: { name: objectId },
 	onMessage: async (message, args) => {
-		const window = instanceWindowMap.get(message.instanceId)
-		if (!window) {
-			return
-		}
-
 		const iframeDataMessage: IframeDataMessage = {
 			type: 'iframe-data-message',
 			message,
 			state: args,
 		}
-		window.postMessage(iframeDataMessage, { targetOrigin: '*' })
+		postWindowMessage(message.instanceId, iframeDataMessage)
 	},
 })
 
@@ -41,4 +35,11 @@ export function registerWindow(instanceId: string, window: Window) {
 
 export function unregisterWindow(instanceId: string) {
 	instanceWindowMap.delete(instanceId)
+}
+
+export function postWindowMessage(instanceId: string, message: unknown) {
+	const window = instanceWindowMap.get(instanceId)
+	if (window) {
+		window.postMessage(message, { targetOrigin: '*' })
+	}
 }
