@@ -681,27 +681,33 @@ export default class WakuAdapter implements Adapter {
 
 	private async updateContactProfiles() {
 		// look for changes in users profile name and picture
-		const contacts = Array.from(get(chats).chats).flatMap(([, chat]) => chat.users)
+		const allContacts = Array.from(get(chats).chats).flatMap(([, chat]) => chat.users)
+		const uniqueContacts = new Map<string, User>(allContacts.map((user) => [user.address, user]))
 		const changes = new Map<string, User>()
-		for (const contact of contacts) {
-			const storageProfile = await this.fetchStorageProfile(contact.address)
+		for (const contact of uniqueContacts) {
+			const user = contact[1]
+			const storageProfile = await this.fetchStorageProfile(user.address)
 
 			if (!storageProfile) {
 				continue
 			}
 
-			if (storageProfile.name != contact.name || storageProfile.avatar != contact.avatar) {
-				changes.set(contact.address, { ...storageProfile, address: contact.address })
+			if (storageProfile.name != user.name || storageProfile.avatar != user.avatar) {
+				changes.set(user.address, { ...storageProfile, address: user.address })
 			}
 		}
 		if (changes.size > 0) {
 			chats.update((state) => {
 				const newChats = new Map<string, Chat>(state.chats)
-				changes.forEach((user) => {
-					const chat = newChats.get(user.address)
-					if (chat) {
-						chat.users[0] = user
-					}
+				newChats.forEach((chat) => {
+					chat.users.forEach((user) => {
+						const changedUser = changes.get(user.address)
+						if (!changedUser) {
+							return
+						}
+						user.name = changedUser.name
+						user.avatar = changedUser.avatar
+					})
 				})
 				return {
 					...state,
