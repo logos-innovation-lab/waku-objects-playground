@@ -16,7 +16,7 @@
 	import { settleDebt } from '../blockchain'
 	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 	import type { Token } from '$lib/objects/schemas'
-	import { toSignificant } from '$lib/utils/format'
+	import { formatAddress, toSignificant } from '$lib/utils/format'
 
 	export let profile: UserType
 	export let balances: Balance[]
@@ -102,6 +102,21 @@
 					</p>
 				</ReadonlyText></Container
 			>
+
+			<Container gap={6} padX={0} padY={0}>
+				<div class="label">
+					<span class="text-sm">From</span>
+					<div class="input-wrapper">
+						<!-- svelte-ignore a11y-autofocus -->
+						<div class="text-lg input">
+							<p>Your account</p>
+							<p class="text-sm">
+								{formatAddress(profile.address,6,6)}
+							</p>
+						</div>
+					</div>
+				</div>
+			</Container>
 
 			<Container gap={6} padX={0} padY={0}>
 				<div class="label">
