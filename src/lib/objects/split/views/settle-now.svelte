@@ -111,7 +111,7 @@
 						<div class="text-lg input">
 							<p>Your account</p>
 							<p class="text-sm">
-								{formatAddress(profile.address,6,6)}
+								{formatAddress(profile.address, 6, 6)}
 							</p>
 						</div>
 					</div>

@@ -69,19 +69,20 @@
 	<Container grow>
 		<ul>
 			{#each usersAmounts as { user, amount }}
+				{@const isYou = user?.address === profile.address}
 				<li>
 					<Container grow>
 						<div class="chat">
 							<Avatar size={48} picture={user?.avatar} />
 							<Container direction="column">
 								<p>
-									{(user?.address === profile.address ? 'You' : user?.name) ?? 'unknown'}
+									{(isYou ? 'You' : user?.name) ?? 'unknown'}
 								</p>
 								<p>
 									{#if amount < 0n}
 										lent {toSignificant(-amount, decimals)} DAI
 									{:else if amount > 0n}
-										owes {toSignificant(amount, decimals)} DAI
+										owe {isYou ? '' : 's'} {toSignificant(amount, decimals)} DAI
 									{:else}
 										settled
 									{/if}
