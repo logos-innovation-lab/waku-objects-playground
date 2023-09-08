@@ -45,7 +45,7 @@ export interface WakuObjectContext<
 	send: (data: DataMessageType) => Promise<void>
 
 	readonly view?: ViewType // Screen to show on Waku object
-	readonly params: string[] // Other path params after the screen
+	readonly viewParams: string[] // Other path params after the screen
 	onViewChange: (view: ViewType, ...rest: string[]) => void
 }
 

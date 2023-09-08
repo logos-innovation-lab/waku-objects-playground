@@ -26,7 +26,7 @@
 	const goBack = () => history.back()
 
 	let expense: Expense | undefined = undefined
-	$: expense = args.store?.expenses.find((e) => e.txHash === args.params[0])
+	$: expense = args.store?.expenses.find((e) => e.txHash === args.viewParams[0])
 </script>
 
 {#if args.view === 'expense'}

@@ -58,7 +58,7 @@
 			users,
 			tokens,
 			store,
-			params: [],
+			viewParams: [],
 			chatName,
 			send: (data: JSONSerializable) =>
 				adapter.sendData(wallet, chatId, message.objectId, message.instanceId, data),

@@ -17,7 +17,7 @@
 	export let onViewChange: (view: string, ...args: string[]) => void
 	export let view: string | undefined = undefined
 	export let wallet: HDNodeWallet
-	export let params: string[]
+	export let viewParams: string[]
 
 	const component = lookup(objectId)?.standalone
 
@@ -75,7 +75,7 @@
 				updateStore,
 				onViewChange,
 				view,
-				params,
+				viewParams,
 				...wakuObjectAdapter,
 			}
 		}

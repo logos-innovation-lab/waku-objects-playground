@@ -128,7 +128,7 @@ async function executeOnDataMessage(
 		const store = objects.get(key)
 		const context: WakuObjectContext = {
 			...blockchainAdapter,
-			params: [],
+			viewParams: [],
 			store,
 			updateStore,
 			send,
