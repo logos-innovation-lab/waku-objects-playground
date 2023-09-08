@@ -84,11 +84,23 @@
 	}
 
 	function updateContext(force = false) {
-		const { chatId, objectId, instanceId, profile, users, tokens, view, store } = args
+		const {
+			chatId,
+			chatName,
+			objectId,
+			instanceId,
+			profile,
+			users,
+			tokens,
+			view,
+			viewParams,
+			store,
+		} = args
 		const iframeContextChange: IframeContextChange = {
 			type: 'iframe-context-change',
 			state: {
 				chatId,
+				chatName,
 				objectId,
 				instanceId,
 				profile,
@@ -97,6 +109,7 @@
 			},
 			context: {
 				view,
+				viewParams,
 				store,
 			},
 		}

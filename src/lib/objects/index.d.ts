@@ -36,24 +36,33 @@ export interface WakuObjectState {
 type StoreType = JSONSerializable
 type DataMessageType = JSONSerializable
 
-export interface WakuObjectContextProps<ViewType extends string = string> {
+export interface WakuObjectContextProps<
+	StoreType = JSONSerializable,
+	ViewType extends string = string,
+> {
 	readonly store?: StoreType
 	readonly view?: ViewType
+	readonly viewParams: string[] // Other path params after the screen
 }
 
-export interface WakuObjectContext<ViewType extends string = string> extends WakuObjectContextProps<ViewType>, WakuObjectAdapter {
+export interface WakuObjectContext<
+	StoreType = JSONSerializable,
+	DataMessageType = JSONSerializable,
+	ViewType extends string = string,
+> extends WakuObjectContextProps<StoreType, ViewType>,
+		WakuObjectAdapter {
 	updateStore: (updater: (state?: StoreType) => StoreType) => void
 
 	send: (data: DataMessageType) => Promise<void>
 
-	readonly view?: ViewType // Screen to show on Waku object
-	readonly viewParams: string[] // Other path params after the screen
 	onViewChange: (view: ViewType, ...rest: string[]) => void
 }
 
 export interface WakuObjectArgs<
+	StoreType = JSONSerializable,
+	DataMessageType = JSONSerializable,
 	ViewType extends string = string,
-> extends WakuObjectContext<ViewType>,
+> extends WakuObjectContext<StoreType, DataMessageType, ViewType>,
 		WakuObjectState {}
 
 interface WakuObjectMetadata {
@@ -64,17 +73,21 @@ interface WakuObjectMetadata {
 }
 
 interface WakuObjectDescriptor<
+	StoreType = JSONSerializable,
+	DataMessageType = JSONSerializable,
 	ViewType extends string = string,
 > extends WakuObjectMetadata {
 	onMessage?: (
 		message: DataMessage<DataMessageType>,
-		args: WakuObjectArgs<ViewType>,
+		args: WakuObjectArgs<StoreType, DataMessageType, ViewType>,
 	) => Promise<void>
 }
 
 interface WakuObjectSvelteDescriptor<
+	StoreType = JSONSerializable,
+	DataMessageType = JSONSerializable,
 	ViewType extends string = string,
-> extends WakuObjectDescriptor<ViewType> {
+> extends WakuObjectDescriptor<StoreType, DataMessageType, ViewType> {
 	readonly wakuObject: ComponentType
 	readonly standalone?: ComponentType
 }
