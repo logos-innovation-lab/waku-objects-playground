@@ -5,25 +5,33 @@
 	export let disabled = false
 	export let pad = 0
 	export let label: string | undefined = undefined
+	export let unit: string | undefined = undefined
 </script>
 
 <label>
 	{#if label !== undefined && label !== ''}
 		<span class="text-sm">{label}</span>
 	{/if}
-	<!-- svelte-ignore a11y-autofocus -->
-	<input
-		class="text-lg"
-		style={`padding-block: ${pad}px`}
-		type="text"
-		{disabled}
-		{autofocus}
-		{placeholder}
-		bind:value
-		on:keydown
-		on:keypress
-		on:keyup
-	/>
+	<div class="input-wrapper">
+		<!-- svelte-ignore a11y-autofocus -->
+		<input
+			class="text-lg"
+			style={`padding-block: ${pad}px; padding-right: ${
+				unit ? 'calc(var(--spacing-12) + 2em)' : 'var(--spacing-12)'
+			};`}
+			type="text"
+			{disabled}
+			{autofocus}
+			{placeholder}
+			bind:value
+			on:keydown
+			on:keypress
+			on:keyup
+		/>
+		{#if unit}
+			<span class="input-unit">{unit}</span>
+		{/if}
+	</div>
 </label>
 
 <style lang="scss">
@@ -37,6 +45,18 @@
 		margin-inline: 13px;
 		text-align: left;
 		color: var(--color-step-40, var(--color-dark-step-20));
+	}
+
+	.input-wrapper {
+		position: relative;
+	}
+
+	.input-unit {
+		position: absolute;
+		right: var(--spacing-12);
+		top: 50%;
+		transform: translateY(-50%);
+		pointer-events: none; // Ensure the input behind is still clickable
 	}
 
 	input {

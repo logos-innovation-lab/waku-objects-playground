@@ -2,9 +2,17 @@
 	export let disabled: boolean | undefined = undefined
 	export let multiple = false
 	export let files: FileList | undefined = undefined
+	export let borderRadius: number | undefined = undefined
+	export let size: number | undefined = undefined
+	export let margin = '0 auto'
 </script>
 
-<label class={`input-file`}>
+<label
+	class={`input-file`}
+	style={`${borderRadius ? `border-radius: ${borderRadius}px;` : ''} ${
+		size ? `width: ${size}px; height: ${size}px;` : ''
+	} margin: ${margin}`}
+>
 	<slot />
 	<input type="file" {disabled} bind:files hidden {multiple} />
 </label>
@@ -19,7 +27,6 @@
 		font-weight: var(--font-weight-500);
 		line-height: 20px;
 		padding: 11px;
-		margin: 0 auto;
 		display: flex;
 		justify-content: center;
 		flex-direction: row;

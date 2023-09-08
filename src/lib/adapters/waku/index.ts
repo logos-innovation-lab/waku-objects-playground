@@ -32,6 +32,7 @@ import { fetchBalances } from '$lib/adapters/balance'
 import { makeWakustore } from './wakustore'
 import type { StorageChat, StorageChatEntry, StorageObjectEntry, StorageProfile } from './types'
 import { genRandomHex } from '$lib/utils'
+import { walletStore } from '$lib/stores/wallet'
 
 interface QueuedMessage {
 	message: Message
@@ -117,17 +118,17 @@ async function executeOnDataMessage(
 		const updateStore = (updater: (_store?: JSONSerializable) => JSONSerializable) => {
 			const store = objects.get(key)
 			const newStore = updater(store)
-			const newObjects = new Map(objects)
-			newObjects.set(key, newStore)
+			objects.set(key, newStore)
 			objectStore.update((state) => ({
 				...state,
-				objects: newObjects,
+				objects,
 				lastUpdated: dataMessage.timestamp,
 			}))
 		}
 		const store = objects.get(key)
 		const context: WakuObjectContext = {
 			...blockchainAdapter,
+			viewParams: [],
 			store,
 			updateStore,
 			send,
@@ -138,13 +139,17 @@ async function executeOnDataMessage(
 		}
 		const chat = get(chats).chats.get(chatId)
 		const users = chat ? chat.users : []
+		const myProfile: User = { ...get(profile), address }
+		const chatName =
+			chat?.name ?? users.find((u) => u.address !== myProfile.address)?.name ?? 'Unknown'
 		const args: WakuObjectArgs = {
 			...context,
+			chatName,
 			chatId,
 			objectId: dataMessage.objectId,
 			instanceId: dataMessage.instanceId,
-			profile: { ...get(profile), address },
 			users: users,
+			profile: myProfile,
 			tokens: defaultBlockchainNetwork.tokens || [],
 		}
 		await descriptor.onMessage(dataMessage, args)
@@ -640,8 +645,18 @@ export default class WakuAdapter implements Adapter {
 			if (!chatsMap.has(id)) {
 				return
 			}
+			let send: undefined | ((data: JSONValue) => Promise<void>) = undefined
 
-			await addMessageToChat(address, adapter, id, message)
+			if (message.type === 'data') {
+				// FIXME: @agazso figure out how to get wallet here without using the store
+				const wallet = get(walletStore).wallet
+				if (wallet) {
+					const { instanceId, objectId } = message
+					send = (data: JSONValue) => this.sendData(wallet, id, objectId, instanceId, data)
+				}
+			}
+
+			await addMessageToChat(address, adapter, id, message, send)
 
 			return
 		}
@@ -669,7 +684,17 @@ export default class WakuAdapter implements Adapter {
 			createPrivateChat(message.fromAddress, user, address)
 		}
 
-		await addMessageToChat(address, adapter, message.fromAddress, message)
+		let send: undefined | ((data: JSONValue) => Promise<void>) = undefined
+
+		if (message.type === 'data') {
+			// FIXME: @agazso figure out how to get wallet here without using the store
+			const wallet = get(walletStore).wallet
+			if (wallet) {
+				const { instanceId, objectId } = message
+				send = (data: JSONValue) => this.sendData(wallet, id, objectId, instanceId, data)
+			}
+		}
+		await addMessageToChat(address, adapter, message.fromAddress, message, send)
 	}
 
 	private async updateContactProfiles() {

@@ -14,9 +14,10 @@
 	export let objectId: string
 	export let instanceId: string
 	export let chatId: string
-	export let onViewChange: (view: string) => void
+	export let onViewChange: (view: string, ...args: string[]) => void
 	export let view: string | undefined = undefined
 	export let wallet: HDNodeWallet
+	export let viewParams: string[]
 
 	const component = lookup(objectId)?.standalone
 
@@ -59,6 +60,8 @@
 		const wakuObjectAdapter = makeWakuObjectAdapter(adapter, wallet)
 
 		if (userProfile && users) {
+			const chatName =
+				chat?.name ?? users.find((u) => u.address !== userProfile.address)?.name ?? 'Unknown'
 			args = {
 				chatId,
 				objectId,
@@ -66,11 +69,13 @@
 				profile: userProfile,
 				users,
 				tokens,
+				chatName,
 				store,
 				send,
 				updateStore,
 				onViewChange,
 				view,
+				viewParams,
 				...wakuObjectAdapter,
 			}
 		}
