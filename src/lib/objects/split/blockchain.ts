@@ -41,7 +41,14 @@ export async function createSplitterContract(
 	}
 
 	let splitterAddress: string | undefined = undefined
-	for (let sleepTime = 100; sleepTime < 2000 && splitterAddress === undefined; sleepTime += 100) {
+	const sleepTimeout = 10000
+	const sleepTime = 100
+	// TODO: refactor into promise
+	for (
+		let elapsedTime = 0;
+		elapsedTime < sleepTimeout && splitterAddress === undefined;
+		elapsedTime += sleepTime
+	) {
 		splitterAddress = events.find((e) => e.txHash === tx.hash)?.address
 		await sleep(sleepTime)
 	}
