@@ -12,6 +12,7 @@
 	import { balanceStore } from '$lib/stores/balances'
 	import { goto } from '$app/navigation'
 	import routes from '$lib/routes'
+	import { chats } from '$lib/stores/chat'
 
 	export let message: DataMessage
 	export let users: User[]
@@ -42,9 +43,13 @@
 		adapter.updateStore(address, message.objectId, message.instanceId, updater)
 	}
 
+	const chat = $chats.chats.get(chatId)
+
 	let args: WakuObjectArgs
-	$: if (userProfile) {
+	$: if ((userProfile, chat)) {
 		const wakuObjectAdapter = makeWakuObjectAdapter(adapter, wallet)
+		const chatName =
+			chat?.name ?? users.find((u) => u.address !== userProfile.address)?.name ?? 'Unknown'
 		args = {
 			chatId,
 			objectId: message.objectId,
@@ -54,7 +59,7 @@
 			tokens,
 			store,
 			params: [],
-			chatName: 'unknown', // FIXME: this should be fetched from the chat store
+			chatName,
 			send: (data: JSONSerializable) =>
 				adapter.sendData(wallet, chatId, message.objectId, message.instanceId, data),
 			updateStore,

@@ -139,14 +139,17 @@ async function executeOnDataMessage(
 		}
 		const chat = get(chats).chats.get(chatId)
 		const users = chat ? chat.users : []
+		const myProfile: User = { ...get(profile), address }
+		const chatName =
+			chat?.name ?? users.find((u) => u.address !== myProfile.address)?.name ?? 'Unknown'
 		const args: WakuObjectArgs = {
 			...context,
-			chatName: chat?.name ?? 'Unknown', // FIXME: figure out how to have a proper chatname
+			chatName,
 			chatId,
 			objectId: dataMessage.objectId,
 			instanceId: dataMessage.instanceId,
-			profile: { ...get(profile), address },
 			users: users,
+			profile: myProfile,
 			tokens: defaultBlockchainNetwork.tokens || [],
 		}
 		await descriptor.onMessage(dataMessage, args)

@@ -60,6 +60,8 @@
 		const wakuObjectAdapter = makeWakuObjectAdapter(adapter, wallet)
 
 		if (userProfile && users) {
+			const chatName =
+				chat?.name ?? users.find((u) => u.address !== userProfile.address)?.name ?? 'Unknown'
 			args = {
 				chatId,
 				objectId,
@@ -67,7 +69,7 @@
 				profile: userProfile,
 				users,
 				tokens,
-				chatName: chat.name ?? 'unknown',
+				chatName,
 				store,
 				send,
 				updateStore,
