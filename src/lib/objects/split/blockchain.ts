@@ -2,7 +2,6 @@ import { Interface } from 'ethers'
 import type { SplitterFactoryContract, SplitterContract, GetContract } from './types'
 import splitterFactoryAbi from './abis/splitter-factory.json'
 import splitterAbi from './abis/splitter.json'
-import { sleep } from './utils'
 import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 import type { Balance } from './schemas'
 
@@ -10,6 +9,10 @@ const splitterFactoryAddress = defaultBlockchainNetwork.objects.splitterFactory
 
 function getSplitterContract(getContract: GetContract, splitterAddress: string): SplitterContract {
 	return getContract(splitterAddress, new Interface(splitterAbi)) as SplitterContract
+}
+
+export function sleep(ms: number) {
+	return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 export async function createSplitterContract(
