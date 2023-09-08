@@ -27,12 +27,6 @@ export interface InviteMessage {
 
 export type Message = UserMessage | DataMessage | InviteMessage
 
-export interface DraftChat {
-	users: string[]
-	name: string
-	avatar?: string
-}
-
 export interface Chat {
 	chatId: string
 	messages: Message[]

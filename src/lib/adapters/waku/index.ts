@@ -2,7 +2,6 @@ import { profile } from '$lib/stores/profile'
 import type { Adapter } from '..'
 import {
 	chats,
-	type DraftChat,
 	type Chat,
 	type Message,
 	isGroupChatId,
@@ -287,26 +286,34 @@ export default class WakuAdapter implements Adapter {
 		return chatId
 	}
 
-	async startGroupChat(wallet: BaseWallet, chat: DraftChat): Promise<string> {
+	async startGroupChat(
+		wallet: BaseWallet,
+		memberAddresses: string[],
+		name: string,
+		avatar?: string,
+	): Promise<string> {
 		if (!this.waku) {
 			this.waku = await connectWaku()
 		}
-		if (chat.users.length === 0) {
+		if (memberAddresses.length === 0) {
 			throw 'invalid chat'
 		}
 
 		const chatId = genRandomHex(64)
 
-		const userPromises = chat.users.map((address) => this.storageProfileToUser(address))
-		const allUsers = await Promise.all(userPromises)
-		const users = allUsers.filter((user) => user) as User[]
-
+		const userAddresses = [...memberAddresses, wallet.address]
+		const storageChat = {
+			users: userAddresses,
+			name,
+			avatar,
+		}
+		const chat = await this.storageChatToChat(chatId, storageChat)
 		const wakuObjectAdapter = makeWakuObjectAdapter(this, wallet)
 
-		createGroupChat(chatId, users, chat.name, chat.avatar, true)
+		createGroupChat(chatId, chat.users, name, avatar, true)
 
 		const ws = makeWakustore(this.waku)
-		await ws.setDoc<StorageChat>('group-chats', chatId, chat)
+		await ws.setDoc<StorageChat>('group-chats', chatId, storageChat)
 		await this.subscribeToGroupChat(chatId, wallet.address, wakuObjectAdapter)
 
 		return chatId
@@ -699,27 +706,33 @@ export default class WakuAdapter implements Adapter {
 
 	private async updateContactProfiles() {
 		// look for changes in users profile name and picture
-		const contacts = Array.from(get(chats).chats).flatMap(([, chat]) => chat.users)
+		const allContacts = Array.from(get(chats).chats).flatMap(([, chat]) => chat.users)
+		const uniqueContacts = new Map<string, User>(allContacts.map((user) => [user.address, user]))
 		const changes = new Map<string, User>()
-		for (const contact of contacts) {
-			const storageProfile = await this.fetchStorageProfile(contact.address)
+		for (const contact of uniqueContacts) {
+			const user = contact[1]
+			const storageProfile = await this.fetchStorageProfile(user.address)
 
 			if (!storageProfile) {
 				continue
 			}
 
-			if (storageProfile.name != contact.name || storageProfile.avatar != contact.avatar) {
-				changes.set(contact.address, { ...storageProfile, address: contact.address })
+			if (storageProfile.name != user.name || storageProfile.avatar != user.avatar) {
+				changes.set(user.address, { ...storageProfile, address: user.address })
 			}
 		}
 		if (changes.size > 0) {
 			chats.update((state) => {
 				const newChats = new Map<string, Chat>(state.chats)
-				changes.forEach((user) => {
-					const chat = newChats.get(user.address)
-					if (chat) {
-						chat.users[0] = user
-					}
+				newChats.forEach((chat) => {
+					chat.users.forEach((user) => {
+						const changedUser = changes.get(user.address)
+						if (!changedUser) {
+							return
+						}
+						user.name = changedUser.name
+						user.avatar = changedUser.avatar
+					})
 				})
 				return {
 					...state,
