@@ -56,6 +56,7 @@ async function main() {
 
 	console.debug('✅ connected to waku')
 
+	console.debug(`🪪 storing profile as ${BOT_NAME} and avatar as ${BOT_AVATAR}`)
 	await storeDocument(waku, 'profile', BOT_ADDRESS, botProfile)
 
 	console.debug(`✨ subscribe to ${BOT_ADDRESS}`)
