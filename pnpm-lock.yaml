@@ -101,6 +101,12 @@ devDependencies:
   svelte-preprocess:
     specifier: ^5.0.4
     version: 5.0.4(sass@1.63.6)(svelte@4.0.3)(typescript@5.1.6)
+<<<<<<< HEAD
+=======
+  ts-node:
+    specifier: ^10.9.1
+    version: 10.9.1(@types/node@20.5.4)(typescript@5.1.6)
+>>>>>>> b867b5e (feat: cli uses tsx instead of ts-node)
   tsx:
     specifier: ^3.12.8
     version: 3.12.8
