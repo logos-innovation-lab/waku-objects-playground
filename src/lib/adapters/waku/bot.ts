@@ -1,11 +1,11 @@
 // run with npx ts-node --esm --experimental-specifier-resolution=node ./src/lib/adapters/waku/cli.ts
 
+import child_process from 'child_process'
 import type { DecodedMessage } from '@waku/sdk'
-import { connectWaku, decodeMessagePayload, sendMessage, storeDocument, subscribe } from './waku'
+import type { LightNode } from '@waku/interfaces'
 import axios from 'axios'
 
-import child_process from 'child_process'
-import type { LightNode } from '@waku/interfaces'
+import { connectWaku, decodeMessagePayload, sendMessage, storeDocument, subscribe } from './waku'
 import { makeWakustore } from './wakustore'
 
 const BOT_ENDPOINT = process.env.BOT_ENDPOINT || 'http://172.16.246.1:5000/api/v1/chat'
@@ -17,6 +17,7 @@ const BOT_PRESET = process.env.BOT_PRESET || undefined
 const BOT_HISTORY_LIMIT = process.env.BOT_HISTORY_LIMIT
 	? parseInt(process.env.BOT_HISTORY_LIMIT, 10)
 	: 1024
+const BOT_SPEAK_COMMAND = process.env.BOT_SPEAK || undefined
 
 const botProfile = {
 	name: BOT_NAME,
@@ -39,10 +40,15 @@ export interface InviteMessage {
 
 export type Message = UserMessage | InviteMessage
 
+interface Profile {
+	name: string
+	avatar?: string
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const sessions = new Map<string, any>()
-
 let groupChats = new Set<string>()
+const contacts = new Map<string, string>()
 
 async function main() {
 	if (!BOT_ADDRESS) {
@@ -91,7 +97,7 @@ async function handlePrivateMessage(waku: LightNode, msg: DecodedMessage, chatId
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function requestBot(text: string, fromAddress: string, history?: any) {
+async function requestBot(text: string, name: string, history?: any) {
 	console.debug(`🕓 requesting bot...`)
 	const request = {
 		user_input: text,
@@ -102,7 +108,7 @@ async function requestBot(text: string, fromAddress: string, history?: any) {
 		history,
 		regenerate: false,
 		_continue: false,
-		your_name: fromAddress,
+		your_name: name,
 		preset: BOT_PRESET,
 	}
 
@@ -137,13 +143,11 @@ async function handleUserMessage(waku: LightNode, chatMessage: UserMessage, chat
 }
 
 async function handleSessionUserMessage(waku: LightNode, chatMessage: UserMessage, chatId: string) {
+	const name = await lookupAndCacheProfile(waku, chatMessage.fromAddress)
+
 	const sessionHistory = sessions.get(chatId)
 
-	const { history, responseText } = await requestBot(
-		chatMessage.text,
-		chatMessage.fromAddress,
-		sessionHistory,
-	)
+	const { history, responseText } = await requestBot(chatMessage.text, name, sessionHistory)
 
 	if (history?.visible?.length > BOT_HISTORY_LIMIT) {
 		history.visible.shift()
@@ -152,19 +156,55 @@ async function handleSessionUserMessage(waku: LightNode, chatMessage: UserMessag
 
 	sessions.set(chatId, history)
 
-	sendMessage(waku, chatId, {
+	safeSendMessage(waku, chatId, {
 		type: 'user',
 		timestamp: Date.now(),
-		text: responseText,
+		text: `@${name} ${responseText}`,
 		fromAddress: BOT_ADDRESS,
 	})
 
 	speak(responseText)
 }
 
+async function safeSendMessage(waku: LightNode, id: string, message: unknown) {
+	let error = undefined
+	let timeout = 30_000
+	do {
+		try {
+			error = await sendMessage(waku, id, message)
+		} catch (e) {
+			error = e
+		} finally {
+			if (error) {
+				console.log(`⁉️ ${error}`)
+				await new Promise((r) => setTimeout(r, timeout))
+				if (timeout < 120_000) {
+					timeout += timeout
+				}
+			}
+		}
+	} while (error)
+}
+
 // FIXME temporary hack
 function isGroupChatId(id: string) {
 	return id.length === 64
+}
+
+async function lookupAndCacheProfile(waku: LightNode, address: string) {
+	if (contacts.has(address)) {
+		return contacts.get(address) || address
+	}
+
+	const ws = makeWakustore(waku)
+	const profile = await ws.getDoc<Profile>('profile', address)
+	if (!profile) {
+		return address
+	}
+
+	contacts.set(address, profile.name)
+
+	return profile.name
 }
 
 async function handleInviteMessage(waku: LightNode, message: InviteMessage) {
@@ -192,9 +232,13 @@ async function loadGroupChats(waku: LightNode) {
 }
 
 function speak(text: string) {
+	if (!BOT_SPEAK_COMMAND) {
+		return
+	}
+
 	try {
 		const input = decodeHTML(text)
-		child_process.spawn('speak-piper', [input], { detached: true }).on('error', () => {
+		child_process.spawn(BOT_SPEAK_COMMAND, [input], { detached: true }).on('error', () => {
 			/* ignore */
 		})
 	} catch (e) {
