@@ -20,11 +20,6 @@ export type WakuObject = {
 	csp: Csp
 }
 
-export type Embed = {
-	message: string
-	sha256: string
-}
-
 export type LoadedObject = {
 	script: string
 	csp: string
