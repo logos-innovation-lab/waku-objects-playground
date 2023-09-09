@@ -176,7 +176,7 @@ async function safeSendMessage(waku: LightNode, id: string, message: unknown) {
 			error = e
 		} finally {
 			if (error) {
-				console.log(`⁉️ ${error}`)
+				console.debug(`⁉️  Error: ${error}`)
 				await new Promise((r) => setTimeout(r, timeout))
 				if (timeout < 120_000) {
 					timeout += timeout
