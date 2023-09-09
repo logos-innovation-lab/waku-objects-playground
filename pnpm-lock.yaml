@@ -119,9 +119,6 @@ devDependencies:
   vitest:
     specifier: ^0.32.4
     version: 0.32.4(sass@1.63.6)
-  ws:
-    specifier: ^8.13.0
-    version: 8.13.0
   zod:
     specifier: ^3.21.4
     version: 3.21.4
