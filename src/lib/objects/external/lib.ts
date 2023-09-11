@@ -53,7 +53,7 @@ export const getNPMObject = async (
 		if (!added['script-src']) {
 			added['script-src'] = ''
 		}
-		added['script-src'] += ` ${window.location.origin + script}`
+		added['script-src'] += ` ${script}`
 
 		return {
 			script,
