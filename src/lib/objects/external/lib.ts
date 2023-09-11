@@ -1,5 +1,3 @@
-import type { DataMessage } from '$lib/stores/chat'
-
 // Not sure how inefficient this is
 const scripts = import.meta.glob('/node_modules/**/object/index.js', {
 	as: 'url',
@@ -18,19 +16,15 @@ export type Csp = {
 
 export type WakuObject = {
 	name: string
+	standalone?: boolean
 	csp: Csp
-}
-
-export type Embed = {
-	message: string
-	sha256: string
 }
 
 export type LoadedObject = {
 	script: string
 	csp: string
 	name: string
-	embed: Embed
+	className: string
 }
 
 const DEFAULT_CSP: Csp = {
@@ -47,50 +41,24 @@ const formatCsp = (csp: Csp, add?: Csp): string => {
 		.join('; ')
 }
 
-const arrayBufferToBase64 = (buffer: ArrayBuffer) => {
-	let binary = ''
-	const bytes = new Uint8Array(buffer)
-	const len = bytes.byteLength
-
-	for (let i = 0; i < len; i++) {
-		binary += String.fromCharCode(bytes[i])
-	}
-
-	return window.btoa(binary)
-}
-
-const getEmbed = async (dataMessage: DataMessage): Promise<Embed> => {
-	const message = `
-		window.wakuObject = {}
-		window.wakuObject.message = JSON.parse('${JSON.stringify(dataMessage)}')
-	`
-
-	const utf8 = new TextEncoder().encode(message)
-	const hashBuffer = await crypto.subtle.digest('SHA-256', utf8)
-
-	return { message, sha256: arrayBufferToBase64(hashBuffer) }
-}
-
 export const getNPMObject = async (
 	module: string,
-	message: DataMessage,
+	className: 'chat' | 'standalone',
 ): Promise<LoadedObject | null> => {
 	try {
 		const object = (await objects[`/node_modules/${module}/object/metadata.json`]()) as WakuObject
 		const script = await scripts[`/node_modules/${module}/object/index.js`]()
-		const embed = await getEmbed(message)
 
 		const added = { ...DEFAULT_CSP } as Csp
 		if (!added['script-src']) {
 			added['script-src'] = ''
 		}
-		added['script-src'] += ` 'sha256-${embed.sha256}'`
 
 		return {
 			script,
 			csp: formatCsp(object.csp, added),
 			name: object.name,
-			embed: embed,
+			className,
 		}
 	} catch (err) {
 		console.error(err)

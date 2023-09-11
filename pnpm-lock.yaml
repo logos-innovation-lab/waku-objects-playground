@@ -32,8 +32,8 @@ devDependencies:
     specifier: ^2.0.1
     version: 2.0.1
   '@waku-objects/sandbox-example':
-    specifier: ^0.3.0
-    version: 0.3.0
+    specifier: ^0.4.0
+    version: 0.4.0
   '@waku/interfaces':
     specifier: ^0.0.15
     version: 0.0.15
@@ -2491,8 +2491,8 @@ packages:
       pretty-format: 29.6.2
     dev: true
 
-  /@waku-objects/adapter@0.3.0:
-    resolution: {integrity: sha512-iRtyMGIk1j5feNuEQXOhX+F9dFExR43jb3PH/Gfyly+VZtddjU3YNOTj8nx0/Wqk3tMfxdHuY9iYiqjhRVf71A==}
+  /@waku-objects/adapter@0.4.0:
+    resolution: {integrity: sha512-8eojpU3hg+QFrB0ZKCkYvgMYue4aSC+1Ejf7+875gLLeTHDZofU3a85ZJZnu3WcS+v1pMMehNyUWSiPjRRpkXw==}
     dependencies:
       ethers: 6.7.1
       p-defer: 4.0.0
@@ -2506,11 +2506,11 @@ packages:
     resolution: {integrity: sha512-/zmMsR9nXXzV5uwpMYxOjMzSOOyQFi6vqMuPBkvF0+XCnOHXFR6y/ONX2DeBkMLkvoueDG8rwADvZpyyvU3bWA==}
     dev: true
 
-  /@waku-objects/sandbox-example@0.3.0:
-    resolution: {integrity: sha512-hlQ+Kf+TBhVTr7SBj2BKMMK4hN1YoZtOdEHbk7dtlY2h808ANccXA5hKviBNmnoMCjToZ8jEr/SC6A9X8oDQ1g==}
+  /@waku-objects/sandbox-example@0.4.0:
+    resolution: {integrity: sha512-Op34sv2QliveTFfDQ2EXf7YP3rXO3oJhSDdQC7NenYBarzjSChlu2C1AVVdU0tv8b/wNmlvZ+4Ky0QHvLkOkqA==}
     dependencies:
-      '@waku-objects/adapter': 0.3.0
-      ethers: 6.7.1
+      '@waku-objects/adapter': 0.4.0
+      ethers: 6.6.4
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate

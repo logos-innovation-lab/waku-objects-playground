@@ -24,7 +24,7 @@
 		...object,
 		onClick: object.standalone
 			? () => {
-					goto(ROUTES.OBJECT($page.params.id, object.objectId, 'new'))
+					goto(ROUTES.OBJECT($page.params.id, encodeURIComponent(object.objectId), 'new'))
 			  }
 			: () => {
 					createObject(object.objectId, {

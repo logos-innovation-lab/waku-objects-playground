@@ -3,7 +3,6 @@ import type { DataMessage } from '$lib/stores/chat'
 import type { ComponentType } from 'svelte'
 import type { Transaction, User, TransactionState } from './schemas'
 import type { Contract, Interface } from 'ethers'
-import type { CustomArgs } from ''
 
 export interface WakuObjectAdapter {
 	getTransaction(txHash: string): Promise<Transaction | undefined>
@@ -34,24 +33,34 @@ export interface WakuObjectState {
 	readonly chatName: string
 }
 
-export interface WakuObjectContext<
-	StoreType extends JSONSerializable = JSONSerializable,
-	DataMessageType extends JSONSerializable = JSONSerializable,
+type StoreType = JSONSerializable
+type DataMessageType = JSONSerializable
+
+export interface WakuObjectContextProps<
+	StoreType = JSONSerializable,
 	ViewType extends string = string,
-> extends WakuObjectAdapter {
+> {
 	readonly store?: StoreType
+	readonly view?: ViewType
+	readonly viewParams: string[] // Other path params after the screen
+}
+
+export interface WakuObjectContext<
+	StoreType = JSONSerializable,
+	DataMessageType = JSONSerializable,
+	ViewType extends string = string,
+> extends WakuObjectContextProps<StoreType, ViewType>,
+		WakuObjectAdapter {
 	updateStore: (updater: (state?: StoreType) => StoreType) => void
 
 	send: (data: DataMessageType) => Promise<void>
 
-	readonly view?: ViewType // Screen to show on Waku object
-	readonly viewParams: string[] // Other path params after the screen
 	onViewChange: (view: ViewType, ...rest: string[]) => void
 }
 
 export interface WakuObjectArgs<
-	StoreType extends JSONSerializable = JSONSerializable,
-	DataMessageType extends JSONSerializable = JSONSerializable,
+	StoreType = JSONSerializable,
+	DataMessageType = JSONSerializable,
 	ViewType extends string = string,
 > extends WakuObjectContext<StoreType, DataMessageType, ViewType>,
 		WakuObjectState {}
@@ -64,8 +73,8 @@ interface WakuObjectMetadata {
 }
 
 interface WakuObjectDescriptor<
-	StoreType extends JSONSerializable = JSONSerializable,
-	DataMessageType extends JSONSerializable = JSONSerializable,
+	StoreType = JSONSerializable,
+	DataMessageType = JSONSerializable,
 	ViewType extends string = string,
 > extends WakuObjectMetadata {
 	onMessage?: (
@@ -74,16 +83,11 @@ interface WakuObjectDescriptor<
 	) => Promise<void>
 }
 
-export type CustomArgs = {
-	name: string
-}
-
 interface WakuObjectSvelteDescriptor<
-	StoreType extends JSONSerializable = JSONSerializable,
-	DataMessageType extends JSONSerializable = JSONSerializable,
+	StoreType = JSONSerializable,
+	DataMessageType = JSONSerializable,
 	ViewType extends string = string,
 > extends WakuObjectDescriptor<StoreType, DataMessageType, ViewType> {
 	readonly wakuObject: ComponentType
 	readonly standalone?: ComponentType
-	readonly customArgs?: CustomArgs
 }

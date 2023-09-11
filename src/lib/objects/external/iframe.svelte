@@ -8,8 +8,8 @@
 
 	// Types
 	import { getNPMObject, type LoadedObject } from './lib'
-	import { makeIframeDispatcher } from './dispatch'
-	import { registerWindow, unregisterWindow } from '.'
+	import { makeIframeDispatcher, type IframeContextChange } from './dispatch'
+	import { postWindowMessage, registerWindow, unregisterWindow } from '.'
 	import { onDestroy } from 'svelte'
 	import adapters from '$lib/adapters'
 	import { walletStore } from '$lib/stores/wallet'
@@ -19,19 +19,17 @@
 		return template
 			.replace('__CSP__', object.csp)
 			.replace('__URL__', object.script)
-			.replace('__EMBED__', object.embed.message)
+			.replace('__CLASS__', object.className)
 	}
 
 	// Exports
-	export let message: DataMessage
+	export let message: DataMessage | undefined
 	export let args: WakuObjectArgs
-
-	export let customArgs: { name: string }
-	const { name } = customArgs
 
 	// Local variables
 	let object: LoadedObject | null
 	let iframe: HTMLIFrameElement
+	let lastContextHash: number | undefined = undefined
 
 	$: wallet = $walletStore.wallet
 
@@ -49,8 +47,14 @@
 						switch (data.type) {
 							case 'window-size': {
 								const { scrollWidth, scrollHeight } = data
-								iframe.style.width = `${scrollWidth}px`
+								if (isStandalone()) {
+									iframe.style.width = `${scrollWidth}px`
+								}
 								iframe.style.height = `${scrollHeight}px`
+								return
+							}
+							case 'init': {
+								updateContext(true)
 								return
 							}
 							default: {
@@ -67,29 +71,86 @@
 		started = true
 	}
 
-	// TODO: Add option to add external objects
-	$: name && getNPMObject(name, message).then((result) => (object = result))
+	$: args &&
+		getNPMObject(args.objectId, message ? 'chat' : 'standalone').then((result) => (object = result))
 	$: if (iframe && iframe.contentWindow) {
 		registerWindow(args.instanceId, iframe.contentWindow)
+		updateContext()
+	}
+	onDestroy(() => unregisterWindow(args.instanceId))
+
+	function isStandalone() {
+		return !message
 	}
 
-	onDestroy(() => unregisterWindow(args.instanceId))
+	function updateContext(force = false) {
+		const {
+			chatId,
+			chatName,
+			objectId,
+			instanceId,
+			profile,
+			users,
+			tokens,
+			view,
+			viewParams,
+			store,
+		} = args
+		const iframeContextChange: IframeContextChange = {
+			type: 'iframe-context-change',
+			state: {
+				chatId,
+				chatName,
+				objectId,
+				instanceId,
+				profile,
+				users,
+				tokens,
+			},
+			context: {
+				view,
+				viewParams,
+				store,
+			},
+		}
+		const json = JSON.stringify(iframeContextChange, (key, value) =>
+			typeof value === 'bigint' ? value.toString(10) : value,
+		)
+		const contextHash = Array.from(json).reduce(
+			(hash, char) => 0 | (31 * hash + char.charCodeAt(0)),
+			0,
+		)
+
+		if (force || lastContextHash !== contextHash) {
+			postWindowMessage(args.instanceId, iframeContextChange)
+			lastContextHash = contextHash
+		}
+	}
 </script>
 
 {#if object}
-	<ChatMessage myMessage={args?.profile.address === message?.fromAddress} bubble noText>
+	{#if message}
+		<ChatMessage myMessage={args?.profile.address === message?.fromAddress} bubble noText>
+			<iframe
+				title={object.name}
+				bind:this={iframe}
+				sandbox="allow-scripts"
+				srcdoc={getIframeSource(object)}
+			/>
+		</ChatMessage>
+	{:else}
 		<iframe
 			title={object.name}
 			bind:this={iframe}
 			sandbox="allow-scripts"
 			srcdoc={getIframeSource(object)}
 		/>
-	</ChatMessage>
+	{/if}
 {/if}
 
 <style>
 	iframe {
 		all: unset;
-		overflow: hidden;
+		/* overflow: hidden; */
 	}
 </style>

@@ -8,6 +8,7 @@
 	import ChooseAmount from './views/choose-amount.svelte'
 	import ConfirmSend from './views/confirm-send.svelte'
 	import SelectUser from './views/select-user.svelte'
+	import { isGroupChatId } from '$lib/stores/chat'
 
 	export let args: WakuObjectArgs
 
@@ -27,7 +28,7 @@
 	let amount = ''
 	let toUser: User | undefined = undefined
 
-	$: isGroupchat = args.users.length !== 2
+	$: isGroupchat = isGroupChatId(args.chatId)
 
 	// If this is private chat, set the user to which we want to send funds to the other user
 	$: if (!isGroupchat && !args.view)

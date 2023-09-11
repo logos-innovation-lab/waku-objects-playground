@@ -6,6 +6,7 @@ import type {
 	JSONValue,
 	WakuObjectAdapter,
 	WakuObjectArgs,
+	WakuObjectContextProps,
 	WakuObjectState,
 } from '..'
 import type { Token } from '../schemas'
@@ -39,6 +40,12 @@ export interface IframeDataMessage {
 	type: 'iframe-data-message'
 	message: DataMessage
 	state: WakuObjectState
+}
+
+export interface IframeContextChange {
+	type: 'iframe-context-change'
+	state: WakuObjectState
+	context: WakuObjectContextProps
 }
 
 interface IframeDispatcher {

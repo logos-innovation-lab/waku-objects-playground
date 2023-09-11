@@ -28,7 +28,6 @@ const config: KnipConfig = {
 	},
 	ignoreExportsUsedInFile: true,
 	ignoreBinaries: ['docker'],
-	ignoreDependencies: ['@waku-objects/sandbox-example'],
 }
 
 export default config
