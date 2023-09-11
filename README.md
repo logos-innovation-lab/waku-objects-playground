@@ -4,10 +4,11 @@ Waku Objects Playground is a simple chat app. Its main use is to showcase Waku O
 
 ## Developing
 
-Once you've created a project and installed dependencies with `pnpm install`, start a development server:
+Install dependencies with `pnpm install`. Then start the development server:
 
 ```bash
-pnpm dev
+# bind to 127.0.0.1
+pnpm dev --host
 
 # or start the server and open the app in a new browser tab
 pnpm dev --open
@@ -22,6 +23,29 @@ pnpm build
 ```
 
 You can preview the production build with `pnpm preview`.
+
+## CLI
+
+There is a built-in command line tool for making development easier.
+
+Run it with this command:
+
+```bash
+pnpm cli <command> [arguments]
+```
+
+Currently the following commands are available:
+
+- `pnpm cli fund <address> [amount=1]`: fund an address from a builtin hardhat test account
+- `pnpm cli balance <address>`: prints the balance of the account that belongs to the address
+- `pnpm cli txinfo <hash>`: prints the transaction information
+- `pnpm cli waku profile <address>`: prints the profile belonging to an address
+- `pnpm cli waku group-chat <address>`: prints the group chats
+- `pnpm cli waku chats <address>`: prints the chats object
+- `pnpm cli waku private-message <address>`: prints the private messages
+- `pnpm cli waku objects <address>`: prints the object store
+- `pnpm cli waku send <from> <to> <message>` sends a private `message` from a user (or group) to another one
+- `pnpm cli waku invite <from> <to> <chat-id>` invite a user to a group chat
 
 ## License
 
