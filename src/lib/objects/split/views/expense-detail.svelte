@@ -23,9 +23,9 @@
 	export let profile: User
 	export let send: (message: DataMessage) => Promise<void>
 
-	const amountString = toSignificant(expense.amount, expense.decimals, expense.decimals)
-	const amountPerPerson = (Number(amountString) / users.length).toFixed(2)
-	const lentAmount = (Number(amountString) - Number(amountPerPerson)).toFixed(2)
+	const bigIntPerUser = BigInt(expense.amount) / BigInt(users.length)
+	const amountPerPerson = toSignificant(bigIntPerUser, expense.decimals)
+	const lentAmount = toSignificant(BigInt(expense.amount) - bigIntPerUser, expense.decimals)
 	const paidBy =
 		profile.address === expense.paidBy
 			? 'You'

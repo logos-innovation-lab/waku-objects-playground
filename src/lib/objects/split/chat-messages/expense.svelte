@@ -21,9 +21,10 @@
 
 	export let onViewChange: (view: View, ...rest: string[]) => void
 
-	const amountPerPerson = (
-		Number(toSignificant(expense.amount, expense.decimals, expense.decimals)) / users.length
-	).toFixed(2)
+	const amountPerPerson = toSignificant(
+		BigInt(expense.amount) / BigInt(users.length),
+		expense.decimals,
+	)
 </script>
 
 <ChatMessage {myMessage} object bubble>
