@@ -43,6 +43,27 @@ export function makeWakustore(waku: LightNode) {
 		return makeQuery(contentTopic, id, queryOptions)
 	}
 
+	function decodedMessageToTypedResult<T>(message: DecodedMessage): T {
+		const decodedPayload = decodeMessagePayload(message)
+		const typedPayload = JSON.parse(decodedPayload) as T & { timestamp?: number }
+
+		// HACK to use waku timestamp instead of the type T's
+		if (
+			typedPayload &&
+			typeof typedPayload === 'object' &&
+			!Array.isArray(typedPayload) &&
+			typedPayload.timestamp
+		) {
+			return {
+				...typedPayload,
+				timestamp: Number(message.timestamp),
+				origTimestamp: typedPayload.timestamp,
+			}
+		} else {
+			return typedPayload
+		}
+	}
+
 	async function parseQueryResults<T>(
 		results: QueryResult,
 		queryOptions?: QueryOptions,
@@ -52,24 +73,8 @@ export function makeWakustore(waku: LightNode) {
 			for (const messagePromise of messagePromises) {
 				const message = await messagePromise
 				if (message) {
-					const decodedPayload = decodeMessagePayload(message)
-					const typedPayload = JSON.parse(decodedPayload) as T & { timestamp?: number }
-
-					// HACK to use waku timestamp instead of the type T's
-					if (
-						typedPayload &&
-						typeof typedPayload === 'object' &&
-						!Array.isArray(typedPayload) &&
-						typedPayload.timestamp
-					) {
-						typedResults.push({
-							...typedPayload,
-							timestamp: Number(message.timestamp),
-							origTimestamp: typedPayload.timestamp,
-						})
-					} else {
-						typedResults.push(typedPayload)
-					}
+					const typedResult = decodedMessageToTypedResult<T>(message)
+					typedResults.push(typedResult)
 
 					// reached the limit
 					if (
@@ -104,6 +109,16 @@ export function makeWakustore(waku: LightNode) {
 	}
 
 	async function onSnapshot<T>(query: Query, callback: (value: T) => void): Promise<Unsubscribe> {
+		const subscription = await subscribe(
+			waku,
+			query.contentTopic,
+			query.id,
+			(msg: DecodedMessage) => {
+				const typedResult = decodedMessageToTypedResult<T>(msg)
+				callback(typedResult)
+			},
+		)
+
 		const queryOptions = {
 			...query.queryOptions,
 			pageSize: query.queryOptions?.pageSize ?? query.queryOptions?.limit,
@@ -115,12 +130,7 @@ export function makeWakustore(waku: LightNode) {
 			callback(value)
 		}
 
-		return await subscribe(waku, query.contentTopic, query.id, (msg: DecodedMessage) => {
-			const decodedPayload = decodeMessagePayload(msg)
-			const decodedValue = JSON.parse(decodedPayload) as T
-
-			callback(decodedValue)
-		})
+		return subscription
 	}
 
 	return {

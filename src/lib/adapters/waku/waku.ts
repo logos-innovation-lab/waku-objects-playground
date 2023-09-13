@@ -37,6 +37,7 @@ function getTopic(contentTopic: ContentTopic, id: string | '' = '') {
 
 interface ConnectWakuOptions {
 	onDisconnect?: () => void
+	onConnect?: (connections: unknown[]) => void
 }
 
 export async function connectWaku(options?: ConnectWakuOptions) {
@@ -45,6 +46,13 @@ export async function connectWaku(options?: ConnectWakuOptions) {
 	waku.libp2p.addEventListener('peer:disconnect', () => {
 		if (options?.onDisconnect && waku.libp2p.getConnections().length === 0) {
 			options.onDisconnect()
+		}
+	})
+
+	waku.libp2p.addEventListener('peer:connect', () => {
+		if (options?.onConnect && waku.libp2p.getConnections().length > 0) {
+			const connections = waku.libp2p.getConnections()
+			options.onConnect(connections)
 		}
 	})
 
@@ -107,7 +115,5 @@ export async function sendMessage(waku: LightNode, id: string, message: unknown)
 	const encoder = createEncoder({ contentTopic })
 
 	const { error } = await waku.lightPush.send(encoder, { payload })
-	if (error) {
-		console.error(error)
-	}
+	return error
 }
