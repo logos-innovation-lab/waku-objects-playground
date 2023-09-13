@@ -33,6 +33,8 @@ import type { StorageChat, StorageChatEntry, StorageObjectEntry, StorageProfile 
 import { genRandomHex } from '$lib/utils'
 import { walletStore } from '$lib/stores/wallet'
 
+const MAX_MESSAGES = 100
+
 interface QueuedMessage {
 	message: Message
 	address: string
@@ -96,7 +98,7 @@ async function addMessageToChat(
 	const unread = message.fromAddress !== address && message.type === 'user' ? 1 : 0
 	chats.updateChat(chatId, (chat) => ({
 		...chat,
-		messages: [...chat.messages, message],
+		messages: [...chat.messages.slice(-MAX_MESSAGES), message],
 		unread: chat.unread + unread,
 	}))
 }
@@ -165,7 +167,14 @@ export default class WakuAdapter implements Adapter {
 
 	async onLogIn(wallet: BaseWallet): Promise<void> {
 		const address = wallet.address
-		this.waku = await connectWaku()
+		this.waku = await connectWaku({
+			onDisconnect: () => {
+				console.debug('❌ disconnected from waku')
+			},
+			onConnect: () => {
+				console.debug('✅ connected to waku')
+			},
+		})
 
 		const wakuObjectAdapter = makeWakuObjectAdapter(this, wallet)
 
