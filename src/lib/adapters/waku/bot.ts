@@ -294,7 +294,16 @@ async function handleSessionUserMessage(waku: LightNode, chatMessage: UserMessag
 	const sessionHistory = sessions.get(chatId)
 
 	const name = `@${chatMessage.fromAddress}`
-	const { history, responseText } = await requestLLM(chatMessage.text, name, sessionHistory)
+	const { response, history, responseText } = await requestLLM(
+		chatMessage.text,
+		name,
+		sessionHistory,
+	)
+
+	if (!responseText) {
+		log(`⚠️ undefined response text`, { response })
+		return
+	}
 
 	if (history?.visible?.length > BOT_HISTORY_LIMIT) {
 		history.visible.shift()
@@ -303,7 +312,7 @@ async function handleSessionUserMessage(waku: LightNode, chatMessage: UserMessag
 
 	sessions.set(chatId, history)
 
-	if (responseText === '') {
+	if (!responseText) {
 		log(`⛔ empty response`, { chatMessage })
 	}
 
