@@ -44,6 +44,16 @@
 		return ''
 	}
 
+	function replaceAddressesWithNames(s: string, chat: Chat) {
+		if (!chat) {
+			return s
+		}
+		for (const user of chat.users) {
+			s = s.replaceAll(`@${user.address}`, `@${user.name || user.address}`)
+		}
+		return s
+	}
+
 	$: loading = $profile.loading || $chats.loading
 </script>
 
@@ -168,7 +178,7 @@
 											<p class={`message text-serif ${myMessage ? 'my-message' : ''}`}>
 												{senderName}
 												{@html lastMessage && lastMessage.type === 'user'
-													? lastMessage.text?.substring(0, 50)
+													? replaceAddressesWithNames(lastMessage.text?.substring(0, 150), chat)
 													: 'No messages yet'}
 											</p>
 										</div>
@@ -273,5 +283,14 @@
 
 	.my-message {
 		font-style: italic;
+	}
+
+	.message {
+		overflow: hidden;
+		text-overflow: ellipsis;
+		width: 100%;
+		display: -webkit-box;
+		-webkit-line-clamp: 2;
+		-webkit-box-orient: vertical;
 	}
 </style>
