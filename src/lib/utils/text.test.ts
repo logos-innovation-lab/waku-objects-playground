@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { replaceUrlToLink } from './text'
+import { replaceAtMention, replaceUrlToLink } from './text'
 
 describe('replaceUrlToLink', () => {
 	const values = [
@@ -27,6 +27,33 @@ describe('replaceUrlToLink', () => {
 	values.forEach(({ text, expected }) => {
 		it(`with text ${text} should return ${expected}`, () => {
 			expect(replaceUrlToLink(text)).toStrictEqual(expected)
+		})
+	})
+})
+
+describe('replaceAtMention', () => {
+	const values = [
+		{
+			text: '@abc',
+			expected: '<b>@abc</b>',
+		},
+		{
+			text: '@abc ',
+			expected: '<b>@abc</b> ',
+		},
+		{
+			text: '@abc hello',
+			expected: '<b>@abc</b> hello',
+		},
+		{
+			text: '@abc hello @abc',
+			expected: '<b>@abc</b> hello <b>@abc</b>',
+		},
+	]
+
+	values.forEach(({ text, expected }) => {
+		it(`with text ${text} should return ${expected}`, () => {
+			expect(replaceAtMention(text)).toStrictEqual(expected)
 		})
 	})
 })
