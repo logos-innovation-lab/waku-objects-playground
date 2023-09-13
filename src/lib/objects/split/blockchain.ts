@@ -108,7 +108,6 @@ export async function getBalances(
 		balances.push({
 			address: member,
 			amount: debt.toString(),
-			decimals: defaultBlockchainNetwork.nativeToken.decimals,
 		})
 	}
 

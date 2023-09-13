@@ -1,4 +1,4 @@
-import { balanceStore, type Token } from '$lib/stores/balances'
+import { balanceStore, type TokenAmount } from '$lib/stores/balances'
 import { defaultBlockchainNetwork, getBalance, getProvider } from '$lib/adapters/transaction'
 import { Contract } from 'ethers'
 import abi from '$lib/abis/erc20.json'
@@ -16,7 +16,7 @@ export async function fetchBalances(address: string): Promise<void> {
 		amount: nativeTokenAmount,
 	}
 
-	const tokens = defaultBlockchainNetwork.tokens ?? []
+	const tokens = defaultBlockchainNetwork.tokens?.map((t) => ({ ...t, amount: 0n })) ?? []
 
 	for (const token of tokens) {
 		// We skip tokens that have no address (likely native tokens)
@@ -35,7 +35,7 @@ export async function fetchBalances(address: string): Promise<void> {
 	balanceStore.set(balancesState)
 }
 
-export async function checkBalance(address: string, token: Token): Promise<void> {
+export async function checkBalance(address: string, token: TokenAmount): Promise<void> {
 	const nativeTokenAmount = await getBalance(address)
 
 	balanceStore.update((balanceState) => ({

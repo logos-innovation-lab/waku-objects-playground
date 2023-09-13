@@ -35,7 +35,6 @@ const testBlockchain: BlockchainNetwork = {
 		symbol: 'ETH',
 		decimals: 18,
 		image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
-		amount: BigInt(0),
 	},
 	objects: {
 		splitterFactory: '0x0',
@@ -55,7 +54,6 @@ const chiadoBlockchain: BlockchainNetwork = {
 		symbol: 'xDai',
 		decimals: 18,
 		image: 'https://docs.gnosischain.com/img/tokens/chiado-xdai.png',
-		amount: BigInt(0),
 	},
 	tokens: [
 		{
@@ -63,7 +61,6 @@ const chiadoBlockchain: BlockchainNetwork = {
 			symbol: 'GNO',
 			decimals: 18,
 			image: 'https://docs.gnosischain.com/img/tokens/gno.png',
-			amount: BigInt(0),
 			address: '0x19C653Da7c37c66208fbfbE8908A5051B57b4C70',
 		},
 	],
@@ -85,7 +82,6 @@ const sepoliaBlockchain: BlockchainNetwork = {
 		symbol: 'SEP',
 		decimals: 18,
 		image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
-		amount: BigInt(0),
 	},
 	objects: {
 		splitterFactory: '0x0',

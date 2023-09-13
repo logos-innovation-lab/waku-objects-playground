@@ -9,7 +9,7 @@ import type {
 	WakuObjectContextProps,
 	WakuObjectState,
 } from '..'
-import type { Token } from '../schemas'
+import type { TokenAmount } from '../schemas'
 
 interface AdapterRequestMessage {
 	type: 'adapter'
@@ -90,21 +90,21 @@ export function makeIframeDispatcher(
 			}
 			case 'checkBalance': {
 				// TODO validation
-				const token = JSON.parse(request.args[0]) as Token
+				const token = JSON.parse(request.args[0]) as TokenAmount
 				await objectAdapter.checkBalance(token)
 				return undefined
 			}
 			case 'sendTransaction': {
 				const to = request.args[0]
 				// TODO validation
-				const token = JSON.parse(request.args[1]) as Token
+				const token = JSON.parse(request.args[1]) as TokenAmount
 				const response = await objectAdapter.sendTransaction(to, token)
 				return response
 			}
 			case 'estimateTransaction': {
 				const to = request.args[0]
 				// TODO validation
-				const token = JSON.parse(request.args[1]) as Token
+				const token = JSON.parse(request.args[1]) as TokenAmount
 				const response = await objectAdapter.estimateTransaction(to, token)
 				// TODO proper types
 				return response as unknown as JSONValue

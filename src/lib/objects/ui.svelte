@@ -1,7 +1,7 @@
 <script lang="ts">
 	import adapter from '$lib/adapters'
 	import { lookup } from './lookup'
-	import { balanceStore, type Token } from '$lib/stores/balances'
+	import { balanceStore, type TokenAmount } from '$lib/stores/balances'
 	import { chats, type Chat } from '$lib/stores/chat'
 	import type { JSONSerializable, WakuObjectArgs } from '.'
 	import { profile } from '$lib/stores/profile'
@@ -23,7 +23,7 @@
 
 	let args: WakuObjectArgs
 	let store: JSONSerializable | undefined
-	let tokens: Token[]
+	let tokens: TokenAmount[]
 	let chat: Chat | undefined
 	let userProfile: User
 	let users: User[]

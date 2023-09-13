@@ -15,17 +15,19 @@
 	import type { View } from '../types'
 	import type { DataMessage, Expense } from '../schemas'
 	import { formatDateAndTime, toSignificant } from '$lib/utils/format'
+	import type { Token } from '$lib/objects/schemas'
 
 	export let expense: Expense
-	export let onViewChange: (view: View, ...rest: string[]) => void
-	export let exitObject: () => void
 	export let users: User[]
 	export let profile: User
+	export let token: Token
+	export let onViewChange: (view: View, ...rest: string[]) => void
+	export let exitObject: () => void
 	export let send: (message: DataMessage) => Promise<void>
 
 	const bigIntPerUser = BigInt(expense.amount) / BigInt(users.length)
-	const amountPerPerson = toSignificant(bigIntPerUser, expense.decimals)
-	const lentAmount = toSignificant(BigInt(expense.amount) - bigIntPerUser, expense.decimals)
+	const amountPerPerson = toSignificant(bigIntPerUser, token.decimals)
+	const lentAmount = toSignificant(BigInt(expense.amount) - bigIntPerUser, token.decimals)
 	const paidBy =
 		profile.address === expense.paidBy
 			? 'You'
@@ -75,8 +77,8 @@
 				<Image picture={image} />
 			{/each}
 		</Container>
-		<h1>{toSignificant(expense.amount, expense.decimals)} DAI</h1>
-		<p>{amountPerPerson} DAI per person</p>
+		<h1>{toSignificant(expense.amount, token.decimals)} {token.symbol}</h1>
+		<p>{amountPerPerson} {token.symbol} per person</p>
 	</Container>
 	<Divider pad={24} />
 	<Container gap={0} padX={24} alignItems="center" grow>
@@ -94,14 +96,14 @@
 	<Container padX={24} padY={24} gap={6} justify="flex-end" alignItems="center">
 		{#if paidByYou}
 			<p>On this expense you lent</p>
-			<h1>{lentAmount} DAI</h1>
+			<h1>{lentAmount} {token.symbol}</h1>
 			<Container direction="row" justify="center" alignItems="center">
 				<Button variant="strong" on:click={askToSettle}><Bullhorn /> Ask to settle</Button>
 				<Button on:click={viewAccounting}><DataViewAlt />View accounting</Button>
 			</Container>
 		{:else}
 			<p>On this expense {paidBy} lend you</p>
-			<h1>{amountPerPerson} DAI</h1>
+			<h1>{amountPerPerson} {token.symbol}</h1>
 			<Container direction="row" justify="center" alignItems="center">
 				<Button variant="strong" on:click={settleNow}><Renew /> Settle now</Button>
 				<Button on:click={viewAccounting}><DataViewAlt />View accounting</Button>

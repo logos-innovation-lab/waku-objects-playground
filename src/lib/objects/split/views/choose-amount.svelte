@@ -10,8 +10,10 @@
 
 	import Layout from '$lib/components/layout.svelte'
 	import { splitDescriptor } from '..'
+	import type { Token } from '$lib/objects/schemas'
 
 	export let amount: string
+	export let token: Token
 	export let exitObject: () => void
 	export let goNext: () => void
 	export let goBack: () => void
@@ -34,7 +36,13 @@
 		<h2>Add an expense you paid and that you would like to share with the group.</h2>
 		<p>It will be split equally between all chat members</p>
 		<div class="input">
-			<Input unit="DAI" label="Paid amount" autofocus bind:value={amount} placeholder="0" />
+			<Input
+				unit={token.symbol}
+				label="Paid amount"
+				autofocus
+				bind:value={amount}
+				placeholder="0"
+			/>
 		</div>
 		{#if error}
 			<p>{error}</p>

@@ -5,8 +5,11 @@ import StandaloneComponent from './standalone.svelte'
 import logo from './logo.svg'
 import type { View } from './types'
 import { getBalances } from './blockchain'
+import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 
 export const SPLIT_OBJECT_ID = 'split'
+
+export const SPLIT_TOKEN = defaultBlockchainNetwork.nativeToken
 
 export const splitDescriptor: WakuObjectSvelteDescriptor<Store, DataMessage, View> = {
 	objectId: SPLIT_OBJECT_ID,
@@ -26,8 +29,9 @@ export const splitDescriptor: WakuObjectSvelteDescriptor<Store, DataMessage, Vie
 		}
 
 		if (res.data.type === 'expense') {
-			const { expense, splitterAddress } = res.data
+			const { expense, splitterAddress, tokenAddress } = res.data
 
+			const token = args.tokens.find((t) => t.address === tokenAddress) ?? SPLIT_TOKEN
 			let balances: Balance[] = []
 			try {
 				balances = await getBalances(args.getContract, splitterAddress)
@@ -42,6 +46,7 @@ export const splitDescriptor: WakuObjectSvelteDescriptor<Store, DataMessage, Vie
 				expenses.push(expense)
 
 				return {
+					token,
 					splitterAddress,
 					payments,
 					balances,
@@ -63,11 +68,13 @@ export const splitDescriptor: WakuObjectSvelteDescriptor<Store, DataMessage, Vie
 			args.updateStore((s) => {
 				const expenses = s?.expenses ?? []
 				const payments = s?.payments ?? []
+				const token = s?.token ?? SPLIT_TOKEN
 
 				payments.push(payment)
 
 				return {
 					splitterAddress,
+					token,
 					payments,
 					balances,
 					expenses,

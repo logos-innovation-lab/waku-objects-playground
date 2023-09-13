@@ -6,7 +6,7 @@
 	import Expense from './chat-messages/expense.svelte'
 	import SettleReminder from './chat-messages/settle-reminder.svelte'
 	import Payment from './chat-messages/payment.svelte'
-	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
+	import { SPLIT_TOKEN } from '.'
 
 	export let message: DataMessage<DM>
 	export let args: WakuObjectArgs<Store, DM, View>
@@ -16,12 +16,13 @@
 
 	$: isSender = args.profile.address === sender?.address
 
-	const symbol = defaultBlockchainNetwork.nativeToken.symbol
+	const token = SPLIT_TOKEN
 </script>
 
 {#if message.data.type === 'expense'}
 	{@const expense = message.data.expense}
 	<Expense
+		{token}
 		{expense}
 		instanceId={message.instanceId}
 		users={args.users}
@@ -46,8 +47,7 @@
 		{myMessage}
 		instanceId={message.instanceId}
 		amount={message.data.payment.amount}
-		decimals={message.data.payment.decimals}
-		{symbol}
+		{token}
 		{sender}
 	/>
 {:else}

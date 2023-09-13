@@ -14,8 +14,7 @@
 	import { splitDescriptor } from '..'
 	import type { GetContract } from '../types'
 	import { settleDebt } from '../blockchain'
-	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
-	import type { Token } from '$lib/objects/schemas'
+	import type { TokenAmount, Token } from '$lib/objects/schemas'
 	import { formatAddress, toSignificant } from '$lib/utils/format'
 
 	export let profile: UserType
@@ -23,23 +22,23 @@
 	export let instanceId: string
 	export let chatName: string
 	export let splitterAddress: string
-	export let tokens: Token[]
+	export let tokens: TokenAmount[]
+	export let token: Token
 
 	export let getContract: GetContract
 	export let exitObject: () => void
 	export let send: (message: DataMessage) => Promise<void>
 
 	let owedAmount = 0n
-	let decimals: number = defaultBlockchainNetwork.nativeToken.decimals
 	let settling = false
 	$: {
 		const balance = balances.find(({ address }) => address === profile.address)
 		if (balance) {
 			owedAmount = BigInt(balance.amount)
-			decimals = balance.decimals
 		}
 	}
-	$: nativeToken = tokens.find((t) => !t.address) ?? defaultBlockchainNetwork.nativeToken
+	$: nativeToken = tokens.find((t) => !t.address)
+	$: splitToken = tokens.find((t) => t.address === token.address)
 
 	async function settleNow() {
 		try {
@@ -48,10 +47,10 @@
 			send({
 				type: 'payment',
 				splitterAddress,
+				tokenAddress: token.address,
 				payment: {
 					txHash,
 					amount: owedAmount.toString(),
-					decimals,
 					paidBy: profile.address,
 					timestamp: Date.now(),
 				},
@@ -63,7 +62,7 @@
 		}
 	}
 
-	const fee: Token = { ...defaultBlockchainNetwork.nativeToken, amount: 1000000000000000n }
+	$: fee = nativeToken ? { ...nativeToken, amount: 1000000000000000n } : undefined
 </script>
 
 <Layout>
@@ -75,93 +74,99 @@
 			</Button>
 		</Header>
 	</svelte:fragment>
-	<Container padX={24} padY={24} alignItems="center">
-		<h1>{chatName} shared expenses</h1>
-	</Container>
-	<Divider />
+	{#if nativeToken === undefined || splitToken === undefined || fee === undefined}
+		<!-- This should never happen -->
+		<p>No native token</p>
+	{:else}
+		<Container padX={24} padY={24} alignItems="center">
+			<h1>{chatName} shared expenses</h1>
+		</Container>
+		<Divider />
 
-	<Container gap={24} padX={24} padY={24} grow justify="center">
-		<h2>Settle now</h2>
+		<Container gap={24} padX={24} padY={24} grow justify="center">
+			<h2>Settle now</h2>
 
-		{#if owedAmount > 0n}
-			<Container gap={6} padX={0} padY={0}>
-				<div class="label">
-					<span class="text-sm">Amount to settle</span>
-					<div class="input-wrapper">
-						<!-- svelte-ignore a11y-autofocus -->
-						<div class="text-lg input">
-							{toSignificant(owedAmount, decimals)}
-							{nativeToken.symbol}
+			{#if owedAmount > 0n}
+				<Container gap={6} padX={0} padY={0}>
+					<div class="label">
+						<span class="text-sm">Amount to settle</span>
+						<div class="input-wrapper">
+							<!-- svelte-ignore a11y-autofocus -->
+							<div class="text-lg input">
+								{toSignificant(owedAmount, splitToken.decimals)}
+								{nativeToken.symbol}
+							</div>
 						</div>
 					</div>
-				</div>
-				<ReadonlyText marginBottom={0} align="center">
-					<p class="text-sm">
-						{toSignificant(nativeToken.amount, nativeToken.decimals)}
-						{nativeToken.symbol} available
-					</p>
-				</ReadonlyText></Container
+					<ReadonlyText marginBottom={0} align="center">
+						<p class="text-sm">
+							{toSignificant(nativeToken.amount, nativeToken.decimals)}
+							{nativeToken.symbol} available
+						</p>
+					</ReadonlyText></Container
+				>
+
+				<Container gap={6} padX={0} padY={0}>
+					<div class="label">
+						<span class="text-sm">From</span>
+						<div class="input-wrapper">
+							<!-- svelte-ignore a11y-autofocus -->
+							<div class="text-lg input">
+								<p>Your account</p>
+								<p class="text-sm">
+									{formatAddress(profile.address, 6, 6)}
+								</p>
+							</div>
+						</div>
+					</div>
+				</Container>
+
+				<Container gap={6} padX={0} padY={0}>
+					<div class="label">
+						<span class="text-sm">Transaction fee (max)</span>
+						<div class="input-wrapper">
+							<!-- svelte-ignore a11y-autofocus -->
+							<div class="text-lg input">
+								<p>{toSignificant(fee.amount, fee.decimals)} {fee.symbol}</p>
+								<p class="text-sm">
+									{toSignificant(fee.amount, fee.decimals)} ≈ {toSignificant(
+										fee.amount,
+										fee.decimals,
+									)}
+									DAI
+								</p>
+							</div>
+						</div>
+					</div>
+					<ReadonlyText marginBottom={0} align="center">
+						<p class="text-sm">
+							{toSignificant(splitToken.amount, splitToken.decimals)}
+							{splitToken.symbol} available
+						</p>
+					</ReadonlyText>
+				</Container>
+			{:else if owedAmount < 0n}
+				<Container gap={12} padX={0} padY={0} align="center">
+					<p>Nothing to settle, you are owed</p>
+					<h1>{toSignificant(-owedAmount, splitToken.decimals)} {splitToken.symbol}</h1>
+				</Container>
+			{:else}
+				<Container gap={12} padX={0} padY={0} align="center">
+					<p>\(•◡•)/</p>
+					<h1>Settled up</h1>
+				</Container>
+			{/if}
+		</Container>
+
+		<Container padX={24} padY={24} gap={6} justify="flex-end" alignItems="center">
+			<Button
+				variant="strong"
+				on:click={settleNow}
+				disabled={settling || fee.amount + owedAmount > nativeToken.amount}
+				><ArrowUp /> Pay now</Button
 			>
-
-			<Container gap={6} padX={0} padY={0}>
-				<div class="label">
-					<span class="text-sm">From</span>
-					<div class="input-wrapper">
-						<!-- svelte-ignore a11y-autofocus -->
-						<div class="text-lg input">
-							<p>Your account</p>
-							<p class="text-sm">
-								{formatAddress(profile.address, 6, 6)}
-							</p>
-						</div>
-					</div>
-				</div>
-			</Container>
-
-			<Container gap={6} padX={0} padY={0}>
-				<div class="label">
-					<span class="text-sm">Transaction fee (max)</span>
-					<div class="input-wrapper">
-						<!-- svelte-ignore a11y-autofocus -->
-						<div class="text-lg input">
-							<p>{toSignificant(fee.amount, fee.decimals)} {fee.symbol}</p>
-							<p class="text-sm">
-								{toSignificant(fee.amount, fee.decimals)} ≈ {toSignificant(
-									fee.amount,
-									fee.decimals,
-								)} DAI
-							</p>
-						</div>
-					</div>
-				</div>
-				<ReadonlyText marginBottom={0} align="center">
-					<p class="text-sm">
-						{toSignificant(nativeToken.amount, nativeToken.decimals)}
-						{nativeToken.symbol} available
-					</p>
-				</ReadonlyText>
-			</Container>
-		{:else if owedAmount < 0n}
-			<Container gap={12} padX={0} padY={0} align="center">
-				<p>Nothing to settle, you are owed</p>
-				<h1>{toSignificant(-owedAmount, decimals)} {nativeToken.symbol}</h1>
-			</Container>
-		{:else}
-			<Container gap={12} padX={0} padY={0} align="center">
-				<p>\(•◡•)/</p>
-				<h1>Settled up</h1>
-			</Container>
-		{/if}
-	</Container>
-
-	<Container padX={24} padY={24} gap={6} justify="flex-end" alignItems="center">
-		<Button
-			variant="strong"
-			on:click={settleNow}
-			disabled={settling || fee.amount + owedAmount > nativeToken.amount}
-			><ArrowUp /> Pay now</Button
-		>
-	</Container>
+		</Container>
+	{/if}
 </Layout>
 
 <style>

@@ -10,6 +10,7 @@
 	import type { User } from '$lib/types'
 	import ChatMessage from '$lib/components/chat-message.svelte'
 	import { toSignificant } from '$lib/utils/format'
+	import type { Token } from '$lib/objects/schemas'
 
 	export let instanceId: string
 	export let expense: Expense
@@ -18,12 +19,13 @@
 	export let myMessage: boolean
 	export let isSender: boolean
 	export let chatName: string
+	export let token: Token
 
 	export let onViewChange: (view: View, ...rest: string[]) => void
 
 	const amountPerPerson = toSignificant(
 		BigInt(expense.amount) / BigInt(users.length),
-		expense.decimals,
+		token.decimals,
 	)
 </script>
 
@@ -59,11 +61,12 @@
 						</div>
 					</div>
 					<div class="grow">{expense.description}</div>
-					<div class="grow">{toSignificant(expense.amount, expense.decimals)} DAI</div>
+					<div class="grow">{toSignificant(expense.amount, token.decimals)} {token.symbol}</div>
 				</ReadonlyText>
 			</Container>
 			<p class="text-sm">
-				{amountPerPerson} DAI per person
+				{amountPerPerson}
+				{token.symbol} per person
 			</p>
 			<Button on:click={() => onViewChange('expense', expense.txHash)}>View expense</Button>
 		</Container>

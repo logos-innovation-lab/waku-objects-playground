@@ -5,13 +5,13 @@
 	import type { User } from '$lib/types'
 	import ChatMessage from '$lib/components/chat-message.svelte'
 	import { toSignificant } from '$lib/utils/format'
+	import type { Token } from '$lib/objects/schemas'
 
 	export let myMessage: boolean
 	export let amount: string
 	export let sender: User | undefined = undefined
 	export let instanceId: string
-	export let decimals: number
-	export let symbol: string
+	export let token: Token
 </script>
 
 <ChatMessage {myMessage} object bubble>
@@ -28,8 +28,8 @@
 			{:else}
 				{sender?.name ?? 'Unknown'}
 			{/if}
-			paid {toSignificant(amount, decimals)}
-			{symbol}.
+			paid {toSignificant(amount, token.decimals)}
+			{token.symbol}.
 		</Container>
 	</div>
 </ChatMessage>

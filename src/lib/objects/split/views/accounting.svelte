@@ -13,9 +13,9 @@
 
 	import type { User as UserType } from '$lib/types'
 	import type { Balance, DataMessage } from '../schemas'
-	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 	import { toSignificant } from '$lib/utils/format'
 	import type { View } from '../types'
+	import type { Token } from '$lib/objects/schemas'
 
 	export let users: UserType[]
 	export let profile: UserType
@@ -23,18 +23,17 @@
 	export let exitObject: () => void
 	export let send: (message: DataMessage) => Promise<void>
 	export let onViewChange: (view: View, ...rest: string[]) => void
+	export let token: Token
 
 	const usersAmounts = balances.map(({ address, amount }) => ({
 		user: users.find((user) => user.address === address),
 		amount: BigInt(amount),
 	}))
 	let userAmount = 0n
-	let decimals = defaultBlockchainNetwork.nativeToken.decimals
 	$: {
 		const balance = balances.find(({ address }) => address === profile.address)
 		if (balance) {
 			userAmount = BigInt(balance.amount)
-			decimals = balance.decimals
 		}
 	}
 
@@ -80,9 +79,9 @@
 								</p>
 								<p>
 									{#if amount < 0n}
-										lent {toSignificant(-amount, decimals)} DAI
+										lent {toSignificant(-amount, token.decimals)} {token.symbol}
 									{:else if amount > 0n}
-										owe {isYou ? '' : 's'} {toSignificant(amount, decimals)} DAI
+										owe {isYou ? '' : 's'} {toSignificant(amount, token.decimals)} {token.symbol}
 									{:else}
 										settled
 									{/if}
@@ -98,11 +97,11 @@
 	<Container gap={12} padX={24} padY={24} justify="center" alignItems="center">
 		{#if userAmount < 0}
 			<p>Overall you lent</p>
-			<h1>{toSignificant(-userAmount, decimals)} DAI</h1>
+			<h1>{toSignificant(-userAmount, token.decimals)} {token.symbol}</h1>
 			<Button variant="strong" on:click={askToSettle}><Bullhorn /> Ask to settle</Button>
 		{:else if userAmount > 0}
 			<p>Overall you owe</p>
-			<h1>{toSignificant(userAmount, decimals)} DAI</h1>
+			<h1>{toSignificant(userAmount, token.decimals)} {token.symbol}</h1>
 			<Button variant="strong" on:click={settleNow}><Renew /> Settle now</Button>
 		{:else}
 			<p>\(•◡•)/</p>

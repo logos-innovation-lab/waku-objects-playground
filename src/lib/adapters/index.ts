@@ -1,4 +1,4 @@
-import type { Token } from '$lib/stores/balances'
+import type { TokenAmount } from '$lib/stores/balances'
 import WakuAdapter from '$lib/adapters/waku'
 import type { BaseWallet } from 'ethers'
 import type { User } from '$lib/objects/schemas'
@@ -38,8 +38,8 @@ export interface Adapter {
 		instanceId: string,
 		updater: (state: JSONSerializable) => JSONSerializable,
 	): Promise<void>
-	sendTransaction(wallet: BaseWallet, to: string, token: Token): Promise<string>
-	estimateTransaction(wallet: BaseWallet, to: string, token: Token): Promise<Token>
+	sendTransaction(wallet: BaseWallet, to: string, token: TokenAmount): Promise<string>
+	estimateTransaction(wallet: BaseWallet, to: string, token: TokenAmount): Promise<TokenAmount>
 }
 
 export default new WakuAdapter()

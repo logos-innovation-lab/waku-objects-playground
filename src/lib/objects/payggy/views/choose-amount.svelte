@@ -14,13 +14,13 @@
 	import Grid from '$lib/components/grid.svelte'
 
 	import { toSignificant } from '$lib/utils/format'
-	import type { Token } from '../../schemas'
+	import type { TokenAmount } from '../../schemas'
 	import Layout from '$lib/components/layout.svelte'
 	import { payggyDescriptor } from '..'
 
 	export let amount: string
-	export let token: Token
-	export let tokens: Token[]
+	export let token: TokenAmount
+	export let tokens: TokenAmount[]
 	export let onViewChange: (view: string) => void
 	export let exitObject: () => void
 

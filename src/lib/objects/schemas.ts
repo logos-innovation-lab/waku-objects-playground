@@ -4,12 +4,16 @@ import z from 'zod'
 export const TokenSchema = z.object({
 	name: z.string(),
 	symbol: z.string(),
-	amount: z.bigint().positive(),
 	decimals: z.number().int().positive(),
 	image: z.string().optional(),
 	address: AddressSchema.optional(),
 })
 export type Token = z.infer<typeof TokenSchema>
+
+export const TokenAmountSchema = TokenSchema.extend({
+	amount: z.bigint().positive(),
+})
+export type TokenAmount = z.infer<typeof TokenAmountSchema>
 
 export const UserSchema = z.object({
 	address: AddressSchema,
