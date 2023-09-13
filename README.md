@@ -40,8 +40,12 @@ Currently the following commands are available:
 - `pnpm cli balance <address>`: prints the balance of the account that belongs to the address
 - `pnpm cli txinfo <hash>`: prints the transaction information
 - `pnpm cli waku profile <address>`: prints the profile belonging to an address
+- `pnpm cli waku set-profile <address> <name> [avatar]`: set the name and avatar of profile at address
 - `pnpm cli waku group-chat <address>`: prints the group chats
+- `pnpm cli waku set-group-chat <address> <name> <avatar> [...users]`: set the name, avatar and users of a group chat`
 - `pnpm cli waku chats <address>`: prints the chats object
+- `pnpm cli waku chat <address> <chat-id>`: prints the chat object
+- `pnpm cli waku chat-messages <address> <chat-id>`: prints the messages of a chat
 - `pnpm cli waku private-message <address>`: prints the private messages
 - `pnpm cli waku objects <address>`: prints the object store
 - `pnpm cli waku send <from> <to> <message>` sends a private `message` from a user (or group) to another one
