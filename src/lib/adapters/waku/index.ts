@@ -17,7 +17,7 @@ import type { BaseWallet, Wallet } from 'ethers'
 import { get } from 'svelte/store'
 import { objectStore, objectKey } from '$lib/stores/objects'
 import { lookup } from '$lib/objects/lookup'
-import type { Token } from '$lib/stores/balances'
+import type { TokenAmount } from '$lib/stores/balances'
 import { defaultBlockchainNetwork, sendTransaction } from '$lib/adapters/transaction'
 import type {
 	JSONSerializable,
@@ -480,12 +480,12 @@ export default class WakuAdapter implements Adapter {
 		objectStore.update((state) => ({ ...state, objects: newObjects, lastUpdated: Date.now() }))
 	}
 
-	async sendTransaction(wallet: Wallet, to: string, token: Token): Promise<string> {
+	async sendTransaction(wallet: Wallet, to: string, token: TokenAmount): Promise<string> {
 		const tx = await sendTransaction(wallet, to, token.amount, token.address)
 		return tx.hash
 	}
 
-	async estimateTransaction(): Promise<Token> {
+	async estimateTransaction(): Promise<TokenAmount> {
 		return {
 			...defaultBlockchainNetwork.nativeToken,
 			amount: 1000059237n,

@@ -15,7 +15,7 @@
 	import type { Balance, DataMessage } from '../schemas'
 	import { toSignificant } from '$lib/utils/format'
 	import type { View } from '../types'
-	import type { TokenNoAmount } from '$lib/objects/schemas'
+	import type { Token } from '$lib/objects/schemas'
 
 	export let users: UserType[]
 	export let profile: UserType
@@ -23,7 +23,7 @@
 	export let exitObject: () => void
 	export let send: (message: DataMessage) => Promise<void>
 	export let onViewChange: (view: View, ...rest: string[]) => void
-	export let token: TokenNoAmount
+	export let token: Token
 
 	const usersAmounts = balances.map(({ address, amount }) => ({
 		user: users.find((user) => user.address === address),

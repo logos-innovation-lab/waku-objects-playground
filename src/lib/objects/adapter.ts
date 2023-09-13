@@ -1,7 +1,7 @@
 import type { Adapter } from '$lib/adapters'
 import { Contract, type BaseWallet, type TransactionReceipt, Interface } from 'ethers'
 import type { WakuObjectAdapter } from '.'
-import type { Token } from '$lib/stores/balances'
+import type { TokenAmount } from '$lib/stores/balances'
 import {
 	defaultBlockchainNetwork,
 	getProvider,
@@ -19,15 +19,15 @@ const NUM_CONFIRMATIONS = 2
 export function makeWakuObjectAdapter(adapter: Adapter, wallet: BaseWallet): WakuObjectAdapter {
 	const { address } = wallet
 
-	function sendTransaction(to: string, token: Token) {
+	function sendTransaction(to: string, token: TokenAmount) {
 		return adapter.sendTransaction(wallet, to, token)
 	}
 
-	function estimateTransaction(to: string, token: Token) {
+	function estimateTransaction(to: string, token: TokenAmount) {
 		return adapter.estimateTransaction(wallet, to, token)
 	}
 
-	async function _checkBalance(token: Token): Promise<void> {
+	async function _checkBalance(token: TokenAmount): Promise<void> {
 		await checkBalance(address, token)
 	}
 
@@ -39,7 +39,7 @@ export function makeWakuObjectAdapter(adapter: Adapter, wallet: BaseWallet): Wak
 		const from = tx.from
 		const nonNativeToken = defaultBlockchainNetwork.tokens?.find((t) => t.address === tx.to)
 
-		let token: Token
+		let token: TokenAmount
 		let to: string
 
 		if (nonNativeToken && tx.to) {

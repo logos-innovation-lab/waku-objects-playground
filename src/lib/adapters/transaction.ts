@@ -1,4 +1,4 @@
-import type { TokenNoAmount } from '$lib/objects/schemas'
+import type { Token } from '$lib/objects/schemas'
 import {
 	JsonRpcProvider,
 	type BaseWallet,
@@ -19,8 +19,8 @@ interface BlockchainNetwork {
 	name: string
 	provider: string
 	explorer?: BlockchainExplorer
-	nativeToken: TokenNoAmount
-	tokens?: TokenNoAmount[]
+	nativeToken: Token
+	tokens?: Token[]
 	objects: {
 		splitterFactory: string
 	}

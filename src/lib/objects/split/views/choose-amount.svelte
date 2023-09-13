@@ -10,10 +10,10 @@
 
 	import Layout from '$lib/components/layout.svelte'
 	import { splitDescriptor } from '..'
-	import type { TokenNoAmount } from '$lib/objects/schemas'
+	import type { Token } from '$lib/objects/schemas'
 
 	export let amount: string
-	export let token: TokenNoAmount
+	export let token: Token
 	export let exitObject: () => void
 	export let goNext: () => void
 	export let goBack: () => void

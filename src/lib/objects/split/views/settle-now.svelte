@@ -14,7 +14,7 @@
 	import { splitDescriptor } from '..'
 	import type { GetContract } from '../types'
 	import { settleDebt } from '../blockchain'
-	import type { Token, TokenNoAmount } from '$lib/objects/schemas'
+	import type { TokenAmount, Token } from '$lib/objects/schemas'
 	import { formatAddress, toSignificant } from '$lib/utils/format'
 
 	export let profile: UserType
@@ -22,8 +22,8 @@
 	export let instanceId: string
 	export let chatName: string
 	export let splitterAddress: string
-	export let tokens: Token[]
-	export let token: TokenNoAmount
+	export let tokens: TokenAmount[]
+	export let token: Token
 
 	export let getContract: GetContract
 	export let exitObject: () => void

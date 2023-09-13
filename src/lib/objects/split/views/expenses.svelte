@@ -14,12 +14,12 @@
 	import type { Expense } from '../schemas'
 	import type { View } from '../types'
 	import { toSignificant } from '$lib/utils/format'
-	import type { TokenNoAmount } from '$lib/objects/schemas'
+	import type { Token } from '$lib/objects/schemas'
 
 	export let users: UserType[]
 	export let expenses: Expense[]
 	export let profile: UserType
-	export let token: TokenNoAmount
+	export let token: Token
 
 	export let exitObject: () => void
 	export let onViewChange: (view: View, ...rest: string[]) => void

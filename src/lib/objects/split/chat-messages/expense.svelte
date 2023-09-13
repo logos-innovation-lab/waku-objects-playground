@@ -10,7 +10,7 @@
 	import type { User } from '$lib/types'
 	import ChatMessage from '$lib/components/chat-message.svelte'
 	import { toSignificant } from '$lib/utils/format'
-	import type { TokenNoAmount } from '$lib/objects/schemas'
+	import type { Token } from '$lib/objects/schemas'
 
 	export let instanceId: string
 	export let expense: Expense
@@ -19,7 +19,7 @@
 	export let myMessage: boolean
 	export let isSender: boolean
 	export let chatName: string
-	export let token: TokenNoAmount
+	export let token: Token
 
 	export let onViewChange: (view: View, ...rest: string[]) => void
 

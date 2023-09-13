@@ -19,7 +19,7 @@
 	import type { View, Activity as ActivityType } from '../types'
 	import Activity from '../components/activity.svelte'
 	import { toSignificant } from '$lib/utils/format'
-	import type { TokenNoAmount } from '$lib/objects/schemas'
+	import type { Token } from '$lib/objects/schemas'
 
 	export let profile: UserType
 	export let balances: Balance[]
@@ -28,7 +28,7 @@
 	export let instanceId: string
 	export let chatName: string
 	export let users: UserType[]
-	export let token: TokenNoAmount
+	export let token: Token
 
 	export let exitObject: () => void
 	export let send: (message: DataMessage) => Promise<void>

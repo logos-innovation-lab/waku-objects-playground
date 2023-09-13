@@ -1,6 +1,6 @@
 import z from 'zod'
 import { AddressSchema } from '$lib/utils/schemas'
-import { TokenNoAmountSchema } from '../schemas'
+import { TokenSchema } from '../schemas'
 
 const ExpenseSchema = z.object({
 	txHash: z.string(), // Adding any expense means transaction, it is also used as ID of the expense
@@ -28,7 +28,7 @@ export type Balance = z.infer<typeof BalanceSchema>
 
 export const StoreSchema = z.object({
 	splitterAddress: z.string(),
-	token: TokenNoAmountSchema,
+	token: TokenSchema,
 	balances: z.array(BalanceSchema),
 	payments: z.array(PaymentSchema),
 	expenses: z.array(ExpenseSchema),

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type { WakuObjectArgs } from '..'
 	import { SendTransactionStoreSchema, type SendTransactionStore } from './schemas'
-	import type { Token } from '../schemas'
+	import type { TokenAmount } from '../schemas'
 	import type { User } from '$lib/types'
 
 	import Details from './views/details.svelte'
@@ -24,7 +24,7 @@
 		}
 	}
 
-	let token: Token
+	let token: TokenAmount
 	let amount = ''
 	let toUser: User | undefined = undefined
 

@@ -10,12 +10,12 @@
 	import { formatDateAndTime, toSignificant } from '$lib/utils/format'
 	import type { Activity } from '../types'
 	import type { User } from '$lib/types'
-	import type { TokenNoAmount } from '$lib/objects/schemas'
+	import type { Token } from '$lib/objects/schemas'
 
 	export let activity: Activity
 	export let users: User[]
 	export let profile: User
-	export let token: TokenNoAmount
+	export let token: Token
 
 	let expanded = false
 

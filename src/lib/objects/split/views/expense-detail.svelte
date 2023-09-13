@@ -15,12 +15,12 @@
 	import type { View } from '../types'
 	import type { DataMessage, Expense } from '../schemas'
 	import { formatDateAndTime, toSignificant } from '$lib/utils/format'
-	import type { TokenNoAmount } from '$lib/objects/schemas'
+	import type { Token } from '$lib/objects/schemas'
 
 	export let expense: Expense
 	export let users: User[]
 	export let profile: User
-	export let token: TokenNoAmount
+	export let token: Token
 	export let onViewChange: (view: View, ...rest: string[]) => void
 	export let exitObject: () => void
 	export let send: (message: DataMessage) => Promise<void>

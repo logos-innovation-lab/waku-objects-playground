@@ -12,13 +12,13 @@
 	import type { User as UserType } from '$lib/types'
 	import type { Expense, Payment } from '../schemas'
 	import type { Activity as ActivityType } from '../types'
-	import type { TokenNoAmount } from '$lib/objects/schemas'
+	import type { Token } from '$lib/objects/schemas'
 
 	export let profile: UserType
 	export let users: UserType[]
 	export let expenses: Expense[]
 	export let payments: Payment[]
-	export let token: TokenNoAmount
+	export let token: Token
 
 	export let exitObject: () => void
 	export let goBack: () => void

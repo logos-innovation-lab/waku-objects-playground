@@ -12,22 +12,22 @@
 
 	import { formatAddress, toSignificant, toBigInt } from '$lib/utils/format'
 	import type { SendTransactionDataMessage } from '../schemas'
-	import type { Token } from '../../schemas'
+	import type { TokenAmount } from '../../schemas'
 	import type { User } from '$lib/types'
 	import Layout from '$lib/components/layout.svelte'
 	import { payggyDescriptor } from '..'
 
 	export let toUser: User
-	export let estimateTransaction: (to: string, token: Token) => Promise<Token>
-	export let sendTransaction: (to: string, token: Token, fee: Token) => Promise<string>
+	export let estimateTransaction: (to: string, token: TokenAmount) => Promise<TokenAmount>
+	export let sendTransaction: (to: string, token: TokenAmount, fee: TokenAmount) => Promise<string>
 	export let send: (message: SendTransactionDataMessage) => Promise<void>
 	export let profile: User
 	export let amount: string
-	export let token: Token
+	export let token: TokenAmount
 	export let exitObject: () => void
 
 	let transactionSent = false
-	let fee: Token | undefined = undefined
+	let fee: TokenAmount | undefined = undefined
 
 	$: if (toUser && amount && token) {
 		try {

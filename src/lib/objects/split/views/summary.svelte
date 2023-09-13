@@ -17,7 +17,7 @@
 	import { toBigInt } from '$lib/utils/format'
 	import { addExpense, createSplitterContract } from '../blockchain'
 	import type { GetContract } from '../types'
-	import type { TokenNoAmount } from '$lib/objects/schemas'
+	import type { Token } from '$lib/objects/schemas'
 
 	export let amount: string
 	export let description: string
@@ -27,7 +27,7 @@
 	export let users: User[]
 	export let splitterAddress: string | undefined
 	export let instanceId: string
-	export let token: TokenNoAmount
+	export let token: Token
 	export let send: (message: DataMessage) => Promise<void>
 	export let exitObject: () => void
 	export let getContract: GetContract

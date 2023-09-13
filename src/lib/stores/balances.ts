@@ -1,7 +1,7 @@
 import { writable } from 'svelte/store'
 import type { Writable } from 'svelte/store'
 
-export interface Token {
+export interface TokenAmount {
 	name: string
 	symbol: string
 	amount: bigint
@@ -11,7 +11,7 @@ export interface Token {
 }
 
 interface BalanceState {
-	balances: Token[]
+	balances: TokenAmount[]
 	loading: boolean
 	error?: Error
 }

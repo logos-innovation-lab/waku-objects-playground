@@ -1,4 +1,4 @@
-import type { Token } from '$lib/stores/balances'
+import type { TokenAmount } from '$lib/stores/balances'
 import type { DataMessage } from '$lib/stores/chat'
 import type { ComponentType } from 'svelte'
 import type { Transaction, User, TransactionState } from './schemas'
@@ -8,9 +8,9 @@ export interface WakuObjectAdapter {
 	getTransaction(txHash: string): Promise<Transaction | undefined>
 	getTransactionState(txHash: string): Promise<TransactionState>
 	waitForTransaction(txHash: string): Promise<TransactionState>
-	checkBalance(token: Token): Promise<void>
-	sendTransaction: (to: string, token: Token) => Promise<string>
-	estimateTransaction: (to: string, token: Token) => Promise<Token>
+	checkBalance(token: TokenAmount): Promise<void>
+	sendTransaction: (to: string, token: TokenAmount) => Promise<string>
+	estimateTransaction: (to: string, token: TokenAmount) => Promise<TokenAmount>
 	getContract(address: string, abi: Interface): Contract
 }
 
@@ -29,7 +29,7 @@ export interface WakuObjectState {
 	readonly instanceId: string
 	readonly profile: User
 	readonly users: User[]
-	readonly tokens: Token[]
+	readonly tokens: TokenAmount[]
 	readonly chatName: string
 }
 
