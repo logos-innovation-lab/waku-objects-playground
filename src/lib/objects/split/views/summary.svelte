@@ -17,21 +17,20 @@
 	import { toBigInt } from '$lib/utils/format'
 	import { addExpense, createSplitterContract } from '../blockchain'
 	import type { GetContract } from '../types'
-	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
+	import type { TokenNoAmount } from '$lib/objects/schemas'
 
 	export let amount: string
 	export let description: string
 	export let images: string[]
 	export let chatName: string
-	export let send: (message: DataMessage) => Promise<void>
-	export let exitObject: () => void
 	export let profile: User
 	export let users: User[]
-	export let getContract: GetContract
 	export let splitterAddress: string | undefined
 	export let instanceId: string
-
-	const decimals = defaultBlockchainNetwork.nativeToken.decimals
+	export let token: TokenNoAmount
+	export let send: (message: DataMessage) => Promise<void>
+	export let exitObject: () => void
+	export let getContract: GetContract
 
 	let transactionSent = false
 
@@ -45,7 +44,7 @@
 				splitContractAddress = await createSplitterContract(getContract, members)
 			}
 
-			let amnt = toBigInt(amount, decimals)
+			let amnt = toBigInt(amount, token.decimals)
 			const txHash = await addExpense(
 				getContract,
 				splitContractAddress,
@@ -57,9 +56,9 @@
 			await send({
 				type: 'expense',
 				splitterAddress: splitContractAddress,
+				tokenAddress: token.address,
 				expense: {
 					amount: amnt.toString(),
-					decimals,
 					description,
 					images,
 					txHash,
@@ -96,7 +95,7 @@
 			<div class="text-lg">#{instanceId.slice(0, 4)}</div>
 		</ReadonlyText>
 		<ReadonlyText label="Paid amount">
-			<div class="text-lg">{amount} DAI</div>
+			<div class="text-lg">{amount} {token.symbol}</div>
 		</ReadonlyText>
 		<ReadonlyText label="Description">
 			<div class="text-lg">{description}</div>

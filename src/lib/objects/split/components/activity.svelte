@@ -10,10 +10,12 @@
 	import { formatDateAndTime, toSignificant } from '$lib/utils/format'
 	import type { Activity } from '../types'
 	import type { User } from '$lib/types'
+	import type { TokenNoAmount } from '$lib/objects/schemas'
 
 	export let activity: Activity
 	export let users: User[]
 	export let profile: User
+	export let token: TokenNoAmount
 
 	let expanded = false
 
@@ -55,7 +57,7 @@
 			<Container padY={0} gap={6} padX={12}>
 				{#if activity.type === 'expense'}
 					<ReadonlyText label="Paid amount"
-						>{toSignificant(activity.amount, activity.decimals)} DAI</ReadonlyText
+						>{toSignificant(activity.amount, token.decimals)} {token.symbol}</ReadonlyText
 					>
 					<ReadonlyText label="Description">{activity.description}</ReadonlyText>
 					{#if activity.images.length > 0}
@@ -76,7 +78,7 @@
 					{/if}
 				{:else}
 					<ReadonlyText label="Paid amount"
-						>{toSignificant(activity.amount, activity.decimals)} DAI</ReadonlyText
+						>{toSignificant(activity.amount, token.decimals)} {token.symbol}</ReadonlyText
 					>
 				{/if}
 			</Container>

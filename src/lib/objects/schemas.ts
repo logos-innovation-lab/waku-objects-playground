@@ -1,13 +1,17 @@
 import { AddressSchema } from '$lib/utils/schemas'
 import z from 'zod'
 
-export const TokenSchema = z.object({
+export const TokenNoAmountSchema = z.object({
 	name: z.string(),
 	symbol: z.string(),
-	amount: z.bigint().positive(),
 	decimals: z.number().int().positive(),
 	image: z.string().optional(),
 	address: AddressSchema.optional(),
+})
+export type TokenNoAmount = z.infer<typeof TokenNoAmountSchema>
+
+export const TokenSchema = TokenNoAmountSchema.extend({
+	amount: z.bigint().positive(),
 })
 export type Token = z.infer<typeof TokenSchema>
 

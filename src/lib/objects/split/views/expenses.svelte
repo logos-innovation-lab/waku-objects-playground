@@ -13,24 +13,23 @@
 	import type { User as UserType } from '$lib/types'
 	import type { Expense } from '../schemas'
 	import type { View } from '../types'
-	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 	import { toSignificant } from '$lib/utils/format'
+	import type { TokenNoAmount } from '$lib/objects/schemas'
 
 	export let users: UserType[]
 	export let expenses: Expense[]
 	export let profile: UserType
+	export let token: TokenNoAmount
 
 	export let exitObject: () => void
 	export let onViewChange: (view: View, ...rest: string[]) => void
 	export let goBack: () => void
 
 	let totalExpenses = 0n
-	let decimals = defaultBlockchainNetwork.nativeToken.decimals
 	$: {
 		totalExpenses = 0n
-		for (const { amount, decimals: d } of expenses) {
+		for (const { amount } of expenses) {
 			totalExpenses += BigInt(amount)
-			decimals = d
 		}
 	}
 </script>
@@ -61,7 +60,7 @@
 				on:keypress={() => onViewChange('expense', expense.txHash)}
 			>
 				<Container padX={0} padY={6} gap={6}>
-					<p>{toSignificant(expense.amount, expense.decimals)} DAI</p>
+					<p>{toSignificant(expense.amount, token.decimals)} {token.symbol}</p>
 					<p>{expense.description}</p>
 					<p class="text-sm">Paid by {paidBy}</p>
 				</Container>
@@ -75,7 +74,7 @@
 	<Container alignItems="center" gap={24} padX={24} padY={24}>
 		<Container alignItems="center" gap={6} padX={0} padY={0}>
 			<p>Total expenses</p>
-			<h1>{toSignificant(totalExpenses, decimals)} DAI</h1>
+			<h1>{toSignificant(totalExpenses, token.decimals)} {token.symbol}</h1>
 		</Container>
 		<Button on:click={() => onViewChange('amount')} variant="strong">
 			<Receipt />Add expense

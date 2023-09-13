@@ -19,7 +19,7 @@
 	import type { View, Activity as ActivityType } from '../types'
 	import Activity from '../components/activity.svelte'
 	import { toSignificant } from '$lib/utils/format'
-	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
+	import type { TokenNoAmount } from '$lib/objects/schemas'
 
 	export let profile: UserType
 	export let balances: Balance[]
@@ -28,18 +28,17 @@
 	export let instanceId: string
 	export let chatName: string
 	export let users: UserType[]
+	export let token: TokenNoAmount
 
 	export let exitObject: () => void
 	export let send: (message: DataMessage) => Promise<void>
 	export let onViewChange: (view: View, ...rest: string[]) => void
 
 	let owedAmount = BigInt(0)
-	let decimals: number = defaultBlockchainNetwork.nativeToken.decimals
 	$: {
 		const balance = balances.find(({ address }) => address === profile.address)
 		if (balance) {
 			owedAmount = BigInt(balance.amount)
-			decimals = balance.decimals
 		}
 	}
 
@@ -87,18 +86,18 @@
 					<h3>Latest activity</h3>
 					<button on:click={() => onViewChange('activity')}>View all</button>
 				</Container>
-				<Activity {activity} {users} {profile} />
+				<Activity {activity} {users} {profile} {token} />
 			</Container>
 		</div>
 	{/if}
 	<Container gap={12} padX={24} padY={24} alignItems="center">
 		{#if owedAmount < 0}
 			<p>Overall you lent</p>
-			<h1>{toSignificant(-owedAmount, decimals)} DAI</h1>
+			<h1>{toSignificant(-owedAmount, token.decimals)} {token.symbol}</h1>
 			<Button variant="strong" on:click={askToSettle}><Bullhorn /> Ask to settle</Button>
 		{:else if owedAmount > 0}
 			<p>Overall you owe</p>
-			<h1>{toSignificant(owedAmount, decimals)} DAI</h1>
+			<h1>{toSignificant(owedAmount, token.decimals)} {token.symbol}</h1>
 			<Button variant="strong" on:click={settleNow}><Renew /> Settle now</Button>
 		{:else}
 			<p>\(•◡•)/</p>

@@ -16,7 +16,7 @@ export async function fetchBalances(address: string): Promise<void> {
 		amount: nativeTokenAmount,
 	}
 
-	const tokens = defaultBlockchainNetwork.tokens ?? []
+	const tokens = defaultBlockchainNetwork.tokens?.map((t) => ({ ...t, amount: 0n })) ?? []
 
 	for (const token of tokens) {
 		// We skip tokens that have no address (likely native tokens)

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { SPLIT_TOKEN } from '.'
 	import type { WakuObjectArgs } from '..'
 	import type { DataMessage, Expense, Store } from './schemas'
 	import type { View } from './types'
@@ -19,6 +20,7 @@
 	let amount = ''
 	let description = ''
 	let images: string[] = []
+	const token = SPLIT_TOKEN
 
 	// Utility function which makes it easier to handle history for closing the object
 	const exitObject = (depth: number) => () => history.go(-depth)
@@ -35,6 +37,7 @@
 	{:else}
 		<ExpenseDetail
 			{expense}
+			{token}
 			users={args.users}
 			profile={args.profile}
 			exitObject={exitObject(1)}
@@ -48,6 +51,7 @@
 		<p>No splitter address...</p>
 	{:else}
 		<SettleNow
+			{token}
 			instanceId={args.instanceId}
 			chatName={args.chatName}
 			profile={args.profile}
@@ -61,6 +65,7 @@
 	{/if}
 {:else if args.view === 'accounting'}
 	<Accounting
+		{token}
 		users={args.users}
 		profile={args.profile}
 		balances={args.store?.balances ?? []}
@@ -70,6 +75,7 @@
 	/>
 {:else if args.view === 'collection'}
 	<Collection
+		{token}
 		instanceId={args.instanceId}
 		chatName={args.chatName}
 		profile={args.profile}
@@ -85,6 +91,7 @@
 	<Expenses
 		users={args.users}
 		profile={args.profile}
+		{token}
 		expenses={args.store?.expenses ?? []}
 		onViewChange={args.onViewChange}
 		exitObject={exitObject(2)}
@@ -92,6 +99,7 @@
 	/>
 {:else if args.view === 'activity'}
 	<ActivityHistory
+		{token}
 		expenses={args.store?.expenses ?? []}
 		payments={args.store?.payments ?? []}
 		users={args.users}
@@ -104,6 +112,7 @@
 		{description}
 		{amount}
 		{images}
+		{token}
 		profile={args.profile}
 		chatName={args.chatName}
 		send={args.send}
@@ -123,5 +132,5 @@
 		{goBack}
 	/>
 {:else}
-	<ChooseAmount bind:amount exitObject={exitObject(2)} goNext={goNext('name')} {goBack} />
+	<ChooseAmount bind:amount exitObject={exitObject(2)} goNext={goNext('name')} {goBack} {token} />
 {/if}

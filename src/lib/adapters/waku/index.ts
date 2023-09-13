@@ -151,7 +151,7 @@ async function executeOnDataMessage(
 			instanceId: dataMessage.instanceId,
 			users: users,
 			profile: myProfile,
-			tokens: defaultBlockchainNetwork.tokens || [],
+			tokens: defaultBlockchainNetwork.tokens?.map((t) => ({ ...t, amount: 0n })) || [],
 		}
 		await descriptor.onMessage(dataMessage, args)
 	}

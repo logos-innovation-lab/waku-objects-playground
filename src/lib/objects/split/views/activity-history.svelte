@@ -12,11 +12,13 @@
 	import type { User as UserType } from '$lib/types'
 	import type { Expense, Payment } from '../schemas'
 	import type { Activity as ActivityType } from '../types'
+	import type { TokenNoAmount } from '$lib/objects/schemas'
 
 	export let profile: UserType
 	export let users: UserType[]
 	export let expenses: Expense[]
 	export let payments: Payment[]
+	export let token: TokenNoAmount
 
 	export let exitObject: () => void
 	export let goBack: () => void
@@ -43,7 +45,7 @@
 	<div class="preview">
 		<Container padY={24} gap={12} padX={12} grow>
 			{#each activities as activity}
-				<Activity {activity} {users} {profile} />
+				<Activity {activity} {users} {profile} {token} />
 			{/each}
 		</Container>
 	</div>

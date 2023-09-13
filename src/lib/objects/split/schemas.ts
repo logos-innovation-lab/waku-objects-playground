@@ -1,10 +1,10 @@
 import z from 'zod'
 import { AddressSchema } from '$lib/utils/schemas'
+import { TokenNoAmountSchema } from '../schemas'
 
 const ExpenseSchema = z.object({
 	txHash: z.string(), // Adding any expense means transaction, it is also used as ID of the expense
 	amount: z.string(),
-	decimals: z.number().int().positive(),
 	description: z.string(),
 	images: z.array(z.string()),
 	paidBy: AddressSchema,
@@ -15,7 +15,6 @@ export type Expense = z.infer<typeof ExpenseSchema>
 export const PaymentSchema = z.object({
 	txHash: z.string(),
 	amount: z.string(),
-	decimals: z.number().int().positive(),
 	paidBy: AddressSchema,
 	timestamp: z.number(),
 })
@@ -24,12 +23,12 @@ export type Payment = z.infer<typeof PaymentSchema>
 export const BalanceSchema = z.object({
 	address: AddressSchema,
 	amount: z.string(),
-	decimals: z.number().int().positive(),
 })
 export type Balance = z.infer<typeof BalanceSchema>
 
 export const StoreSchema = z.object({
 	splitterAddress: z.string(),
+	token: TokenNoAmountSchema,
 	balances: z.array(BalanceSchema),
 	payments: z.array(PaymentSchema),
 	expenses: z.array(ExpenseSchema),
@@ -40,6 +39,7 @@ export const DataMessageSchema = z.union([
 	z.object({
 		type: z.literal('expense'),
 		splitterAddress: z.string(),
+		tokenAddress: z.string().optional(),
 		expense: ExpenseSchema,
 		users: z.array(AddressSchema),
 	}),
@@ -49,6 +49,7 @@ export const DataMessageSchema = z.union([
 	z.object({
 		type: z.literal('payment'),
 		splitterAddress: z.string(),
+		tokenAddress: z.string().optional(),
 		payment: PaymentSchema,
 	}),
 ])

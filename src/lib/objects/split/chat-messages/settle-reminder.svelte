@@ -10,7 +10,6 @@
 	import type { User } from '$lib/types'
 	import ChatMessage from '$lib/components/chat-message.svelte'
 	import Renew from '$lib/components/icons/renew.svelte'
-	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 
 	export let instanceId: string
 	export let profile: User
@@ -21,12 +20,10 @@
 	export let onViewChange: (view: View, ...rest: string[]) => void
 
 	let owedAmount = BigInt(0)
-	let decimals = defaultBlockchainNetwork.nativeToken.decimals
 	$: {
 		const balance = balances.find(({ address }) => address === profile.address)
 		if (balance) {
 			owedAmount = BigInt(balance.amount)
-			decimals = balance.decimals
 		}
 	}
 	let paid = false
@@ -40,7 +37,7 @@
 	<ChatMessage {myMessage} object bubble>
 		<p>You asked to settle up</p>
 	</ChatMessage>
-{:else if owedAmount < 0}
+{:else if owedAmount < 0n}
 	<ChatMessage object bubble>
 		<div class="wo text-normal">
 			<Container gap={12}>
@@ -75,7 +72,7 @@
 			</Container>
 		</div>
 	</ChatMessage>
-{:else if paid || owedAmount > 0}
+{:else if paid || owedAmount > 0n}
 	<ChatMessage {myMessage} object bubble>
 		<p>All settled</p>
 	</ChatMessage>
