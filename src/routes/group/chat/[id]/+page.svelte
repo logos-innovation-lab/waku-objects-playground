@@ -31,6 +31,7 @@
 	import Checkmark from '$lib/components/icons/checkmark.svelte'
 	import Settings from '$lib/components/icons/settings.svelte'
 	import { walletStore } from '$lib/stores/wallet'
+	import type { User } from '$lib/types'
 
 	let div: HTMLElement
 	let autoscroll = true
@@ -71,7 +72,8 @@
 
 	const sendMessage = async (wallet: HDNodeWallet) => {
 		loading = true
-		await adapters.sendChatMessage(wallet, $page.params.id, text)
+		const messageText = replaceNamesWithAddresses(text)
+		await adapters.sendChatMessage(wallet, $page.params.id, messageText)
 		text = ''
 		loading = false
 	}
@@ -89,6 +91,39 @@
 			adapters.removeFromGroupChat($page.params.id, wallet.address)
 			goto(ROUTES.HOME)
 		}
+	}
+
+	function htmlize(s: string) {
+		const txt = document.createElement('textarea')
+		txt.innerHTML = s
+		return txt.value
+	}
+
+	function replaceAddressesWithNames(s: string) {
+		if (!chat) {
+			return s
+		}
+		for (const user of chat.users) {
+			s = s.replaceAll(`@${user.address}`, `@${user.name || user.address}`)
+		}
+		return s
+	}
+
+	function replaceNamesWithAddresses(s: string) {
+		if (!chat) {
+			return s
+		}
+
+		const nameLength = (user: User) => user.name?.length ?? 0
+		const sortedUsers = chat.users.sort((a, b) => nameLength(b) - nameLength(a))
+
+		for (const user of sortedUsers) {
+			if (!user.name) {
+				continue
+			}
+			s = s.replaceAll(`@${user.name}`, `@${user.address}`)
+		}
+		return s
 	}
 </script>
 
@@ -168,7 +203,7 @@
 												? undefined
 												: sender?.name}
 										>
-											{@html textToHTML(message.text)}
+											{@html replaceAddressesWithNames(textToHTML(htmlize(message.text)))}
 											<svelte:fragment slot="avatar">
 												{#if message.fromAddress !== wallet.address && lastMessage}
 													<Avatar size={40} picture={sender?.avatar} />

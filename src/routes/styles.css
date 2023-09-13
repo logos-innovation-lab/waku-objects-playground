@@ -135,6 +135,10 @@ a {
 	text-decoration: underline;
 }
 
+b {
+	font-weight: bold;
+}
+
 .text-title {
 	font-weight: var(--font-weight-700);
 	font-size: var(--font-size-lg);
