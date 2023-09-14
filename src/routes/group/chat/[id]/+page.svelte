@@ -12,8 +12,6 @@
 	import Textarea from '$lib/components/textarea.svelte'
 	import Button from '$lib/components/button.svelte'
 	import Avatar from '$lib/components/avatar.svelte'
-	import Dropdown from '$lib/components/dropdown.svelte'
-	import DropdownItem from '$lib/components/dropdown-item.svelte'
 	import WakuObject from '$lib/objects/chat.svelte'
 
 	import { goto } from '$app/navigation'
@@ -221,21 +219,9 @@
 				<div class="chat-input-wrapper">
 					<Container>
 						<div class="chat-input">
-							<Dropdown up left>
-								<!-- TODO: make button "active" while dropdown is open -->
-								<Button variant="icon" slot="button">
-									<Add />
-								</Button>
-								<DropdownItem disabled onClick={() => console.log('Pic from Cam')}
-									>Pic from Cam</DropdownItem
-								>
-								<DropdownItem disabled onClick={() => console.log('Pic from Lib')}
-									>Pic from Lib</DropdownItem
-								>
-								<DropdownItem onClick={() => goto(ROUTES.OBJECTS($page.params.id))}
-									>Waku Object</DropdownItem
-								>
-							</Dropdown>
+							<Button variant="icon" on:click={() => goto(ROUTES.OBJECTS($page.params.id))}>
+								<Add />
+							</Button>
 							<Textarea
 								placeholder="Message"
 								bind:value={text}
