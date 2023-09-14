@@ -26,7 +26,6 @@
 			owedAmount = BigInt(balance.amount)
 		}
 	}
-	let paid = false
 
 	function settleNow() {
 		onViewChange('settle')
@@ -72,7 +71,7 @@
 			</Container>
 		</div>
 	</ChatMessage>
-{:else if paid || owedAmount <= 0n}
+{:else if owedAmount <= 0n}
 	<!-- TODO: this likely should not be displayed if I am owed something (owedAmount < 0n) -->
 	<ChatMessage {myMessage} object bubble>
 		<p>All settled</p>
