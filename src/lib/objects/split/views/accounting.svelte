@@ -81,7 +81,7 @@
 									{#if amount < 0n}
 										lent {toSignificant(-amount, token.decimals)} {token.symbol}
 									{:else if amount > 0n}
-										owe {isYou ? '' : 's'} {toSignificant(amount, token.decimals)} {token.symbol}
+										owe{isYou ? '' : 's'} {toSignificant(amount, token.decimals)} {token.symbol}
 									{:else}
 										settled
 									{/if}
