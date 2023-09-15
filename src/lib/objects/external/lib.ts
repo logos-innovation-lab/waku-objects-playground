@@ -53,6 +53,7 @@ export const getNPMObject = async (
 		if (!added['script-src']) {
 			added['script-src'] = ''
 		}
+		added['script-src'] += ` ${script}`
 
 		return {
 			script,
