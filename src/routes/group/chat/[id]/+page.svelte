@@ -65,15 +65,15 @@
 	})
 
 	$: messages = $chats.chats.get($page.params.id)?.messages || []
-	let loading = false
+	let isSending = false
 	let text = ''
 
 	const sendMessage = async (wallet: HDNodeWallet) => {
-		loading = true
+		isSending = true
 		const messageText = replaceNamesWithAddresses(text)
 		await adapters.sendChatMessage(wallet, $page.params.id, messageText)
 		text = ''
-		loading = false
+		isSending = false
 	}
 
 	$: inviter = chat?.users.find((user) => user.address === chat?.inviter)
@@ -224,6 +224,7 @@
 							</Button>
 							<Textarea
 								placeholder="Message"
+								autofocus
 								bind:value={text}
 								on:keypress={(e) => {
 									// When enter is pressed without modifier keys, send the message
@@ -239,7 +240,7 @@
 								}}
 							/>
 							{#if text.length > 0}
-								<Button variant="strong" disabled={loading} on:click={() => sendMessage(wallet)}>
+								<Button variant="strong" disabled={isSending} on:click={() => sendMessage(wallet)}>
 									<ArrowUp />
 								</Button>
 							{/if}

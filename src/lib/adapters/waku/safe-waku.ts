@@ -29,6 +29,8 @@ export class SafeWaku {
 	}
 	private queuedMessages: QueuedMessage[] = []
 	private isHandlingMessage = false
+	private logging = true
+	private logDateTime = true
 
 	constructor(public readonly options?: ConnectWakuOptions) {}
 
@@ -59,13 +61,13 @@ export class SafeWaku {
 		timeFilter = timeFilter || calculatedTimeFilter
 
 		const talkEmoji = isGroupChatId(chatId) ? '🗫' : '🗩'
-		console.debug(`${talkEmoji}  subscribe to ${chatId}`)
+		this.log(`${talkEmoji}  subscribe to ${chatId}`)
 
 		const ws = makeWakustore(this.lightNode)
 		const unsubscribe = await ws.onSnapshot<Message>(
 			ws.collectionQuery('private-message', chatId, {
 				timeFilter,
-				pageDirection: PageDirection.BACKWARD,
+				pageDirection: PageDirection.FORWARD,
 				pageSize: 1000,
 			}),
 			(message) => this.queueMessage(callback, message, chatId),
@@ -110,8 +112,8 @@ export class SafeWaku {
 			} finally {
 				if (error) {
 					this.errors.numSendError++
-					console.debug(`⁉️  Error: ${error}`)
-					console.debug(`🕓 Waiting ${timeout} milliseconds...`)
+					this.log(`⁉️  Error: ${error}`)
+					this.log(`🕓 Waiting ${timeout} milliseconds...`)
 					await new Promise((r) => setTimeout(r, timeout))
 					if (timeout < 120_000) {
 						timeout += timeout
@@ -122,19 +124,15 @@ export class SafeWaku {
 
 		const elapsed = Date.now() - start
 
-		console.debug({ message, id })
-
 		if (elapsed > 1000) {
-			console.debug(`⏰ sending message took ${elapsed} milliseconds`)
+			this.log(`⏰ sending message took ${elapsed} milliseconds`)
 		}
 	}
 
 	private connectWaku() {
-		console.debug('connectWaku')
-
 		const waku = connectWaku({
 			onConnect: (connections) => {
-				console.debug('✅ connected to waku', { connections })
+				this.log('✅ connected to waku', { connections })
 				this.safeResubscribe()
 
 				if (this.options?.onConnect) {
@@ -142,7 +140,7 @@ export class SafeWaku {
 				}
 			},
 			onDisconnect: () => {
-				console.debug('❌ disconnected from waku')
+				this.log('❌ disconnected from waku')
 				this.errors.numDisconnect++
 
 				if (this.options?.onDisconnect) {
@@ -210,23 +208,36 @@ export class SafeWaku {
 			const queuedMessage = this.queuedMessages.shift()
 			if (queuedMessage) {
 				// deduplicate already seen messages
+				const message = queuedMessage.chatMessage
 				const lastMessage = this.lastMessages.get(chatId)
 				if (
 					lastMessage &&
-					lastMessage.timestamp === chatMessage.timestamp &&
-					lastMessage.type === chatMessage.type &&
-					lastMessage.fromAddress === chatMessage.fromAddress
+					lastMessage.timestamp === message.timestamp &&
+					lastMessage.type === message.type &&
+					lastMessage.fromAddress === message.fromAddress
 				) {
-					console.debug('🙈 ignoring duplicate message', { chatMessage })
+					this.log('🙈 ignoring duplicate message', { message, lastMessage })
 					continue
 				}
 
-				this.lastMessages.set(chatId, chatMessage)
+				this.lastMessages.set(chatId, message)
 
 				await callback(queuedMessage.chatMessage, queuedMessage.chatId)
 			}
 		}
 
 		this.isHandlingMessage = false
+	}
+
+	private log(...args: unknown[]) {
+		if (!this.logging) {
+			return
+		}
+		if (!this.logDateTime) {
+			console.debug(...args)
+			return
+		}
+		const isoTime = new Date().toISOString().replace('T', ' ').replace('Z', '')
+		console.debug(isoTime, ...args)
 	}
 }

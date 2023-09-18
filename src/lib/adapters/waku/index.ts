@@ -8,6 +8,7 @@ import {
 	type DataMessage,
 	getLastSeenMessageTime,
 	type ChatData,
+	getLastMessageTime,
 } from '$lib/stores/chat'
 import type { User } from '$lib/types'
 import type { TimeFilter } from '@waku/interfaces'
@@ -152,8 +153,6 @@ async function executeOnDataMessage(
 export default class WakuAdapter implements Adapter {
 	private safeWaku = new SafeWaku()
 	private subscriptions: Array<() => void> = []
-	private numWaitingSaveChats = 0
-	private isSavingChats = false
 
 	async onLogIn(wallet: BaseWallet): Promise<void> {
 		const address = wallet.address
@@ -166,8 +165,6 @@ export default class WakuAdapter implements Adapter {
 
 		const storageChatEntries = await ws.getDoc<StorageChatEntry[]>('chats', address)
 		chats.update((state) => ({ ...state, chats: new Map(storageChatEntries), loading: false }))
-
-		console.debug({ storageChatEntries })
 
 		const allChats = Array.from(get(chats).chats)
 
@@ -183,10 +180,11 @@ export default class WakuAdapter implements Adapter {
 		await this.subscribeToPrivateMessages(address, address, wakuObjectAdapter, timeFilter)
 
 		// group chats
-		const groupChatIds = allChats.filter(([id]) => isGroupChatId(id)).map(([id]) => id)
+		const groupChats = allChats.filter(([id]) => isGroupChatId(id)).map(([, chat]) => chat)
 
-		for (const groupChatId of groupChatIds) {
-			const lastSeenMessageTime = getLastSeenMessageTime(privateChats)
+		for (const groupChat of groupChats) {
+			const groupChatId = groupChat.chatId
+			const lastSeenMessageTime = getLastMessageTime(groupChat)
 			const now = new Date()
 			const timeFilter = {
 				startTime: new Date(lastSeenMessageTime + 1),
@@ -196,20 +194,22 @@ export default class WakuAdapter implements Adapter {
 		}
 
 		// chat store
+		let firstChatStoreSave = true
+		let chatSaveTimeout: ReturnType<typeof setTimeout> | undefined = undefined
 		const subscribeChatStore = chats.subscribe(async () => {
-			if (this.isSavingChats) {
-				this.numWaitingSaveChats++
+			if (firstChatStoreSave) {
+				firstChatStoreSave = false
 				return
 			}
+			// debounce saving changes
+			if (chatSaveTimeout) {
+				clearTimeout(chatSaveTimeout)
+			}
 
-			this.isSavingChats = true
-
-			do {
-				this.numWaitingSaveChats = 0
+			chatSaveTimeout = setTimeout(async () => {
+				chatSaveTimeout = undefined
 				await this.saveChatStore(address)
-			} while (this.numWaitingSaveChats > 0)
-
-			this.isSavingChats = false
+			}, 1000)
 		})
 		this.subscriptions.push(subscribeChatStore)
 
@@ -222,7 +222,12 @@ export default class WakuAdapter implements Adapter {
 			loading: false,
 		}))
 
+		let firstObjectStoreSave = true
 		const subscribeObjectStore = objectStore.subscribe(async (objects) => {
+			if (firstObjectStoreSave) {
+				firstObjectStoreSave = false
+				return
+			}
 			await ws.setDoc<StorageObjectEntry[]>('objects', address, Array.from(objects.objects))
 		})
 		this.subscriptions.push(subscribeObjectStore)
