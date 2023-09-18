@@ -1,5 +1,8 @@
 // run with pnpm bot <address>
 
+// [ ] admin + commands
+// [ ] onlu print nonzero errors
+
 import child_process from 'child_process'
 import { PageDirection, type LightNode, type Unsubscribe } from '@waku/interfaces'
 import axios from 'axios'
@@ -54,6 +57,7 @@ const errors = {
 	numDisconnect: 0,
 	numRequestError: 0,
 	numSendError: 0,
+	numUndefinedResponse: 0,
 }
 const queuedMessages: QueuedMessage[] = []
 let isHandlingMessage = false
@@ -62,36 +66,45 @@ let isHandlingMessage = false
 main().catch(console.error)
 
 async function main() {
-	if (!BOT_ADDRESS) {
-		console.error(
-			'please provide a bot address as argument or in the BOT_ADDRESS environment variable',
+	try {
+		if (!BOT_ADDRESS) {
+			console.error(
+				'please provide a bot address as argument or in the BOT_ADDRESS environment variable',
+			)
+			process.exit(1)
+		}
+
+		process.on('uncaughtException', (error) => log(`⁉️  Uncaught exception`, { error }))
+		process.on('unhandledRejection', (reason, promise) =>
+			log(`⁉️  Unhandled rejection`, { reason, promise }),
 		)
-		process.exit(1)
+
+		let waku: LightNode | undefined = undefined
+		waku = await connectWaku({
+			onDisconnect: () => {
+				log('❌ disconnected from waku')
+				errors.numDisconnect++
+			},
+			onConnect: () => {
+				log('✅ connected to waku')
+				safeResubscribe(waku)
+			},
+		})
+
+		log(`🪪 storing profile as ${BOT_NAME} and avatar as ${BOT_AVATAR}`)
+		await storeDocument(waku, 'profile', BOT_ADDRESS, botProfile)
+
+		await subscribe(waku, BOT_ADDRESS, queueMessage)
+
+		await loadGroupChats(waku)
+		for (const groupChatId of groupChats) {
+			await subscribe(waku, groupChatId, queueMessage)
+		}
+
+		setInterval(logStats, 60_000)
+	} catch (error) {
+		log(`‼️  Top Level Error: `, { error })
 	}
-
-	let waku: LightNode | undefined = undefined
-	waku = await connectWaku({
-		onDisconnect: () => {
-			log('❌ disconnected from waku')
-			errors.numDisconnect++
-		},
-		onConnect: () => {
-			log('✅ connected to waku')
-			safeResubscribe(waku)
-		},
-	})
-
-	log(`🪪 storing profile as ${BOT_NAME} and avatar as ${BOT_AVATAR}`)
-	await storeDocument(waku, 'profile', BOT_ADDRESS, botProfile)
-
-	await subscribe(waku, BOT_ADDRESS, queueMessage)
-
-	await loadGroupChats(waku)
-	for (const groupChatId of groupChats) {
-		await subscribe(waku, groupChatId, queueMessage)
-	}
-
-	setInterval(logStats, 60_000)
 }
 
 async function safeResubscribe(waku: LightNode | undefined) {
@@ -239,6 +252,8 @@ async function requestLLM(text: string, name: string, history?: any) {
 	history = response?.data?.results?.[0]?.history
 	const responseText = history?.visible?.slice(-1)?.[0]?.[1]
 
+	console.debug({ lastSlice: history?.visible?.slice(-1) })
+
 	return {
 		response,
 		history,
@@ -277,12 +292,12 @@ async function handleUserMessage(waku: LightNode, chatMessage: UserMessage, chat
 	if (isGroupChatId(chatId)) {
 		// ignore messages from self
 		if (chatMessage.fromAddress === BOT_ADDRESS) {
-			log('🙈 ignoring messages from self')
+			log('🙈 ignoring message from self')
 			return
 		}
 		// ignore messages not addressed to bot
 		if (!chatMessage.text.startsWith(`@${BOT_ADDRESS}`)) {
-			log('🙈 ignoring messages not addressed to me')
+			log('🙈 ignoring message not addressed to me')
 			return
 		}
 		return handleSessionUserMessage(waku, chatMessage, chatId)
@@ -301,7 +316,8 @@ async function handleSessionUserMessage(waku: LightNode, chatMessage: UserMessag
 	)
 
 	if (!responseText) {
-		log(`⚠️ undefined response text`, { response })
+		log(`⚠️  undefined response text`, { response })
+		errors.numUndefinedResponse++
 		return
 	}
 
@@ -422,5 +438,6 @@ function sleep(msec: number) {
 }
 
 function logStats() {
-	log(`📊 `, { errors })
+	const nonZeroErrors = Object.entries(errors).filter(([, value]) => value !== 0)
+	log(`📊 `, { errors: Object.fromEntries(nonZeroErrors) })
 }
