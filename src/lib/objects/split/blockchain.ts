@@ -119,14 +119,23 @@ export async function addExpense(
 
 export async function estimateAddExpense(
 	getContract: GetContract,
-	splitterAddress: string,
+	splitterAddress: string | undefined,
 	amount: bigint,
 	from: string,
 	members: string[],
 	metadata = '0x0000000000000000000000000000000000000000',
 ): Promise<bigint> {
-	const splitter = getSplitterContract(getContract, splitterAddress)
-	const gasEstimate: bigint = await splitter.addExpense.estimateGas(metadata, amount, from, members)
+	let gasEstimate: bigint
+	let splitter: Splitter
+	if (splitterAddress) {
+		splitter = getSplitterContract(getContract, splitterAddress)
+		gasEstimate = await splitter.addExpense.estimateGas(metadata, amount, from, members)
+	} else {
+		// This is worse case estimateAddExpense cost
+		// we can not do it by estimating the transaction because we don't have the splitter contract deployed and the transaction would fail in the master splitter contract
+		gasEstimate = 47530n + 9000n * BigInt(members.length - 2)
+		splitter = getSplitterContract(getContract, await getMasterSplitterContractAddress(getContract))
+	}
 
 	const provider = splitter.runner?.provider
 	if (!provider) throw new Error('Could not estimate transaction fee')

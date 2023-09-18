@@ -20,7 +20,6 @@
 		createSplitterContract,
 		estimateAddExpense,
 		estimateCreateSplitterContract,
-		getMasterSplitterContractAddress,
 	} from '../blockchain'
 	import type { GetContract } from '../types'
 	import type { Token, TokenAmount } from '$lib/objects/schemas'
@@ -46,32 +45,19 @@
 	async function estimateFee(users: User[], amount: string, token: Token) {
 		const members = users.map((u) => u.address)
 		let amnt = toBigInt(amount, token.decimals)
-		fee = 0n
+		let fee = 0n
 		let splitContractAddress = splitterAddress
 
-		try {
-			if (!splitContractAddress) {
-				fee = await estimateCreateSplitterContract(getContract, members)
-
-				splitContractAddress = await getMasterSplitterContractAddress(getContract)
-			}
-		} catch (error) {
-			console.log('e1', error)
+		if (!splitContractAddress) {
+			fee = await estimateCreateSplitterContract(getContract, members)
 		}
-
-		if (!splitContractAddress) throw new Error('No splitter address')
-
-		try {
-			fee += await estimateAddExpense(
-				getContract,
-				splitContractAddress,
-				amnt,
-				profile.address,
-				members,
-			)
-		} catch (error) {
-			console.log('e2', error)
-		}
+		fee += await estimateAddExpense(
+			getContract,
+			splitContractAddress,
+			amnt,
+			profile.address,
+			members,
+		)
 
 		return fee
 	}
