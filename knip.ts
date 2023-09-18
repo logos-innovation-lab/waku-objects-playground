@@ -11,6 +11,7 @@ const config: KnipConfig = {
 		'src/lib/objects/hello-world/index.ts',
 		'src/lib/objects/external/iframe.svelte',
 		'src/lib/objects/split/types.ts',
+		'src/lib/objects/split/contracts/**/*',
 	],
 	paths: {
 		// This ain't pretty, but Svelte basically does the same
@@ -28,6 +29,7 @@ const config: KnipConfig = {
 	},
 	ignoreExportsUsedInFile: true,
 	ignoreBinaries: ['docker'],
+	ignoreDependencies: ['@typechain/ethers-v6'],
 }
 
 export default config

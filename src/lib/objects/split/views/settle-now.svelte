@@ -16,6 +16,7 @@
 	import { settleDebt } from '../blockchain'
 	import type { TokenAmount, Token } from '$lib/objects/schemas'
 	import { formatAddress, toSignificant } from '$lib/utils/format'
+	import Info from '../components/info.svelte'
 
 	export let profile: UserType
 	export let balances: Balance[]
@@ -88,16 +89,10 @@
 
 			{#if owedAmount > 0n}
 				<Container gap={6} padX={0} padY={0}>
-					<div class="label">
-						<span class="text-sm">Amount to settle</span>
-						<div class="input-wrapper">
-							<!-- svelte-ignore a11y-autofocus -->
-							<div class="text-lg input">
-								{toSignificant(owedAmount, splitToken.decimals)}
-								{nativeToken.symbol}
-							</div>
-						</div>
-					</div>
+					<Info title="Amount to settle">
+						{toSignificant(owedAmount, splitToken.decimals)}
+						{nativeToken.symbol}
+					</Info>
 					<ReadonlyText marginBottom={0} align="center">
 						<p class="text-sm">
 							{toSignificant(nativeToken.amount, nativeToken.decimals)}
@@ -107,37 +102,22 @@
 				>
 
 				<Container gap={6} padX={0} padY={0}>
-					<div class="label">
-						<span class="text-sm">From</span>
-						<div class="input-wrapper">
-							<!-- svelte-ignore a11y-autofocus -->
-							<div class="text-lg input">
-								<p>Your account</p>
-								<p class="text-sm">
-									{formatAddress(profile.address, 6, 6)}
-								</p>
-							</div>
-						</div>
-					</div>
+					<Info title="From">
+						<p>Your account</p>
+						<p class="text-sm">
+							{formatAddress(profile.address, 6, 6)}
+						</p>
+					</Info>
 				</Container>
 
 				<Container gap={6} padX={0} padY={0}>
-					<div class="label">
-						<span class="text-sm">Transaction fee (max)</span>
-						<div class="input-wrapper">
-							<!-- svelte-ignore a11y-autofocus -->
-							<div class="text-lg input">
-								<p>{toSignificant(fee.amount, fee.decimals)} {fee.symbol}</p>
-								<p class="text-sm">
-									{toSignificant(fee.amount, fee.decimals)} ≈ {toSignificant(
-										fee.amount,
-										fee.decimals,
-									)}
-									DAI
-								</p>
-							</div>
-						</div>
-					</div>
+					<Info title="Transaction fee (max)">
+						<p>{toSignificant(fee.amount, fee.decimals)} {fee.symbol}</p>
+						<p class="text-sm">
+							{toSignificant(fee.amount, fee.decimals)} ≈ {toSignificant(fee.amount, fee.decimals)}
+							DAI
+						</p>
+					</Info>
 					<ReadonlyText marginBottom={0} align="center">
 						<p class="text-sm">
 							{toSignificant(splitToken.amount, splitToken.decimals)}
@@ -172,32 +152,5 @@
 <style>
 	img {
 		border-radius: var(--spacing-12);
-	}
-
-	.label {
-		display: flex;
-		flex-direction: column;
-		gap: var(--spacing-6);
-	}
-
-	.label span {
-		margin-inline: 13px;
-		text-align: left;
-		color: var(--color-step-40, var(--color-dark-step-20));
-	}
-
-	.input-wrapper {
-		position: relative;
-	}
-
-	.input {
-		border: 1px solid var(--color-step-20, var(--color-dark-step-40));
-		border-radius: var(--border-radius);
-		padding: 11px var(--spacing-12);
-		max-height: 120px;
-		min-height: 48px;
-		width: 100%;
-		color: var(--color-step-40, var(--color-dark-step-20));
-		background-color: var(--color-base, var(--color-dark-accent));
 	}
 </style>

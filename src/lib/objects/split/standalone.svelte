@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 	import { SPLIT_TOKEN } from '.'
 	import type { WakuObjectArgs } from '..'
 	import type { DataMessage, Expense, Store } from './schemas'
@@ -21,6 +22,12 @@
 	let description = ''
 	let images: string[] = []
 	const token = SPLIT_TOKEN
+	$: nativeToken = {
+		...defaultBlockchainNetwork.nativeToken,
+		amount:
+			args.tokens.find((t) => t.address === defaultBlockchainNetwork.nativeToken.address)?.amount ??
+			0n,
+	}
 
 	// Utility function which makes it easier to handle history for closing the object
 	const exitObject = (depth: number) => () => history.go(-depth)
@@ -113,6 +120,7 @@
 		{amount}
 		{images}
 		{token}
+		{nativeToken}
 		profile={args.profile}
 		chatName={args.chatName}
 		send={args.send}
