@@ -35,7 +35,7 @@ function getTopic(contentTopic: ContentTopic, id: string | '' = '') {
 	return `/${topicApp}/${topicVersion}/${contentTopic}/${id}`
 }
 
-interface ConnectWakuOptions {
+export interface ConnectWakuOptions {
 	onDisconnect?: () => void
 	onConnect?: (connections: unknown[]) => void
 }
@@ -86,10 +86,9 @@ export async function storeDocument(
 	const json = JSON.stringify(document)
 	const payload = utf8ToBytes(json)
 
-	const { error } = await waku.lightPush.send(encoder, { payload })
-	if (error) {
-		console.error(error)
-	}
+	const sendResult = await waku.lightPush.send(encoder, { payload })
+	console.debug({ sendResult, contentTopic })
+	return sendResult.error
 }
 
 export async function readStore(
@@ -114,6 +113,7 @@ export async function sendMessage(waku: LightNode, id: string, message: unknown)
 	const contentTopic = getTopic('private-message', id)
 	const encoder = createEncoder({ contentTopic })
 
-	const { error } = await waku.lightPush.send(encoder, { payload })
-	return error
+	const sendResult = await waku.lightPush.send(encoder, { payload })
+	console.debug({ sendResult, contentTopic })
+	return sendResult.error
 }
