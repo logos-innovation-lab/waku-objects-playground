@@ -147,18 +147,22 @@
 		<Info title="Description">
 			<div class="text-lg">{description}</div>
 		</Info>
-		<Info title="Transaction fee (max)">
-			<div class="text-lg">
-				{fee ? toSignificant(fee, nativeToken.decimals) : 'unknown'}
-				{nativeToken.symbol}
-			</div>
-		</Info>
-		<ReadonlyText marginBottom={0} align="center">
-			<p class="text-sm">
-				{toSignificant(nativeToken.amount, nativeToken.decimals)}
-				{nativeToken.symbol} available
-			</p>
-		</ReadonlyText>
+
+		<Container gap={6} padX={0} padY={0}>
+			<Info title="Transaction fee (max)">
+				<div class="text-lg">
+					{fee ? toSignificant(fee, nativeToken.decimals) : 'unknown'}
+					{nativeToken.symbol}
+				</div>
+			</Info>
+			<ReadonlyText marginBottom={0} align="center">
+				<p class="text-sm">
+					{toSignificant(nativeToken.amount, nativeToken.decimals)}
+					{nativeToken.symbol} available
+				</p>
+			</ReadonlyText>
+		</Container>
+
 		{#if images.length > 0}
 			<Grid>
 				{#each images as image}
