@@ -1,7 +1,7 @@
-import { Interface } from 'ethers'
+import { Interface, type Provider } from 'ethers'
 import type { GetContract } from './types'
 import splitterFactoryAbi from './contracts/abis/splitter-factory.json'
-import splitterAbi from './contracts//abis/splitter.json'
+import splitterAbi from './contracts/abis/splitter.json'
 import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 import type { Balance } from './schemas'
 import type { Splitter, SplitterFactory } from './contracts/types'
@@ -19,7 +19,17 @@ function getSplitterContractFactory(getContract: GetContract): SplitterFactory {
 	) as unknown as SplitterFactory
 }
 
-export function sleep(ms: number) {
+async function calculateFee(provider: Provider, gasEstimate: bigint): Promise<bigint> {
+	const fee = await provider.getFeeData()
+
+	if (fee.maxFeePerGas && fee.maxPriorityFeePerGas)
+		return gasEstimate * (fee.maxFeePerGas + fee.maxPriorityFeePerGas)
+	else if (fee.gasPrice) return gasEstimate * fee.gasPrice
+
+	throw new Error('Could not estimate transaction fee')
+}
+
+function sleep(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
@@ -81,13 +91,7 @@ export async function estimateCreateSplitterContract(
 	const provider = splitterFactory.runner?.provider
 	if (!provider) throw new Error('Could not estimate transaction fee')
 
-	const fee = await provider.getFeeData()
-
-	if (fee.maxFeePerGas && fee.maxPriorityFeePerGas)
-		return gasEstimate * (fee.maxFeePerGas + fee.maxPriorityFeePerGas)
-	else if (fee.gasPrice) return gasEstimate * fee.gasPrice
-
-	throw new Error('Could not estimate transaction fee')
+	return calculateFee(provider, gasEstimate)
 }
 
 export async function getMasterSplitterContractAddress(getContract: GetContract): Promise<string> {
@@ -127,13 +131,7 @@ export async function estimateAddExpense(
 	const provider = splitter.runner?.provider
 	if (!provider) throw new Error('Could not estimate transaction fee')
 
-	const fee = await provider.getFeeData()
-
-	if (fee.maxFeePerGas && fee.maxPriorityFeePerGas)
-		return gasEstimate * (fee.maxFeePerGas + fee.maxPriorityFeePerGas)
-	else if (fee.gasPrice) return gasEstimate * fee.gasPrice
-
-	throw new Error('Could not estimate transaction fee')
+	return calculateFee(provider, gasEstimate)
 }
 
 export async function settleDebt(
