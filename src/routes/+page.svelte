@@ -23,8 +23,16 @@
 
 	$: orderedChats = Array.from($chats.chats)
 		.map(([, chat]) => chat)
-		.sort((a, b) => lastChatMessageTimestamp(b) - lastChatMessageTimestamp(a))
+		.sort(compareChats)
 		.filter((chat) => chat.chatId) // HACK to remove early version broken group chats
+
+	function compareChats(a: Chat, b: Chat) {
+		// put not joined chats at the top
+		if (a.joined !== b.joined) {
+			return (b.joined ? 0 : 1) - (a.joined ? 0 : 1)
+		}
+		return lastChatMessageTimestamp(b) - lastChatMessageTimestamp(a)
+	}
 
 	function lastChatMessageTimestamp(chat: Chat) {
 		const lastMessage = chat.messages.slice(-1)[0]
@@ -168,7 +176,9 @@
 															{otherUser?.name}
 														</span>
 													{/if}
-													{#if chat.unread > 0}
+													{#if !chat.joined}
+														<Badge dark>NEW</Badge>
+													{:else if chat.unread > 0}
 														<Badge dark>
 															{chat.unread}
 														</Badge>
@@ -176,10 +186,21 @@
 												</span>
 											</div>
 											<p class={`message text-serif ${myMessage ? 'my-message' : ''}`}>
-												{senderName}
-												{@html lastMessage && lastMessage.type === 'user'
-													? replaceAddressesWithNames(lastMessage.text?.substring(0, 150), chat)
-													: 'No messages yet'}
+												{#if chat.joined}
+													{senderName}
+													{@html lastMessage && lastMessage.type === 'user'
+														? replaceAddressesWithNames(lastMessage.text?.substring(0, 150), chat)
+														: 'No messages yet'}
+													{chat.joined}
+													{lastMessage?.timestamp}
+												{:else}
+													{@const inviter =
+														chat.inviter ||
+														chat.users.find((user) => user.address !== wallet.address)?.name}
+													{inviter} invited you to {isGroupChatId(chat.chatId)
+														? 'group chat'
+														: 'chat privately'}
+												{/if}
 											</p>
 										</div>
 									</div>

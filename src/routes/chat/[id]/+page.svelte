@@ -14,7 +14,7 @@
 	import WakuObject from '$lib/objects/chat.svelte'
 
 	import { goto } from '$app/navigation'
-	import { chats } from '$lib/stores/chat'
+	import { chats, isGroupChatId } from '$lib/stores/chat'
 	import adapters from '$lib/adapters'
 	import ROUTES from '$lib/routes'
 	import { browser } from '$app/environment'
@@ -23,6 +23,9 @@
 	import type { HDNodeWallet } from 'ethers/lib.commonjs'
 	import Layout from '$lib/components/layout.svelte'
 	import { textToHTML } from '$lib/utils/text'
+	import Spacer from '$lib/components/spacer.svelte'
+	import Checkmark from '$lib/components/icons/checkmark.svelte'
+	import Close from '$lib/components/icons/close.svelte'
 
 	let div: HTMLElement
 	let autoscroll = true
@@ -64,6 +67,15 @@
 		text = ''
 		loading = false
 	}
+
+	function join() {
+		chats.updateChat($page.params.id, (chat) => ({ ...chat, joined: true }))
+	}
+
+	async function decline() {
+		chats.removeChat($page.params.id)
+		goto(ROUTES.HOME)
+	}
 </script>
 
 <AuthenticatedOnly let:wallet>
@@ -87,28 +99,60 @@
 					</svelte:fragment>
 				</Header>
 			</svelte:fragment>
-			<div class="chat-messages" bind:this={div}>
-				<Container grow>
-					<div class="messages">
-						<div class="messages-inner">
-							<!-- Chat bubbles -->
-							{#each messages as message}
-								{#if message.type === 'user' && message.text?.length > 0}
-									<ChatMessage
-										myMessage={message.fromAddress === wallet.address ? true : false}
-										bubble
-									>
-										{@html textToHTML(message.text)}
-									</ChatMessage>
-								{:else if message.type === 'data'}
-									<WakuObject {message} users={chat.users} />
-								{/if}
-							{/each}
-						</div>
-					</div>
+			{#if !chat.joined}
+				{@const inviter = chat?.users.find((user) => user.address !== wallet.address)}
+				{@const commonGroupNames = Array.from($chats.chats.values())
+					.filter(
+						(chat) =>
+							isGroupChatId(chat.chatId) &&
+							chat.users.find((user) => user.address === wallet.address),
+					)
+					.map((chat) => `"${chat.name}"`)
+					.slice(0, 1)}
+				<Container justify="center" alignItems="center" gap={0} padX={24}>
+					<Avatar picture={inviter?.avatar ?? ''} size={140} />
+					<Spacer />
+					<p class="text-lg text-bold text-center">Chat with "{chat?.name}"?</p>
+					<Spacer height={12} />
+					<p class="text-lg text-center">
+						{chat?.name} invited you to chat privately. {commonGroupNames.length > 0
+							? `You are both part of the ${commonGroupNames[0]} group.`
+							: ''}
+					</p>
+					<Spacer />
+					<Container direction="row" justify="center" gap={12} alignItems="center" padY={0}>
+						<Button align="center" variant="strong" on:click={() => join()}>
+							<Checkmark />
+							Start chatting
+						</Button>
+						<Button align="left" on:click={() => decline()}>
+							<Close />
+							Decline
+						</Button>
+					</Container>
 				</Container>
-			</div>
-			<svelte:fragment slot="footer">
+			{:else}
+				<div class="chat-messages" bind:this={div}>
+					<Container grow>
+						<div class="messages">
+							<div class="messages-inner">
+								<!-- Chat bubbles -->
+								{#each messages as message}
+									{#if message.type === 'user' && message.text?.length > 0}
+										<ChatMessage
+											myMessage={message.fromAddress === wallet.address ? true : false}
+											bubble
+										>
+											{@html textToHTML(message.text)}
+										</ChatMessage>
+									{:else if message.type === 'data'}
+										<WakuObject {message} users={chat.users} />
+									{/if}
+								{/each}
+							</div>
+						</div>
+					</Container>
+				</div>
 				<div class="chat-input-wrapper">
 					<Container>
 						<div class="chat-input">
@@ -140,7 +184,7 @@
 						</div>
 					</Container>
 				</div>
-			</svelte:fragment>
+			{/if}
 		</Layout>
 	{/if}
 </AuthenticatedOnly>
@@ -168,5 +212,9 @@
 		display: flex;
 		gap: var(--spacing-12);
 		align-items: center;
+	}
+
+	.text-center {
+		text-align: center;
 	}
 </style>
