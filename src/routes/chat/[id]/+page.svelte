@@ -55,14 +55,14 @@
 	})
 
 	$: messages = $chats.chats.get($page.params.id)?.messages || []
-	let loading = false
+	let isSending = false
 	let text = ''
 
 	const sendMessage = async (wallet: HDNodeWallet) => {
-		loading = true
+		isSending = true
 		await adapters.sendChatMessage(wallet, $page.params.id, text)
 		text = ''
-		loading = false
+		isSending = false
 	}
 </script>
 
@@ -133,7 +133,7 @@
 								}}
 							/>
 							{#if text.length > 0}
-								<Button variant="strong" disabled={loading} on:click={() => sendMessage(wallet)}>
+								<Button variant="strong" disabled={isSending} on:click={() => sendMessage(wallet)}>
 									<ArrowUp />
 								</Button>
 							{/if}

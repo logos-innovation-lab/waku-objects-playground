@@ -16,13 +16,17 @@ import {
 	type Unsubscribe,
 } from '@waku/interfaces'
 
-const peerMultiaddr = multiaddr(
+const peers = [
+	// use this address for local testing
+	// '/ip4/127.0.0.1/tcp/8000/ws/p2p/16Uiu2HAm53sojJN72rFbYg6GV2LpRRER9XeWkiEAhjKy3aL9cN5Z',
+
 	// '/dns4/ws.waku.apyos.dev/tcp/443/wss/p2p/16Uiu2HAm5wH4dPAV6zDfrBHkWt9Wu9iiXT4ehHdUArDUbEevzmBY',
 	'/dns4/ws.waku-1.apyos.dev/tcp/443/wss/p2p/16Uiu2HAm8gXHntr3SB5sde11pavjptaoiqyvwoX3GyEZWKMPiuBu',
 
-	// use this address for local testing
-	// '/ip4/127.0.0.1/tcp/8000/ws/p2p/16Uiu2HAm53sojJN72rFbYg6GV2LpRRER9XeWkiEAhjKy3aL9cN5Z',
-)
+	// '/dns4/waku.gra.nomad.apyos.dev/tcp/443/wss/p2p/16Uiu2HAmDvywnsGaB32tFqwjTsg8sfC1ZV2EXo3xjxM4V2gvH6Up',
+	// '/dns4/waku.bhs.nomad.apyos.dev/tcp/443/wss/p2p/16Uiu2HAkvrRkEHRMfe26F8NCWUfzMuaCfyCzwoPSUYG7yminM5Bn',
+	// '/dns4/waku.de.nomad.apyos.dev/tcp/443/wss/p2p/16Uiu2HAmRgjA134DcoyK8r44pKWJQ69C7McLSWtRgxUVwkKAsbGx',
+]
 
 export type ContentTopic = 'private-message' | 'profile' | 'chats' | 'objects' | 'group-chats'
 
@@ -35,7 +39,7 @@ function getTopic(contentTopic: ContentTopic, id: string | '' = '') {
 	return `/${topicApp}/${topicVersion}/${contentTopic}/${id}`
 }
 
-interface ConnectWakuOptions {
+export interface ConnectWakuOptions {
 	onDisconnect?: () => void
 	onConnect?: (connections: unknown[]) => void
 }
@@ -57,7 +61,10 @@ export async function connectWaku(options?: ConnectWakuOptions) {
 	})
 
 	await waku.start()
-	await waku.dial(peerMultiaddr)
+	for (const peer of peers) {
+		const addr = multiaddr(peer)
+		await waku.dial(addr)
+	}
 	await waitForRemotePeer(waku, [Protocols.Filter, Protocols.LightPush, Protocols.Store])
 
 	return waku
@@ -86,10 +93,8 @@ export async function storeDocument(
 	const json = JSON.stringify(document)
 	const payload = utf8ToBytes(json)
 
-	const { error } = await waku.lightPush.send(encoder, { payload })
-	if (error) {
-		console.error(error)
-	}
+	const sendResult = await waku.lightPush.send(encoder, { payload })
+	return sendResult.error
 }
 
 export async function readStore(
@@ -114,6 +119,6 @@ export async function sendMessage(waku: LightNode, id: string, message: unknown)
 	const contentTopic = getTopic('private-message', id)
 	const encoder = createEncoder({ contentTopic })
 
-	const { error } = await waku.lightPush.send(encoder, { payload })
-	return error
+	const sendResult = await waku.lightPush.send(encoder, { payload })
+	return sendResult.error
 }

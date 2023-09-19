@@ -104,7 +104,8 @@ function createChatStore(): ChatStore {
 					return state
 				}
 				const newMap = new Map(state.chats)
-				newMap.set(chatId, update(oldChat))
+				const newChat = update(oldChat)
+				newMap.set(chatId, newChat)
 
 				return {
 					...state,
