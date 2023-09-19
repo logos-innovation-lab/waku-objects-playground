@@ -62,7 +62,6 @@
 			instanceId={args.instanceId}
 			chatName={args.chatName}
 			profile={args.profile}
-			balances={args.store?.balances ?? []}
 			{splitterAddress}
 			exitObject={exitObject(2)}
 			send={args.send}

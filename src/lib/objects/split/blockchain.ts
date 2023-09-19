@@ -160,6 +160,23 @@ export async function settleDebt(
 	return tx.hash
 }
 
+export async function estimateSettleDebt(
+	getContract: GetContract,
+	splitterAddress: string,
+	from: string,
+): Promise<bigint> {
+	const splitter = getSplitterContract(getContract, splitterAddress)
+	const value = await splitter.debts(from)
+	const gasEstimate = await splitter['settleDebts(address)'].estimateGas(from, { value })
+
+	const provider = splitter.runner?.provider
+	if (!provider) throw new Error('Could not estimate transaction fee')
+
+	return calculateFee(provider, gasEstimate)
+
+	return 0n
+}
+
 export async function getBalances(
 	getContract: GetContract,
 	splitterAddress: string,
@@ -177,4 +194,13 @@ export async function getBalances(
 	}
 
 	return balances
+}
+
+export async function getOwedAmount(
+	getContract: GetContract,
+	splitterAddress: string,
+	from: string,
+): Promise<bigint> {
+	const splitter = getSplitterContract(getContract, splitterAddress)
+	return await splitter.debts(from)
 }
