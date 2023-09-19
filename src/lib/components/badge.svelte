@@ -16,6 +16,7 @@
 		text-transform: uppercase;
 		min-width: 22px;
 		text-align: center;
+		white-space: nowrap;
 
 		&.dark {
 			background-color: var(--color-step-50, var(--color-dark-step-10));
