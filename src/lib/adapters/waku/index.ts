@@ -18,7 +18,11 @@ import { get } from 'svelte/store'
 import { objectStore, objectKey } from '$lib/stores/objects'
 import { lookup } from '$lib/objects/lookup'
 import type { TokenAmount } from '$lib/stores/balances'
-import { defaultBlockchainNetwork, sendTransaction } from '$lib/adapters/transaction'
+import {
+	defaultBlockchainNetwork,
+	sendTransaction,
+	estimateTransaction,
+} from '$lib/adapters/transaction'
 import type {
 	JSONSerializable,
 	JSONValue,
@@ -485,10 +489,11 @@ export default class WakuAdapter implements Adapter {
 		return tx.hash
 	}
 
-	async estimateTransaction(): Promise<TokenAmount> {
+	async estimateTransaction(wallet: Wallet, to: string, token: TokenAmount): Promise<TokenAmount> {
+		const fee = await estimateTransaction(wallet, to, token.amount, token.address)
 		return {
 			...defaultBlockchainNetwork.nativeToken,
-			amount: 1000059237n,
+			amount: fee,
 		}
 	}
 

@@ -10,15 +10,15 @@
 	import ReadonlyText from '$lib/components/readonly-text.svelte'
 
 	import type { User as UserType } from '$lib/types'
-	import type { Balance, DataMessage } from '../schemas'
+	import type { DataMessage } from '../schemas'
 	import { splitDescriptor } from '..'
 	import type { GetContract } from '../types'
-	import { settleDebt } from '../blockchain'
+	import { estimateSettleDebt, getOwedAmount, settleDebt } from '../blockchain'
 	import type { TokenAmount, Token } from '$lib/objects/schemas'
 	import { formatAddress, toSignificant } from '$lib/utils/format'
+	import Info from '../components/info.svelte'
 
 	export let profile: UserType
-	export let balances: Balance[]
 	export let instanceId: string
 	export let chatName: string
 	export let splitterAddress: string
@@ -29,18 +29,33 @@
 	export let exitObject: () => void
 	export let send: (message: DataMessage) => Promise<void>
 
-	let owedAmount = 0n
+	let owedAmount: undefined | bigint = undefined
 	let settling = false
-	$: {
-		const balance = balances.find(({ address }) => address === profile.address)
-		if (balance) {
-			owedAmount = BigInt(balance.amount)
-		}
-	}
+	let fee: bigint | undefined = undefined
+	let feeError: undefined | Error = undefined
+	let feeChecking = false
+
+	$: getOwedAmount(getContract, splitterAddress, profile.address)
+		.then((amount) => (owedAmount = amount))
+		.catch(console.error)
 	$: nativeToken = tokens.find((t) => !t.address)
 	$: splitToken = tokens.find((t) => t.address === token.address)
+	$: hasEnoughFunds = owedAmount && splitToken && owedAmount < splitToken?.amount
+
+	$: if (hasEnoughFunds) {
+		feeChecking = true
+		feeError = undefined
+		fee = undefined
+		estimateSettleDebt(getContract, splitterAddress, profile.address)
+			.then((feeAmount) => {
+				fee = feeAmount
+			})
+			.catch((err) => (feeError = err))
+			.finally(() => (feeChecking = false))
+	}
 
 	async function settleNow() {
+		if (!owedAmount) return
 		try {
 			settling = true
 			const txHash = await settleDebt(getContract, splitterAddress, profile.address)
@@ -61,8 +76,6 @@
 			console.log(error)
 		}
 	}
-
-	$: fee = nativeToken ? { ...nativeToken, amount: 1000000000000000n } : undefined
 </script>
 
 <Layout>
@@ -74,9 +87,11 @@
 			</Button>
 		</Header>
 	</svelte:fragment>
-	{#if nativeToken === undefined || splitToken === undefined || fee === undefined}
+	{#if nativeToken === undefined || splitToken === undefined}
 		<!-- This should never happen -->
 		<p>No native token</p>
+	{:else if owedAmount === undefined}
+		<p>Loading...</p>
 	{:else}
 		<Container padX={24} padY={24} alignItems="center">
 			<h1>{chatName} shared expenses</h1>
@@ -88,16 +103,10 @@
 
 			{#if owedAmount > 0n}
 				<Container gap={6} padX={0} padY={0}>
-					<div class="label">
-						<span class="text-sm">Amount to settle</span>
-						<div class="input-wrapper">
-							<!-- svelte-ignore a11y-autofocus -->
-							<div class="text-lg input">
-								{toSignificant(owedAmount, splitToken.decimals)}
-								{nativeToken.symbol}
-							</div>
-						</div>
-					</div>
+					<Info title="Amount to settle">
+						{toSignificant(owedAmount, splitToken.decimals)}
+						{nativeToken.symbol}
+					</Info>
 					<ReadonlyText marginBottom={0} align="center">
 						<p class="text-sm">
 							{toSignificant(nativeToken.amount, nativeToken.decimals)}
@@ -107,43 +116,44 @@
 				>
 
 				<Container gap={6} padX={0} padY={0}>
-					<div class="label">
-						<span class="text-sm">From</span>
-						<div class="input-wrapper">
-							<!-- svelte-ignore a11y-autofocus -->
-							<div class="text-lg input">
-								<p>Your account</p>
-								<p class="text-sm">
-									{formatAddress(profile.address, 6, 6)}
-								</p>
-							</div>
-						</div>
-					</div>
+					<Info title="From">
+						<p>Your account</p>
+						<p class="text-sm">
+							{formatAddress(profile.address, 6, 6)}
+						</p>
+					</Info>
 				</Container>
 
 				<Container gap={6} padX={0} padY={0}>
-					<div class="label">
-						<span class="text-sm">Transaction fee (max)</span>
-						<div class="input-wrapper">
-							<!-- svelte-ignore a11y-autofocus -->
-							<div class="text-lg input">
-								<p>{toSignificant(fee.amount, fee.decimals)} {fee.symbol}</p>
-								<p class="text-sm">
-									{toSignificant(fee.amount, fee.decimals)} ≈ {toSignificant(
-										fee.amount,
-										fee.decimals,
-									)}
-									DAI
-								</p>
-							</div>
-						</div>
-					</div>
-					<ReadonlyText marginBottom={0} align="center">
-						<p class="text-sm">
-							{toSignificant(splitToken.amount, splitToken.decimals)}
-							{splitToken.symbol} available
-						</p>
-					</ReadonlyText>
+					{#if fee}
+						<Info title="Transaction fee (max)">
+							<p>{toSignificant(fee, nativeToken.decimals)} {nativeToken.symbol}</p>
+							<p class="text-sm">
+								{toSignificant(fee, nativeToken.decimals)} ≈ TODO DAI
+							</p>
+						</Info>
+						<ReadonlyText marginBottom={0} align="center">
+							<p class="text-sm">
+								{toSignificant(splitToken.amount, splitToken.decimals)}
+								{splitToken.symbol} available
+							</p>
+						</ReadonlyText>
+					{:else if !hasEnoughFunds}
+						<p>You don't have enough funds to settle</p>
+					{:else if feeChecking}
+						<Info title="Transaction fee (max)">
+							<p>Loading...</p>
+						</Info>
+						<ReadonlyText marginBottom={0} align="center">
+							<p class="text-sm">
+								{toSignificant(splitToken.amount, splitToken.decimals)}
+								{splitToken.symbol} available
+							</p>
+						</ReadonlyText>
+					{:else}
+						<p>Failed to check fee</p>
+						<p>{feeError?.message}</p>
+					{/if}
 				</Container>
 			{:else if owedAmount < 0n}
 				<Container gap={12} padX={0} padY={0} align="center">
@@ -162,7 +172,7 @@
 			<Button
 				variant="strong"
 				on:click={settleNow}
-				disabled={settling || fee.amount + owedAmount > nativeToken.amount}
+				disabled={!hasEnoughFunds || settling || !fee || fee + owedAmount > splitToken.amount}
 				><ArrowUp /> Pay now</Button
 			>
 		</Container>
@@ -172,32 +182,5 @@
 <style>
 	img {
 		border-radius: var(--spacing-12);
-	}
-
-	.label {
-		display: flex;
-		flex-direction: column;
-		gap: var(--spacing-6);
-	}
-
-	.label span {
-		margin-inline: 13px;
-		text-align: left;
-		color: var(--color-step-40, var(--color-dark-step-20));
-	}
-
-	.input-wrapper {
-		position: relative;
-	}
-
-	.input {
-		border: 1px solid var(--color-step-20, var(--color-dark-step-40));
-		border-radius: var(--border-radius);
-		padding: 11px var(--spacing-12);
-		max-height: 120px;
-		min-height: 48px;
-		width: 100%;
-		color: var(--color-step-40, var(--color-dark-step-20));
-		background-color: var(--color-base, var(--color-dark-accent));
 	}
 </style>

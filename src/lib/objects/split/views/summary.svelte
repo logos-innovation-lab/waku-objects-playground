@@ -14,10 +14,16 @@
 	import type { DataMessage } from '../schemas'
 	import { splitDescriptor } from '..'
 	import type { User } from '$lib/types'
-	import { toBigInt } from '$lib/utils/format'
-	import { addExpense, createSplitterContract } from '../blockchain'
+	import { toBigInt, toSignificant } from '$lib/utils/format'
+	import {
+		addExpense,
+		createSplitterContract,
+		estimateAddExpense,
+		estimateCreateSplitterContract,
+	} from '../blockchain'
 	import type { GetContract } from '../types'
-	import type { Token } from '$lib/objects/schemas'
+	import type { Token, TokenAmount } from '$lib/objects/schemas'
+	import Info from '../components/info.svelte'
 
 	export let amount: string
 	export let description: string
@@ -28,11 +34,38 @@
 	export let splitterAddress: string | undefined
 	export let instanceId: string
 	export let token: Token
+	export let nativeToken: TokenAmount
 	export let send: (message: DataMessage) => Promise<void>
 	export let exitObject: () => void
 	export let getContract: GetContract
 
 	let transactionSent = false
+	let fee: bigint | undefined = undefined
+
+	async function estimateFee(users: User[], amount: string, token: Token) {
+		const members = users.map((u) => u.address)
+		let amnt = toBigInt(amount, token.decimals)
+		let fee = 0n
+		let splitContractAddress = splitterAddress
+
+		if (!splitContractAddress) {
+			fee = await estimateCreateSplitterContract(getContract, members)
+		}
+		fee += await estimateAddExpense(
+			getContract,
+			splitContractAddress,
+			amnt,
+			profile.address,
+			members,
+		)
+
+		return fee
+	}
+
+	$: if (users && amount && token)
+		estimateFee(users, amount, token)
+			.then((amount) => (fee = amount))
+			.catch(console.error)
 
 	async function sendTransactionInternal() {
 		transactionSent = true
@@ -87,19 +120,35 @@
 			</Button>
 		</Header>
 	</svelte:fragment>
-	<Container gap={6} direction="column" justify="center" padX={12}>
-		<ReadonlyText label="Post to">
+	<Container gap={16} direction="column" justify="center" padX={12}>
+		<Info title="Post to">
 			<div class="text-lg">{chatName}</div>
-		</ReadonlyText>
-		<ReadonlyText label="Collection">
+		</Info>
+		<Info title="Collection">
 			<div class="text-lg">#{instanceId.slice(0, 4)}</div>
-		</ReadonlyText>
-		<ReadonlyText label="Paid amount">
+		</Info>
+		<Info title="Paid amount">
 			<div class="text-lg">{amount} {token.symbol}</div>
-		</ReadonlyText>
-		<ReadonlyText label="Description">
+		</Info>
+		<Info title="Description">
 			<div class="text-lg">{description}</div>
-		</ReadonlyText>
+		</Info>
+
+		<Container gap={6} padX={0} padY={0}>
+			<Info title="Transaction fee (max)">
+				<div class="text-lg">
+					{fee ? toSignificant(fee, nativeToken.decimals) : 'unknown'}
+					{nativeToken.symbol}
+				</div>
+			</Info>
+			<ReadonlyText marginBottom={0} align="center">
+				<p class="text-sm">
+					{toSignificant(nativeToken.amount, nativeToken.decimals)}
+					{nativeToken.symbol} available
+				</p>
+			</ReadonlyText>
+		</Container>
+
 		{#if images.length > 0}
 			<Grid>
 				{#each images as image}

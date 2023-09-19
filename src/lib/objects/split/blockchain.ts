@@ -1,17 +1,35 @@
-import { Interface } from 'ethers'
-import type { SplitterFactoryContract, SplitterContract, GetContract } from './types'
-import splitterFactoryAbi from './abis/splitter-factory.json'
-import splitterAbi from './abis/splitter.json'
+import { Interface, type Provider } from 'ethers'
+import type { GetContract } from './types'
+import splitterFactoryAbi from './contracts/abis/splitter-factory.json'
+import splitterAbi from './contracts/abis/splitter.json'
 import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 import type { Balance } from './schemas'
+import type { Splitter, SplitterFactory } from './contracts/types'
 
 const splitterFactoryAddress = defaultBlockchainNetwork.objects.splitterFactory
 
-function getSplitterContract(getContract: GetContract, splitterAddress: string): SplitterContract {
-	return getContract(splitterAddress, new Interface(splitterAbi)) as SplitterContract
+function getSplitterContract(getContract: GetContract, splitterAddress: string): Splitter {
+	return getContract(splitterAddress, new Interface(splitterAbi)) as unknown as Splitter
 }
 
-export function sleep(ms: number) {
+function getSplitterContractFactory(getContract: GetContract): SplitterFactory {
+	return getContract(
+		splitterFactoryAddress,
+		new Interface(splitterFactoryAbi),
+	) as unknown as SplitterFactory
+}
+
+async function calculateFee(provider: Provider, gasEstimate: bigint): Promise<bigint> {
+	const fee = await provider.getFeeData()
+
+	if (fee.maxFeePerGas && fee.maxPriorityFeePerGas)
+		return gasEstimate * (fee.maxFeePerGas + fee.maxPriorityFeePerGas)
+	else if (fee.gasPrice) return gasEstimate * fee.gasPrice
+
+	throw new Error('Could not estimate transaction fee')
+}
+
+function sleep(ms: number) {
 	return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
@@ -21,16 +39,17 @@ export async function createSplitterContract(
 	token = '0x0000000000000000000000000000000000000000',
 	metadata = '0x0000000000000000000000000000000000000000',
 ): Promise<string> {
-	const splitterFactory = getContract(
-		splitterFactoryAddress,
-		new Interface(splitterFactoryAbi),
-	) as SplitterFactoryContract
+	const splitterFactory = getSplitterContractFactory(getContract)
+
 	// TODO: this should be `once` with appropriate filter instead of `on`
 	const events: { address: string; txHash: string }[] = []
 
-	splitterFactory.addListener('SplitterCreated', (address, metadata, token, members, payload) => {
-		events.push({ address, txHash: payload.log.transactionHash })
-	})
+	splitterFactory.addListener(
+		splitterFactory.getEvent('SplitterCreated'),
+		(address, metadata, token, members, payload) => {
+			events.push({ address, txHash: payload.log.transactionHash })
+		},
+	)
 
 	// TODO: Maybe we don't need metadata
 	const tx = await splitterFactory.create(metadata, token, members)
@@ -52,11 +71,32 @@ export async function createSplitterContract(
 		splitterAddress = events.find((e) => e.txHash === tx.hash)?.address
 		await sleep(sleepTime)
 	}
-	splitterFactory.removeAllListeners('SplitterCreated')
+	splitterFactory.removeAllListeners(splitterFactory.getEvent('SplitterCreated'))
 
 	if (!splitterAddress) throw new Error('Failed to create splitter contract')
 
 	return splitterAddress
+}
+
+export async function estimateCreateSplitterContract(
+	getContract: GetContract,
+	members: string[],
+	token = '0x0000000000000000000000000000000000000000',
+	metadata = '0x0000000000000000000000000000000000000000',
+): Promise<bigint> {
+	const splitterFactory = getSplitterContractFactory(getContract)
+
+	const gasEstimate: bigint = await splitterFactory.create.estimateGas(metadata, token, members)
+
+	const provider = splitterFactory.runner?.provider
+	if (!provider) throw new Error('Could not estimate transaction fee')
+
+	return calculateFee(provider, gasEstimate)
+}
+
+export async function getMasterSplitterContractAddress(getContract: GetContract): Promise<string> {
+	const splitterFactory = getSplitterContractFactory(getContract)
+	return await splitterFactory.masterSplitter()
 }
 
 export async function addExpense(
@@ -77,6 +117,32 @@ export async function addExpense(
 	return tx.hash
 }
 
+export async function estimateAddExpense(
+	getContract: GetContract,
+	splitterAddress: string | undefined,
+	amount: bigint,
+	from: string,
+	members: string[],
+	metadata = '0x0000000000000000000000000000000000000000',
+): Promise<bigint> {
+	let gasEstimate: bigint
+	let splitter: Splitter
+	if (splitterAddress) {
+		splitter = getSplitterContract(getContract, splitterAddress)
+		gasEstimate = await splitter.addExpense.estimateGas(metadata, amount, from, members)
+	} else {
+		// This is worse case estimateAddExpense cost
+		// we can not do it by estimating the transaction because we don't have the splitter contract deployed and the transaction would fail in the master splitter contract
+		gasEstimate = 47530n + 9000n * BigInt(members.length - 2)
+		splitter = getSplitterContract(getContract, await getMasterSplitterContractAddress(getContract))
+	}
+
+	const provider = splitter.runner?.provider
+	if (!provider) throw new Error('Could not estimate transaction fee')
+
+	return calculateFee(provider, gasEstimate)
+}
+
 export async function settleDebt(
 	getContract: GetContract,
 	splitterAddress: string,
@@ -84,7 +150,7 @@ export async function settleDebt(
 ): Promise<string> {
 	const splitter = getSplitterContract(getContract, splitterAddress)
 	const value = await splitter.debts(from)
-	const tx = await splitter.settleDebts(from, { gasLimit: 3000000n, value })
+	const tx = await splitter['settleDebts(address)'](from, { gasLimit: 3000000n, value })
 	const receipt = await tx.wait()
 
 	if (!receipt || receipt.status !== 1) {
@@ -94,12 +160,28 @@ export async function settleDebt(
 	return tx.hash
 }
 
+export async function estimateSettleDebt(
+	getContract: GetContract,
+	splitterAddress: string,
+	from: string,
+): Promise<bigint> {
+	const splitter = getSplitterContract(getContract, splitterAddress)
+	const value = await splitter.debts(from)
+	const gasEstimate = await splitter['settleDebts(address)'].estimateGas(from, { value })
+
+	const provider = splitter.runner?.provider
+	if (!provider) throw new Error('Could not estimate transaction fee')
+
+	return calculateFee(provider, gasEstimate)
+
+	return 0n
+}
+
 export async function getBalances(
 	getContract: GetContract,
 	splitterAddress: string,
 ): Promise<Balance[]> {
-	const splitter = getContract(splitterAddress, new Interface(splitterAbi)) as SplitterContract
-
+	const splitter = getSplitterContract(getContract, splitterAddress)
 	const members = await splitter.getMembers()
 
 	const balances: Balance[] = []
@@ -112,4 +194,13 @@ export async function getBalances(
 	}
 
 	return balances
+}
+
+export async function getOwedAmount(
+	getContract: GetContract,
+	splitterAddress: string,
+	from: string,
+): Promise<bigint> {
+	const splitter = getSplitterContract(getContract, splitterAddress)
+	return await splitter.debts(from)
 }

@@ -121,6 +121,36 @@ export async function sendTransaction(
 	return tx
 }
 
+export async function estimateTransaction(
+	wallet: BaseWallet,
+	to: string,
+	amount: bigint,
+	tokenAddress?: string,
+): Promise<bigint> {
+	const provider = getProvider()
+	const txWallet = wallet.connect(provider)
+
+	let gasEstimate: bigint
+
+	if (tokenAddress) {
+		const contract = new Contract(tokenAddress, abi, txWallet)
+		gasEstimate = await contract.transfer.estimateGas(to, amount)
+	} else {
+		const txRequest: TransactionRequest = {
+			to,
+			value: amount,
+		}
+		gasEstimate = await provider.estimateGas(txRequest)
+	}
+	const fee = await provider.getFeeData()
+
+	if (fee.maxFeePerGas && fee.maxPriorityFeePerGas)
+		return gasEstimate * (fee.maxFeePerGas + fee.maxPriorityFeePerGas)
+	else if (fee.gasPrice) return gasEstimate * fee.gasPrice
+
+	throw new Error('Could not estimate transaction fee')
+}
+
 export async function waitForTransaction(
 	txHash: string,
 	confirm?: number | undefined,
