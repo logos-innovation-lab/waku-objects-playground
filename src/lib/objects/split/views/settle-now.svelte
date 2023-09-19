@@ -44,11 +44,13 @@
 
 	$: if (hasEnoughFunds) {
 		feeChecking = true
+		feeError = undefined
+		fee = undefined
 		estimateSettleDebt(getContract, splitterAddress, profile.address)
 			.then((feeAmount) => {
 				fee = feeAmount
 			})
-			.catch(console.error)
+			.catch((err) => (feeError = err))
 			.finally(() => (feeChecking = false))
 	}
 
