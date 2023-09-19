@@ -191,8 +191,6 @@
 													{@html lastMessage && lastMessage.type === 'user'
 														? replaceAddressesWithNames(lastMessage.text?.substring(0, 150), chat)
 														: 'No messages yet'}
-													{chat.joined}
-													{lastMessage?.timestamp}
 												{:else}
 													{@const inviter =
 														chat.inviter ||
