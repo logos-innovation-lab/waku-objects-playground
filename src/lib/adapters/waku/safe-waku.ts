@@ -17,12 +17,16 @@ interface Subscription {
 	callback: Callback
 }
 
+async function sleep(msec: number) {
+	return await new Promise((r) => setTimeout(r, msec))
+}
+
 export class SafeWaku {
 	public lightNode: LightNode | undefined = undefined
 	private subscriptions = new Map<string, Subscription>()
 	private lastMessages = new Map<string, Message>()
 	private lastSentTimestamp = 0
-	private isSubscribing = false
+	private isReSubscribing = false
 	public readonly errors = {
 		numDisconnect: 0,
 		numSendError: 0,
@@ -31,6 +35,7 @@ export class SafeWaku {
 	private isHandlingMessage = false
 	private logging = true
 	private logDateTime = true
+	private isConnecting = false
 
 	constructor(public readonly options?: ConnectWakuOptions) {}
 
@@ -39,7 +44,7 @@ export class SafeWaku {
 			return this.lightNode
 		}
 
-		this.lightNode = await this.connectWaku()
+		this.lightNode = await this.safeConnectWaku()
 		return this.lightNode
 	}
 
@@ -49,7 +54,7 @@ export class SafeWaku {
 		callback: (message: Message, chatId: string) => Promise<void>,
 	) {
 		if (!this.lightNode) {
-			this.lightNode = await this.connectWaku()
+			this.lightNode = await this.safeConnectWaku()
 		}
 
 		const lastMessageTime = this.lastMessages.get(chatId)?.timestamp || 0
@@ -91,7 +96,7 @@ export class SafeWaku {
 
 	async sendMessage(id: string, message: Message) {
 		if (!this.lightNode) {
-			this.lightNode = await connectWaku(this.options)
+			this.lightNode = await this.safeConnectWaku()
 		}
 
 		let error = undefined
@@ -114,7 +119,7 @@ export class SafeWaku {
 					this.errors.numSendError++
 					this.log(`⁉️  Error: ${error}`)
 					this.log(`🕓 Waiting ${timeout} milliseconds...`)
-					await new Promise((r) => setTimeout(r, timeout))
+					await sleep(timeout)
 					if (timeout < 120_000) {
 						timeout += timeout
 					}
@@ -129,8 +134,32 @@ export class SafeWaku {
 		}
 	}
 
-	private connectWaku() {
-		const waku = connectWaku({
+	private async safeConnectWaku() {
+		if (this.isConnecting) {
+			while (!this.lightNode) {
+				await sleep(100)
+			}
+			return this.lightNode
+		}
+
+		this.isConnecting = true
+
+		let waku: LightNode | undefined
+		while (!waku) {
+			try {
+				waku = await this.connectWaku()
+			} catch (e) {
+				this.log(`⁉️  Error while connecting: ${e}`)
+			}
+		}
+
+		this.isConnecting = false
+
+		return waku
+	}
+
+	private async connectWaku() {
+		const waku = await connectWaku({
 			onConnect: (connections) => {
 				this.log('✅ connected to waku', { connections })
 				this.safeResubscribe()
@@ -152,26 +181,32 @@ export class SafeWaku {
 	}
 
 	private async safeResubscribe() {
+		if (this.isReSubscribing) {
+			return
+		}
+
+		this.isReSubscribing = true
+
 		// eslint-disable-next-line no-constant-condition
 		while (true) {
 			try {
-				return await this.resubscribe()
+				await this.resubscribe()
+				break
 			} catch (e) {
-				console.error(`⁉️  ${e}`)
+				this.log(`⁉️ Error while resubscribing: ${e}`)
+
+				// sleep to avoid infinite looping
+				await sleep(100)
 			}
 		}
+
+		this.isReSubscribing = false
 	}
 
 	private async resubscribe() {
 		if (!this.lightNode) {
 			return
 		}
-
-		if (this.isSubscribing) {
-			return
-		}
-
-		this.isSubscribing = true
 
 		const chatIds = this.subscriptions.keys()
 		for (const subscription of this.subscriptions.values()) {
@@ -181,14 +216,39 @@ export class SafeWaku {
 		const oldSubscriptions = this.subscriptions
 		this.subscriptions = new Map()
 
+		let subscribeError = undefined
 		for (const chatId of chatIds) {
 			const callback = oldSubscriptions.get(chatId)?.callback
-			if (callback) {
-				await this.subscribe(chatId, undefined, callback)
+			if (!callback) {
+				continue
+			}
+
+			if (!subscribeError) {
+				try {
+					await this.subscribe(chatId, undefined, callback)
+				} catch (e) {
+					subscribeError = e
+					this.subscribeEmpty(chatId, callback)
+				}
+			} else {
+				this.subscribeEmpty(chatId, callback)
 			}
 		}
 
-		this.isSubscribing = false
+		if (subscribeError) {
+			throw subscribeError
+		}
+	}
+
+	private subscribeEmpty(chatId: string, callback: Callback) {
+		const unsubscribe = () => {
+			/* empty */
+		}
+		const subscription = {
+			callback,
+			unsubscribe,
+		}
+		this.subscriptions.set(chatId, subscription)
 	}
 
 	private async queueMessage(callback: Callback, chatMessage: Message, chatId: string) {
@@ -222,7 +282,11 @@ export class SafeWaku {
 
 				this.lastMessages.set(chatId, message)
 
-				await callback(queuedMessage.chatMessage, queuedMessage.chatId)
+				try {
+					await callback(queuedMessage.chatMessage, queuedMessage.chatId)
+				} catch (e) {
+					this.log(`⁉️ Error in callback: ${e}`)
+				}
 			}
 		}
 
