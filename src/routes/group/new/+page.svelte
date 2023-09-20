@@ -3,7 +3,6 @@
 
 	import AddComment from '$lib/components/icons/add-comment.svelte'
 	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
-	import UserIcon from '$lib/components/icons/user.svelte'
 
 	import Button from '$lib/components/button.svelte'
 	import Header from '$lib/components/header.svelte'
@@ -23,7 +22,8 @@
 	import type { HDNodeWallet } from 'ethers/lib.commonjs'
 	import Layout from '$lib/components/layout.svelte'
 	import Checkbox from '$lib/components/checkbox.svelte'
-	import { getPicture, uploadPicture } from '$lib/adapters/ipfs'
+	import { uploadPicture } from '$lib/adapters/ipfs'
+	import { genRandomHex } from '$lib/utils'
 
 	let groupMembers: string[] = []
 	let screen: 'create' | 'details' = 'create'
@@ -31,6 +31,8 @@
 	let name = ''
 	let pictureFiles: FileList | undefined = undefined
 	let buttonDisabled = false
+
+	const chatId = genRandomHex(64)
 
 	async function resizePersonaPicture(p?: File) {
 		try {
@@ -44,7 +46,7 @@
 	async function createGroup(wallet: HDNodeWallet) {
 		buttonDisabled = true
 
-		const chatId = await adapters.startGroupChat(wallet, groupMembers, name, picture)
+		await adapters.startGroupChat(wallet, chatId, groupMembers, name, picture)
 		await adapters.sendInvite(wallet, chatId, groupMembers)
 
 		buttonDisabled = false
@@ -150,19 +152,7 @@
 				</Header>
 			</svelte:fragment>
 			<Container gap={12}>
-				<div class="avatar">
-					{#if picture}
-						<div class="img">
-							<img src={getPicture(picture)} alt="profile" />
-						</div>
-					{:else}
-						<div class="no-img">
-							<div class="profile-default">
-								<UserIcon size={70} />
-							</div>
-						</div>
-					{/if}
-				</div>
+				<Avatar group picture={picture || chatId} size={140} />
 				<InputFile bind:files={pictureFiles}>
 					<Renew />
 					Change picture
@@ -254,41 +244,5 @@
 		flex-direction: row;
 		gap: var(--spacing-6);
 		align-items: center;
-	}
-
-	.avatar {
-		margin: var(--spacing-12) auto 0;
-		border-radius: 100px;
-	}
-	.no-img,
-	.img {
-		aspect-ratio: 1;
-		height: 140px;
-		border-radius: 100px;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		background-color: var(--color-step-10, var(--color-dark-step-50));
-		margin-inline: auto;
-		position: relative;
-
-		:global(img) {
-			aspect-ratio: 1;
-			object-fit: cover;
-			border-radius: 100px;
-		}
-	}
-
-	.profile-default {
-		position: relative;
-		width: 100%;
-		height: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-
-		:global(svg) {
-			fill: var(--color-step-50, var(--color-dark-step-10));
-		}
 	}
 </style>

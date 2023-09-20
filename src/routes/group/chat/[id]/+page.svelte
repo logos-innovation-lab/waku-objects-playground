@@ -140,7 +140,7 @@
 						<ChevronLeft />
 					</Button>
 					<svelte:fragment slot="chat">
-						<Avatar picture={chat?.avatar ?? chat?.chatId} />
+						<Avatar group picture={chat?.avatar || chat?.chatId} />
 						<span class="truncate">
 							{chat?.name}
 						</span>
@@ -159,7 +159,7 @@
 			</svelte:fragment>
 			{#if !chat.joined}
 				<Container justify="center" alignItems="center" gap={0} padX={24}>
-					<Avatar picture={chat?.avatar ?? chat?.chatId} size={140} />
+					<Avatar group picture={chat?.avatar || chat?.chatId} size={140} />
 					<Spacer />
 					<p class="text-lg text-bold text-center">Join "{chat?.name}"?</p>
 					<Spacer height={12} />

@@ -159,7 +159,7 @@
 								<Container grow>
 									<div class="chat">
 										{#if isGroupChatId(chat.chatId)}
-											<Avatar size={70} picture={chat?.avatar || chat.chatId} />
+											<Avatar group size={70} picture={chat?.avatar || chat.chatId} />
 										{:else}
 											<Avatar size={70} picture={otherUser?.avatar || otherUser?.address} />
 										{/if}

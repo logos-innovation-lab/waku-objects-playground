@@ -5,10 +5,13 @@
 	export let picture: string | undefined
 	export let size = 48
 	export let onClick: (() => unknown) | undefined = undefined
+	export let group = false
 
 	function isCID(s: string) {
 		return s.length === 46 && s.startsWith('Qm')
 	}
+
+	console.debug('avatar', { picture, group })
 </script>
 
 <div
@@ -22,7 +25,8 @@
 		{#if picture && isCID(picture)}
 			<img src={getPicture(picture)} alt="profile" />
 		{:else if picture}
-			<Dicebear name={picture || ''} {size} />
+			{@const style = group ? 'shapes' : 'bottts-neutral'}
+			<Dicebear name={picture || ''} {size} {style} />
 		{/if}
 	</div>
 </div>

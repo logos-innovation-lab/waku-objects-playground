@@ -140,7 +140,7 @@
 				</Header>
 			</svelte:fragment>
 			<Container gap={12}>
-				<Avatar picture={picture || wallet.address} size={140} />
+				<Avatar group {picture} size={140} />
 				<InputFile bind:files={pictureFiles}>
 					<Renew />
 					Change picture
