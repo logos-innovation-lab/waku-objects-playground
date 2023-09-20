@@ -24,16 +24,11 @@
 	import type { HDNodeWallet } from 'ethers'
 	import routes from '$lib/routes'
 	import { goto } from '$app/navigation'
-<<<<<<< HEAD
-	import { getPicture, uploadPicture } from '$lib/adapters/ipfs'
+	import { uploadPicture } from '$lib/adapters/ipfs'
 	import { onDestroy } from 'svelte'
 	import Logout from '$lib/components/icons/logout.svelte'
 	import { walletStore } from '$lib/stores/wallet'
 	import ROUTES from '$lib/routes'
-=======
-	import ChatBot from '$lib/components/icons/chat-bot.svelte'
-	import { uploadPicture } from '$lib/adapters/ipfs'
->>>>>>> f9f0358 (feat: dicebear icon test)
 
 	$: chatId = $page.params.id
 	$: groupChat = $chats.chats.get(chatId)
@@ -145,20 +140,7 @@
 				</Header>
 			</svelte:fragment>
 			<Container gap={12}>
-				<!-- <div class="avatar">
-					{#if picture}
-						<div class="img">
-							<img src={getPicture(picture)} alt="profile" />
-						</div>
-					{:else}
-						<div class="no-img">
-							<div class="profile-default">
-								<UserIcon size={70} />
-							</div>
-						</div>
-					{/if}
-				</div> -->
-				<Avatar picture={picture || ''} size={140} />
+				<Avatar picture={picture || wallet.address} size={140} />
 				<InputFile bind:files={pictureFiles}>
 					<Renew />
 					Change picture

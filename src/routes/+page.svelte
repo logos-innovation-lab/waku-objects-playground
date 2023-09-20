@@ -161,7 +161,7 @@
 										{#if isGroupChatId(chat.chatId)}
 											<Avatar size={70} picture={chat?.avatar || chat.chatId} />
 										{:else}
-											<Avatar size={70} picture={otherUser?.avatar || otherUser?.address || ''} />
+											<Avatar size={70} picture={otherUser?.avatar || otherUser?.address} />
 										{/if}
 										<div class="content">
 											<div class="chat-info">

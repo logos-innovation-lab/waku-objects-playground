@@ -175,7 +175,7 @@
 			</Container>
 		{:else}
 			<Container gap={6} justify="center" align="center" padX={24}>
-				<Avatar picture={counterParty?.avatar ?? counterParty?.address ?? ''} size={140} />
+				<Avatar picture={counterParty?.avatar ?? counterParty?.address} size={140} />
 				<p class="text-lg text-bold">Chat with {counterParty?.name ?? $page.params.address}</p>
 				<p class="text-lg description">
 					Connect with {counterParty?.name ?? $page.params.address} and start a private chat on Waku

@@ -2,7 +2,7 @@
 	import { getPicture } from '$lib/adapters/ipfs'
 	import Dicebear from './dicebear.svelte'
 
-	export let picture: string
+	export let picture: string | undefined
 	export let size = 48
 	export let onClick: (() => unknown) | undefined = undefined
 
@@ -21,7 +21,7 @@
 	<div class="img" style={`height: ${size}px;`}>
 		{#if picture && isCID(picture)}
 			<img src={getPicture(picture)} alt="profile" />
-		{:else}
+		{:else if picture}
 			<Dicebear name={picture || ''} {size} />
 		{/if}
 	</div>

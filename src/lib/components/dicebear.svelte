@@ -3,7 +3,7 @@
 
 	export let name: string
 	export let size = 48
-	export let style = localStorage.getItem('dicebearStyle') || 'user'
+	export let style = 'bottts-neutral'
 	export let scale = 75
 	export let radius = 50
 

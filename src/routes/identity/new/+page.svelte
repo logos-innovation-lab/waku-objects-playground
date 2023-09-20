@@ -2,7 +2,6 @@
 	import ArrowRight from '$lib/components/icons/arrow-right.svelte'
 	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
 	import Renew from '$lib/components/icons/renew.svelte'
-	import User from '$lib/components/icons/user.svelte'
 
 	import Button from '$lib/components/button.svelte'
 	import Container from '$lib/components/container.svelte'
@@ -17,7 +16,8 @@
 	import { HDNodeWallet, Wallet } from 'ethers'
 	import { walletStore } from '$lib/stores/wallet'
 	import Layout from '$lib/components/layout.svelte'
-	import { getPicture, uploadPicture } from '$lib/adapters/ipfs'
+	import { uploadPicture } from '$lib/adapters/ipfs'
+	import Avatar from '$lib/components/avatar.svelte'
 
 	let picture = ''
 	let name = ''
@@ -72,17 +72,7 @@
 	</svelte:fragment>
 	<Container gap={12} justify="center">
 		<div class="avatar">
-			{#if picture}
-				<div class="img">
-					<img src={getPicture(picture)} alt="profile" />
-				</div>
-			{:else}
-				<div class="no-img">
-					<div class="profile-default">
-						<User size={70} />
-					</div>
-				</div>
-			{/if}
+			<Avatar size={140} picture={picture || wallet?.address} />
 		</div>
 		<InputFile bind:files={pictureFiles}>
 			<Renew />
