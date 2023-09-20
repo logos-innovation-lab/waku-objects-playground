@@ -4,7 +4,6 @@
 	import Renew from '$lib/components/icons/renew.svelte'
 	import Wallet from '$lib/components/icons/wallet.svelte'
 	import SettingsView from '$lib/components/icons/settings-view.svelte'
-	import User from '$lib/components/icons/user.svelte'
 	import Logout from '$lib/components/icons/logout.svelte'
 	import DocumentSigned from '$lib/components/icons/document-signed.svelte'
 
@@ -26,7 +25,8 @@
 	import { get } from 'svelte/store'
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 	import Layout from '$lib/components/layout.svelte'
-	import { getPicture, uploadPicture } from '$lib/adapters/ipfs'
+	import { uploadPicture } from '$lib/adapters/ipfs'
+	import Avatar from '$lib/components/avatar.svelte'
 
 	let avatar = $profile.avatar
 	let name = $profile.name
@@ -86,21 +86,9 @@
 			</Button>
 		</Header>
 	</svelte:fragment>
-	<AuthenticatedOnly>
+	<AuthenticatedOnly let:wallet>
 		<Container gap={6}>
-			<div class="avatar">
-				{#if avatar}
-					<div class="img">
-						<img src={getPicture(avatar)} alt="your avatar" />
-					</div>
-				{:else}
-					<div class="no-img">
-						<div class="profile-default">
-							<User size={70} />
-						</div>
-					</div>
-				{/if}
-			</div>
+			<Avatar picture={avatar} seed={wallet.address} size={140} />
 			<InputFile bind:files>
 				<Renew />
 				Change picture
@@ -159,38 +147,6 @@
 </Layout>
 
 <style lang="scss">
-	.avatar {
-		margin: var(--spacing-12) 0px;
-		border-radius: 100px;
-	}
-	.no-img,
-	.img {
-		aspect-ratio: 1;
-		height: 140px;
-		border-radius: 100px;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		background-color: var(--color-step-10, var(--color-dark-step-50));
-		margin-inline: auto;
-		position: relative;
-
-		:global(img) {
-			aspect-ratio: 1;
-			object-fit: cover;
-			border-radius: 100px;
-		}
-	}
-
-	.profile-default {
-		position: relative;
-		width: 100%;
-		height: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-
 	.displayname {
 		margin-top: var(--spacing-6);
 		margin-bottom: var(--spacing-12);

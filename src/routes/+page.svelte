@@ -94,7 +94,7 @@
 						<svelte:fragment slot="right">
 							<Button align="right" variant="account" on:click={() => goto(ROUTES.IDENTITY)}>
 								<svelte:fragment slot="avatar">
-									<Avatar size={48} picture={$profile.avatar} />
+									<Avatar size={48} picture={$profile.avatar} seed={wallet.address} />
 								</svelte:fragment>
 								{$profile.name}
 							</Button>
@@ -127,7 +127,7 @@
 						<svelte:fragment slot="right">
 							<Button align="right" variant="account" on:click={() => goto(ROUTES.IDENTITY)}>
 								<svelte:fragment slot="avatar">
-									<Avatar size={48} picture={$profile.avatar} />
+									<Avatar size={48} picture={$profile.avatar} seed={wallet.address} />
 								</svelte:fragment>
 								{$profile.name}
 							</Button>
@@ -159,9 +159,9 @@
 								<Container grow>
 									<div class="chat">
 										{#if isGroupChatId(chat.chatId)}
-											<Avatar size={70} picture={chat?.avatar} />
+											<Avatar group size={70} picture={chat?.avatar} seed={chat.chatId} />
 										{:else}
-											<Avatar size={70} picture={otherUser?.avatar} />
+											<Avatar size={70} picture={otherUser?.avatar} seed={otherUser?.address} />
 										{/if}
 										<div class="content">
 											<div class="chat-info">

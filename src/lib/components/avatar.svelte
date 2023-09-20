@@ -1,11 +1,12 @@
 <script lang="ts">
 	import { getPicture } from '$lib/adapters/ipfs'
-	import User from '$lib/components/icons/user.svelte'
+	import Dicebear from './dicebear.svelte'
 
-	export let picture: string | undefined = undefined
+	export let picture: string | undefined
+	export let seed: string | undefined
 	export let size = 48
 	export let onClick: (() => unknown) | undefined = undefined
-	export let avatarSize = size / 2
+	export let group = false
 </script>
 
 <div
@@ -18,8 +19,9 @@
 	<div class="img" style={`height: ${size}px;`}>
 		{#if picture}
 			<img src={getPicture(picture)} alt="profile" />
-		{:else}
-			<User size={avatarSize} />
+		{:else if seed}
+			{@const style = group ? 'shapes' : 'bottts-neutral'}
+			<Dicebear {seed} {size} {style} />
 		{/if}
 	</div>
 </div>

@@ -13,6 +13,7 @@ export interface Adapter {
 	startChat(address: string, peerAddress: string): Promise<string>
 	startGroupChat(
 		wallet: BaseWallet,
+		chatId: string,
 		memberAddresses: string[],
 		name: string,
 		avatar?: string,

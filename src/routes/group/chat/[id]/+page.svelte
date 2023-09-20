@@ -140,7 +140,7 @@
 						<ChevronLeft />
 					</Button>
 					<svelte:fragment slot="chat">
-						<Avatar picture={chat?.avatar ?? ''} />
+						<Avatar group picture={chat?.avatar} seed={chat?.chatId} />
 						<span class="truncate">
 							{chat?.name}
 						</span>
@@ -159,7 +159,7 @@
 			</svelte:fragment>
 			{#if !chat.joined}
 				<Container justify="center" alignItems="center" gap={0} padX={24}>
-					<Avatar picture={chat?.avatar ?? ''} size={140} />
+					<Avatar group picture={chat?.avatar} seed={chat?.chatId} size={140} />
 					<Spacer />
 					<p class="text-lg text-bold text-center">Join "{chat?.name}"?</p>
 					<Spacer height={12} />
@@ -204,7 +204,7 @@
 											{@html replaceAddressesWithNames(textToHTML(htmlize(message.text)))}
 											<svelte:fragment slot="avatar">
 												{#if message.fromAddress !== wallet.address && lastMessage}
-													<Avatar size={40} picture={sender?.avatar} />
+													<Avatar size={40} picture={sender?.avatar} seed={sender?.address} />
 												{/if}
 											</svelte:fragment>
 										</ChatMessage>

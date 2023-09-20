@@ -33,7 +33,6 @@ import { makeWakuObjectAdapter } from '$lib/objects/adapter'
 import { fetchBalances } from '$lib/adapters/balance'
 import { makeWakustore } from './wakustore'
 import type { StorageChat, StorageChatEntry, StorageObjectEntry, StorageProfile } from './types'
-import { genRandomHex } from '$lib/utils'
 import { walletStore } from '$lib/stores/wallet'
 import { SafeWaku } from './safe-waku'
 
@@ -280,6 +279,7 @@ export default class WakuAdapter implements Adapter {
 
 	async startGroupChat(
 		wallet: BaseWallet,
+		chatId: string,
 		memberAddresses: string[],
 		name: string,
 		avatar?: string,
@@ -287,8 +287,6 @@ export default class WakuAdapter implements Adapter {
 		if (memberAddresses.length === 0) {
 			throw 'invalid chat'
 		}
-
-		const chatId = genRandomHex(64)
 
 		const userAddresses = [...memberAddresses, wallet.address]
 		const storageChat = {
