@@ -1,7 +1,6 @@
-import type { TokenAmount } from '$lib/stores/balances'
 import WakuAdapter from '$lib/adapters/waku'
 import type { BaseWallet } from 'ethers'
-import type { User } from '$lib/objects/schemas'
+import type { TokenAmount, User } from '$lib/objects/schemas'
 import type { JSONSerializable } from '$lib/objects'
 
 export interface Adapter {

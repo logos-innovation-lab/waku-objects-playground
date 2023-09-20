@@ -1,7 +1,8 @@
-import { balanceStore, type TokenAmount } from '$lib/stores/balances'
+import { balanceStore } from '$lib/stores/balances'
 import { defaultBlockchainNetwork, getBalance, getProvider } from '$lib/adapters/transaction'
 import { Contract } from 'ethers'
 import abi from '$lib/abis/erc20.json'
+import type { TokenAmount } from '$lib/objects/schemas'
 
 export async function fetchBalances(address: string): Promise<void> {
 	balanceStore.update((state) => ({
