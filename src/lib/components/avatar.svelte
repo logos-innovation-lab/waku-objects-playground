@@ -3,13 +3,10 @@
 	import Dicebear from './dicebear.svelte'
 
 	export let picture: string | undefined
+	export let seed: string | undefined
 	export let size = 48
 	export let onClick: (() => unknown) | undefined = undefined
 	export let group = false
-
-	function isCID(s: string) {
-		return s.length === 46 && s.startsWith('Qm')
-	}
 </script>
 
 <div
@@ -20,11 +17,11 @@
 	tabindex={0}
 >
 	<div class="img" style={`height: ${size}px;`}>
-		{#if picture && isCID(picture)}
+		{#if picture}
 			<img src={getPicture(picture)} alt="profile" />
-		{:else if picture}
+		{:else if seed}
 			{@const style = group ? 'shapes' : 'bottts-neutral'}
-			<Dicebear name={picture || ''} {size} {style} />
+			<Dicebear {seed} {size} {style} />
 		{/if}
 	</div>
 </div>

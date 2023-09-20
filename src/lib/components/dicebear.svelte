@@ -1,13 +1,12 @@
 <script lang="ts">
 	import User from './icons/user.svelte'
 
-	export let name: string
+	export let seed: string
 	export let size = 48
 	export let style = 'bottts-neutral'
 	export let scale = 75
 	export let radius = 50
 
-	const seed = name
 	const avatarSize = size / 2
 </script>
 

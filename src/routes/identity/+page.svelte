@@ -88,7 +88,7 @@
 	</svelte:fragment>
 	<AuthenticatedOnly let:wallet>
 		<Container gap={6}>
-			<Avatar picture={avatar || wallet.address} size={140} />
+			<Avatar picture={avatar} seed={wallet.address} size={140} />
 			<InputFile bind:files>
 				<Renew />
 				Change picture

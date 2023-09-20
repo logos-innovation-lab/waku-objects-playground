@@ -72,7 +72,7 @@
 				<li>
 					<Container grow>
 						<div class="chat">
-							<Avatar size={48} picture={user?.avatar ?? user?.address} />
+							<Avatar size={48} picture={user?.avatar} seed={user?.address} />
 							<Container direction="column">
 								<p>
 									{(isYou ? 'You' : user?.name) ?? 'unknown'}

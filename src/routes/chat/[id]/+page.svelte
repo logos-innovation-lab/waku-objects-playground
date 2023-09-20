@@ -94,7 +94,7 @@
 						<ChevronLeft />
 					</Button>
 					<svelte:fragment slot="chat">
-						<Avatar picture={otherUser?.avatar || otherUser?.address} />
+						<Avatar picture={otherUser?.avatar} seed={otherUser?.address} />
 						{otherUser?.name}
 					</svelte:fragment>
 				</Header>
@@ -110,7 +110,7 @@
 					.map((chat) => `"${chat.name}"`)
 					.slice(0, 1)}
 				<Container justify="center" alignItems="center" gap={0} padX={24}>
-					<Avatar picture={inviter?.avatar ?? inviter?.address} size={140} />
+					<Avatar picture={inviter?.avatar} seed={inviter?.address} size={140} />
 					<Spacer />
 					<p class="text-lg text-bold text-center">Chat with "{chat?.name}"?</p>
 					<Spacer height={12} />

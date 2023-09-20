@@ -36,7 +36,7 @@
 	let name: string | undefined
 
 	$: if (groupChat) {
-		picture = picture ?? (groupChat.avatar || groupChat.chatId)
+		picture = picture ?? groupChat.avatar
 		name = name ?? groupChat.name
 	}
 
@@ -140,7 +140,7 @@
 				</Header>
 			</svelte:fragment>
 			<Container gap={12}>
-				<Avatar group {picture} size={140} />
+				<Avatar group {picture} seed={chatId} size={140} />
 				<InputFile bind:files={pictureFiles}>
 					<Renew />
 					Change picture
@@ -168,7 +168,7 @@
 							<Container grow>
 								<div class="chat">
 									<div class="chat-avatar">
-										<Avatar size={48} picture={user.avatar || user.address} />
+										<Avatar size={48} picture={user.avatar} seed={user.address} />
 									</div>
 									<div class="content">
 										<div class="user-info">
@@ -219,7 +219,7 @@
 							<div class="chat-button" role="listitem">
 								<Container grow>
 									<div class="chat">
-										<Avatar size={48} picture={chat.users[0].avatar || chat.users[0].address} />
+										<Avatar size={48} picture={chat.users[0].avatar} seed={chat.users[0].address} />
 										<div class="content">
 											<div class="user-info">
 												<span class="username">

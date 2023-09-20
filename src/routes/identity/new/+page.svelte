@@ -72,7 +72,7 @@
 	</svelte:fragment>
 	<Container gap={12} justify="center">
 		<div class="avatar">
-			<Avatar size={140} picture={picture || wallet?.address} />
+			<Avatar size={140} {picture} seed={wallet?.address} />
 		</div>
 		<InputFile bind:files={pictureFiles}>
 			<Renew />
