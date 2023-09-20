@@ -1,7 +1,6 @@
 import type { Adapter } from '$lib/adapters'
 import { Contract, type BaseWallet, type TransactionReceipt, Interface } from 'ethers'
 import type { WakuObjectAdapter } from '.'
-import type { TokenAmount } from '$lib/stores/balances'
 import {
 	defaultBlockchainNetwork,
 	getProvider,
@@ -10,7 +9,7 @@ import {
 	getTransactionTimestamp,
 	waitForTransaction,
 } from '$lib/adapters/transaction'
-import type { Transaction, TransactionState } from './schemas'
+import type { TokenAmount, Transaction, TransactionState } from './schemas'
 import { checkBalance } from '$lib/adapters/balance'
 import abi from '$lib/abis/erc20.json'
 

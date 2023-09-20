@@ -16,7 +16,6 @@ import type { BaseWallet, Wallet } from 'ethers'
 import { get } from 'svelte/store'
 import { objectStore, objectKey } from '$lib/stores/objects'
 import { lookup } from '$lib/objects/lookup'
-import type { TokenAmount } from '$lib/stores/balances'
 import {
 	defaultBlockchainNetwork,
 	sendTransaction,
@@ -35,6 +34,7 @@ import { makeWakustore } from './wakustore'
 import type { StorageChat, StorageChatEntry, StorageObjectEntry, StorageProfile } from './types'
 import { walletStore } from '$lib/stores/wallet'
 import { SafeWaku } from './safe-waku'
+import type { TokenAmount } from '$lib/objects/schemas'
 
 const MAX_MESSAGES = 100
 

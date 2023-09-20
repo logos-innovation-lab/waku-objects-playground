@@ -1,14 +1,6 @@
+import type { TokenAmount } from '$lib/objects/schemas'
 import { writable } from 'svelte/store'
 import type { Writable } from 'svelte/store'
-
-export interface TokenAmount {
-	name: string
-	symbol: string
-	amount: bigint
-	decimals: number
-	image?: string
-	address?: string // if not set, it is the native token
-}
 
 interface BalanceState {
 	balances: TokenAmount[]

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import adapter from '$lib/adapters'
 	import { lookup } from './lookup'
-	import { balanceStore, type TokenAmount } from '$lib/stores/balances'
+	import { balanceStore } from '$lib/stores/balances'
 	import { chats, type Chat } from '$lib/stores/chat'
 	import type { JSONSerializable, WakuObjectArgs } from '.'
 	import { profile } from '$lib/stores/profile'
@@ -10,6 +10,7 @@
 	import { objectKey, objectStore } from '$lib/stores/objects'
 	import Container from '$lib/components/container.svelte'
 	import type { HDNodeWallet } from 'ethers/lib.commonjs'
+	import type { TokenAmount } from './schemas'
 
 	export let objectId: string
 	export let instanceId: string
