@@ -38,7 +38,12 @@ import { SafeWaku } from './safe-waku'
 
 const MAX_MESSAGES = 100
 
-function createPrivateChat(chatId: string, user: User, ownAddress: string): string {
+function createPrivateChat(
+	chatId: string,
+	user: User,
+	ownAddress: string,
+	joined?: boolean,
+): string {
 	const ownProfile = get(profile)
 	const ownUser = {
 		name: ownProfile.name,
@@ -51,6 +56,7 @@ function createPrivateChat(chatId: string, user: User, ownAddress: string): stri
 		users: [user, ownUser],
 		name: user.name ?? user.address,
 		unread: 0,
+		joined,
 	}
 	chats.createChat(chat)
 
@@ -272,7 +278,8 @@ export default class WakuAdapter implements Adapter {
 			throw 'invalid user'
 		}
 
-		createPrivateChat(chatId, user, address)
+		const joined = true
+		createPrivateChat(chatId, user, address, joined)
 
 		return chatId
 	}
