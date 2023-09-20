@@ -10,8 +10,6 @@
 	function isCID(s: string) {
 		return s.length === 46 && s.startsWith('Qm')
 	}
-
-	console.debug('avatar', { picture, group })
 </script>
 
 <div
