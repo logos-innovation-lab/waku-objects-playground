@@ -96,35 +96,4 @@
 		margin: var(--spacing-12) auto 0;
 		border-radius: 100px;
 	}
-	.no-img,
-	.img {
-		aspect-ratio: 1;
-		height: 140px;
-		border-radius: 100px;
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		background-color: var(--color-step-10, var(--color-dark-step-50));
-		margin-inline: auto;
-		position: relative;
-
-		:global(img) {
-			aspect-ratio: 1;
-			object-fit: cover;
-			border-radius: 100px;
-		}
-	}
-
-	.profile-default {
-		position: relative;
-		width: 100%;
-		height: 100%;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-
-		:global(svg) {
-			fill: var(--color-step-50, var(--color-dark-step-10));
-		}
-	}
 </style>
