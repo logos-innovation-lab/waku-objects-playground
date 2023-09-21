@@ -17,7 +17,7 @@
 	import Layout from '$lib/components/layout.svelte'
 	import { payggyDescriptor } from '..'
 	import type { ExchangeRateRecord } from '$lib/stores/exchangeRates'
-	import { getFiatAmountText } from '$lib/objects/utils'
+	import { getFiatAmountText } from '$lib/utils/fiat'
 
 	export let toUser: User
 	export let estimateTransaction: (to: string, token: TokenAmount) => Promise<TokenAmount>

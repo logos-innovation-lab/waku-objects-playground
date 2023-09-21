@@ -18,7 +18,7 @@
 	import type { User } from '$lib/types'
 	import Layout from '$lib/components/layout.svelte'
 	import { payggyDescriptor } from '..'
-	import { getFiatAmountText } from '$lib/objects/utils'
+	import { getFiatAmountText } from '$lib/utils/fiat'
 	import type { ExchangeRateRecord } from '$lib/stores/exchangeRates'
 
 	export let transaction: Transaction
