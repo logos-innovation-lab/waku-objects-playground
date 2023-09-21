@@ -16,12 +16,12 @@
 	import { goto } from '$app/navigation'
 	import routes from '$lib/routes'
 	import { page } from '$app/stores'
-	import { chats } from '$lib/stores/chat'
+	import { chats, isGroupChatId } from '$lib/stores/chat'
 	import adapters from '$lib/adapters'
 	import { Html5Qrcode } from 'html5-qrcode'
 	import Camera from '$lib/components/icons/camera.svelte'
 	import QrCodeIcon from '$lib/components/icons/qr-code.svelte'
-	import { onDestroy } from 'svelte'
+	import { onDestroy, onMount } from 'svelte'
 	import ButtonBlock from '$lib/components/button-block.svelte'
 	import ChevronRight from '$lib/components/icons/chevron-right.svelte'
 	import Layout from '$lib/components/layout.svelte'
@@ -29,12 +29,14 @@
 	import { profile } from '$lib/stores/profile'
 	import { walletStore } from '$lib/stores/wallet'
 	import Avatar from '$lib/components/avatar.svelte'
+	import type { Unsubscriber } from 'svelte/store'
 
 	// check if the chat already exists
 	$: if ($chats.chats.has($page.params.address)) {
 		goto(routes.CHAT($page.params.address))
 	}
 
+	let unsubscribe: Unsubscriber | undefined
 	let copied = false
 	let loading = false
 	function copyToClipboard() {
@@ -107,7 +109,23 @@
 		goto(routes.CHAT(chatId))
 	}
 
+	onMount(() => {
+		// make a copy of the list of chatIds when the screen is opened so that later we can compare
+		const oldChatIds = new Set($chats.chats.keys())
+		unsubscribe = chats.subscribe((store) => {
+			store.chats.forEach((value, key) => {
+				if (!oldChatIds.has(key) && !isGroupChatId(value.chatId)) {
+					// found new private chat
+					goto(routes.CHAT(value.chatId))
+				}
+			})
+		})
+	})
+
 	onDestroy(() => {
+		if (unsubscribe) {
+			unsubscribe()
+		}
 		stop()
 	})
 </script>
