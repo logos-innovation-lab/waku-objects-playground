@@ -32,12 +32,10 @@
 	import type { User } from '$lib/types'
 	import {
 		areDifferentDays,
-		formatTimestamp,
 		formatTimestampSeparator,
 		formatTimestampTime,
 	} from '$lib/utils/format'
 	import ChatDateBadge from '$lib/components/chat-date-badge.svelte'
-	import Timestamp from '$lib/components/timestamp.svelte'
 
 	let div: HTMLElement
 	let autoscroll = true
