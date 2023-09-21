@@ -170,22 +170,16 @@ export function formatTimestampSeparator(timestamp: number, currentDate = new Da
 		0,
 	)
 
-	// a week before `today`
-	// this is used for the calculating a day, but it should not include
-	// the same day twice, hence we only count the last 6 days
 	const yesterday = new Date(today.valueOf() - 24 * 60 * 60 * 1000)
 
-	// if it is today, show only the time with a 24 hour clock
 	if (timestamp >= today.valueOf()) {
 		return 'Today'
 	}
 
-	// if it is last week, show only the day of the week
 	if (timestamp >= yesterday.valueOf()) {
 		return 'Yesterday'
 	}
 
-	// if it is older than a week, show the month and day
 	const dateFormat = new Intl.DateTimeFormat(locale, {
 		month: 'short',
 		day: 'numeric',
