@@ -9,7 +9,9 @@
 	export let fiatSymbol: string | undefined = undefined
 	export let fiatExchange: number | undefined = undefined
 
-	const fiatAmount = fiatExchange ? Number(toSignificant(amount, decimals, decimals)) * fiatExchange : undefined
+	const fiatAmount = fiatExchange
+		? Number(toSignificant(amount, decimals, decimals)) * fiatExchange
+		: undefined
 </script>
 
 <div class="asset root">

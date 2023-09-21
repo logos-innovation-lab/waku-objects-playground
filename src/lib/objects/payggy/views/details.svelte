@@ -18,12 +18,16 @@
 	import type { User } from '$lib/types'
 	import Layout from '$lib/components/layout.svelte'
 	import { payggyDescriptor } from '..'
+	import { getFiatAmountText } from '$lib/objects/utils'
+	import type { ExchangeRateRecord } from '$lib/stores/exchangeRates'
 
 	export let transaction: Transaction
 	export let users: User[]
 	export let instanceId: string
 	export let profile: User
 	export let status: string
+	export let fiatRates: Map<string, ExchangeRateRecord>
+	export let fiatSymbol: string | undefined
 	export let exitObject: () => void
 
 	$: sender = users.find((u) => u.address === transaction.from)
@@ -111,22 +115,29 @@
 						<div class="row">
 							<div>
 								<div class="text-lg">
-									{toSignificant(BigInt(transaction.token.amount), transaction.token.decimals)}
+									{toSignificant(transaction.token.amount, transaction.token.decimals)}
 									{transaction.token.symbol}
 								</div>
 								<div class="secondary text-sm">≈ 13.91 EUR at the time of transaction</div>
 							</div>
 						</div>
 					</ReadonlyText>
-					<ReadonlyText label="Transaction fee (max)">
+					<ReadonlyText label="Transaction fee">
 						<div class="text-lg">
 							{transaction.fee
-								? `${toSignificant(BigInt(transaction.fee.amount), transaction.fee.decimals)} ${
+								? `${toSignificant(transaction.fee.amount, transaction.fee.decimals)} ${
 										transaction.fee.symbol
 								  }`
 								: 'unknown'}
 						</div>
-						<div class="secondary text-sm">≈ 1.56 EUR now</div>
+						<div class="secondary text-sm">
+							{getFiatAmountText(
+								fiatRates,
+								fiatSymbol,
+								toSignificant(transaction.fee.amount, transaction.fee.decimals),
+								transaction.fee.symbol,
+							)}
+						</div>
 					</ReadonlyText>
 					<ReadonlyText label="Transaction ID">
 						<div class="text-lg">{transaction.hash}</div>

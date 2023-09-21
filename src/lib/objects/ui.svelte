@@ -11,6 +11,7 @@
 	import Container from '$lib/components/container.svelte'
 	import type { HDNodeWallet } from 'ethers/lib.commonjs'
 	import type { TokenAmount } from './schemas'
+	import { DEFAULT_FIAT_SYMBOL, exchangeStore } from '$lib/stores/exchangeRates'
 
 	export let objectId: string
 	export let instanceId: string
@@ -77,6 +78,8 @@
 				onViewChange,
 				view,
 				viewParams,
+				exchangeRates: $exchangeStore.exchange,
+				fiatSymbol: DEFAULT_FIAT_SYMBOL,
 				...wakuObjectAdapter,
 			}
 		}

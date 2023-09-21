@@ -13,6 +13,7 @@
 	import { onDestroy } from 'svelte'
 	import adapters from '$lib/adapters'
 	import { walletStore } from '$lib/stores/wallet'
+	import { DEFAULT_FIAT_SYMBOL, exchangeStore } from '$lib/stores/exchangeRates'
 
 	// TODO: This needs escaping for the CSP
 	const getIframeSource = (object: LoadedObject): string => {
@@ -106,6 +107,8 @@
 				profile,
 				users,
 				tokens,
+				exchangeRates: $exchangeStore.exchange,
+				fiatSymbol: DEFAULT_FIAT_SYMBOL,
 			},
 			context: {
 				view,

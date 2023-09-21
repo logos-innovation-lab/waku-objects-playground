@@ -35,6 +35,7 @@ import type { StorageChat, StorageChatEntry, StorageObjectEntry, StorageProfile 
 import { walletStore } from '$lib/stores/wallet'
 import { SafeWaku } from './safe-waku'
 import type { TokenAmount } from '$lib/objects/schemas'
+import { DEFAULT_FIAT_SYMBOL, exchangeStore } from '$lib/stores/exchangeRates'
 
 const MAX_MESSAGES = 100
 
@@ -153,6 +154,8 @@ async function executeOnDataMessage(
 			instanceId: dataMessage.instanceId,
 			users: users,
 			profile: myProfile,
+			exchangeRates: get(exchangeStore).exchange,
+			fiatSymbol: DEFAULT_FIAT_SYMBOL,
 			tokens: defaultBlockchainNetwork.tokens?.map((t) => ({ ...t, amount: 0n })) || [],
 		}
 		await descriptor.onMessage(dataMessage, args)

@@ -11,12 +11,13 @@ function createSchema(tokens: string[]) {
 	return z.object(schemas)
 }
 
+// TODO: with centralised endpoint, we can add more fiat currencies
 const fiatList = ['DAI']
 
 const resSchema = createSchema(fiatList)
 type ExchangeRates = z.infer<typeof resSchema>
 
-interface ExchangeRateRecord {
+export interface ExchangeRateRecord {
 	rates: ExchangeRates
 	refreshing: boolean
 	checkedAt?: number

@@ -48,6 +48,8 @@
 		sendTransaction={args.sendTransaction}
 		estimateTransaction={args.estimateTransaction}
 		exitObject={exitObject(3)}
+		fiatRates={args.exchangeRates}
+		fiatSymbol={args.fiatSymbol}
 	/>
 {:else if args.view === 'details' && store}
 	<Details
@@ -56,6 +58,8 @@
 		profile={args.profile}
 		instanceId={args.instanceId}
 		status={store.type}
+		fiatRates={args.exchangeRates}
+		fiatSymbol={args.fiatSymbol}
 		exitObject={() => history.back()}
 	/>
 {:else if args.view === 'amount' || (args.view === undefined && !isGroupchat)}
@@ -65,6 +69,8 @@
 		tokens={args.tokens}
 		exitObject={exitObject(2)}
 		onViewChange={args.onViewChange}
+		fiatRates={args.exchangeRates}
+		fiatSymbol={args.fiatSymbol}
 	/>
 {:else}
 	<SelectUser

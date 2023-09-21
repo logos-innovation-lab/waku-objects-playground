@@ -16,6 +16,8 @@
 	import type { User } from '$lib/types'
 	import Layout from '$lib/components/layout.svelte'
 	import { payggyDescriptor } from '..'
+	import type { ExchangeRateRecord } from '$lib/stores/exchangeRates'
+	import { getFiatAmountText } from '$lib/objects/utils'
 
 	export let toUser: User
 	export let estimateTransaction: (to: string, token: TokenAmount) => Promise<TokenAmount>
@@ -24,6 +26,8 @@
 	export let profile: User
 	export let amount: string
 	export let token: TokenAmount
+	export let fiatRates: Map<string, ExchangeRateRecord>
+	export let fiatSymbol: string | undefined
 	export let exitObject: () => void
 
 	let transactionSent = false
@@ -69,7 +73,9 @@
 			<div class="row">
 				<div>
 					<div class="text-lg">{amount} {token.symbol}</div>
-					<div class="secondary text-sm">≈ 13.91 EUR now</div>
+					<div class="secondary text-sm">
+						{getFiatAmountText(fiatRates, fiatSymbol, amount, token.symbol)}
+					</div>
 				</div>
 				<Button variant="icon" align="right" on:click={() => history.back()}>
 					<Edit />
@@ -88,7 +94,16 @@
 			<div class="text-lg">
 				{fee ? `${toSignificant(fee.amount, fee.decimals)} ${fee.symbol}` : 'unknown'}
 			</div>
-			<div class="secondary text-sm">≈ 1.56 EUR now</div>
+			<div class="secondary text-sm">
+				{fee
+					? getFiatAmountText(
+							fiatRates,
+							fiatSymbol,
+							toSignificant(fee.amount, fee.decimals, fee.decimals),
+							fee.symbol,
+					  )
+					: ''}
+			</div>
 		</ReadonlyText>
 		<Container padY={0}>
 			<p

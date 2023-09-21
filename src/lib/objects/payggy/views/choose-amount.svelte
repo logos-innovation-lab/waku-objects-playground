@@ -17,10 +17,14 @@
 	import type { TokenAmount } from '../../schemas'
 	import Layout from '$lib/components/layout.svelte'
 	import { payggyDescriptor } from '..'
+	import type { ExchangeRateRecord } from '$lib/stores/exchangeRates'
+	import { getFiatAmountText } from '$lib/objects/utils'
 
 	export let amount: string
 	export let token: TokenAmount
 	export let tokens: TokenAmount[]
+	export let fiatRates: Map<string, ExchangeRateRecord>
+	export let fiatSymbol: string | undefined
 	export let onViewChange: (view: string) => void
 	export let exitObject: () => void
 
@@ -58,7 +62,9 @@
 					</Dropdown>
 				</div>
 			</Grid>
-			<p class="fiat text-sm">x EUR {amount ? 'now' : ''}</p>
+			<p class="fiat text-sm">
+				{getFiatAmountText(fiatRates, fiatSymbol, amount, token.symbol)}
+			</p>
 		</div>
 		<p
 			class={`balance ${
