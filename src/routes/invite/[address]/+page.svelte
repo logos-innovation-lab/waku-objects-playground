@@ -113,7 +113,6 @@
 		// make a copy of the list of chatIds when the screen is opened so that later we can compare
 		const oldChatIds = new Set($chats.chats.keys())
 		unsubscribe = chats.subscribe((store) => {
-			console.debug({ store, oldChats: oldChatIds })
 			store.chats.forEach((value, key) => {
 				if (!oldChatIds.has(key) && !isGroupChatId(value.chatId)) {
 					// found new private chat
