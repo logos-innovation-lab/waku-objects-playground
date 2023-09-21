@@ -18,6 +18,8 @@
 	//name of the person who sent the message
 	export let senderName: undefined | string = undefined
 
+	export let timestamp: string | undefined = undefined
+
 	const isFF = () => {
 		let browserInfo = navigator.userAgent
 		return browserInfo.includes('Firefox')
@@ -32,9 +34,23 @@
 	<div class={`${bubble ? 'bubble message-content message-text text-lg' : ''}`}>
 		<slot />
 		{#if senderName}
-			<div class="author">
-				{senderName}
+			<div class="bottom">
+				<div class="author">
+					{senderName}
+				</div>
+				{#if timestamp}
+					<div class="timestamp">
+						{timestamp}
+					</div>
+				{/if}
 			</div>
+		{/if}
+		{#if myMessage || !senderName}
+			{#if timestamp}
+				<div class="timestamp">
+					{timestamp}
+				</div>
+			{/if}
 		{/if}
 	</div>
 	{#if $$slots.avatar}
@@ -76,6 +92,8 @@
 		font-style: italic;
 		margin-left: auto;
 		margin-right: 0;
+		flex-direction: row;
+		justify-content: end;
 
 		//The + combinator matches the second element only if it immediately follows the first element.
 		& + .my-message:not(.ff) .message-text {
@@ -89,6 +107,10 @@
 			.message-text {
 				border-bottom-right-radius: 0;
 			}
+		}
+
+		.timestamp {
+			text-align: end;
 		}
 	}
 
@@ -127,6 +149,10 @@
 				}
 			}
 		}
+
+		.timestamp {
+			text-align: end;
+		}
 	}
 	.author {
 		font-family: sans-serif;
@@ -135,5 +161,22 @@
 
 	.no-text .text-lg {
 		line-height: 0;
+	}
+
+	.bottom {
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		flex-grow: 1;
+
+		.timestamp {
+			margin-left: var(--spacing-12);
+		}
+	}
+
+	.timestamp {
+		font-size: var(--font-size-sm);
+		color: var(--color-step-40);
+		font-style: normal;
 	}
 </style>

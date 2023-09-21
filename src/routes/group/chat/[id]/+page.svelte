@@ -30,6 +30,14 @@
 	import Settings from '$lib/components/icons/settings.svelte'
 	import { walletStore } from '$lib/stores/wallet'
 	import type { User } from '$lib/types'
+	import {
+		areDifferentDays,
+		formatTimestamp,
+		formatTimestampSeparator,
+		formatTimestampTime,
+	} from '$lib/utils/format'
+	import ChatDateBadge from '$lib/components/chat-date-badge.svelte'
+	import Timestamp from '$lib/components/timestamp.svelte'
 
 	let div: HTMLElement
 	let autoscroll = true
@@ -192,6 +200,9 @@
 											messages[i].fromAddress !== messages[i + 1]?.fromAddress ||
 											messages[i + 1]?.type !== 'user'}
 										{@const sender = chat.users.find((u) => message.fromAddress === u.address)}
+										{#if i > 0 && areDifferentDays(messages[i].timestamp, messages[i - 1].timestamp)}
+											<ChatDateBadge text={formatTimestampSeparator(message.timestamp)} />
+										{/if}
 										<ChatMessage
 											myMessage={message.fromAddress === wallet.address ? true : false}
 											bubble
@@ -200,6 +211,9 @@
 											senderName={message.fromAddress === wallet.address || !lastMessage
 												? undefined
 												: sender?.name}
+											timestamp={lastMessage
+												? formatTimestampTime(lastMessage ? message.timestamp : 0)
+												: undefined}
 										>
 											{@html replaceAddressesWithNames(textToHTML(htmlize(message.text)))}
 											<svelte:fragment slot="avatar">
