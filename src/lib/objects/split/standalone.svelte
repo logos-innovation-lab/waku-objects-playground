@@ -67,6 +67,8 @@
 			send={args.send}
 			getContract={args.getContract}
 			tokens={args.tokens}
+			fiatRates={args.exchangeRates}
+			fiatSymbol={args.fiatSymbol}
 		/>
 	{/if}
 {:else if args.view === 'accounting'}

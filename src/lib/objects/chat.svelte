@@ -13,6 +13,7 @@
 	import { goto } from '$app/navigation'
 	import routes from '$lib/routes'
 	import { chats } from '$lib/stores/chat'
+	import { DEFAULT_FIAT_SYMBOL, exchangeStore } from '$lib/stores/exchangeRates'
 
 	export let message: DataMessage
 	export let users: User[]
@@ -57,6 +58,8 @@
 			profile: userProfile,
 			users,
 			tokens,
+			exchangeRates: $exchangeStore.exchange,
+			fiatSymbol: DEFAULT_FIAT_SYMBOL,
 			store,
 			viewParams: [],
 			chatName,

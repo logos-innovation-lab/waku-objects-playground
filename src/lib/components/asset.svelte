@@ -6,6 +6,12 @@
 	export let amount: bigint
 	export let decimals: number
 	export let image: string | undefined = undefined
+	export let fiatSymbol: string | undefined = undefined
+	export let fiatExchange: number | undefined = undefined
+
+	const fiatAmount = fiatExchange
+		? Number(toSignificant(amount, decimals, decimals)) * fiatExchange
+		: undefined
 </script>
 
 <div class="asset root">
@@ -16,9 +22,17 @@
 				{name}
 			</span>
 		</div>
-		<div class="text-lg">
-			{toSignificant(amount, decimals)}
-			{token}
+		<div>
+			<div class="text-lg">
+				{toSignificant(amount, decimals)}
+				{token}
+			</div>
+			<div class="text-sm">
+				{#if fiatAmount !== undefined}
+					{`≈ ${fiatAmount.toFixed(2)}`}
+					{fiatSymbol}
+				{/if}
+			</div>
 		</div>
 	</Container>
 </div>

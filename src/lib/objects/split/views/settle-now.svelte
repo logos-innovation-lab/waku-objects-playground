@@ -17,6 +17,8 @@
 	import type { TokenAmount, Token } from '$lib/objects/schemas'
 	import { formatAddress, toSignificant } from '$lib/utils/format'
 	import Info from '../components/info.svelte'
+	import { getFiatAmountText } from '$lib/utils/fiat'
+	import type { ExchangeRateRecord } from '$lib/stores/exchangeRates'
 
 	export let profile: UserType
 	export let instanceId: string
@@ -24,6 +26,8 @@
 	export let splitterAddress: string
 	export let tokens: TokenAmount[]
 	export let token: Token
+	export let fiatRates: Map<string, ExchangeRateRecord>
+	export let fiatSymbol: string | undefined
 
 	export let getContract: GetContract
 	export let exitObject: () => void
@@ -129,7 +133,13 @@
 						<Info title="Transaction fee (max)">
 							<p>{toSignificant(fee, nativeToken.decimals)} {nativeToken.symbol}</p>
 							<p class="text-sm">
-								{toSignificant(fee, nativeToken.decimals)} ≈ TODO DAI
+								{toSignificant(fee, nativeToken.decimals)}
+								{getFiatAmountText(
+									fiatRates,
+									fiatSymbol,
+									toSignificant(fee, nativeToken.decimals),
+									nativeToken.symbol,
+								)}
 							</p>
 						</Info>
 						<ReadonlyText marginBottom={0} align="center">

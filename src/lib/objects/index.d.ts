@@ -3,6 +3,7 @@ import type { DataMessage } from '$lib/stores/chat'
 import type { ComponentType } from 'svelte'
 import type { Transaction, User, TransactionState } from './schemas'
 import type { Contract, Interface } from 'ethers'
+import type { ExchangeRateRecord } from '$lib/stores/exchangeRates'
 
 export interface WakuObjectAdapter {
 	getTransaction(txHash: string): Promise<Transaction | undefined>
@@ -30,6 +31,8 @@ export interface WakuObjectState {
 	readonly profile: User
 	readonly users: User[]
 	readonly tokens: TokenAmount[]
+	readonly exchangeRates: Map<string, ExchangeRateRecord>
+	readonly fiatSymbol: string
 	readonly chatName: string
 }
 

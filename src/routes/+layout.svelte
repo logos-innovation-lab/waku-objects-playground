@@ -11,8 +11,10 @@
 
 	import { walletStore } from '$lib/stores/wallet'
 	import { theme } from '$lib/stores/theme'
+	import { exchangeStore } from '$lib/stores/exchangeRates'
 
 	let unsubscribeWalletStore: (() => void) | undefined = undefined
+	let unsubscribeExchangeStore: (() => void) | undefined = undefined
 
 	onMount(() => {
 		unsubscribeWalletStore = walletStore.subscribe(({ wallet }) => {
@@ -22,11 +24,17 @@
 				adapter.onLogOut()
 			}
 		})
+
+		const MINUTE = 1000 * 60
+		const interval = setInterval(exchangeStore.update, MINUTE)
+
+		unsubscribeExchangeStore = () => clearInterval(interval)
 	})
 
 	onDestroy(() => {
 		if ($walletStore.wallet) adapter.onLogOut()
 		if (unsubscribeWalletStore) unsubscribeWalletStore()
+		if (unsubscribeExchangeStore) unsubscribeExchangeStore()
 	})
 
 	$: changeColors($theme.baseColor, $theme.darkMode)
