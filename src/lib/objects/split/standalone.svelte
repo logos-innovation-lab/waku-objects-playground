@@ -127,7 +127,7 @@
 		send={args.send}
 		exitObject={exitObject(5)}
 		getContract={args.getContract}
-		users={args.users}
+		users={args.store?.users ?? args.users.map((u) => u.address)}
 		splitterAddress={args.store?.splitterAddress}
 		instanceId={args.instanceId}
 	/>
