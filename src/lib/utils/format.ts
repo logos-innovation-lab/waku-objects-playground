@@ -96,3 +96,57 @@ export function formatDateAndTime(timestamp: number) {
 	const dateTime = timeFormat.format(date)
 	return `${dateString} at ${dateTime}`
 }
+
+export function formatTimestamp(timestamp: number, currentDate = new Date()) {
+	if (timestamp <= 0) {
+		return ''
+	}
+
+	const locale = new Intl.DateTimeFormat().resolvedOptions().locale
+	const date = new Date(timestamp)
+
+	// today at 00:00
+	const today = new Date(
+		currentDate.getFullYear(),
+		currentDate.getMonth(),
+		currentDate.getDate(),
+		0,
+		0,
+		0,
+		0,
+	)
+
+	// a week before `today`
+	// this is used for the calculating a day, but it should not include
+	// the same day twice, hence we only count the last 6 days
+	const lastWeek = new Date(today.valueOf() - 6 * 24 * 60 * 60 * 1000)
+
+	// if it is today, show only the time with a 24 hour clock
+	if (timestamp >= today.valueOf()) {
+		const timeFormat = new Intl.DateTimeFormat(locale, {
+			hour: 'numeric',
+			minute: 'numeric',
+			hour12: false,
+		})
+		const dateTime = timeFormat.format(date)
+
+		return dateTime
+	}
+
+	// if it is last week, show only the day of the week
+	if (timestamp >= lastWeek.valueOf()) {
+		const dayFormat = new Intl.DateTimeFormat(locale, {
+			weekday: 'short',
+		})
+
+		return dayFormat.format(date)
+	}
+
+	// if it is older than a week, show the month and day
+	const dateFormat = new Intl.DateTimeFormat(locale, {
+		month: 'short',
+		day: 'numeric',
+	})
+
+	return dateFormat.format(date)
+}

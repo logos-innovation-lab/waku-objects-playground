@@ -20,6 +20,7 @@
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 	import Layout from '$lib/components/layout.svelte'
 	import Events from '$lib/components/icons/events.svelte'
+	import { formatTimestamp } from '$lib/utils/format'
 
 	$: orderedChats = Array.from($chats.chats)
 		.map(([, chat]) => chat)
@@ -183,6 +184,9 @@
 															{chat.unread}
 														</Badge>
 													{/if}
+												</span>
+												<span class="timestamp">
+													{formatTimestamp(lastMessage?.timestamp ?? 0)}
 												</span>
 											</div>
 											<p class={`message text-serif ${myMessage ? 'my-message' : ''}`}>

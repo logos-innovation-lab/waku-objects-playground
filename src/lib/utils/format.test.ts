@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { toDecimal, toSignificantString, toBigInt } from './format'
+import { toDecimal, toSignificantString, toBigInt, formatTimestamp } from './format'
 
 describe('toDecimal', () => {
 	const testValues = [
@@ -52,6 +52,27 @@ describe('toBigInt', () => {
 	testValues.forEach(({ value, decimals, expectedOut }) => {
 		it(`with value=${value} and decimals=${decimals} should return ${expectedOut}`, () => {
 			expect(toBigInt(value, decimals)).toEqual(expectedOut)
+		})
+	})
+})
+
+describe('formatTimestamp', () => {
+	const currentDate = new Date(1695301187859)
+	const testValues = [
+		{ timestamp: 1695292194040, expectedOut: '12:29' },
+		{ timestamp: 1695292052039, expectedOut: '12:27' },
+		{ timestamp: 1695215231556, expectedOut: 'Wed' },
+		{ timestamp: 1695213720514, expectedOut: 'Wed' },
+		{ timestamp: 1695213620936, expectedOut: 'Wed' },
+		{ timestamp: 1695136556259, expectedOut: 'Tue' },
+		{ timestamp: 1695062899168, expectedOut: 'Mon' },
+		{ timestamp: 1694447288453, expectedOut: 'Sep 11' },
+		{ timestamp: 1694258558099, expectedOut: 'Sep 9' },
+	]
+
+	testValues.forEach(({ timestamp, expectedOut }) => {
+		it(`with timestamp=${timestamp} should return ${expectedOut}`, () => {
+			expect(formatTimestamp(timestamp, currentDate)).toEqual(expectedOut)
 		})
 	})
 })
