@@ -209,11 +209,11 @@
 					chats
 				</p>
 				<Container direction="row" justify="center" gap={12} alignItems="center" padY={0}>
-					<Button variant="strong" on:click={() => startChat(wallet.address)}>
+					<Button align="block" variant="strong" on:click={() => startChat(wallet.address)}>
 						<CopyLink />
 						Start new chat
 					</Button>
-					<Button on:click={() => decline()}>
+					<Button align="block" on:click={() => decline()}>
 						<Close />
 						Decline
 					</Button>
