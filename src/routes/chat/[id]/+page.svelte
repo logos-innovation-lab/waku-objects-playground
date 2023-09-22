@@ -105,7 +105,7 @@
 					.filter(
 						(chat) =>
 							isGroupChatId(chat.chatId) &&
-							chat.users.find((user) => user.address === wallet.address),
+							chat.users.find((user) => user.address === inviter?.address),
 					)
 					.map((chat) => `"${chat.name}"`)
 					.slice(0, 1)}
