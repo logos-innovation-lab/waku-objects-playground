@@ -110,16 +110,20 @@
 	}
 
 	onMount(() => {
-		// make a copy of the list of chatIds when the screen is opened so that later we can compare
-		const oldChatIds = new Set($chats.chats.keys())
-		unsubscribe = chats.subscribe((store) => {
-			store.chats.forEach((value, key) => {
-				if (!oldChatIds.has(key) && !isGroupChatId(value.chatId)) {
-					// found new private chat
-					goto(routes.CHAT(value.chatId))
-				}
+		// when you show your QR code and link to someone, start looking for changes in the contacts
+		// and if a new contact is detected, redirect to their chat page
+		if (!$chats.loading && $page.params.address === $walletStore.wallet?.address) {
+			// make a copy of the list of chatIds when the screen is opened so that later we can compare
+			const oldChatIds = new Set($chats.chats.keys())
+			unsubscribe = chats.subscribe((store) => {
+				store.chats.forEach((value, key) => {
+					if (!oldChatIds.has(key) && !isGroupChatId(value.chatId)) {
+						// found new private chat
+						goto(routes.CHAT(value.chatId))
+					}
+				})
 			})
-		})
+		}
 	})
 
 	onDestroy(() => {
