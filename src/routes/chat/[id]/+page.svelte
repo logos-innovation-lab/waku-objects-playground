@@ -121,11 +121,11 @@
 					</p>
 					<Spacer />
 					<Container direction="row" justify="center" gap={12} alignItems="center" padY={0}>
-						<Button align="center" variant="strong" on:click={() => join()}>
+						<Button align="block" variant="strong" on:click={() => join()}>
 							<Checkmark />
 							Start chatting
 						</Button>
-						<Button align="left" on:click={() => decline()}>
+						<Button align="block" on:click={() => decline()}>
 							<Close />
 							Decline
 						</Button>
