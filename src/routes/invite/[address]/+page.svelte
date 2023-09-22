@@ -6,6 +6,7 @@
 	import Checkmark from '$lib/components/icons/checkmark.svelte'
 	import Events from '$lib/components/icons/events.svelte'
 	import CopyLink from '$lib/components/icons/copy-link.svelte'
+	import Close from '$lib/components/icons/close.svelte'
 
 	import Button from '$lib/components/button.svelte'
 	import Container from '$lib/components/container.svelte'
@@ -109,6 +110,10 @@
 		goto(routes.CHAT(chatId))
 	}
 
+	async function decline() {
+		goto(routes.HOME)
+	}
+
 	onMount(() => {
 		// when you show your QR code and link to someone, start looking for changes in the contacts
 		// and if a new contact is detected, redirect to their chat page
@@ -203,10 +208,16 @@
 					Connect with {counterParty?.name ?? $page.params.address} and start a private chat on Waku
 					chats
 				</p>
-				<Button on:click={() => startChat(wallet.address)}>
-					<CopyLink />
-					Start new chat
-				</Button>
+				<Container direction="row" justify="center" gap={12} alignItems="center" padY={0}>
+					<Button align="block" variant="strong" on:click={() => startChat(wallet.address)}>
+						<CopyLink />
+						Start new chat
+					</Button>
+					<Button align="block" on:click={() => decline()}>
+						<Close />
+						Decline
+					</Button>
+				</Container>
 			</Container>
 		{/if}
 	</AuthenticatedOnly>
