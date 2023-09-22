@@ -173,8 +173,6 @@ export async function estimateSettleDebt(
 	if (!provider) throw new Error('Could not estimate transaction fee')
 
 	return calculateFee(provider, gasEstimate)
-
-	return 0n
 }
 
 export async function getBalances(
