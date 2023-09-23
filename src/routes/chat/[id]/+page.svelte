@@ -144,14 +144,14 @@
 							<div class="messages-inner">
 								<!-- Chat bubbles -->
 								{#each messages as message, i}
+									{#if i === 0 || (i > 0 && areDifferentDays(messages[i].timestamp, messages[i - 1].timestamp))}
+										<ChatDateBadge text={formatTimestampSeparator(message.timestamp)} />
+									{/if}
 									{#if message.type === 'user' && message.text?.length > 0}
 										{@const lastMessage =
 											i + 1 === messages.length ||
 											messages[i].fromAddress !== messages[i + 1]?.fromAddress ||
 											messages[i + 1]?.type !== 'user'}
-										{#if i > 0 && areDifferentDays(messages[i].timestamp, messages[i - 1].timestamp)}
-											<ChatDateBadge text={formatTimestampSeparator(message.timestamp)} />
-										{/if}
 										<ChatMessage
 											myMessage={message.fromAddress === wallet.address ? true : false}
 											bubble
