@@ -150,3 +150,69 @@ export function formatTimestamp(timestamp: number, currentDate = new Date()) {
 
 	return dateFormat.format(date)
 }
+
+export function formatTimestampSeparator(timestamp: number, currentDate = new Date()) {
+	if (timestamp <= 0) {
+		return ''
+	}
+
+	const locale = new Intl.DateTimeFormat().resolvedOptions().locale
+	const date = new Date(timestamp)
+
+	// today at 00:00
+	const today = new Date(
+		currentDate.getFullYear(),
+		currentDate.getMonth(),
+		currentDate.getDate(),
+		0,
+		0,
+		0,
+		0,
+	)
+
+	const yesterday = new Date(today.valueOf() - 24 * 60 * 60 * 1000)
+
+	if (timestamp >= today.valueOf()) {
+		return 'Today'
+	}
+
+	if (timestamp >= yesterday.valueOf()) {
+		return 'Yesterday'
+	}
+
+	const dateFormat = new Intl.DateTimeFormat(locale, {
+		month: 'short',
+		day: 'numeric',
+	})
+
+	const dayFormat = new Intl.DateTimeFormat(locale, {
+		weekday: 'short',
+	})
+
+	return `${dayFormat.format(date)}, ${dateFormat.format(date)}`
+}
+
+export function areDifferentDays(timestampA: number, timestampB: number): boolean {
+	const sepA = formatTimestampSeparator(timestampA)
+	const sepB = formatTimestampSeparator(timestampB)
+	return sepA !== sepB
+}
+
+export function formatTimestampTime(timestamp: number) {
+	if (timestamp <= 0) {
+		return ''
+	}
+
+	const locale = new Intl.DateTimeFormat().resolvedOptions().locale
+	const date = new Date(timestamp)
+
+	// if it is today, show only the time with a 24 hour clock
+	const timeFormat = new Intl.DateTimeFormat(locale, {
+		hour: 'numeric',
+		minute: 'numeric',
+		hour12: false,
+	})
+	const dateTime = timeFormat.format(date)
+
+	return dateTime
+}

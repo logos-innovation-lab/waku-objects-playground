@@ -26,6 +26,12 @@
 	import Spacer from '$lib/components/spacer.svelte'
 	import Checkmark from '$lib/components/icons/checkmark.svelte'
 	import Close from '$lib/components/icons/close.svelte'
+	import {
+		areDifferentDays,
+		formatTimestampSeparator,
+		formatTimestampTime,
+	} from '$lib/utils/format'
+	import ChatDateBadge from '$lib/components/chat-date-badge.svelte'
 
 	let div: HTMLElement
 	let autoscroll = true
@@ -137,11 +143,21 @@
 						<div class="messages">
 							<div class="messages-inner">
 								<!-- Chat bubbles -->
-								{#each messages as message}
+								{#each messages as message, i}
+									{#if i === 0 || (i > 0 && areDifferentDays(messages[i].timestamp, messages[i - 1].timestamp))}
+										<ChatDateBadge text={formatTimestampSeparator(message.timestamp)} />
+									{/if}
 									{#if message.type === 'user' && message.text?.length > 0}
+										{@const lastMessage =
+											i + 1 === messages.length ||
+											messages[i].fromAddress !== messages[i + 1]?.fromAddress ||
+											messages[i + 1]?.type !== 'user'}
 										<ChatMessage
 											myMessage={message.fromAddress === wallet.address ? true : false}
 											bubble
+											timestamp={lastMessage
+												? formatTimestampTime(lastMessage ? message.timestamp : 0)
+												: undefined}
 										>
 											{@html textToHTML(message.text)}
 										</ChatMessage>
