@@ -29,6 +29,7 @@ export type Balance = z.infer<typeof BalanceSchema>
 export const StoreSchema = z.object({
 	splitterAddress: z.string(),
 	token: TokenSchema,
+	users: z.array(AddressSchema),
 	balances: z.array(BalanceSchema),
 	payments: z.array(PaymentSchema),
 	expenses: z.array(ExpenseSchema),

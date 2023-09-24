@@ -30,7 +30,7 @@
 	export let images: string[]
 	export let chatName: string
 	export let profile: User
-	export let users: User[]
+	export let users: string[]
 	export let splitterAddress: string | undefined
 	export let instanceId: string
 	export let token: Token
@@ -42,22 +42,15 @@
 	let transactionSent = false
 	let fee: bigint | undefined = undefined
 
-	async function estimateFee(users: User[], amount: string, token: Token) {
-		const members = users.map((u) => u.address)
+	async function estimateFee(users: string[], amount: string, token: Token) {
 		let amnt = toBigInt(amount, token.decimals)
 		let fee = 0n
 		let splitContractAddress = splitterAddress
 
 		if (!splitContractAddress) {
-			fee = await estimateCreateSplitterContract(getContract, members)
+			fee = await estimateCreateSplitterContract(getContract, users)
 		}
-		fee += await estimateAddExpense(
-			getContract,
-			splitContractAddress,
-			amnt,
-			profile.address,
-			members,
-		)
+		fee += await estimateAddExpense(getContract, splitContractAddress, amnt, profile.address, users)
 
 		return fee
 	}
@@ -70,11 +63,9 @@
 	async function sendTransactionInternal() {
 		transactionSent = true
 		try {
-			const members = users.map((u) => u.address)
-
 			let splitContractAddress = splitterAddress
 			if (!splitContractAddress) {
-				splitContractAddress = await createSplitterContract(getContract, members)
+				splitContractAddress = await createSplitterContract(getContract, users)
 			}
 
 			let amnt = toBigInt(amount, token.decimals)
@@ -83,7 +74,7 @@
 				splitContractAddress,
 				amnt,
 				profile.address,
-				members,
+				users,
 			)
 
 			await send({
@@ -98,7 +89,7 @@
 					timestamp: Date.now(),
 					paidBy: profile.address,
 				},
-				users: members,
+				users,
 			})
 
 			exitObject()

@@ -50,7 +50,6 @@ export const payggyDescriptor: WakuObjectSvelteDescriptor = {
 		const token = {
 			...tx.token,
 			name: tx.token.symbol,
-			amount: BigInt(0), // the amount is not really necessary for checkBalance
 		}
 
 		args.checkBalance(token)
@@ -75,7 +74,6 @@ export const payggyDescriptor: WakuObjectSvelteDescriptor = {
 				const token = {
 					...tx.token,
 					name: tx.token.symbol,
-					amount: BigInt(0), // the amount is not really necessary for checkBalance
 				}
 
 				args.checkBalance(token)
