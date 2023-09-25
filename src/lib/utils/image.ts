@@ -62,7 +62,6 @@ const allowedTypes = [
 ]
 
 function assertIsSupported(file: File) {
-	console.log(file.type)
 	if (!file.size || !file.type || !allowedTypes.includes(file.type))
 		throw new Error(`File not supported! File type: ${file.type}`)
 }
@@ -86,7 +85,6 @@ async function convertHeicToPng(heicFile: File): Promise<Blob> {
 		blob: heicFile,
 		toType: 'image/png',
 	})
-	console.log(out)
 	if (Array.isArray(out) && out[0]) return out[0]
 	if (out instanceof Blob) return out
 	throw new Error('Failed to convert HEIC to PNG')
