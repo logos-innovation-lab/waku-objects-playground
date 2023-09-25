@@ -129,7 +129,7 @@ There is no concept of access control in the group protocol, any existing member
 
 ### Other data definitions
 
-The Waku Chat app also uses the Waku network as its storage layer, except for images. Currently all data is stored unencrypted. The app stores both internal data and shared data on the network. Internal data is stored as the serialization of internal application states, such as the chat and object stores and these are read back from waku storage when the app starts.
+The Waku Chat app also uses the Waku network as its storage layer, except for images. Images are currently stored on IPFS but any content-addressed network storage could be used. Currently all data is stored unencrypted. The app stores both internal data and shared data on the network. Internal data is stored as the serialization of internal application states, such as the chat and object stores and these are read back from waku storage when the app starts.
 
 The definitions for these can be found in the [Waku Adapter](https://github.com/logos-innovation-lab/waku-objects-playground/blob/main/src/lib/adapters/waku/index.ts) source code.
 
