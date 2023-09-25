@@ -199,9 +199,11 @@
 													{@const inviter =
 														chat.inviter ||
 														chat.users.find((user) => user.address !== wallet.address)?.name}
-													{inviter} invited you to {isGroupChatId(chat.chatId)
-														? 'group chat'
-														: 'chat privately'}
+													{#if isGroupChatId(chat.chatId)}
+														{inviter} invited you to join this group
+													{:else}
+														{inviter} wants to chat privately
+													{/if}
 												{/if}
 											</p>
 										</div>

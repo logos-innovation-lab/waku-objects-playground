@@ -121,7 +121,7 @@
 					<p class="text-lg text-bold text-center">Chat with "{chat?.name}"?</p>
 					<Spacer height={12} />
 					<p class="text-lg text-center">
-						{chat?.name} invited you to chat privately. {commonGroupNames.length > 0
+						{chat?.name} wants to chat privately. {commonGroupNames.length > 0
 							? `You are both part of the ${commonGroupNames[0]} group.`
 							: ''}
 					</p>
