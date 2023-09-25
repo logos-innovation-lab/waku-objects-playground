@@ -58,11 +58,38 @@ const allowedTypes = [
 	'image/svg+xml',
 	'image/tiff',
 	'image/webp',
+	'image/heic',
 ]
 
 function assertIsSupported(file: File) {
+	console.log(file.type)
 	if (!file.size || !file.type || !allowedTypes.includes(file.type))
-		throw new Error('File not supported!')
+		throw new Error(`File not supported! File type: ${file.type}`)
+}
+
+async function getFile(file: File): Promise<File> {
+	if (file.type === 'image/heic') {
+		return new File([await convertHeicToPng(file)], file.name, { type: 'image/png' })
+	}
+	return file
+}
+
+/**
+ * Convert a HEIC file to PNG format.
+ *
+ * @param heicFile The HEIC file to be converted.
+ * @returns A promise that resolves to a Blob in PNG format.
+ */
+async function convertHeicToPng(heicFile: File): Promise<Blob> {
+	const heic2any = await import('heic2any')
+	const out = await heic2any.default({
+		blob: heicFile,
+		toType: 'image/png',
+	})
+	console.log(out)
+	if (Array.isArray(out) && out[0]) return out[0]
+	if (out instanceof Blob) return out
+	throw new Error('Failed to convert HEIC to PNG')
 }
 
 /**
@@ -75,36 +102,34 @@ function assertIsSupported(file: File) {
  *
  * @returns Promise that resolves into the clipped and resized image as base64 string
  */
-export function clipAndResize(file: File, width: number, height: number): Promise<string> {
+export async function clipAndResize(file: File, width: number, height: number): Promise<string> {
+	assertIsSupported(file)
+
+	const f = await getFile(file)
+
 	return new Promise((resolve, reject) => {
-		assertIsSupported(file)
+		const reader = new FileReader()
+		reader.readAsDataURL(f)
+		reader.onerror = (error) => reject(error)
+		reader.onload = (event) => {
+			const src = event?.target?.result
 
-		try {
-			const reader = new FileReader()
-			reader.readAsDataURL(file)
-			reader.onload = (event) => {
-				const src = event?.target?.result
+			if (!src || typeof src !== 'string') throw new Error('Failed to load the image source')
 
-				if (!src || typeof src !== 'string') throw new Error('Failed to load the image source')
+			const img = new Image()
+			img.src = src
+			img.onload = () => {
+				const dimensions = getClipDimensions(img.width, img.height, width, height)
+				const elem = document.createElement('canvas')
+				elem.width = dimensions.dw >= 0 ? Math.min(width, dimensions.width) : width
+				elem.height = dimensions.dh >= 0 ? Math.min(height, dimensions.height) : height
+				const ctx = elem.getContext('2d')
 
-				const img = new Image()
-				img.src = src
-				img.onload = () => {
-					const dimensions = getClipDimensions(img.width, img.height, width, height)
-					const elem = document.createElement('canvas')
-					elem.width = dimensions.dw >= 0 ? Math.min(width, dimensions.width) : width
-					elem.height = dimensions.dh >= 0 ? Math.min(height, dimensions.height) : height
-					const ctx = elem.getContext('2d')
+				if (!ctx) throw new Error('Failed to create canvas context')
 
-					if (!ctx) throw new Error('Failed to create canvas context')
-
-					ctx.drawImage(img, dimensions.dw, dimensions.dh, dimensions.width, dimensions.height)
-					resolve(ctx.canvas.toDataURL())
-				}
+				ctx.drawImage(img, dimensions.dw, dimensions.dh, dimensions.width, dimensions.height)
+				resolve(ctx.canvas.toDataURL())
 			}
-			reader.onerror = (error) => reject(error)
-		} catch (error) {
-			reject(error)
 		}
 	})
 }
@@ -146,36 +171,33 @@ export function getResizeDimensions(
  *
  * @returns Promise that resolves into the resized image as base64 string
  */
-export function resize(file: File, maxWidth?: number, maxHeight?: number): Promise<string> {
+export async function resize(file: File, maxWidth?: number, maxHeight?: number): Promise<string> {
+	assertIsSupported(file)
+
+	const f = await getFile(file)
 	return new Promise((resolve, reject) => {
-		assertIsSupported(file)
+		const reader = new FileReader()
+		reader.readAsDataURL(f)
+		reader.onerror = (error) => reject(error)
+		reader.onload = (event) => {
+			const src = event?.target?.result
 
-		try {
-			const reader = new FileReader()
-			reader.readAsDataURL(file)
-			reader.onload = (event) => {
-				const src = event?.target?.result
+			if (!src || typeof src !== 'string') throw new Error('Failed to load the image source')
 
-				if (!src || typeof src !== 'string') throw new Error('Failed to load the image source')
+			const img = new Image()
+			img.src = src
+			img.onload = () => {
+				const dimensions = getResizeDimensions(img.width, img.height, maxWidth, maxHeight)
+				const elem = document.createElement('canvas')
+				elem.width = dimensions.width
+				elem.height = dimensions.height
+				const ctx = elem.getContext('2d')
 
-				const img = new Image()
-				img.src = src
-				img.onload = () => {
-					const dimensions = getResizeDimensions(img.width, img.height, maxWidth, maxHeight)
-					const elem = document.createElement('canvas')
-					elem.width = dimensions.width
-					elem.height = dimensions.height
-					const ctx = elem.getContext('2d')
+				if (!ctx) throw new Error('Failed to create canvas context')
 
-					if (!ctx) throw new Error('Failed to create canvas context')
-
-					ctx.drawImage(img, 0, 0, elem.width, elem.height)
-					resolve(ctx.canvas.toDataURL())
-				}
+				ctx.drawImage(img, 0, 0, elem.width, elem.height)
+				resolve(ctx.canvas.toDataURL())
 			}
-			reader.onerror = (error) => reject(error)
-		} catch (error) {
-			reject(error)
 		}
 	})
 }
