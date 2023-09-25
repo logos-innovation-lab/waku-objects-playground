@@ -300,6 +300,7 @@
 
 	.timestamp {
 		font-size: var(--font-size-sm);
+		font-family: sans-serif;
 		color: var(--color-step-40);
 		margin-left: auto;
 	}

@@ -178,5 +178,6 @@
 		font-size: var(--font-size-sm);
 		color: var(--color-step-40);
 		font-style: normal;
+		font-family: sans-serif;
 	}
 </style>
