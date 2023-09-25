@@ -354,12 +354,10 @@ export default class WakuAdapter implements Adapter {
 			return
 		}
 
-		const updatedGroupChat = {
-			...groupChat,
-			name: name ?? groupChat.name,
-			avatar: avatar ?? groupChat.avatar,
-		}
-		await ws.setDoc<StorageChat>('group-chats', chatId, updatedGroupChat)
+		groupChat.name = name ?? groupChat.name
+		groupChat.avatar = avatar ?? groupChat.avatar
+
+		await ws.setDoc<StorageChat>('group-chats', chatId, groupChat)
 	}
 
 	async sendChatMessage(wallet: BaseWallet, chatId: string, text: string): Promise<void> {
