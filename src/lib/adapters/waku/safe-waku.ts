@@ -196,7 +196,7 @@ export class SafeWaku {
 				this.log(`⁉️ Error while resubscribing: ${e}`)
 
 				// sleep to avoid infinite looping
-				await sleep(100)
+				await sleep(1_000)
 			}
 		}
 
