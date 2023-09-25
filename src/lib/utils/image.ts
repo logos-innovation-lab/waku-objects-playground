@@ -59,6 +59,7 @@ const allowedTypes = [
 	'image/tiff',
 	'image/webp',
 	'image/heic',
+	'image/heif',
 ]
 
 function assertIsSupported(file: File) {
