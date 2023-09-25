@@ -2,17 +2,17 @@
 
 ## Table of Contents
 
-- Overview
-  - Terminology
-- Waku Objects Chat Protocol
+- [Overview](#overview)
+  - [Terminology](#terminology)
+- [Waku Objects Chat Protocol](#waku-objects-chat-protocol)
 
-  - Message types
-    - UserMessage type
-    - InviteMessage type
-    - DataMessage type
-  - Private chat
-  - Group chat
-  - Other data definitions
+  - [Message types](#message-types)
+    - [UserMessage type](#usermessage-type)
+    - [InviteMessage type](#invitemessage-type)
+    - [DataMessage type](#datamessage-type)
+  - [Private chat](#private-chat)
+  - [Group chat](#group-chat)
+  - [Other data definitions](#other-data-definitions)
 
 - Waku Object SDK
   - Overview
