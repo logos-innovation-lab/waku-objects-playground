@@ -70,6 +70,34 @@ const chiadoBlockchain: BlockchainNetwork = {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
+const gnosisBlockchain: BlockchainNetwork = {
+	name: 'Gnosis',
+	provider: 'https://rpc.gnosischain.com/',
+	explorer: {
+		name: 'Blockscout',
+		url: 'https://gnosis.blockscout.com',
+	},
+	nativeToken: {
+		name: 'xDai',
+		symbol: 'xDai',
+		decimals: 18,
+		image: 'https://docs.gnosischain.com/img/tokens/xdai.png',
+	},
+	tokens: [
+		{
+			name: 'GNO',
+			symbol: 'GNO',
+			decimals: 18,
+			image: 'https://docs.gnosischain.com/img/tokens/gno.png',
+			address: '0x9C58BAcC331c9aa871AFD802DB6379a98e80CEdb',
+		},
+	],
+	objects: {
+		splitterFactory: '0x941DDB22a33FC753d3E7b82cc34c47Ee605e60a3',
+	},
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const sepoliaBlockchain: BlockchainNetwork = {
 	name: 'Sepolia testnet',
 	provider: 'https://rpc2.sepolia.org/ ',
@@ -88,7 +116,7 @@ const sepoliaBlockchain: BlockchainNetwork = {
 	},
 }
 
-export const defaultBlockchainNetwork = chiadoBlockchain
+export const defaultBlockchainNetwork = gnosisBlockchain
 
 export function getProvider(): Provider {
 	const providerUrl = defaultBlockchainNetwork.provider
