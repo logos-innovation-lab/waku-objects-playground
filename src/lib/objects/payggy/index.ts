@@ -9,7 +9,7 @@ export const PAYGGY_OBJECT_ID = 'payggy'
 export const payggyDescriptor: WakuObjectSvelteDescriptor = {
 	objectId: PAYGGY_OBJECT_ID,
 	name: 'Payggy',
-	description: 'Send or request payments',
+	description: 'Send payments to chat members',
 	logo,
 
 	wakuObject: ChatComponent,
