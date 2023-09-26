@@ -25,7 +25,7 @@
 
 Waku Objects is an open, modular system for transactional mini-applications to be built inside a chat application. Open, because it uses open standards for interoperability and provides a default [web based implementation](https://www.wakuplay.im/). Modular, because it may be implemented in any chat application that supports structured data messages that are sent alongside user messages. Transactional, because it supports blockchain transactions and smart contract interactions on Ethereum compatible blockchains.
 
-The Waku Object concept enables building social applications, where the social context is provided by the chat (private 1on1 or group at the moment) so that there is already some implied trust between the participants. The Waku Object SDK provides an interface for objects to communicate easily with the other participants' objects and offer safe services without leaking private or personal data.
+The Waku Object concept enables building social applications, where the social context is provided by the chat (private 1on1 or group at the moment) so that there is already some implied trust between the participants. The Waku Object SDK provides an interface for objects to communicate easily with the other participants' objects and aims to offer safe services without leaking private or personal data.
 
 The current implementation uses the [Waku protocol](https://waku.org/) as transport and storage layer. The objects' code may be run in a sandboxed iframe protected by [Content Security Policy](https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP). The communication between the application and the objects are done with JSON serializable data. Native applications may use web views provided by their appropriate platforms to display and communicate with the Waku Objects.
 
@@ -103,9 +103,7 @@ There is a field `type` that is `invite`, the `timestamp` is the number of milli
 
 The private chat is defined as a private conversation between two participants. Each user has a pubsub topic derived from their Ethereum address, where others can send messages. The topic is defined as follows:
 
-```typescript
 `/${topicApp}/${topicVersion}/${contentTopic}/${id}`
-```
 
 Where `topicApp` is `wakuobjects-playground`, `topicVersion` is `1`, `contentTopic` is `private-message` and `id` is the Ethereum address of the user.
 
@@ -119,9 +117,7 @@ The group chat is defined as a group conversation between any number of particip
 
 Each group has their own specific topic that group members need to subscribe to. The topic is defined as follows:
 
-```typescript
-;`/${topicApp}/${topicVersion}/${contentTopic}/${id}`
-```
+`/${topicApp}/${topicVersion}/${contentTopic}/${id}`
 
 Where `topicApp` is `wakuobjects-playground`, `topicVersion` is `1`, `contentTopic` is `private-message` and `id` is the group chat id. Participants can send messages to this topic and then others in the same group will receive it. Currently only user and data messages are considered as legal group chat messages.
 
