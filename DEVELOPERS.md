@@ -104,7 +104,7 @@ There is a field `type` that is `invite`, the `timestamp` is the number of milli
 The private chat is defined as a private conversation between two participants. Each user has a pubsub topic derived from their Ethereum address, where others can send messages. The topic is defined as follows:
 
 ```typescript
-;`/${topicApp}/${topicVersion}/${contentTopic}/${id}`
+`/${topicApp}/${topicVersion}/${contentTopic}/${id}`
 ```
 
 Where `topicApp` is `wakuobjects-playground`, `topicVersion` is `1`, `contentTopic` is `private-message` and `id` is the Ethereum address of the user.
