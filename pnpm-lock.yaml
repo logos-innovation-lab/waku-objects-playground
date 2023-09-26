@@ -65,6 +65,9 @@ devDependencies:
   hardhat:
     specifier: ^2.16.1
     version: 2.16.1(typescript@5.1.6)
+  heic2any:
+    specifier: ^0.0.4
+    version: 0.0.4
   html5-qrcode:
     specifier: ^2.3.8
     version: 2.3.8
@@ -4486,6 +4489,10 @@ packages:
   /he@1.2.0:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
+    dev: true
+
+  /heic2any@0.0.4:
+    resolution: {integrity: sha512-3lLnZiDELfabVH87htnRolZ2iehX9zwpRyGNz22GKXIu0fznlblf0/ftppXKNqS26dqFSeqfIBhAmAj/uSp0cA==}
     dev: true
 
   /hi-base32@0.5.1:
