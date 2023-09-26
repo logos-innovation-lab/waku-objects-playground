@@ -68,7 +68,7 @@ function assertIsSupported(file: File) {
 }
 
 async function getFile(file: File): Promise<File> {
-	if (file.type === 'image/heic') {
+	if (file.type === 'image/heic' || file.type === 'image/heif') {
 		return new File([await convertHeicToPng(file)], file.name, { type: 'image/png' })
 	}
 	return file
