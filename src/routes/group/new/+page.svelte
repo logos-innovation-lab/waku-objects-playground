@@ -24,6 +24,7 @@
 	import Checkbox from '$lib/components/checkbox.svelte'
 	import { uploadPicture } from '$lib/adapters/ipfs'
 	import { genRandomHex } from '$lib/utils'
+	import Loading from '$lib/components/loading.svelte'
 
 	let groupMembers: string[] = []
 	let screen: 'create' | 'details' = 'create'
@@ -59,9 +60,7 @@
 	{#if $chats.loading}
 		<Layout>
 			<Container align="center" gap={6} justify="center">
-				<div class="center">
-					<h2>Loading...</h2>
-				</div>
+				<Loading />
 			</Container>
 		</Layout>
 	{:else if $chats.chats.size === 0}
@@ -179,17 +178,6 @@
 </AuthenticatedOnly>
 
 <style lang="scss">
-	.center {
-		text-align: center;
-		margin-inline: auto;
-		display: flex;
-		flex-direction: column;
-		gap: var(--spacing-6);
-		justify-content: center;
-		align-items: center;
-		place-items: center;
-	}
-
 	.btn-spacing {
 		margin-top: var(--spacing-6);
 		display: flex;

@@ -22,6 +22,7 @@
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 	import Layout from '$lib/components/layout.svelte'
 	import { exchangeStore, DEFAULT_FIAT_SYMBOL } from '$lib/stores/exchangeRates'
+	import Loading from '$lib/components/loading.svelte'
 
 	let copied = false
 	$: address = $walletStore.wallet?.address
@@ -46,7 +47,7 @@
 	<AuthenticatedOnly let:wallet>
 		{#if $profile.loading}
 			<Container align="center" gap={6} justify="center" padX={24}>
-				<h2>Loading...</h2>
+				<Loading />
 			</Container>
 		{:else if $profile.error}
 			<Container align="center" gap={6} justify="center" padX={24}>

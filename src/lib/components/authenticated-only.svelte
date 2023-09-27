@@ -7,9 +7,9 @@
 
 	import { goto } from '$app/navigation'
 
-	import Button from './button.svelte'
-
+	import Button from '$lib/components/button.svelte'
 	import Container from '$lib/components/container.svelte'
+	import Loading from '$lib/components/loading.svelte'
 
 	import ChatBot from '$lib/components/icons/chat-bot.svelte'
 	import Login from '$lib/components/icons/login.svelte'
@@ -27,7 +27,7 @@
 
 {#if $profile.loading || $walletStore.loading}
 	<Container align="center" gap={6} justify="center">
-		<h2>Loading...</h2>
+		<Loading />
 	</Container>
 {:else if $profile.error}
 	<Container align="center" gap={6} justify="center" padX={24}>

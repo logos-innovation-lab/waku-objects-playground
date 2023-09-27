@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
+	import Loading from '$lib/components/loading.svelte'
 	import { SPLIT_TOKEN } from '.'
 	import type { WakuObjectArgs } from '..'
 	import type { DataMessage, Expense, Store } from './schemas'
@@ -40,7 +41,7 @@
 
 {#if args.view === 'expense'}
 	{#if expense === undefined}
-		<p>Loading...</p>
+		<Loading />
 	{:else}
 		<ExpenseDetail
 			{expense}

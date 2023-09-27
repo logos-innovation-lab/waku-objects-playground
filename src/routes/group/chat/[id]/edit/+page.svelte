@@ -29,6 +29,7 @@
 	import Logout from '$lib/components/icons/logout.svelte'
 	import { walletStore } from '$lib/stores/wallet'
 	import ROUTES from '$lib/routes'
+	import Loading from '$lib/components/loading.svelte'
 
 	$: chatId = $page.params.id
 	$: groupChat = $chats.chats.get(chatId)
@@ -116,7 +117,7 @@
 	{#if $chats.loading}
 		<Layout>
 			<Container align="center" grow gap={6} justify="center">
-				<h2>Loading...</h2>
+				<Loading />
 			</Container>
 		</Layout>
 	{:else if !groupChat}
