@@ -15,11 +15,15 @@
   - [Other data definitions](#other-data-definitions)
 
 - Waku Object SDK
+
   - Overview
   - Types
   - External objects
   - Creating your own object type
   - Existing implementations
+  - Future directions
+
+- Resources
 
 ## Overview
 
@@ -153,3 +157,29 @@ export interface StorageChat {
 The `name` is the display name of the chat and the `avatar` optional field contains an IPFS hash of the chat's profile picture. The topic of the group chat is `/wakuobjects-playground/1/group-chats/${chatId}` where `chatId` is the group chat id.
 
 The definitions for these can be found in the [Waku Adapter Types](https://github.com/logos-innovation-lab/waku-objects-playground/blob/main/src/lib/adapters/waku/types.ts) file.
+
+## Waku Object SDK
+
+### Overview
+
+The Waku Object SDK enables developers to write their own Waku Object implementations. It provides interfaces that wraps the chat context and exposes functionality to objects to interact with other instances or with external services (storage, transactions, smart contracts, etc.).
+
+The SDK is designed in a way so that it is natural to use with reactive UI libraries (which represent the mainstream paradigm on the web) but it is also possible to use it with any kind of applications. The Waku Chat host application is written in Svelte, but other frontend libraries can be used to create objects (see [External objects](#external-objects)) and the system is designed in a way that host applications can be written in any language as long as they can embed Waku Objects in a web view provided by the native system.
+
+### Types
+
+### External objects
+
+### Creating your own object type
+
+### Existing implementations
+
+### Future directions
+
+## Resources
+
+- [Design guidelines](https://www.wakuplay.im/design)
+- [Waku Play website](https://www.wakuplay.im/)
+- [Waku Objects Playground repo](https://github.com/logos-innovation-lab/waku-objects-playground)
+- [Waku Objects repo](https://github.com/logos-innovation-lab/waku-objects)
+- [Luminance library repo](https://github.com/logos-innovation-lab/luminance)
