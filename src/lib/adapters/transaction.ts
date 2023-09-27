@@ -93,7 +93,7 @@ const gnosisBlockchain: BlockchainNetwork = {
 		},
 	],
 	objects: {
-		splitterFactory: '0x941DDB22a33FC753d3E7b82cc34c47Ee605e60a3',
+		splitterFactory: '0xCdE164E4274Ee30dA21cf5407B8FB37A265f623C',
 	},
 }
 
