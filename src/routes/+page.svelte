@@ -11,6 +11,7 @@
 	import Button from '$lib/components/button.svelte'
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
+	import Loading from '$lib/components/loading.svelte'
 
 	// Stores
 	import { profile } from '$lib/stores/profile'
@@ -71,7 +72,7 @@
 		{#if loading}
 			<Layout>
 				<Container align="center" gap={6} justify="center">
-					<h2>Loading...</h2>
+					<Loading />
 				</Container>
 			</Layout>
 		{:else if $chats.error}

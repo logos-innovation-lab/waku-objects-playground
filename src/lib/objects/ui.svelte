@@ -9,6 +9,7 @@
 	import type { User } from '$lib/types'
 	import { objectKey, objectStore } from '$lib/stores/objects'
 	import Container from '$lib/components/container.svelte'
+	import Loading from '$lib/components/loading.svelte'
 	import type { HDNodeWallet } from 'ethers/lib.commonjs'
 	import type { TokenAmount } from './schemas'
 	import { DEFAULT_FIAT_SYMBOL, exchangeStore } from '$lib/stores/exchangeRates'
@@ -88,9 +89,7 @@
 
 {#if loading}
 	<Container align="center" grow gap={6} justify="center">
-		<div class="center">
-			<h2>Loading...</h2>
-		</div>
+		<Loading />
 	</Container>
 {:else if !chat}
 	<Container align="center" grow gap={6} justify="center">

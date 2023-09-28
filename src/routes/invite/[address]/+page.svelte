@@ -31,6 +31,7 @@
 	import { walletStore } from '$lib/stores/wallet'
 	import Avatar from '$lib/components/avatar.svelte'
 	import type { Unsubscriber } from 'svelte/store'
+	import Loading from '$lib/components/loading.svelte'
 
 	// check if the chat already exists
 	$: if ($chats.chats.has($page.params.address)) {
@@ -150,9 +151,7 @@
 	<AuthenticatedOnly let:wallet>
 		{#if wallet && $chats.loading}
 			<Container align="center" gap={6} justify="center">
-				<div class="center">
-					<h2>Loading...</h2>
-				</div>
+				<Loading />
 			</Container>
 		{:else if wallet.address === $page.params.address}
 			<ButtonBlock borderBottom on:click={() => goto(routes.GROUP_NEW)}>

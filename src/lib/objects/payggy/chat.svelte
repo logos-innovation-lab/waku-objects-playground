@@ -17,6 +17,7 @@
 	import Container from '$lib/components/container.svelte'
 	import Spacer from '$lib/components/spacer.svelte'
 	import { payggyDescriptor } from '.'
+	import Loading from '$lib/components/loading.svelte'
 
 	export let message: DataMessage<SendTransactionDataMessage>
 	export let args: WakuObjectArgs
@@ -54,7 +55,7 @@
 				logoAlt={`${payggyDescriptor.name} logo`}
 			/>
 			{#if !args.store || !message.data || !sender || !recipient}
-				Loading...
+				<Loading />
 			{:else if !data}
 				<!-- This is an error state -->
 				Failed to parse store or message data. Check console for details.

@@ -19,6 +19,7 @@
 	import Info from '../components/info.svelte'
 	import { getFiatAmountText } from '$lib/utils/fiat'
 	import type { ExchangeRateRecord } from '$lib/stores/exchangeRates'
+	import Loading from '$lib/components/loading.svelte'
 
 	export let profile: UserType
 	export let instanceId: string
@@ -46,7 +47,7 @@
 	$: splitToken = tokens.find((t) => t.address === token.address)
 	$: hasEnoughFunds = owedAmount && splitToken && owedAmount < splitToken?.amount
 
-	$: if (hasEnoughFunds) {
+	$: if (hasEnoughFunds && !fee && !feeChecking) {
 		feeChecking = true
 		feeError = undefined
 		fee = undefined
@@ -95,7 +96,9 @@
 		<!-- This should never happen -->
 		<p>No native token</p>
 	{:else if owedAmount === undefined}
-		<p>Loading...</p>
+		<Container grow justify="center" align="center">
+			<Loading />
+		</Container>
 	{:else}
 		<Container padX={24} padY={24} alignItems="center">
 			<h1>{chatName} shared expenses</h1>
@@ -152,7 +155,7 @@
 						<p>You don't have enough funds to settle</p>
 					{:else if feeChecking}
 						<Info title="Transaction fee (max)">
-							<p>Loading...</p>
+							<Loading />
 						</Info>
 						<ReadonlyText marginBottom={0} align="center">
 							<p class="text-sm">
