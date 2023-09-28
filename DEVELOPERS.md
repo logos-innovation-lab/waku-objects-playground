@@ -310,7 +310,7 @@ There are two major ways objects can be defined: internal and external. Internal
 
 External objects are independent of the host application and only depend on the Waku Object SDK. They run in a sandboxed environment and communicate using [postMessage API](https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage) internally in the SDK. Therefore they are more portable and more secure.
 
-Currently external object support is at the proof-of-concept stage, most things work (except for `Contract` calls) but it is not yet tested and may be harder to use.
+Currently external object support is at the proof-of-concept stage, most things work (except for `Contract` calls) but it is not tested intensively and may be harder to use.
 
 All the source code for external objects can be found in the [Waku Objects repo](https://github.com/logos-innovation-lab/waku-objects). It is a monorepo that produces two `npm` packages:
 
@@ -340,7 +340,7 @@ The sandbox example is a very simple implementation of an external Waku Object t
 
 External objects need to expose some [metadata](#metadata) so that they can be used in a host application. The `objectId` is usually the name of the `npm` package, so there must be a `name`, `description` and logo exposed as an SVG file. The `name` and `description` is expected to be exposed in a `metadata.json` file in the `object` folder of the package, along with an `index.js` file that contains the code for the object. The sandbox example project provides an example how to do this.
 
-Because there is only one `index.js` is loaded the object may decide if it is rendering a chat widget or a standalone view by querying the style class information of the top-level element called `app`
+Because there is only one `index.js` is loaded the object may decide if it is rendering a chat widget or a standalone view by querying the style class information of the top-level element called `app`:
 
 ```typescript
 document.getElementById('app').class // 'chat' | 'standalone'
@@ -361,6 +361,8 @@ There are many things that can be done to improve the system. Security can be im
 The biggest impact and a low hanging fruit could be to add frontend library specific external adapter that takes care of the mundane details described in the previous two points.
 
 Another could be to make a separate UI library with the components adhering to the design guidelines and the theming capabilities of the app.
+
+Ultimately a goal could be to make external objects as easy to use as internal objects and therefore eliminating the need for internal objects. Then all different chat applications supporting Waku Objects could be augmented with potentially the set of all available object types.
 
 ## Resources
 
