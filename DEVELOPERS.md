@@ -5,7 +5,6 @@
 - [Overview](#overview)
   - [Terminology](#terminology)
 - [Waku Objects Chat Protocol](#waku-objects-chat-protocol)
-
   - [Message types](#message-types)
     - [UserMessage type](#usermessage-type)
     - [InviteMessage type](#invitemessage-type)
@@ -13,19 +12,20 @@
   - [Private chat](#private-chat)
   - [Group chat](#group-chat)
   - [Other data definitions](#other-data-definitions)
-
 - [Waku Object SDK](#waku-object-sdk)
-
   - [Overview](#overview-1)
   - [Types](#types)
-  - [Metadata](#metadata)
-  - [onMessage callback](#onmessage-callback)
-  - [Args](#args)
+    - [Metadata](#metadata)
+    - [onMessage callback](#onmessage-callback)
+    - [Args](#args)
+    - [Adapter](#adapter)
+    - [State](#state)
   - [External objects](#external-objects)
-  - [Adapter](#adapter)
-  - [Sandbox example object](#sandbox-example-object)
+    - [External adapter](#external-adapter)
+    - [Sandbox example object](#sandbox-example-object)
+    - [Package conventions](#package-conventions)
+  - [Create your own Waku Object](#create-your-own-waku-object)
   - [Future directions](#future-directions)
-
 - [Resources](#resources)
 
 ## Overview
@@ -173,7 +173,13 @@ The SDK is designed in a way so that it is natural to use with reactive UI libra
 
 Disclaimer: the Waku Object SDK is currently in an early proof-of-concept state. Most things work, but there are some missing things and rough edges and it is expected that things will move around and break.
 
-// TODO concepts, instance, store, adapter
+### Concepts
+
+Users can create a new instance of a Waku Object by choosing the object from the chat menu, or by receiving a `DataMessage` from one of their contacts who created one. Each Waku Object instance has a random, unique identifier (`instanceId`). By default the instances do not know about each other, however it is possible to use an external resource (e.g. the blockchain) to share the `instanceId`s between instances and therefore make them aware of each other.
+
+Each instance has access to a private persistent store that may be used for storing the internal state. The store is not shared between the instances participating in the chat, but it is unique per user. It is however saved to persistent storage, so it will keep the state after the application is reloaded.
+
+The SDK provides an adapter interface which gives access to external services. Currently only blockchain-related operations are exposed and the goal is hide as much private or personal data from objects in order to minimize data leakage. The adapter can be extended later with other services and host applications may even give users the choice in by approving access by functionality per object.
 
 ### Types
 
@@ -260,6 +266,8 @@ The `store` variable holds the state of the internal store for the object instan
 
 The `view` field can be used to store the navigation state of an object, so that a given URL opens a given screen in standalone mode for the object. The `viewParams` can be used to store extra temporary information in the URL (e.g. transaction hash). The `onViewChange` function can be used to change the `view` and `viewParams` fields.
 
+#### Adapter
+
 The context also contains the adapter interface:
 
 ```typescript
@@ -275,6 +283,8 @@ export interface WakuObjectAdapter {
 ```
 
 The `WakuObjectAdapter` provides basic blockchain functionality and most of these functions are self-explanatory. The `checkBalance` looks up the balance for a certain token and updates the `WakuObjectState` (see later). The `getContract` returns an `ethers` version 6 `Contract` type, when provided a contract `address` and an `abi` imported from a JSON file. Then the functionality provided by the contract can be accessed through the returned `Contract` object, just like in the [ethers library](https://docs.ethers.org/v6/).
+
+#### State
 
 And finally the last piece of `args` is the state:
 
@@ -307,7 +317,7 @@ All the source code for external objects can be found in the [Waku Objects repo]
 - The adapter package called `@waku-objects/adapter`, in the `packages/adapter` folder
 - The sandbox example packaged called `@waku-objects/sandbox-example`, in the `objects/sandbox-example` folder
 
-#### Adapter
+#### External adapter
 
 The adapter package provides the [type definitions](#types) and the functionality to bridge between iframe sandbox and the host application. It exports one function that the external object may call at startup:
 
@@ -326,9 +336,31 @@ By calling the `startEventListener` and providing the callbacks the object may l
 
 The sandbox example is a very simple implementation of an external Waku Object that uses Svelte and the adapter package. It creates a chat widget with a button that can be used to fetch information about a transaction with the help of the SDK. Therefore it is not very useful for end-users, but it demonstrates the usage of the SDK,
 
+#### Package conventions
+
+External objects need to expose some [metadata](#metadata) so that they can be used in a host application. The `objectId` is usually the name of the `npm` package, so there must be a `name`, `description` and logo exposed as an SVG file. The `name` and `description` is expected to be exposed in a `metadata.json` file in the `object` folder of the package, along with an `index.js` file that contains the code for the object. The sandbox example project provides an example how to do this.
+
+Because there is only one `index.js` is loaded the object may decide if it is rendering a chat widget or a standalone view by querying the style class information of the top-level element called `app`
+
+```typescript
+document.getElementById('app').class // 'chat' | 'standalone'
+```
+
+### Create your own Waku Object
+
+Start by creating an empty project and install the `@waku-object/adapter` as dependency. Add a `metadata.json` as described in the [package conventions](#package-conventions) and make sure that the output `index.js` of the project will be put in a folder called `object` alongside with the metadata. For Svelte (Vite) projects you can check the sandbox example how to do it.
+
+Then in the main application file import the `startEventListener` from the `@waku-object/adapter` and call it when the application is mounted. Using the callbacks `onDataMessage` and `onContextChange` can update the local state of the component and trigger a rerender. The object code may access external services through the `args` object.
+
+An important detail is that in order the chat widget renders in an appropriate size it needs to notify the host application about its size after rendered. How this can be done may be different across frontend libraries but usually a call for the `updateSize` function from the `@waku-object/adapter` needs to be done in a lifecycle function. For example in Svelte it must be called from `afterUpdate`.
+
 ### Future directions
 
-// TODO framework specific adapters
+There are many things that can be done to improve the system. Security can be improved by making the Content Security Policy stricter and implementing validations in the external adapter package. There can be external services added to the adapter for decentralised storage or location along with revokable user permissions.
+
+The biggest impact and a low hanging fruit could be to add frontend library specific external adapter that takes care of the mundane details described in the previous two points.
+
+Another could be to make a separate UI library with the components adhering to the design guidelines and the theming capabilities of the app.
 
 ## Resources
 
