@@ -14,6 +14,7 @@
   - [Other data definitions](#other-data-definitions)
 - [Waku Object SDK](#waku-object-sdk)
   - [Overview](#overview-1)
+  - [Concepts](#concepts)
   - [Types](#types)
     - [Metadata](#metadata)
     - [onMessage callback](#onmessage-callback)
@@ -89,7 +90,7 @@ export interface InviteMessage {
 }
 ```
 
-There is a field `type` that is `invite`, the `timestamp` is the number of milliseconds since the Unix Epoch in UTC. The `fromAddress` is the ethereum address of the sender as a string, prefixed with `0x`. The `chatId` field contains the id of the group encoded as string. See the [Group chats](#Group chat) for more information.
+There is a field `type` that is `invite`, the `timestamp` is the number of milliseconds since the Unix Epoch in UTC. The `fromAddress` is the ethereum address of the sender as a string, prefixed with `0x`. The `chatId` field contains the id of the group encoded as string. See the [Group chats](#group-chat) for more information.
 
 #### DataMessage type
 
@@ -171,7 +172,7 @@ The Waku Object SDK enables developers to write their own Waku Object implementa
 
 The SDK is designed in a way so that it is natural to use with reactive UI libraries (which represent the mainstream paradigm on the web) but it is also possible to use it with any kind of applications. The Waku Chat host application is written in Svelte, but other frontend libraries can be used to create objects (see [External objects](#external-objects)) and the system is designed in a way that host applications can be written in any language as long as they can embed Waku Objects in a web view provided by the native system.
 
-Disclaimer: the Waku Object SDK is currently in an early proof-of-concept state. Most things work, but there are some missing things and rough edges and it is expected that things will move around and break.
+**Disclaimer**: the Waku Object SDK is currently in an early proof-of-concept state. Most things work, but there are some missing things and rough edges and it is expected that things will move around and break.
 
 ### Concepts
 
