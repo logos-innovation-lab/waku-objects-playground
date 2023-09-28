@@ -324,13 +324,13 @@ The adapter package provides the [type definitions](#types) and the functionalit
 ```typescript
 interface EventListenerOptions {
 	onDataMessage: (dataMessage: DataMessage, args: WakuObjectArgs) => Promise<void>
-	onContextChange: (state: WakuObjectState, context: WakuObjectContextProps) => Promise<void>
+	onArgsChange: (args: WakuObjectArgs) => Promise<void>
 }
 
 export function startEventListener(options: Partial<EventListenerOptions>)
 ```
 
-By calling the `startEventListener` and providing the callbacks the object may listen to incoming [data messages](#datamessage-type) or context or state changes. The `onDataMessage` is called when there is an incoming data message. This can be used to implement the "backend" logic of an object (e.g. a state machine). The `onContextChange` is called when the `state` or the `context` changes. This can be used to update the UI state when something changes.
+By calling the `startEventListener` and providing the callbacks the object may listen to incoming [data messages](#datamessage-type) or context or state changes. The `onDataMessage` is called when there is an incoming data message. This can be used to implement the "backend" logic of an object (e.g. a state machine). The `onArgsChange` is called when the `args` change. This can be used to update the UI state when something changes.
 
 #### Sandbox example object
 
@@ -350,7 +350,7 @@ document.getElementById('app').class // 'chat' | 'standalone'
 
 Start by creating an empty project and install the `@waku-object/adapter` as dependency. Add a `metadata.json` as described in the [package conventions](#package-conventions) and make sure that the output `index.js` of the project will be put in a folder called `object` alongside with the metadata. For Svelte (Vite) projects you can check the sandbox example how to do it.
 
-Then in the main application file import the `startEventListener` from the `@waku-object/adapter` and call it when the application is mounted. Using the callbacks `onDataMessage` and `onContextChange` can update the local state of the component and trigger a rerender. The object code may access external services through the `args` object.
+Then in the main application file import the `startEventListener` from the `@waku-object/adapter` and call it when the application is mounted. Using the callbacks `onDataMessage` and `onArgsChange` can update the local state of the component and trigger a rerender. The object code may access external services through the `args` object.
 
 An important detail is that in order the chat widget renders in an appropriate size it needs to notify the host application about its size after rendered. How this can be done may be different across frontend libraries but usually a call for the `updateSize` function from the `@waku-object/adapter` needs to be done in a lifecycle function. For example in Svelte it must be called from `afterUpdate`.
 
