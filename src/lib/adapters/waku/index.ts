@@ -512,6 +512,18 @@ export default class WakuAdapter implements Adapter {
 	) {
 		const ws = await this.makeWakustore()
 
+		const groupChat = await ws.getDoc<StorageChat>('group-chats', groupChatId)
+		if (groupChat) {
+			const updatedGroupChat = await this.storageChatToChat(groupChatId, groupChat)
+			chats.updateChat(groupChatId, (chat) => ({
+				...chat,
+				chatId: groupChatId,
+				users: updatedGroupChat.users,
+				name: updatedGroupChat.name,
+				avatar: updatedGroupChat.avatar,
+			}))
+		}
+
 		const groupChatSubscription = await ws.onSnapshot<StorageChat>(
 			ws.docQuery('group-chats', groupChatId),
 			async (groupChat) => {
