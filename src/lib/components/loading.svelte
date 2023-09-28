@@ -1,4 +1,9 @@
 <script lang="ts">
+	/**
+	 * Created by http://tobiasahlin.com/spinkit/
+	 * https://github.com/tobiasahlin/SpinKit
+	 */
+
 	export let size = 40
 </script>
 
