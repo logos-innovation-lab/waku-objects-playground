@@ -265,7 +265,7 @@ export interface WakuObjectContextProps<
 
 The `store` variable holds the state of the internal store for the object instance. The store is not shared between the instances participating in the chat, but it is unique per user. It is however saved to persistent storage, so it will keep the state after the application is reloaded. Usually the store is updated when a `DataMessage` arrives or when the user initiates a UI action.
 
-The `view` field can be used to store the navigation state of an object, so that a given URL opens a given screen in standalone mode for the object. The `viewParams` can be used to store extra temporary information in the URL (e.g. transaction hash). The `onViewChange` function can be used to change the `view` and `viewParams` fields.
+The `view` field can be used to store the navigation state of an object, so that a given URL opens a given screen in standalone mode for the object. The `viewParams` can be used to store extra transient information in the URL (e.g. transaction hash). The `onViewChange` function can be used to change the `view` and `viewParams` fields.
 
 #### Adapter
 
@@ -332,6 +332,12 @@ export function startEventListener(options: Partial<EventListenerOptions>)
 ```
 
 By calling the `startEventListener` and providing the callbacks the object may listen to incoming [data messages](#datamessage-type) or context or state changes. The `onDataMessage` is called when there is an incoming data message. This can be used to implement the "backend" logic of an object (e.g. a state machine). The `onArgsChange` is called when the `args` change. This can be used to update the UI state when something changes.
+
+There is also a function that needs to be called after the object is first rendered and its size is properly calculated in the DOM. This is necessary for the object to look properly in the host application.
+
+```typescript
+export function updateSize()
+```
 
 #### Sandbox example object
 
