@@ -101,9 +101,6 @@ devDependencies:
   svelte-preprocess:
     specifier: ^5.0.4
     version: 5.0.4(sass@1.63.6)(svelte@4.0.3)(typescript@5.1.6)
-  ts-node:
-    specifier: ^10.9.1
-    version: 10.9.1(@types/node@20.5.4)(typescript@5.1.6)
   tsx:
     specifier: ^3.12.8
     version: 3.12.8
@@ -2461,7 +2458,7 @@ packages:
   /@waku-objects/sandbox-example@0.4.0:
     resolution: {integrity: sha512-Op34sv2QliveTFfDQ2EXf7YP3rXO3oJhSDdQC7NenYBarzjSChlu2C1AVVdU0tv8b/wNmlvZ+4Ky0QHvLkOkqA==}
     dependencies:
-      '@waku-objects/adapter': 0.3.0
+      '@waku-objects/adapter': 0.4.0
       ethers: 6.6.4
     transitivePeerDependencies:
       - bufferutil
@@ -5303,7 +5300,7 @@ packages:
       acorn: 8.9.0
       pathe: 1.1.1
       pkg-types: 1.0.3
-      ufo: 1.1.2
+      ufo: 1.2.0
     dev: true
 
   /mnemonist@0.38.5:

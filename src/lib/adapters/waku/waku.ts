@@ -64,7 +64,7 @@ export async function connectWaku(options?: ConnectWakuOptions) {
 	})
 
 	waku.libp2p.addEventListener('peer:connect', () => {
-		if (options?.onConnect && waku.libp2p.getConnections().length > 0) {
+		if (options?.onConnect && waku.libp2p.getConnections().length === 1) {
 			const connections = waku.libp2p.getConnections()
 			options.onConnect(connections)
 		}

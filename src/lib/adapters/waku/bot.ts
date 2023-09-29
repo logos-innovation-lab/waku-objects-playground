@@ -4,11 +4,13 @@
 // [ ] onlu print nonzero errors
 
 import child_process from 'child_process'
-import { PageDirection, type LightNode, type Unsubscribe } from '@waku/interfaces'
+import type { LightNode } from '@waku/interfaces'
 import axios from 'axios'
 
-import { connectWaku, sendMessage, storeDocument } from '$lib/adapters/waku/waku'
+import { storeDocument } from '$lib/adapters/waku/waku'
 import { makeWakustore } from '$lib/adapters/waku/wakustore'
+import { SafeWaku } from './safe-waku'
+import type { InviteMessage, Message, UserMessage } from '$lib/stores/chat'
 
 const BOT_ENDPOINT = process.env.BOT_ENDPOINT || 'http://172.16.246.1:5000/api/v1/chat'
 const BOT_NAME = process.env.BOT_NAME || 'Wendy'
@@ -26,41 +28,17 @@ const botProfile = {
 	avatar: BOT_AVATAR, // IPFS hash of image comes here
 }
 
-export interface UserMessage {
-	type: 'user'
-	timestamp: number
-	fromAddress: string
-	text: string
-}
-
-export interface InviteMessage {
-	type: 'invite'
-	timestamp: number
-	fromAddress: string
-	chatId: string
-}
-
-export type Message = UserMessage | InviteMessage
-
-interface QueuedMessage {
-	chatMessage: Message
-	chatId: string
-}
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const sessions = new Map<string, any>()
 let groupChats = new Set<string>()
 const lastMessages = new Map<string, Message>()
-let subscriptions = new Map<string, Unsubscribe>()
-let isSubscribing = false
 const errors = {
 	numDisconnect: 0,
 	numRequestError: 0,
 	numSendError: 0,
 	numUndefinedResponse: 0,
 }
-const queuedMessages: QueuedMessage[] = []
-let isHandlingMessage = false
+const waku = new SafeWaku()
 
 // run main
 main().catch(console.error)
@@ -79,95 +57,21 @@ async function main() {
 			log(`⁉️  Unhandled rejection`, { reason, promise }),
 		)
 
-		let waku: LightNode | undefined = undefined
-		waku = await connectWaku({
-			onDisconnect: () => {
-				log('❌ disconnected from waku')
-				errors.numDisconnect++
-			},
-			onConnect: () => {
-				log('✅ connected to waku')
-				safeResubscribe(waku)
-			},
-		})
-
+		const lightNode = await waku.connect()
 		log(`🪪 storing profile as ${BOT_NAME} and avatar as ${BOT_AVATAR}`)
-		await storeDocument(waku, 'profile', BOT_ADDRESS, botProfile)
+		await storeDocument(lightNode, 'profile', BOT_ADDRESS, botProfile)
 
-		await subscribe(waku, BOT_ADDRESS, queueMessage)
+		await waku.subscribe(BOT_ADDRESS, undefined, handlePrivateMessage)
 
-		await loadGroupChats(waku)
+		await loadGroupChats(lightNode)
 		for (const groupChatId of groupChats) {
-			await subscribe(waku, groupChatId, queueMessage)
+			await waku.subscribe(groupChatId, undefined, handlePrivateMessage)
 		}
 
 		setInterval(logStats, 60_000)
 	} catch (error) {
 		log(`‼️  Top Level Error: `, { error })
 	}
-}
-
-async function safeResubscribe(waku: LightNode | undefined) {
-	// eslint-disable-next-line no-constant-condition
-	while (true) {
-		try {
-			return await resubscribe(waku)
-		} catch (e) {
-			log(`⁉️  ${e}`)
-		}
-	}
-}
-
-async function resubscribe(waku: LightNode | undefined) {
-	if (!waku) {
-		return
-	}
-
-	if (isSubscribing) {
-		return
-	}
-
-	isSubscribing = true
-
-	const chatIds = subscriptions.keys()
-	for (const unsubscribe of subscriptions.values()) {
-		await unsubscribe()
-	}
-
-	subscriptions = new Map()
-
-	for (const chatId of chatIds) {
-		await subscribe(waku, chatId, queueMessage)
-	}
-
-	isSubscribing = false
-}
-
-async function subscribe(
-	waku: LightNode,
-	chatId: string,
-	callback: (waku: LightNode, message: Message, chatId: string) => Promise<void>,
-) {
-	const lastMessageTime = lastMessages.get(chatId)?.timestamp || 0
-	const startTime = new Date(lastMessageTime + 1)
-	const endTime = new Date()
-	const timeFilter = lastMessageTime ? { startTime, endTime } : { startTime: endTime, endTime }
-
-	const talkEmoji = isGroupChatId(chatId) ? '🗫' : '🗩'
-	log(`${talkEmoji}  subscribe to ${chatId}`)
-
-	const ws = makeWakustore(waku)
-	const subscription = await ws.onSnapshot<Message>(
-		ws.collectionQuery('private-message', chatId, {
-			timeFilter,
-			pageDirection: PageDirection.BACKWARD,
-			pageSize: 1000,
-		}),
-		// TODO serialize the incoming messages
-		(message) => callback(waku, message, chatId),
-	)
-
-	subscriptions.set(chatId, subscription)
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -182,29 +86,7 @@ function logMessage(chatMessage: Message, chatId: string) {
 	log(`${emoji} ${talkEmoji}  ${chatId.slice(0, 6)}`, { chatMessage })
 }
 
-async function queueMessage(waku: LightNode, chatMessage: Message, chatId: string) {
-	queuedMessages.push({
-		chatMessage,
-		chatId,
-	})
-
-	if (isHandlingMessage) {
-		return
-	}
-
-	isHandlingMessage = true
-
-	while (queuedMessages.length > 0) {
-		const queuedMessage = queuedMessages.shift()
-		if (queuedMessage) {
-			await handlePrivateMessage(waku, queuedMessage.chatMessage, queuedMessage.chatId)
-		}
-	}
-
-	isHandlingMessage = false
-}
-
-async function handlePrivateMessage(waku: LightNode, chatMessage: Message, chatId: string) {
+async function handlePrivateMessage(chatMessage: Message, chatId: string) {
 	if (chatMessage.fromAddress !== BOT_ADDRESS) {
 		logMessage(chatMessage, chatId)
 	}
@@ -224,9 +106,9 @@ async function handlePrivateMessage(waku: LightNode, chatMessage: Message, chatI
 
 	switch (chatMessage.type) {
 		case 'invite':
-			return handleInviteMessage(waku, chatMessage)
+			return handleInviteMessage(chatMessage)
 		case 'user':
-			return handleUserMessage(waku, chatMessage, chatId)
+			return handleUserMessage(chatMessage, chatId)
 		default:
 			log('🙈 ignoring unknown message type', { chatMessage })
 	}
@@ -288,7 +170,7 @@ async function safeRequest(request: any) {
 	} while (error)
 }
 
-async function handleUserMessage(waku: LightNode, chatMessage: UserMessage, chatId: string) {
+async function handleUserMessage(chatMessage: UserMessage, chatId: string) {
 	if (isGroupChatId(chatId)) {
 		// ignore messages from self
 		if (chatMessage.fromAddress === BOT_ADDRESS) {
@@ -300,12 +182,12 @@ async function handleUserMessage(waku: LightNode, chatMessage: UserMessage, chat
 			log('🙈 ignoring message not addressed to me')
 			return
 		}
-		return handleSessionUserMessage(waku, chatMessage, chatId)
+		return handleSessionUserMessage(chatMessage, chatId)
 	}
-	return handleSessionUserMessage(waku, chatMessage, chatMessage.fromAddress)
+	return handleSessionUserMessage(chatMessage, chatMessage.fromAddress)
 }
 
-async function handleSessionUserMessage(waku: LightNode, chatMessage: UserMessage, chatId: string) {
+async function handleSessionUserMessage(chatMessage: UserMessage, chatId: string) {
 	const sessionHistory = sessions.get(chatId)
 
 	const name = `@${chatMessage.fromAddress}`
@@ -334,7 +216,7 @@ async function handleSessionUserMessage(waku: LightNode, chatMessage: UserMessag
 
 	const text = isGroupChatId(chatId) ? `@${chatMessage.fromAddress} ${responseText}` : responseText
 
-	await safeSendMessage(waku, chatId, {
+	await waku.sendMessage(chatId, {
 		type: 'user',
 		timestamp: Date.now(),
 		text,
@@ -344,53 +226,22 @@ async function handleSessionUserMessage(waku: LightNode, chatMessage: UserMessag
 	speak(responseText)
 }
 
-async function safeSendMessage(waku: LightNode, id: string, message: Message) {
-	let error = undefined
-	let timeout = 1_000
-
-	const start = Date.now()
-
-	do {
-		try {
-			error = await sendMessage(waku, id, message)
-		} catch (e) {
-			error = e
-		} finally {
-			if (error) {
-				errors.numSendError++
-				log(`⁉️  Error: ${error}`)
-				log(`🕓 Waiting ${timeout} milliseconds...`)
-				await new Promise((r) => setTimeout(r, timeout))
-				if (timeout < 120_000) {
-					timeout += timeout
-				}
-			}
-		}
-	} while (error)
-
-	const elapsed = Date.now() - start
-
-	logMessage(message, id)
-
-	if (elapsed > 1000) {
-		log(`⏰ sending message took ${elapsed} milliseconds`)
-	}
-}
-
 // FIXME temporary hack
 function isGroupChatId(id: string) {
 	return id.length === 64
 }
 
-async function handleInviteMessage(waku: LightNode, message: InviteMessage) {
+async function handleInviteMessage(message: InviteMessage) {
 	if (groupChats.has(message.chatId)) {
 		return
 	}
 
 	groupChats.add(message.chatId)
-	storeGroupChats(waku)
+	if (waku.lightNode) {
+		storeGroupChats(waku.lightNode)
+	}
 
-	await subscribe(waku, message.chatId, queueMessage)
+	await waku.subscribe(message.chatId, undefined, handlePrivateMessage)
 }
 
 async function storeGroupChats(waku: LightNode) {
