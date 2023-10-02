@@ -14,7 +14,6 @@
 		color: var(--color-step-40, var(--color-dark-step-20));
 		padding: var(--spacing-3) var(--spacing-6);
 		text-transform: uppercase;
-		min-width: 22px;
 		text-align: center;
 		white-space: nowrap;
 
