@@ -324,11 +324,12 @@ export default class WakuAdapter implements Adapter {
 			return
 		}
 
-		const updatedGroupChat = {
-			...groupChat,
-			users: groupChat.users.concat(...users),
-		}
-		await ws.setDoc<StorageChat>('group-chats', chatId, updatedGroupChat)
+		const newUsers = groupChat.users.concat(...users)
+		const uniqueUsers = Array.from(new Set(newUsers))
+
+		groupChat.users = uniqueUsers
+
+		await ws.setDoc<StorageChat>('group-chats', chatId, groupChat)
 	}
 
 	async removeFromGroupChat(chatId: string, address: string): Promise<void> {
@@ -457,7 +458,8 @@ export default class WakuAdapter implements Adapter {
 	}
 
 	private async storageChatToChat(chatId: string, storageChat: StorageChat): Promise<Chat> {
-		const userPromises = storageChat.users.map((user) => this.storageProfileToUser(user))
+		const uniqueUsers = Array.from(new Set(storageChat.users))
+		const userPromises = uniqueUsers.map((user) => this.storageProfileToUser(user))
 		const allUsers = await Promise.all(userPromises)
 		const users = allUsers.filter((user) => user) as User[]
 
