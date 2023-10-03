@@ -72,7 +72,7 @@ const chiadoBlockchain: BlockchainNetwork = {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const gnosisBlockchain: BlockchainNetwork = {
 	name: 'Gnosis',
-	provider: 'https://gnosis-erigon.apyos.dev/',
+	provider: 'https://xdai.fairdatasociety.org/',
 	explorer: {
 		name: 'Blockscout',
 		url: 'https://gnosis.blockscout.com',
