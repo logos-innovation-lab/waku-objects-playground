@@ -7,7 +7,8 @@ services:
       --filter=true
       --lightpush=true
       --websocket-support=true
-      --nodekey=7b8d9a670aae6421500b7b3f933d0b5d08b51fcf0f0c2f14cba3a4737c83a228
       --websocket-port=8000
+      --nodekey=7b8d9a670aae6421500b7b3f933d0b5d08b51fcf0f0c2f14cba3a4737c83a228
+      --min-relay-peers-to-publish=0
     ports:
       - 8000:8000/tcp
