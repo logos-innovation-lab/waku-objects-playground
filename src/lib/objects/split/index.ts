@@ -29,7 +29,7 @@ export const splitDescriptor: WakuObjectSvelteDescriptor<Store, DataMessage, Vie
 		}
 
 		if (res.data.type === 'expense') {
-			const { expense, splitterAddress, tokenAddress, users } = res.data
+			const { expense, splitterAddress, tokenAddress, users, collectionName } = res.data
 
 			const token = args.tokens.find((t) => t.address === tokenAddress) ?? SPLIT_TOKEN
 			let balances: Balance[] = []
@@ -52,6 +52,7 @@ export const splitDescriptor: WakuObjectSvelteDescriptor<Store, DataMessage, Vie
 					payments,
 					balances,
 					expenses,
+					collectionName: collectionName ?? s?.collectionName ?? `#${args.instanceId.slice(0, 4)}`,
 				}
 			})
 		}
@@ -71,6 +72,7 @@ export const splitDescriptor: WakuObjectSvelteDescriptor<Store, DataMessage, Vie
 				const payments = s?.payments ?? []
 				const token = s?.token ?? SPLIT_TOKEN
 				const users = s?.users ?? []
+				const collectionName = s?.collectionName ?? `#${args.instanceId.slice(0, 4)}`
 
 				payments.push(payment)
 
@@ -81,6 +83,7 @@ export const splitDescriptor: WakuObjectSvelteDescriptor<Store, DataMessage, Vie
 					payments,
 					balances,
 					expenses,
+					collectionName,
 				}
 			})
 		}

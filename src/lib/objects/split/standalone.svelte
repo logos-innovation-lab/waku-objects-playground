@@ -9,6 +9,8 @@
 	import ActivityHistory from './views/activity-history.svelte'
 
 	import ChooseAmount from './views/choose-amount.svelte'
+	import ChooseCollectionMembers from './views/choose-collection-members.svelte'
+	import ChooseCollectionName from './views/choose-collection-name.svelte'
 	import ChooseExpenseName from './views/choose-expense-name.svelte'
 	import ChooseImages from './views/choose-images.svelte'
 	import Collection from './views/collection.svelte'
@@ -16,11 +18,13 @@
 	import Expenses from './views/expenses.svelte'
 	import SettleNow from './views/settle-now.svelte'
 	import Summary from './views/summary.svelte'
+	import Welcome from './views/welcome.svelte'
 
 	export let args: WakuObjectArgs<Store, DataMessage, View>
 
 	let amount = ''
 	let description = ''
+	let collectionName = ''
 	let images: string[] = []
 	const token = SPLIT_TOKEN
 	$: nativeToken = {
@@ -37,6 +41,11 @@
 
 	let expense: Expense | undefined = undefined
 	$: expense = args.store?.expenses.find((e) => e.txHash === args.viewParams[0])
+	$: {
+		if (!collectionName && args.store) {
+			collectionName = args.store.collectionName
+		}
+	}
 </script>
 
 {#if args.view === 'expense'}
@@ -124,6 +133,7 @@
 		{token}
 		{nativeToken}
 		chainId={args.chainId}
+		collectionName={collectionName ?? `#${args.instanceId.slice(0, 4)}`}
 		profile={args.profile}
 		chatName={args.chatName}
 		send={args.send}
@@ -131,7 +141,6 @@
 		getContract={args.getContract}
 		users={args.store?.users ?? args.users.map((u) => u.address)}
 		splitterAddress={args.store?.splitterAddress}
-		instanceId={args.instanceId}
 	/>
 {:else if args.view === 'images'}
 	<ChooseImages bind:images exitObject={exitObject(4)} goNext={goNext('summary')} {goBack} />
@@ -142,6 +151,22 @@
 		goNext={goNext('images')}
 		{goBack}
 	/>
-{:else}
+{:else if args.view === 'collection-name'}
+	<ChooseCollectionName
+		bind:collectionName
+		instanceId={args.instanceId}
+		exitObject={exitObject(1)}
+		goNext={goNext('collection-members')}
+	/>
+{:else if args.view === 'collection-members'}
+	<ChooseCollectionMembers
+		users={args.users}
+		{goBack}
+		exitObject={exitObject(2)}
+		goNext={exitObject(2)}
+	/>
+{:else if args.view === 'amount' || collectionName !== ''}
 	<ChooseAmount bind:amount exitObject={exitObject(2)} goNext={goNext('name')} {goBack} {token} />
+{:else}
+	<Welcome exitObject={exitObject(1)} {goBack} newCollection={goNext('collection-name')} />
 {/if}
