@@ -72,7 +72,7 @@ const chiadoBlockchain: BlockchainNetwork = {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const gnosisBlockchain: BlockchainNetwork = {
 	name: 'Gnosis',
-	provider: 'https://rpc.gnosischain.com/',
+	provider: 'https://gnosis-erigon.apyos.dev/',
 	explorer: {
 		name: 'Blockscout',
 		url: 'https://gnosis.blockscout.com',
@@ -93,7 +93,7 @@ const gnosisBlockchain: BlockchainNetwork = {
 		},
 	],
 	objects: {
-		splitterFactory: '0xCdE164E4274Ee30dA21cf5407B8FB37A265f623C',
+		splitterFactory: '0x99873C280c0c4A5460AB781e4bcD06f6B5f35717',
 	},
 }
 
