@@ -42,8 +42,8 @@ devDependencies:
     specifier: ^0.4.0
     version: 0.4.0
   '@waku/interfaces':
-    specifier: ^0.0.15
-    version: 0.0.15
+    specifier: ^0.0.18
+    version: 0.0.18
   '@waku/sdk':
     specifier: ^0.0.19
     version: 0.0.19(@multiformats/multiaddr@12.1.3)
@@ -2520,11 +2520,6 @@ packages:
       js-sha3: 0.8.0
     transitivePeerDependencies:
       - supports-color
-    dev: true
-
-  /@waku/interfaces@0.0.15:
-    resolution: {integrity: sha512-l8MDtMtA51nWeeU36lZV07JWMLHmnn7Dm93ihS2lgqWACbhzwOEDZ3alox4T8Um7A3RmnK/WZ5U2Cprs3ukt8w==}
-    engines: {node: '>=16'}
     dev: true
 
   /@waku/interfaces@0.0.18:
