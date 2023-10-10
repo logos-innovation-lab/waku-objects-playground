@@ -32,6 +32,7 @@
 		formatTimestampTime,
 	} from '$lib/utils/format'
 	import ChatDateBadge from '$lib/components/chat-date-badge.svelte'
+	import { userDisplayName } from '$lib/utils/user'
 
 	let div: HTMLElement
 	let autoscroll = true
@@ -101,7 +102,7 @@
 					</Button>
 					<svelte:fragment slot="chat">
 						<Avatar picture={otherUser?.avatar} seed={otherUser?.address} />
-						{otherUser?.name}
+						{userDisplayName(otherUser)}
 					</svelte:fragment>
 				</Header>
 			</svelte:fragment>

@@ -30,6 +30,7 @@
 	import { walletStore } from '$lib/stores/wallet'
 	import ROUTES from '$lib/routes'
 	import Loading from '$lib/components/loading.svelte'
+	import { userDisplayName } from '$lib/utils/user'
 
 	$: chatId = $page.params.id
 	$: groupChat = $chats.chats.get(chatId)
@@ -176,7 +177,7 @@
 											{#if isMe}
 												<span class="username text-italic"> You </span>
 											{:else}
-												<span class="username">{user.name}</span>
+												<span class="username">{userDisplayName(user)}</span>
 											{/if}
 										</div>
 									</div>

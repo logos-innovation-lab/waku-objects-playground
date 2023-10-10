@@ -22,6 +22,7 @@
 	import Layout from '$lib/components/layout.svelte'
 	import Events from '$lib/components/icons/events.svelte'
 	import { formatTimestamp } from '$lib/utils/format'
+	import { userDisplayName } from '$lib/utils/user'
 
 	$: orderedChats = Array.from($chats.chats)
 		.map(([, chat]) => chat)
@@ -175,7 +176,7 @@
 														<Events />
 													{:else}
 														<span class="truncate">
-															{otherUser?.name}
+															{userDisplayName(otherUser)}
 														</span>
 													{/if}
 													{#if !chat.joined}
