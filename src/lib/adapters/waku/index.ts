@@ -276,9 +276,11 @@ export default class WakuAdapter implements Adapter {
 
 	async startChat(address: string, peerAddress: string): Promise<string> {
 		const chatId = peerAddress
-		const user = await this.storageProfileToUser(chatId)
+		let user = await this.storageProfileToUser(chatId)
 		if (!user) {
-			throw 'invalid user'
+			user = {
+				address: peerAddress,
+			}
 		}
 
 		const joined = true
