@@ -9,6 +9,7 @@ import {
 	Contract,
 } from 'ethers'
 import abi from '$lib/abis/erc20.json'
+import { PUBLIC_BLOCKCHAIN } from '$env/static/public'
 
 interface BlockchainExplorer {
 	name: string
@@ -27,7 +28,7 @@ interface BlockchainNetwork {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const testBlockchain: BlockchainNetwork = {
+const localBlockchain: BlockchainNetwork = {
 	name: 'Local testnet',
 	provider: 'http://127.0.0.1:8545',
 	nativeToken: {
@@ -97,26 +98,23 @@ const gnosisBlockchain: BlockchainNetwork = {
 	},
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const sepoliaBlockchain: BlockchainNetwork = {
-	name: 'Sepolia testnet',
-	provider: 'https://rpc2.sepolia.org/ ',
-	explorer: {
-		name: 'Etherscan',
-		url: 'https://sepolia.etherscan.io/',
-	},
-	nativeToken: {
-		name: 'Sepolia ETH',
-		symbol: 'SEP',
-		decimals: 18,
-		image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
-	},
-	objects: {
-		splitterFactory: '0x0',
-	},
-}
+let defaultBlockchainNetwork: BlockchainNetwork
+switch (PUBLIC_BLOCKCHAIN) {
+	case 'local':
+		defaultBlockchainNetwork = localBlockchain
+		break
 
-export const defaultBlockchainNetwork = gnosisBlockchain
+	case 'chiado':
+		defaultBlockchainNetwork = chiadoBlockchain
+		break
+
+	// Defaults to production
+	case 'gnosis':
+	default:
+		defaultBlockchainNetwork = gnosisBlockchain
+		break
+}
+export { defaultBlockchainNetwork }
 
 export function getProvider(): Provider {
 	const providerUrl = defaultBlockchainNetwork.provider
