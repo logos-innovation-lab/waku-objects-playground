@@ -12,6 +12,7 @@ const config: KnipConfig = {
 		'src/lib/objects/external/iframe.svelte',
 		'src/lib/objects/split/types.ts',
 		'src/lib/objects/split/contracts/**/*',
+		'hardhat.config.cjs',
 	],
 	paths: {
 		// This ain't pretty, but Svelte basically does the same

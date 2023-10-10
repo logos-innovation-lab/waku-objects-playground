@@ -16,7 +16,8 @@
 		"cli": "tsx --tsconfig ./.svelte-kit/tsconfig.json --no-warnings ./src/cli/cli.ts",
 		"typechain": "typechain --target ethers-v6 --out-dir ./src/lib/objects/split/contracts/types ./src/lib/objects/split/contracts/abis/*.json",
 		"waku:start": "docker compose -f ./docker-compose.yaml up -d",
-		"waku:stop": "docker kill waku-objects-playground-waku-1"
+		"waku:stop": "docker kill waku-objects-playground-waku-1",
+		"bot": "tsx --tsconfig ./.svelte-kit/tsconfig.json --no-warnings ./src/lib/adapters/waku/bot.ts"
 	},
 	"devDependencies": {
 		"@bonosoft/sveltekit-qrcode": "^0.0.3",
@@ -33,6 +34,7 @@
 		"@waku-objects/sandbox-example": "^0.4.0",
 		"@waku/interfaces": "^0.0.18",
 		"@waku/sdk": "^0.0.19",
+		"axios": "^1.5.0",
 		"copy-to-clipboard": "^3.3.3",
 		"eslint": "^8.44.0",
 		"eslint-config-prettier": "^8.8.0",
