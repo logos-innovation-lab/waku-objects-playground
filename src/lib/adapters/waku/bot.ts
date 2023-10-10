@@ -178,7 +178,7 @@ async function handleUserMessage(chatMessage: UserMessage, chatId: string) {
 			return
 		}
 		// ignore messages not addressed to bot
-		if (!chatMessage.text.startsWith(`@${BOT_ADDRESS}`)) {
+		if (!chatMessage.text.includes(`@${BOT_ADDRESS}`)) {
 			log('🙈 ignoring message not addressed to me')
 			return
 		}
