@@ -9,6 +9,7 @@ import {
 	Contract,
 } from 'ethers'
 import abi from '$lib/abis/erc20.json'
+import { PUBLIC_BLOCKCHAIN } from '$env/static/public'
 
 interface BlockchainExplorer {
 	name: string
@@ -26,8 +27,7 @@ interface BlockchainNetwork {
 	}
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const testBlockchain: BlockchainNetwork = {
+const localBlockchain: BlockchainNetwork = {
 	name: 'Local testnet',
 	provider: 'http://127.0.0.1:8545',
 	nativeToken: {
@@ -41,7 +41,6 @@ const testBlockchain: BlockchainNetwork = {
 	},
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const chiadoBlockchain: BlockchainNetwork = {
 	name: 'Chiado testnet',
 	provider: 'https://rpc.chiado.apyos.dev/',
@@ -69,7 +68,6 @@ const chiadoBlockchain: BlockchainNetwork = {
 	},
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const gnosisBlockchain: BlockchainNetwork = {
 	name: 'Gnosis',
 	provider: 'https://gnosis-erigon.apyos.dev/',
@@ -97,26 +95,22 @@ const gnosisBlockchain: BlockchainNetwork = {
 	},
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const sepoliaBlockchain: BlockchainNetwork = {
-	name: 'Sepolia testnet',
-	provider: 'https://rpc2.sepolia.org/ ',
-	explorer: {
-		name: 'Etherscan',
-		url: 'https://sepolia.etherscan.io/',
-	},
-	nativeToken: {
-		name: 'Sepolia ETH',
-		symbol: 'SEP',
-		decimals: 18,
-		image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
-	},
-	objects: {
-		splitterFactory: '0x0',
-	},
+function getBlockchainNetwork(): BlockchainNetwork {
+	switch (PUBLIC_BLOCKCHAIN) {
+		case 'local':
+			return localBlockchain
+
+		case 'chiado':
+			return chiadoBlockchain
+
+		// Defaults to production
+		case 'gnosis':
+		default:
+			return gnosisBlockchain
+	}
 }
 
-export const defaultBlockchainNetwork = gnosisBlockchain
+export const defaultBlockchainNetwork = getBlockchainNetwork()
 
 export function getProvider(): Provider {
 	const providerUrl = defaultBlockchainNetwork.provider

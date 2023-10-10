@@ -15,24 +15,28 @@ import {
 	type StoreQueryOptions,
 	type Unsubscribe,
 } from '@waku/interfaces'
+import { PUBLIC_WAKU } from '$env/static/public'
 
-const peers = [
-	// use this address for local testing
-	// '/ip4/127.0.0.1/tcp/8000/ws/p2p/16Uiu2HAm53sojJN72rFbYg6GV2LpRRER9XeWkiEAhjKy3aL9cN5Z',
+function getPeers(): string[] {
+	switch (PUBLIC_WAKU) {
+		// Local version in docker
+		case 'local':
+			return [
+				'/ip4/127.0.0.1/tcp/8000/ws/p2p/16Uiu2HAm53sojJN72rFbYg6GV2LpRRER9XeWkiEAhjKy3aL9cN5Z',
+			]
 
-	// '/dns4/ws.waku.apyos.dev/tcp/443/wss/p2p/16Uiu2HAm5wH4dPAV6zDfrBHkWt9Wu9iiXT4ehHdUArDUbEevzmBY',
-	// '/dns4/ws.waku-1.apyos.dev/tcp/443/wss/p2p/16Uiu2HAm8gXHntr3SB5sde11pavjptaoiqyvwoX3GyEZWKMPiuBu',
+		// Defaults to production
+		case 'production':
+		default:
+			return [
+				'/dns4/go-waku.gra.nomad.apyos.dev/tcp/443/wss/p2p/16Uiu2HAmMafTFmwN9xat1jw7eHnwZJruQiezttwfRaeSgY5hkwe5',
+				'/dns4/go-waku.de.nomad.apyos.dev/tcp/443/wss/p2p/16Uiu2HAmTwF1VMGkNLXJDj7jLNLMeFwZt8jP8qKS1uojQSCiHib6',
+				'/dns4/go-waku.bhs.nomad.apyos.dev/tcp/443/wss/p2p/16Uiu2HAm2RwLYewyx3UWZgKT7SQPjASF8AYE3WCyWiM9xupZNCmW',
+			]
+	}
+}
 
-	// '/dns4/waku.gra.nomad.apyos.dev/tcp/443/wss/p2p/16Uiu2HAmDvywnsGaB32tFqwjTsg8sfC1ZV2EXo3xjxM4V2gvH6Up',
-	// '/dns4/waku.bhs.nomad.apyos.dev/tcp/443/wss/p2p/16Uiu2HAkvrRkEHRMfe26F8NCWUfzMuaCfyCzwoPSUYG7yminM5Bn',
-	// '/dns4/waku.de.nomad.apyos.dev/tcp/443/wss/p2p/16Uiu2HAmRgjA134DcoyK8r44pKWJQ69C7McLSWtRgxUVwkKAsbGx',
-
-	'/dns4/go-waku.gra.nomad.apyos.dev/tcp/443/wss/p2p/16Uiu2HAmMafTFmwN9xat1jw7eHnwZJruQiezttwfRaeSgY5hkwe5',
-	'/dns4/go-waku.de.nomad.apyos.dev/tcp/443/wss/p2p/16Uiu2HAmTwF1VMGkNLXJDj7jLNLMeFwZt8jP8qKS1uojQSCiHib6',
-	'/dns4/go-waku.bhs.nomad.apyos.dev/tcp/443/wss/p2p/16Uiu2HAm2RwLYewyx3UWZgKT7SQPjASF8AYE3WCyWiM9xupZNCmW',
-
-	// '/dns4/go-waku.srv02.apyos.dev/tcp/443/wss/p2p/16Uiu2HAmPwoBY7YzjGAkHDzd93wX1rXks7MRMCX7m1Jr2b8jSSwQ',
-]
+const peers = getPeers()
 
 export type ContentTopic = 'private-message' | 'profile' | 'chats' | 'objects' | 'group-chats'
 
