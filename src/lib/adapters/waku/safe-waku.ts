@@ -117,7 +117,7 @@ export class SafeWaku {
 			} finally {
 				if (error) {
 					this.errors.numSendError++
-					this.log(`⁉️  Error: ${error}`)
+					this.log(`⁉️  Error: ${error}`, { error })
 					this.log(`🕓 Waiting ${timeout} milliseconds...`)
 					await sleep(timeout)
 					if (timeout < 120_000) {
