@@ -17,23 +17,26 @@ import {
 } from '@waku/interfaces'
 import { PUBLIC_WAKU } from '$env/static/public'
 
-let peers: string[]
-switch (PUBLIC_WAKU) {
-	// Local version in docker
-	case 'local':
-		peers = ['/ip4/127.0.0.1/tcp/8000/ws/p2p/16Uiu2HAm53sojJN72rFbYg6GV2LpRRER9XeWkiEAhjKy3aL9cN5Z']
-		break
+function getPeers(): string[] {
+	switch (PUBLIC_WAKU) {
+		// Local version in docker
+		case 'local':
+			return [
+				'/ip4/127.0.0.1/tcp/8000/ws/p2p/16Uiu2HAm53sojJN72rFbYg6GV2LpRRER9XeWkiEAhjKy3aL9cN5Z',
+			]
 
-	// Defaults to production
-	case 'production':
-	default:
-		peers = [
-			'/dns4/go-waku.gra.nomad.apyos.dev/tcp/443/wss/p2p/16Uiu2HAmMafTFmwN9xat1jw7eHnwZJruQiezttwfRaeSgY5hkwe5',
-			'/dns4/go-waku.de.nomad.apyos.dev/tcp/443/wss/p2p/16Uiu2HAmTwF1VMGkNLXJDj7jLNLMeFwZt8jP8qKS1uojQSCiHib6',
-			'/dns4/go-waku.bhs.nomad.apyos.dev/tcp/443/wss/p2p/16Uiu2HAm2RwLYewyx3UWZgKT7SQPjASF8AYE3WCyWiM9xupZNCmW',
-		]
-		break
+		// Defaults to production
+		case 'production':
+		default:
+			return [
+				'/dns4/go-waku.gra.nomad.apyos.dev/tcp/443/wss/p2p/16Uiu2HAmMafTFmwN9xat1jw7eHnwZJruQiezttwfRaeSgY5hkwe5',
+				'/dns4/go-waku.de.nomad.apyos.dev/tcp/443/wss/p2p/16Uiu2HAmTwF1VMGkNLXJDj7jLNLMeFwZt8jP8qKS1uojQSCiHib6',
+				'/dns4/go-waku.bhs.nomad.apyos.dev/tcp/443/wss/p2p/16Uiu2HAm2RwLYewyx3UWZgKT7SQPjASF8AYE3WCyWiM9xupZNCmW',
+			]
+	}
 }
+
+const peers = getPeers()
 
 export type ContentTopic = 'private-message' | 'profile' | 'chats' | 'objects' | 'group-chats'
 

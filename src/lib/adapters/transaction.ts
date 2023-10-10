@@ -95,23 +95,22 @@ const gnosisBlockchain: BlockchainNetwork = {
 	},
 }
 
-let defaultBlockchainNetwork: BlockchainNetwork
-switch (PUBLIC_BLOCKCHAIN) {
-	case 'local':
-		defaultBlockchainNetwork = localBlockchain
-		break
+function getBlockchainNetwork(): BlockchainNetwork {
+	switch (PUBLIC_BLOCKCHAIN) {
+		case 'local':
+			return localBlockchain
 
-	case 'chiado':
-		defaultBlockchainNetwork = chiadoBlockchain
-		break
+		case 'chiado':
+			return chiadoBlockchain
 
-	// Defaults to production
-	case 'gnosis':
-	default:
-		defaultBlockchainNetwork = gnosisBlockchain
-		break
+		// Defaults to production
+		case 'gnosis':
+		default:
+			return gnosisBlockchain
+	}
 }
-export { defaultBlockchainNetwork }
+
+export const defaultBlockchainNetwork = getBlockchainNetwork()
 
 export function getProvider(): Provider {
 	const providerUrl = defaultBlockchainNetwork.provider
