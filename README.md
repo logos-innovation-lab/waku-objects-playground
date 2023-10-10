@@ -24,6 +24,27 @@ pnpm build
 
 You can preview the production build with `pnpm preview`.
 
+## Config
+
+Use env variables to specify:
+
+```bash
+# Which waku node to connect to
+# Options:
+#    local       single waku node running in docker
+#    production  waku nodes used for production deployment
+# Defaults to
+PUBLIC_WAKU='production'
+
+# Which blockchain to connect to
+# Options:
+#    local    local chain running in docker
+#    chiado   chiado testnet
+#    gnosis   gnosis mainnet
+# Defaults to
+PUBLIC_BLOCKCHAIN='gnosis'
+```
+
 ## CLI
 
 There is a built-in command line tool for making development easier.
