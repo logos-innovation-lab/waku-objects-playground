@@ -22,7 +22,6 @@ switch (PUBLIC_WAKU) {
 	// Local version in docker
 	case 'local':
 		peers = [
-			// use this address for local testing
 			'/ip4/127.0.0.1/tcp/8000/ws/p2p/16Uiu2HAm53sojJN72rFbYg6GV2LpRRER9XeWkiEAhjKy3aL9cN5Z',
 		]
 		break
