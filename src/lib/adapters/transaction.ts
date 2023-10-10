@@ -27,7 +27,6 @@ interface BlockchainNetwork {
 	}
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const localBlockchain: BlockchainNetwork = {
 	name: 'Local testnet',
 	provider: 'http://127.0.0.1:8545',
@@ -42,7 +41,6 @@ const localBlockchain: BlockchainNetwork = {
 	},
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const chiadoBlockchain: BlockchainNetwork = {
 	name: 'Chiado testnet',
 	provider: 'https://rpc.chiado.apyos.dev/',
@@ -70,7 +68,6 @@ const chiadoBlockchain: BlockchainNetwork = {
 	},
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const gnosisBlockchain: BlockchainNetwork = {
 	name: 'Gnosis',
 	provider: 'https://gnosis-erigon.apyos.dev/',

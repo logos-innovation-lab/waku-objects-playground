@@ -21,9 +21,7 @@ let peers: string[]
 switch (PUBLIC_WAKU) {
 	// Local version in docker
 	case 'local':
-		peers = [
-			'/ip4/127.0.0.1/tcp/8000/ws/p2p/16Uiu2HAm53sojJN72rFbYg6GV2LpRRER9XeWkiEAhjKy3aL9cN5Z',
-		]
+		peers = ['/ip4/127.0.0.1/tcp/8000/ws/p2p/16Uiu2HAm53sojJN72rFbYg6GV2LpRRER9XeWkiEAhjKy3aL9cN5Z']
 		break
 
 	// Defaults to production
