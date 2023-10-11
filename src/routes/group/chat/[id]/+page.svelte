@@ -198,7 +198,7 @@
 											messages[i].fromAddress !== messages[i + 1]?.fromAddress ||
 											messages[i + 1]?.type !== 'user'}
 										{@const sender = chat.users.find((u) => message.fromAddress === u.address)}
-										{#if i > 0 && areDifferentDays(messages[i].timestamp, messages[i - 1].timestamp)}
+										{#if i === 0 || (i > 0 && areDifferentDays(messages[i].timestamp, messages[i - 1].timestamp))}
 											<ChatDateBadge text={formatTimestampSeparator(message.timestamp)} />
 										{/if}
 										<ChatMessage
