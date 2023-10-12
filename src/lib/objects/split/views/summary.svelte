@@ -35,6 +35,7 @@
 	export let instanceId: string
 	export let token: Token
 	export let nativeToken: TokenAmount
+	export let chainId: bigint
 	export let send: (message: DataMessage) => Promise<void>
 	export let exitObject: () => void
 	export let getContract: GetContract
@@ -48,9 +49,16 @@
 		let splitContractAddress = splitterAddress
 
 		if (!splitContractAddress) {
-			fee = await estimateCreateSplitterContract(getContract, users)
+			fee = await estimateCreateSplitterContract(getContract, chainId, users)
 		}
-		fee += await estimateAddExpense(getContract, splitContractAddress, amnt, profile.address, users)
+		fee += await estimateAddExpense(
+			getContract,
+			chainId,
+			splitContractAddress,
+			amnt,
+			profile.address,
+			users,
+		)
 
 		return fee
 	}
@@ -65,7 +73,7 @@
 		try {
 			let splitContractAddress = splitterAddress
 			if (!splitContractAddress) {
-				splitContractAddress = await createSplitterContract(getContract, users)
+				splitContractAddress = await createSplitterContract(getContract, chainId, users)
 			}
 
 			let amnt = toBigInt(amount, token.decimals)

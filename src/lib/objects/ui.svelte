@@ -13,6 +13,7 @@
 	import type { HDNodeWallet } from 'ethers/lib.commonjs'
 	import type { TokenAmount } from './schemas'
 	import { DEFAULT_FIAT_SYMBOL, exchangeStore } from '$lib/stores/exchangeRates'
+	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 
 	export let objectId: string
 	export let instanceId: string
@@ -66,6 +67,7 @@
 			const chatName =
 				chat?.name ?? users.find((u) => u.address !== userProfile.address)?.name ?? 'Unknown'
 			args = {
+				chainId: defaultBlockchainNetwork.chainId,
 				chatId,
 				objectId,
 				instanceId,

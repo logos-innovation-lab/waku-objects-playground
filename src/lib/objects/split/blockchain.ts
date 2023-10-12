@@ -2,19 +2,27 @@ import { Interface, type Provider } from 'ethers'
 import type { GetContract } from './types'
 import splitterFactoryAbi from './contracts/abis/splitter-factory.json'
 import splitterAbi from './contracts/abis/splitter.json'
-import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 import type { Balance } from './schemas'
 import type { Splitter, SplitterFactory } from './contracts/types'
 
-const splitterFactoryAddress = defaultBlockchainNetwork.objects.splitterFactory
+function getSplitterFactoryAddress(chainId: bigint) {
+	switch (chainId) {
+		case 100n:
+			return '0x99873C280c0c4A5460AB781e4bcD06f6B5f35717'
+		case 10200n:
+			return '0x941DDB22a33FC753d3E7b82cc34c47Ee605e60a3'
+		default:
+			throw new Error('Unsupported chainId')
+	}
+}
 
 function getSplitterContract(getContract: GetContract, splitterAddress: string): Splitter {
 	return getContract(splitterAddress, new Interface(splitterAbi)) as unknown as Splitter
 }
 
-function getSplitterContractFactory(getContract: GetContract): SplitterFactory {
+function getSplitterContractFactory(getContract: GetContract, chainId: bigint): SplitterFactory {
 	return getContract(
-		splitterFactoryAddress,
+		getSplitterFactoryAddress(chainId),
 		new Interface(splitterFactoryAbi),
 	) as unknown as SplitterFactory
 }
@@ -35,11 +43,12 @@ function sleep(ms: number) {
 
 export async function createSplitterContract(
 	getContract: GetContract,
+	chainId: bigint,
 	members: string[],
 	token = '0x0000000000000000000000000000000000000000',
 	metadata = '0x0000000000000000000000000000000000000000',
 ): Promise<string> {
-	const splitterFactory = getSplitterContractFactory(getContract)
+	const splitterFactory = getSplitterContractFactory(getContract, chainId)
 
 	// TODO: this should be `once` with appropriate filter instead of `on`
 	const events: { address: string; txHash: string }[] = []
@@ -80,11 +89,12 @@ export async function createSplitterContract(
 
 export async function estimateCreateSplitterContract(
 	getContract: GetContract,
+	chainId: bigint,
 	members: string[],
 	token = '0x0000000000000000000000000000000000000000',
 	metadata = '0x0000000000000000000000000000000000000000',
 ): Promise<bigint> {
-	const splitterFactory = getSplitterContractFactory(getContract)
+	const splitterFactory = getSplitterContractFactory(getContract, chainId)
 
 	const gasEstimate: bigint = await splitterFactory.create.estimateGas(metadata, token, members)
 
@@ -94,8 +104,11 @@ export async function estimateCreateSplitterContract(
 	return calculateFee(provider, gasEstimate)
 }
 
-export async function getMasterSplitterContractAddress(getContract: GetContract): Promise<string> {
-	const splitterFactory = getSplitterContractFactory(getContract)
+export async function getMasterSplitterContractAddress(
+	getContract: GetContract,
+	chainId: bigint,
+): Promise<string> {
+	const splitterFactory = getSplitterContractFactory(getContract, chainId)
 	return await splitterFactory.masterSplitter()
 }
 
@@ -119,6 +132,7 @@ export async function addExpense(
 
 export async function estimateAddExpense(
 	getContract: GetContract,
+	chainId: bigint,
 	splitterAddress: string | undefined,
 	amount: bigint,
 	from: string,
@@ -134,7 +148,10 @@ export async function estimateAddExpense(
 		// This is worse case estimateAddExpense cost
 		// we can not do it by estimating the transaction because we don't have the splitter contract deployed and the transaction would fail in the master splitter contract
 		gasEstimate = 47530n + 9000n * BigInt(members.length - 2)
-		splitter = getSplitterContract(getContract, await getMasterSplitterContractAddress(getContract))
+		splitter = getSplitterContract(
+			getContract,
+			await getMasterSplitterContractAddress(getContract, chainId),
+		)
 	}
 
 	const provider = splitter.runner?.provider

@@ -12,11 +12,16 @@
 	import { walletStore } from '$lib/stores/wallet'
 	import { theme } from '$lib/stores/theme'
 	import { exchangeStore } from '$lib/stores/exchangeRates'
+	import { defaultBlockchainNetwork, getChainId } from '$lib/adapters/transaction'
+	import Container from '$lib/components/container.svelte'
+	import Loading from '$lib/components/loading.svelte'
 
 	let unsubscribeWalletStore: (() => void) | undefined = undefined
 	let unsubscribeExchangeStore: (() => void) | undefined = undefined
+	let loading = true
+	let error: string | undefined = undefined
 
-	onMount(() => {
+	onMount(async () => {
 		unsubscribeWalletStore = walletStore.subscribe(({ wallet }) => {
 			if (wallet) {
 				adapter.onLogIn(wallet)
@@ -29,6 +34,13 @@
 		const interval = setInterval(exchangeStore.update, MINUTE)
 
 		unsubscribeExchangeStore = () => clearInterval(interval)
+
+		// Ensures the blockchain connection is on the correct network
+		const chainId = await getChainId()
+		if (defaultBlockchainNetwork.chainId !== chainId) {
+			error = `Incorrect blockchain connection. Got chain ID ${chainId.toString()}, expected ${defaultBlockchainNetwork.chainId.toString()}`
+		}
+		loading = false
 	})
 
 	onDestroy(() => {
@@ -41,7 +53,18 @@
 </script>
 
 <div class="root">
-	<slot />
+	{#if loading}
+		<Container align="center" gap={6} justify="center">
+			<Loading />
+		</Container>
+	{:else if error !== undefined}
+		<!-- FIXME: use the error component-->
+		<Container align="center" gap={6} justify="center" padX={24}>
+			<h2>{error}</h2>
+		</Container>
+	{:else}
+		<slot />
+	{/if}
 </div>
 
 <style>

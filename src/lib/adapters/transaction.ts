@@ -18,17 +18,16 @@ interface BlockchainExplorer {
 
 interface BlockchainNetwork {
 	name: string
+	chainId: bigint
 	provider: string
 	explorer?: BlockchainExplorer
 	nativeToken: Token
 	tokens?: Token[]
-	objects: {
-		splitterFactory: string
-	}
 }
 
 const localBlockchain: BlockchainNetwork = {
 	name: 'Local testnet',
+	chainId: 31337n,
 	provider: 'http://127.0.0.1:8545',
 	nativeToken: {
 		name: 'Test Ether',
@@ -36,13 +35,11 @@ const localBlockchain: BlockchainNetwork = {
 		decimals: 18,
 		image: 'https://s2.coinmarketcap.com/static/img/coins/64x64/1027.png',
 	},
-	objects: {
-		splitterFactory: '0x0',
-	},
 }
 
 const chiadoBlockchain: BlockchainNetwork = {
 	name: 'Chiado testnet',
+	chainId: 10200n,
 	provider: 'https://rpc.chiado.apyos.dev/',
 	explorer: {
 		name: 'Blockscout',
@@ -63,13 +60,11 @@ const chiadoBlockchain: BlockchainNetwork = {
 			address: '0x19C653Da7c37c66208fbfbE8908A5051B57b4C70',
 		},
 	],
-	objects: {
-		splitterFactory: '0x941DDB22a33FC753d3E7b82cc34c47Ee605e60a3',
-	},
 }
 
 const gnosisBlockchain: BlockchainNetwork = {
 	name: 'Gnosis',
+	chainId: 100n,
 	provider: 'https://gnosis-erigon.apyos.dev/',
 	explorer: {
 		name: 'Blockscout',
@@ -90,9 +85,6 @@ const gnosisBlockchain: BlockchainNetwork = {
 			address: '0x9C58BAcC331c9aa871AFD802DB6379a98e80CEdb',
 		},
 	],
-	objects: {
-		splitterFactory: '0x99873C280c0c4A5460AB781e4bcD06f6B5f35717',
-	},
 }
 
 function getBlockchainNetwork(): BlockchainNetwork {
@@ -116,6 +108,12 @@ export function getProvider(): Provider {
 	const providerUrl = defaultBlockchainNetwork.provider
 	const provider = new JsonRpcProvider(providerUrl)
 	return provider
+}
+
+export async function getChainId(): Promise<bigint> {
+	const provider = getProvider()
+	const { chainId } = await provider.getNetwork()
+	return chainId
 }
 
 export async function sendTransaction(

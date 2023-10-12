@@ -17,14 +17,14 @@ export interface WakuObjectAdapter {
 
 export type JSONPrimitive = string | number | boolean | null
 export type JSONObject = { [key: symbol]: JSONValue }
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface JSONArray extends Array<JSONValue> {}
+export type JSONArray = Array<JSONValue>
 
 export type JSONValue = JSONPrimitive | JSONObject | JSONArray
 
 export type JSONSerializable = JSONValue
 
 export interface WakuObjectState {
+	readonly chainId: bigint
 	readonly chatId: string
 	readonly objectId: string
 	readonly instanceId: string

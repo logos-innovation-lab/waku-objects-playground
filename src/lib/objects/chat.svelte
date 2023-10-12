@@ -14,6 +14,7 @@
 	import routes from '$lib/routes'
 	import { chats } from '$lib/stores/chat'
 	import { DEFAULT_FIAT_SYMBOL, exchangeStore } from '$lib/stores/exchangeRates'
+	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 
 	export let message: DataMessage
 	export let users: User[]
@@ -52,6 +53,7 @@
 		const chatName =
 			chat?.name ?? users.find((u) => u.address !== userProfile.address)?.name ?? 'Unknown'
 		args = {
+			chainId: defaultBlockchainNetwork.chainId,
 			chatId,
 			objectId: message.objectId,
 			instanceId: message.instanceId,
