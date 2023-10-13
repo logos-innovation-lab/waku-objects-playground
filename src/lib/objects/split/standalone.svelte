@@ -123,6 +123,7 @@
 		{images}
 		{token}
 		{nativeToken}
+		chainId={args.chainId}
 		profile={args.profile}
 		chatName={args.chatName}
 		send={args.send}

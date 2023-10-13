@@ -14,6 +14,7 @@
 	import adapters from '$lib/adapters'
 	import { walletStore } from '$lib/stores/wallet'
 	import { DEFAULT_FIAT_SYMBOL, exchangeStore } from '$lib/stores/exchangeRates'
+	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 
 	// TODO: This needs escaping for the CSP
 	const getIframeSource = (object: LoadedObject): string => {
@@ -100,6 +101,7 @@
 		const iframeContextChange: IframeContextChange = {
 			type: 'iframe-context-change',
 			state: {
+				chainId: defaultBlockchainNetwork.chainId,
 				chatId,
 				chatName,
 				objectId,

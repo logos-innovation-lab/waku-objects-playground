@@ -36,6 +36,7 @@ import { walletStore } from '$lib/stores/wallet'
 import { SafeWaku } from './safe-waku'
 import type { TokenAmount } from '$lib/objects/schemas'
 import { DEFAULT_FIAT_SYMBOL, exchangeStore } from '$lib/stores/exchangeRates'
+import { balanceStore } from '$lib/stores/balances'
 
 const MAX_MESSAGES = 100
 
@@ -148,6 +149,7 @@ async function executeOnDataMessage(
 			chat?.name ?? users.find((u) => u.address !== myProfile.address)?.name ?? 'Unknown'
 		const args: WakuObjectArgs = {
 			...context,
+			chainId: defaultBlockchainNetwork.chainId,
 			chatName,
 			chatId,
 			objectId: dataMessage.objectId,
@@ -156,7 +158,7 @@ async function executeOnDataMessage(
 			profile: myProfile,
 			exchangeRates: get(exchangeStore).exchange,
 			fiatSymbol: DEFAULT_FIAT_SYMBOL,
-			tokens: defaultBlockchainNetwork.tokens?.map((t) => ({ ...t, amount: 0n })) || [],
+			tokens: get(balanceStore).balances,
 		}
 		await descriptor.onMessage(dataMessage, args)
 	}
