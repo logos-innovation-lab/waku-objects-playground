@@ -171,7 +171,6 @@ export async function settleDebt(
 	const receipt = await tx.wait()
 
 	if (!receipt || receipt.status !== 1) {
-		console.error(receipt)
 		throw new Error('Failed to settle debt')
 	}
 	return tx.hash

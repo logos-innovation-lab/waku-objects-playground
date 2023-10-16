@@ -18,41 +18,67 @@
 	import { payggyDescriptor } from '..'
 	import type { ExchangeRateRecord } from '$lib/stores/exchangeRates'
 	import { getFiatAmountText } from '$lib/utils/fiat'
+	import type { ErrorDescriptor } from '$lib/stores/error'
 
 	export let toUser: User
-	export let estimateTransaction: (to: string, token: TokenAmount) => Promise<TokenAmount>
-	export let sendTransaction: (to: string, token: TokenAmount, fee: TokenAmount) => Promise<string>
-	export let send: (message: SendTransactionDataMessage) => Promise<void>
 	export let profile: User
 	export let amount: string
 	export let token: TokenAmount
 	export let fiatRates: Map<string, ExchangeRateRecord>
 	export let fiatSymbol: string | undefined
+
+	export let estimateTransaction: (to: string, token: TokenAmount) => Promise<TokenAmount>
+	export let sendTransaction: (to: string, token: TokenAmount, fee: TokenAmount) => Promise<string>
+	export let send: (message: SendTransactionDataMessage) => Promise<void>
 	export let exitObject: () => void
+	export let addError: (error: ErrorDescriptor) => void
 
 	let transactionSent = false
 	let fee: TokenAmount | undefined = undefined
 
-	$: if (toUser && amount && token) {
+	async function tryEstimateTransaction() {
 		try {
 			const tokenToTransfer = { ...token, amount: toBigInt(amount, token.decimals) }
-			estimateTransaction(toUser.address, tokenToTransfer).then((f) => (fee = f))
+			fee = await estimateTransaction(toUser.address, tokenToTransfer)
 		} catch (e) {
-			console.log({ e })
+			addError({
+				title: 'Blockchain error',
+				message: `Failed to estimate transaction fee. ${(e as Error).message}`,
+				retry: tryEstimateTransaction,
+				ok: true,
+			})
 		}
 	}
 
-	async function sendTransactionInternal() {
-		if (fee) {
-			transactionSent = true
+	$: if (toUser && amount && token) tryEstimateTransaction()
 
-			// FIXME error handling
-			const tokenToTransfer = { ...token, amount: toBigInt(amount, token.decimals) }
-			const transactionHash = await sendTransaction(toUser.address, tokenToTransfer, fee)
+	async function sendTransactionInternal() {
+		if (!fee) {
+			addError({
+				title: 'Blockchain error',
+				message: 'No estimated transaction fee.',
+				ok: true,
+			})
+			return
+		}
+
+		transactionSent = true
+		const tokenToTransfer = { ...token, amount: toBigInt(amount, token.decimals) }
+
+		let transactionHash: string
+		try {
+			transactionHash = await sendTransaction(toUser.address, tokenToTransfer, fee)
 
 			await send({ hash: transactionHash })
-
 			exitObject()
+		} catch (error) {
+			addError({
+				title: 'Error',
+				message: `Failed to send transaction. ${(error as Error).message}`,
+				retry: sendTransactionInternal,
+				ok: true,
+			})
+			return
 		}
 	}
 </script>

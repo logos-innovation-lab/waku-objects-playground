@@ -45,6 +45,7 @@ import { DEFAULT_FIAT_SYMBOL, exchangeStore } from '$lib/stores/exchangeRates'
 import { balanceStore } from '$lib/stores/balances'
 import type { ContentTopic } from './waku'
 import { installedObjectStore } from '$lib/stores/installed-objects'
+import { errorStore } from '$lib/stores/error'
 
 const MAX_MESSAGES = 100
 
@@ -143,6 +144,7 @@ async function executeOnDataMessage(
 			...blockchainAdapter,
 			viewParams: [],
 			store,
+			addError: errorStore.addEnd,
 			updateStore,
 			send,
 			onViewChange: () => {

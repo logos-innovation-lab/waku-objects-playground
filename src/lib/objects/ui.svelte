@@ -14,6 +14,7 @@
 	import type { TokenAmount } from './schemas'
 	import { DEFAULT_FIAT_SYMBOL, exchangeStore } from '$lib/stores/exchangeRates'
 	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
+	import { errorStore } from '$lib/stores/error'
 
 	export let objectId: string
 	export let instanceId: string
@@ -79,6 +80,7 @@
 				send,
 				updateStore,
 				onViewChange,
+				addError: errorStore.addEnd,
 				view,
 				viewParams,
 				exchangeRates: $exchangeStore.exchange,

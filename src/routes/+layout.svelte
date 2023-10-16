@@ -8,18 +8,22 @@
 	import { onDestroy, onMount } from 'svelte'
 	import adapter from '$lib/adapters'
 	import { changeColors } from '$lib/utils/color'
+	import Checkmark from '$lib/components/icons/checkmark.svelte'
 
 	import { walletStore } from '$lib/stores/wallet'
 	import { theme } from '$lib/stores/theme'
 	import { exchangeStore } from '$lib/stores/exchangeRates'
+	import { errorStore, type ErrorDescriptor } from '$lib/stores/error'
 	import { defaultBlockchainNetwork, getChainId } from '$lib/adapters/transaction'
 	import Container from '$lib/components/container.svelte'
 	import Loading from '$lib/components/loading.svelte'
+	import ErrorModal from '$lib/components/error-modal.svelte'
+	import Button from '$lib/components/button.svelte'
+	import Renew from '$lib/components/icons/renew.svelte'
 
 	let unsubscribeWalletStore: (() => void) | undefined = undefined
 	let unsubscribeExchangeStore: (() => void) | undefined = undefined
 	let loading = true
-	let error: string | undefined = undefined
 
 	onMount(async () => {
 		unsubscribeWalletStore = walletStore.subscribe(({ wallet }) => {
@@ -35,10 +39,22 @@
 
 		unsubscribeExchangeStore = () => clearInterval(interval)
 
-		// Ensures the blockchain connection is on the correct network
-		const chainId = await getChainId()
-		if (defaultBlockchainNetwork.chainId !== chainId) {
-			error = `Incorrect blockchain connection. Got chain ID ${chainId.toString()}, expected ${defaultBlockchainNetwork.chainId.toString()}`
+		try {
+			// Ensures the blockchain connection is on the correct network
+			const chainId = await getChainId()
+			if (defaultBlockchainNetwork.chainId !== chainId) {
+				errorStore.addStart({
+					title: 'Blockchain error',
+					message: `You are trying to connect to incorrect blockchain. Got chain ID ${chainId.toString()}, expected ${defaultBlockchainNetwork.chainId.toString()}`,
+					reload: true,
+				})
+			}
+		} catch (err) {
+			errorStore.addStart({
+				title: 'Blockchain error',
+				message: `Connection to blockchain failed. ${(err as Error).message}`,
+				reload: true,
+			})
 		}
 		loading = false
 	})
@@ -50,17 +66,45 @@
 	})
 
 	$: changeColors($theme.baseColor, $theme.darkMode)
+
+	const resolveError =
+		(error: ErrorDescriptor, handler: () => Promise<void> | void) => async () => {
+			await handler()
+			errorStore.resolve(error)
+		}
 </script>
 
 <div class="root">
+	{#if $errorStore.length > 0}
+		{@const error = $errorStore[0]}
+		<ErrorModal title={error.title} message={error.message}>
+			{#if error.actions !== undefined}
+				{#each error.actions as action}
+					<Button variant={action.variant ?? ''} on:click={resolveError(error, action.handler)}>
+						<svelte:component this={action.icon} />{action.label}
+					</Button>
+				{/each}
+			{/if}
+			{#if error.ok}
+				<Button on:click={() => errorStore.resolve(error)}>
+					<Checkmark /> OK
+				</Button>
+			{/if}
+			{#if error.reload}
+				<Button variant="strong" on:click={resolveError(error, window.location.reload)}>
+					<Renew /> Refresh
+				</Button>
+			{/if}
+			{#if error.retry}
+				<Button variant="strong" on:click={resolveError(error, error.retry)}>
+					<Renew /> Refresh
+				</Button>
+			{/if}
+		</ErrorModal>
+	{/if}
 	{#if loading}
 		<Container align="center" gap={6} justify="center">
 			<Loading />
-		</Container>
-	{:else if error !== undefined}
-		<!-- FIXME: use the error component-->
-		<Container align="center" gap={6} justify="center" padX={24}>
-			<h2>{error}</h2>
 		</Container>
 	{:else}
 		<slot />

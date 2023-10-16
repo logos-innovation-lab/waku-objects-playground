@@ -18,6 +18,7 @@
 	import Layout from '$lib/components/layout.svelte'
 	import { uploadPicture } from '$lib/adapters/ipfs'
 	import Avatar from '$lib/components/avatar.svelte'
+	import { errorStore } from '$lib/stores/error'
 
 	let picture = ''
 	let name = ''
@@ -28,14 +29,19 @@
 	createIdentity()
 
 	let pictureFiles: FileList | undefined = undefined
-	async function resizePersonaPicture(p?: File) {
+	async function resizePicture(p?: File) {
 		try {
 			picture = p ? await uploadPicture(await clipAndResize(p, 200, 200)) : picture
-		} catch (error) {
-			console.error(error)
+		} catch (e) {
+			errorStore.addStart({
+				title: 'Profile Error',
+				message: `Failed to upload profile picture. ${(e as Error)?.message}`,
+				retry: () => resizePicture(p),
+				ok: true,
+			})
 		}
 	}
-	$: resizePersonaPicture(pictureFiles && pictureFiles[0])
+	$: resizePicture(pictureFiles && pictureFiles[0])
 
 	async function saveProfile() {
 		saving = true
@@ -45,8 +51,12 @@
 			await adapters.saveUserProfile(wallet.address, name, picture)
 			walletStore.saveWallet(wallet)
 			goto(routes.IDENTITY_CONFIRM)
-		} catch (error) {
-			console.error('failed to save profile: ', error)
+		} catch (e) {
+			errorStore.addStart({
+				title: 'Profile Error',
+				message: `Failed to save profile. ${(e as Error)?.message}`,
+				retry: saveProfile,
+			})
 		}
 		saving = false
 	}
@@ -56,7 +66,11 @@
 		try {
 			wallet = Wallet.createRandom()
 		} catch (e) {
-			console.error(e)
+			errorStore.addStart({
+				title: 'Wallet Error',
+				message: `Failed to create identity. ${(e as Error)?.message}`,
+				retry: createIdentity,
+			})
 		}
 		isCreatingIdentity = false
 	}
@@ -83,7 +97,7 @@
 	<Container grow justify="flex-end">
 		<Button
 			variant="strong"
-			disabled={isCreatingIdentity || !name || saving}
+			disabled={isCreatingIdentity || !name || saving || !wallet}
 			on:click={saveProfile}
 		>
 			<ArrowRight />

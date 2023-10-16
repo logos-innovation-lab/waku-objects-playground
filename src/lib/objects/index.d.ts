@@ -4,6 +4,7 @@ import type { ComponentType } from 'svelte'
 import type { Transaction, User, TransactionState } from './schemas'
 import type { Contract, Interface } from 'ethers'
 import type { ExchangeRateRecord } from '$lib/stores/exchangeRates'
+import type { ErrorDescriptor } from '$lib/stores/error'
 
 export interface WakuObjectAdapter {
 	getTransaction(txHash: string): Promise<Transaction | undefined>
@@ -59,6 +60,8 @@ export interface WakuObjectContext<
 	send: (data: DataMessageType) => Promise<void>
 
 	onViewChange: (view: ViewType, ...rest: string[]) => void
+
+	addError: (error: ErrorDescriptor) => void
 }
 
 export interface WakuObjectArgs<

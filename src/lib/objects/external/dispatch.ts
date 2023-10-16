@@ -154,7 +154,11 @@ export function makeIframeDispatcher(
 			}
 			postResponse(request.id, result, window)
 		} catch (e) {
-			console.error({ e })
+			args.addError({
+				title: 'External object error',
+				message: `Error dispatching. ${(e as Error)?.message}`,
+				ok: true,
+			})
 			const result: AdapterResponseError = {
 				type: 'error',
 				value: e,

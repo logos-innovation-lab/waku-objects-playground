@@ -31,6 +31,7 @@
 	import ROUTES from '$lib/routes'
 	import Loading from '$lib/components/loading.svelte'
 	import { userDisplayName } from '$lib/utils/user'
+	import { errorStore } from '$lib/stores/error'
 
 	$: chatId = $page.params.id
 	$: groupChat = $chats.chats.get(chatId)
@@ -47,20 +48,34 @@
 	let pictureFiles: FileList | undefined = undefined
 	let buttonDisabled = false
 
-	async function resizePersonaPicture(p?: File) {
+	async function resizePicture(p?: File) {
 		try {
 			picture = p ? await uploadPicture(await clipAndResize(p, 200, 200)) : picture
-		} catch (error) {
-			console.error(error)
+		} catch (e) {
+			errorStore.addStart({
+				title: 'Profile Error',
+				message: `Failed to upload profile picture. ${(e as Error)?.message}`,
+				retry: () => resizePicture(p),
+				ok: true,
+			})
 		}
 	}
-	$: resizePersonaPicture(pictureFiles && pictureFiles[0])
+	$: resizePicture(pictureFiles && pictureFiles[0])
 
 	async function inviteMembers(wallet: HDNodeWallet) {
 		buttonDisabled = true
 
-		await adapters.addMemberToGroupChat(chatId, invitedMembers)
-		await adapters.sendInvite(wallet, chatId, invitedMembers)
+		try {
+			await adapters.addMemberToGroupChat(chatId, invitedMembers)
+			await adapters.sendInvite(wallet, chatId, invitedMembers)
+		} catch (error) {
+			errorStore.addEnd({
+				title: 'Error',
+				message: `Failed to add members to group or to invite them. ${(error as Error)?.message}`,
+				retry: () => inviteMembers(wallet),
+				ok: true,
+			})
+		}
 
 		invitedMembers = []
 		buttonDisabled = false
@@ -82,11 +97,20 @@
 	$: wallet = $walletStore.wallet
 	let timer: ReturnType<typeof setTimeout> | undefined
 
-	function saveProfileNow() {
+	async function saveProfileNow() {
 		if (!groupChat) {
 			return
 		}
-		adapters.saveGroupChatProfile(groupChat?.chatId, name, picture)
+		try {
+			await adapters.saveGroupChatProfile(groupChat?.chatId, name, picture)
+		} catch (error) {
+			errorStore.addEnd({
+				title: 'Group Error',
+				message: `Failed to update group. ${(error as Error)?.message}`,
+				retry: saveProfileNow,
+				ok: true,
+			})
+		}
 	}
 
 	// Debounce saving profile

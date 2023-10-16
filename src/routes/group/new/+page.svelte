@@ -25,6 +25,7 @@
 	import { uploadPicture } from '$lib/adapters/ipfs'
 	import { genRandomHex } from '$lib/utils'
 	import Loading from '$lib/components/loading.svelte'
+	import { errorStore } from '$lib/stores/error'
 
 	let groupMembers: string[] = []
 	let screen: 'create' | 'details' = 'create'
@@ -35,20 +36,34 @@
 
 	const chatId = genRandomHex(64)
 
-	async function resizePersonaPicture(p?: File) {
+	async function resizePicture(p?: File) {
 		try {
 			picture = p ? await uploadPicture(await clipAndResize(p, 200, 200)) : picture
-		} catch (error) {
-			console.error(error)
+		} catch (e) {
+			errorStore.addStart({
+				title: 'Profile Error',
+				message: `Failed to upload profile picture. ${(e as Error)?.message}`,
+				retry: () => resizePicture(p),
+				ok: true,
+			})
 		}
 	}
-	$: resizePersonaPicture(pictureFiles && pictureFiles[0])
+	$: resizePicture(pictureFiles && pictureFiles[0])
 
 	async function createGroup(wallet: HDNodeWallet) {
 		buttonDisabled = true
 
-		await adapters.startGroupChat(wallet, chatId, groupMembers, name, picture)
-		await adapters.sendInvite(wallet, chatId, groupMembers)
+		try {
+			await adapters.startGroupChat(wallet, chatId, groupMembers, name, picture)
+			await adapters.sendInvite(wallet, chatId, groupMembers)
+		} catch (error) {
+			errorStore.addEnd({
+				title: 'Error',
+				message: `Failed to create group or send invites. ${(error as Error)?.message}`,
+				retry: () => createGroup(wallet),
+				ok: true,
+			})
+		}
 
 		buttonDisabled = false
 

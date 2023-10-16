@@ -15,6 +15,7 @@
 	import InputFile from '$lib/components/input-file.svelte'
 	import Add from '$lib/components/icons/add.svelte'
 	import TrashCan from '$lib/components/icons/trash-can.svelte'
+	import { errorStore } from '$lib/stores/error'
 
 	export let images: string[]
 	export let exitObject: () => void
@@ -24,18 +25,28 @@
 	let files: FileList | undefined = undefined
 	let uploading: boolean
 
+	async function tryUploadPicture(image: File) {
+		try {
+			const resizedImage = await resize(image)
+			const imageHash = await uploadPicture(resizedImage)
+			images.push(imageHash)
+		} catch (error) {
+			// Here the retry functionality is not really that straight forward so we ask user to reupload if they want to.
+			errorStore.addEnd({
+				title: 'Upload error',
+				message: `Failed to upload image ${image.name}. Please try and add it again. ${
+					(error as Error)?.message
+				}`,
+				ok: true,
+			})
+		}
+	}
+
 	async function uploadPictures(fls: FileList) {
 		uploading = true
 
 		for (let i = 0; i < fls.length; i++) {
-			try {
-				const image = fls[i]
-				const resizedImage = await resize(image)
-				const imageHash = await uploadPicture(resizedImage)
-				images.push(imageHash)
-			} catch (error) {
-				console.error(error)
-			}
+			await tryUploadPicture(fls[i])
 		}
 		files = undefined
 		images = [...new Set(images)] // We want only unique images
