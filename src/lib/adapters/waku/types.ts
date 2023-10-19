@@ -15,3 +15,11 @@ export interface StorageProfile {
 export type StorageChatEntry = [chatId: string, chat: Chat]
 
 export type StorageObjectEntry = [objectId: string, object: JSONSerializable]
+
+export interface StorageInstalledObject {
+	objectId: string
+	name: string
+	description: string
+	logo: string
+}
+export type StorageInstalledObjectEntry = [objectId: string, object: StorageInstalledObject]
