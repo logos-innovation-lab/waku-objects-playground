@@ -30,13 +30,14 @@ import type {
 } from '$lib/objects'
 import { makeWakuObjectAdapter } from '$lib/objects/adapter'
 import { fetchBalances } from '$lib/adapters/balance'
-import { makeWakustore } from './wakustore'
+import { makeWakustore, type Wakustore } from './wakustore'
 import type { StorageChat, StorageChatEntry, StorageObjectEntry, StorageProfile } from './types'
 import { walletStore } from '$lib/stores/wallet'
 import { SafeWaku } from './safe-waku'
 import type { TokenAmount } from '$lib/objects/schemas'
 import { DEFAULT_FIAT_SYMBOL, exchangeStore } from '$lib/stores/exchangeRates'
 import { balanceStore } from '$lib/stores/balances'
+import type { ContentTopic } from './waku'
 
 const MAX_MESSAGES = 100
 
@@ -164,6 +165,33 @@ async function executeOnDataMessage(
 	}
 }
 
+async function getDoc<T>(
+	ws: Wakustore,
+	contentTopic: ContentTopic,
+	id: string,
+): Promise<T | undefined> {
+	const key = `${contentTopic}/${id}`
+	const value = localStorage.getItem(key)
+	if (value) {
+		// TODO encryption
+		return JSON.parse(value) as T
+	}
+
+	const storeValue = await ws.getDoc<T>(contentTopic, id)
+	const json = JSON.stringify(storeValue)
+	localStorage.setItem(key, json)
+
+	return storeValue
+}
+
+async function setDoc<T>(ws: Wakustore, contentTopic: ContentTopic, id: string, doc: T) {
+	const key = `${contentTopic}/${id}`
+	const json = JSON.stringify(doc)
+	localStorage.setItem(key, json)
+
+	return await ws.setDoc<T>(contentTopic, id, doc)
+}
+
 export default class WakuAdapter implements Adapter {
 	private safeWaku = new SafeWaku()
 	private subscriptions: Array<() => void> = []
@@ -174,10 +202,10 @@ export default class WakuAdapter implements Adapter {
 		const ws = await this.makeWakustore()
 		const wakuObjectAdapter = makeWakuObjectAdapter(this, wallet)
 
-		const storageProfile = await ws.getDoc<StorageProfile>('profile', address)
+		const storageProfile = await getDoc<StorageProfile>(ws, 'profile', address)
 		profile.update((state) => ({ ...state, ...storageProfile, address, loading: false }))
 
-		const storageChatEntries = await ws.getDoc<StorageChatEntry[]>('chats', address)
+		const storageChatEntries = await getDoc<StorageChatEntry[]>(ws, 'chats', address)
 		chats.update((state) => ({ ...state, chats: new Map(storageChatEntries), loading: false }))
 
 		const allChats = Array.from(get(chats).chats)
@@ -228,7 +256,7 @@ export default class WakuAdapter implements Adapter {
 		this.subscriptions.push(subscribeChatStore)
 
 		// object store
-		const storageObjects = await ws.getDoc<StorageObjectEntry[]>('objects', address)
+		const storageObjects = await getDoc<StorageObjectEntry[]>(ws, 'objects', address)
 		objectStore.update((state) => ({
 			...state,
 			objects: new Map(storageObjects),
@@ -242,7 +270,7 @@ export default class WakuAdapter implements Adapter {
 				firstObjectStoreSave = false
 				return
 			}
-			await ws.setDoc<StorageObjectEntry[]>('objects', address, Array.from(objects.objects))
+			await setDoc<StorageObjectEntry[]>(ws, 'objects', address, Array.from(objects.objects))
 		})
 		this.subscriptions.push(subscribeObjectStore)
 
@@ -267,7 +295,7 @@ export default class WakuAdapter implements Adapter {
 
 		if (avatar || name) {
 			const ws = await this.makeWakustore()
-			ws.setDoc<StorageProfile>('profile', address, storageProfile)
+			setDoc<StorageProfile>(ws, 'profile', address, storageProfile)
 			profile.update((state) => ({ ...state, address, name, avatar }))
 		}
 	}
@@ -674,7 +702,12 @@ export default class WakuAdapter implements Adapter {
 		const ws = await this.makeWakustore()
 		const chatData: ChatData = get(chats)
 
-		const result = await ws.setDoc<StorageChatEntry[]>('chats', address, Array.from(chatData.chats))
+		const result = await setDoc<StorageChatEntry[]>(
+			ws,
+			'chats',
+			address,
+			Array.from(chatData.chats),
+		)
 
 		return result
 	}
