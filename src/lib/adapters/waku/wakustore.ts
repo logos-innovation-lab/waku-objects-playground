@@ -1,4 +1,4 @@
-import type { DecodedMessage } from '@waku/sdk'
+import type { DecodedMessage, SendError } from '@waku/sdk'
 import { decodeMessagePayload, readStore, storeDocument, subscribe } from './waku'
 import type { ContentTopic, QueryResult } from './waku'
 import {
@@ -16,6 +16,15 @@ interface Query {
 	contentTopic: ContentTopic
 	id: string
 	queryOptions?: QueryOptions
+}
+
+export interface Wakustore {
+	readonly waku: LightNode
+	docQuery: (contentTopic: ContentTopic, id: string, queryOptions?: QueryOptions) => Query
+	collectionQuery: (contentTopic: ContentTopic, id: string, queryOptions?: QueryOptions) => Query
+	onSnapshot: <T>(query: Query, callback: (value: T) => void) => Promise<Unsubscribe>
+	getDoc: <T>(contentTopic: ContentTopic, id: string) => Promise<T | undefined>
+	setDoc: <T>(contentTopic: ContentTopic, id: string, data: T) => Promise<SendError[] | undefined>
 }
 
 export function makeWakustore(waku: LightNode) {
