@@ -14,13 +14,13 @@
 	import { walletStore } from '$lib/stores/wallet'
 	import ObjectLink from '$lib/components/object-link.svelte'
 	import ButtonBlock from '$lib/components/button-block.svelte'
-	import { wakuObjectList } from '$lib/objects/lookup'
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 	import Layout from '$lib/components/layout.svelte'
 	import type { JSONSerializable } from '$lib/objects'
 	import { genRandomHex } from '$lib/utils'
+	import { getInstalledObjectList } from '$lib/objects/lookup'
 
-	const objects = wakuObjectList.map((object) => ({
+	const objects = getInstalledObjectList().map((object) => ({
 		...object,
 		onClick: object.standalone
 			? () => {

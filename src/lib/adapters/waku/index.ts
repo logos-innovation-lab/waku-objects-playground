@@ -31,13 +31,20 @@ import type {
 import { makeWakuObjectAdapter } from '$lib/objects/adapter'
 import { fetchBalances } from '$lib/adapters/balance'
 import { makeWakustore, type Wakustore } from './wakustore'
-import type { StorageChat, StorageChatEntry, StorageObjectEntry, StorageProfile } from './types'
+import type {
+	StorageChat,
+	StorageChatEntry,
+	StorageInstalledObjectEntry,
+	StorageObjectEntry,
+	StorageProfile,
+} from './types'
 import { walletStore } from '$lib/stores/wallet'
 import { SafeWaku } from './safe-waku'
 import type { TokenAmount } from '$lib/objects/schemas'
 import { DEFAULT_FIAT_SYMBOL, exchangeStore } from '$lib/stores/exchangeRates'
 import { balanceStore } from '$lib/stores/balances'
 import type { ContentTopic } from './waku'
+import { installedObjectStore } from '$lib/stores/installed-objects'
 
 const MAX_MESSAGES = 100
 
@@ -273,6 +280,31 @@ export default class WakuAdapter implements Adapter {
 			await setDoc<StorageObjectEntry[]>(ws, 'objects', address, Array.from(objects.objects))
 		})
 		this.subscriptions.push(subscribeObjectStore)
+
+		// installed objects
+		const storageInstalledObjects = await ws.getDoc<StorageInstalledObjectEntry[]>(
+			'installed',
+			address,
+		)
+		installedObjectStore.update((state) => ({
+			...state,
+			objects: new Map(storageInstalledObjects),
+			loading: false,
+		}))
+
+		let firstInstalledObjectStoreSave = true
+		const subscribeInstalledObjectStore = installedObjectStore.subscribe(async (installed) => {
+			if (firstInstalledObjectStoreSave) {
+				firstInstalledObjectStoreSave = false
+				return
+			}
+			await ws.setDoc<StorageInstalledObjectEntry[]>(
+				'installed',
+				address,
+				Array.from(installed.objects),
+			)
+		})
+		this.subscriptions.push(subscribeInstalledObjectStore)
 
 		// deferred updates
 		fetchBalances(address)

@@ -42,7 +42,13 @@ function getPeers(): string[] {
 
 const peers = getPeers()
 
-export type ContentTopic = 'private-message' | 'profile' | 'chats' | 'objects' | 'group-chats'
+export type ContentTopic =
+	| 'private-message'
+	| 'profile'
+	| 'chats'
+	| 'objects'
+	| 'group-chats'
+	| 'installed'
 
 export type QueryResult = AsyncGenerator<Promise<DecodedMessage | undefined>[]>
 

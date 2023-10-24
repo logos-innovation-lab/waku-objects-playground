@@ -5,8 +5,10 @@ import { payggyDescriptor } from './payggy'
 import sandboxLogo from '@waku-objects/sandbox-example/object/logo.svg'
 import sandboxMeta from '@waku-objects/sandbox-example/object/metadata.json'
 import { splitDescriptor } from './split'
+import { installedObjectStore } from '$lib/stores/installed-objects'
+import { get } from 'svelte/store'
 
-export const wakuObjectList: WakuObjectSvelteDescriptor[] = [
+const preInstalledObjectList: WakuObjectSvelteDescriptor[] = [
 	helloWorldDescriptor,
 	payggyDescriptor,
 	splitDescriptor as unknown as WakuObjectSvelteDescriptor, // FIXME: this is quite uggly
@@ -18,10 +20,16 @@ export const wakuObjectList: WakuObjectSvelteDescriptor[] = [
 	),
 ]
 
-const wakuObjectMap: Map<string, WakuObjectSvelteDescriptor> = new Map(
-	wakuObjectList.map((wakuObject) => [wakuObject.objectId, wakuObject]),
-)
-
 export function lookup(objectId: string): WakuObjectSvelteDescriptor | undefined {
-	return wakuObjectMap.get(objectId)
+	const installedObjectList = getInstalledObjectList()
+	return installedObjectList.find((object) => object.objectId === objectId)
+}
+
+export function getInstalledObjectList() {
+	const installedObjectList = Array.from(get(installedObjectStore).objects)
+		.map((item) => item[1])
+		.map((object) =>
+			getExternalDescriptor(object.objectId, object.name, object.description, object.logo),
+		)
+	return preInstalledObjectList.concat(installedObjectList)
 }
