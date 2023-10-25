@@ -7,7 +7,7 @@
 	import template from './template.html?raw'
 
 	// Types
-	import { getNPMObject, type LoadedObject } from './lib'
+	import { getObject, type LoadedObject } from './lib'
 	import { makeIframeDispatcher, type IframeContextChange } from './dispatch'
 	import { postWindowMessage, registerWindow, unregisterWindow } from '.'
 	import { onDestroy } from 'svelte'
@@ -22,6 +22,7 @@
 		return template
 			.replace('__CSP__', object.csp)
 			.replace('__URL__', object.script)
+			.replace('__URL_INTEGRITY__', object.scriptIntegrity)
 			.replace('__CLASS__', object.className)
 	}
 
@@ -75,7 +76,7 @@
 	}
 
 	$: args &&
-		getNPMObject(args.objectId, message ? 'chat' : 'standalone').then((result) => (object = result))
+		getObject(args.objectId, message ? 'chat' : 'standalone').then((result) => (object = result))
 	$: if (iframe && iframe.contentWindow) {
 		registerWindow(args.instanceId, iframe.contentWindow)
 		updateContext()
