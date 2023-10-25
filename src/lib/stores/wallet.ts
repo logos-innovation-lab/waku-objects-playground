@@ -39,6 +39,9 @@ function createWalletStore(): WalletStore {
 		store.set({ wallet, loading: false })
 
 		storeInLocalstorage(wallet)
+
+		const deviceId = genRandomHex(32)
+		saveToLocalStorage('deviceId', deviceId)
 	}
 
 	const mnemonic = getFromLocalStorage<Mnemonic12>('mnemonic', Mnemonic12Schema)
@@ -80,9 +83,6 @@ function createWalletStore(): WalletStore {
 			store.set({ wallet, loading: false })
 
 			storeInLocalstorage(wallet)
-
-			const deviceId = genRandomHex(32)
-			saveToLocalStorage('deviceId', deviceId)
 		},
 	}
 }
