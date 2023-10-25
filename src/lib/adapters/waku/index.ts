@@ -202,9 +202,12 @@ async function setDoc<T>(ws: Wakustore, contentTopic: ContentTopic, id: string, 
 export default class WakuAdapter implements Adapter {
 	private safeWaku = new SafeWaku()
 	private subscriptions: Array<() => void> = []
+	private deviceId: string | undefined
 
 	async onLogIn(wallet: BaseWallet): Promise<void> {
 		const address = wallet.address
+
+		this.deviceId = get(walletStore).deviceId
 
 		const ws = await this.makeWakustore()
 		const wakuObjectAdapter = makeWakuObjectAdapter(this, wallet)
@@ -432,6 +435,7 @@ export default class WakuAdapter implements Adapter {
 			timestamp: Date.now(),
 			text,
 			fromAddress,
+			deviceId: this.deviceId,
 		}
 
 		const wakuObjectAdapter = makeWakuObjectAdapter(this, wallet)
@@ -452,6 +456,7 @@ export default class WakuAdapter implements Adapter {
 			type: 'data',
 			timestamp: Date.now(),
 			fromAddress,
+			deviceId: this.deviceId,
 			objectId,
 			instanceId,
 			data,

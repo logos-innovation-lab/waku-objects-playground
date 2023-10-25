@@ -6,6 +6,7 @@ export interface UserMessage {
 	type: 'user'
 	timestamp: number
 	fromAddress: string
+	deviceId?: string
 	text: string
 }
 
@@ -13,6 +14,7 @@ export interface DataMessage<T extends JSONSerializable = JSONSerializable> {
 	type: 'data'
 	timestamp: number
 	fromAddress: string
+	deviceId?: string
 	objectId: string
 	instanceId: string
 	data: T
@@ -22,6 +24,7 @@ export interface InviteMessage {
 	type: 'invite'
 	timestamp: number
 	fromAddress: string
+	deviceId?: string
 	chatId: string
 }
 

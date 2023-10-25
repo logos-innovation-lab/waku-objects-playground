@@ -3,9 +3,12 @@ import { Mnemonic12Schema, type Mnemonic12 } from '$lib/utils/schemas'
 import { getFromLocalStorage, removeFromLocalStorage, saveToLocalStorage } from '../adapters/utils'
 import { writable, get } from 'svelte/store'
 import type { Writable } from 'svelte/store'
+import { genRandomHex } from '$lib/utils'
+import { z } from 'zod'
 
 interface WalletState {
 	wallet?: HDNodeWallet
+	deviceId?: string
 	loading: boolean
 	error?: Error
 }
@@ -45,6 +48,14 @@ function createWalletStore(): WalletStore {
 		store.set({ loading: false })
 	}
 
+	const deviceId = getFromLocalStorage<string>('deviceId', z.string())
+	if (deviceId) {
+		store.update((state) => ({
+			...state,
+			deviceId,
+		}))
+	}
+
 	return {
 		...store,
 		restoreWallet,
@@ -69,6 +80,9 @@ function createWalletStore(): WalletStore {
 			store.set({ wallet, loading: false })
 
 			storeInLocalstorage(wallet)
+
+			const deviceId = genRandomHex(32)
+			saveToLocalStorage('deviceId', deviceId)
 		},
 	}
 }
