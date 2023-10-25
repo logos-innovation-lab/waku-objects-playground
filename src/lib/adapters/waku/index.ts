@@ -635,7 +635,7 @@ export default class WakuAdapter implements Adapter {
 		adapter: WakuObjectAdapter,
 	) {
 		// ignore messages coming from own address
-		if (message.fromAddress === address) {
+		if (message.fromAddress === address && message.deviceId === this.deviceId) {
 			return
 		}
 
