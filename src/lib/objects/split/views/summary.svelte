@@ -64,7 +64,7 @@
 			)
 		} catch (error) {
 			addError({
-				title: 'Blockchain error',
+				title: 'Splitter error',
 				message: `Failed to estimate gas fee. ${(error as Error)?.message}`,
 				ok: true,
 				retry: () => tryEstimateFee(users, amount, token),
@@ -110,7 +110,7 @@
 			exitObject()
 		} catch (error) {
 			addError({
-				title: 'Blockchain error',
+				title: 'Splitter error',
 				message: `Failed to send transaction. ${(error as Error)?.message}`,
 				ok: true,
 				retry: sendTransactionInternal,

@@ -42,7 +42,7 @@
 			fee = await estimateTransaction(toUser.address, tokenToTransfer)
 		} catch (e) {
 			addError({
-				title: 'Blockchain error',
+				title: 'Payggy error',
 				message: `Failed to estimate transaction fee. ${(e as Error).message}`,
 				retry: tryEstimateTransaction,
 				ok: true,
@@ -55,7 +55,7 @@
 	async function sendTransactionInternal() {
 		if (!fee) {
 			addError({
-				title: 'Blockchain error',
+				title: 'Payggy error',
 				message: 'No estimated transaction fee.',
 				ok: true,
 			})
@@ -73,7 +73,7 @@
 			exitObject()
 		} catch (error) {
 			addError({
-				title: 'Error',
+				title: 'Payggy Error',
 				message: `Failed to send transaction. ${(error as Error).message}`,
 				retry: sendTransactionInternal,
 				ok: true,

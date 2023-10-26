@@ -16,6 +16,7 @@
 	import Add from '$lib/components/icons/add.svelte'
 	import TrashCan from '$lib/components/icons/trash-can.svelte'
 	import { errorStore } from '$lib/stores/error'
+	import Loading from '$lib/components/loading.svelte'
 
 	export let images: string[]
 	export let exitObject: () => void
@@ -33,7 +34,7 @@
 		} catch (error) {
 			// Here the retry functionality is not really that straight forward so we ask user to reupload if they want to.
 			errorStore.addEnd({
-				title: 'Upload error',
+				title: 'Splitter error',
 				message: `Failed to upload image ${image.name}. Please try and add it again. ${
 					(error as Error)?.message
 				}`,
@@ -86,6 +87,9 @@
 			<InputFile multiple bind:files size={128} borderRadius={12} margin="none">
 				<Add size={32} />
 			</InputFile>
+			{#if uploading}
+				<Loading />
+			{/if}
 			{#each images as image}
 				<Image picture={image}>
 					<Button variant="icon" on:click={() => removeImage(image)}><TrashCan /></Button>

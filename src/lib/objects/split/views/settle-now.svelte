@@ -47,7 +47,7 @@
 			owedAmount = await getOwedAmount(getContract, splitterAddress, profile.address)
 		} catch (error) {
 			addError({
-				title: 'Blockchain error',
+				title: 'Splitter error',
 				message: `Failed to retrieve owed amount. ${(error as Error).message}`,
 				retry: tryGetOwedAmount,
 			})
@@ -63,7 +63,7 @@
 		} catch (error) {
 			feeError = error as Error
 			addError({
-				title: 'Blockchain error',
+				title: 'Splitter error',
 				message: `Failed to estimate fee ${feeError?.message}`,
 				retry: tryEstimateSettleDebt,
 			})
