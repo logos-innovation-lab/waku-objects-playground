@@ -67,6 +67,11 @@
 	--max-width: 498px;
 }
 
+html,
+body {
+	overscroll-behavior: none;
+}
+
 html {
 	line-height: 1.25;
 	-webkit-text-size-adjust: 100%;
@@ -82,7 +87,6 @@ body {
 	font-size: var(--font-size-normal);
 	color: var(--color-step-50, var(--color-dark-step-10));
 	background-color: var(--color-accent, var(--color-dark-base));
-	overscroll-behavior: none;
 }
 
 *,
