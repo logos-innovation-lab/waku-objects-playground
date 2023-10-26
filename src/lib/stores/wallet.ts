@@ -37,7 +37,12 @@ function createWalletStore(): WalletStore {
 		storeInLocalstorage(wallet)
 	}
 
-	const mnemonic = getFromLocalStorage<Mnemonic12>('mnemonic', Mnemonic12Schema)
+	let mnemonic: string | undefined
+	try {
+		getFromLocalStorage<Mnemonic12>('mnemonic', Mnemonic12Schema)
+	} catch (error) {
+		// this is fine
+	}
 	if (mnemonic) {
 		restoreWallet(mnemonic)
 	} else {

@@ -18,8 +18,16 @@ interface ThemeStore extends Writable<Theme> {
 function createThemeStore(): ThemeStore {
 	let darkMode: DarkMode = 'system'
 	let baseColor = '#000000'
-	darkMode = getFromLocalStorage<DarkMode>('dark-mode', darkModeSchema) ?? darkMode
-	baseColor = getFromLocalStorage<string>('color', z.string()) ?? baseColor
+	try {
+		darkMode = getFromLocalStorage<DarkMode>('dark-mode', darkModeSchema) ?? darkMode
+	} catch (error) {
+		// this is fine
+	}
+	try {
+		baseColor = getFromLocalStorage<string>('color', z.string()) ?? baseColor
+	} catch (error) {
+		// this is fine
+	}
 	const store = writable<Theme>({ darkMode, baseColor })
 
 	return {
