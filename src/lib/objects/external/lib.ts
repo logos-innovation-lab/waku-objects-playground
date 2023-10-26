@@ -82,8 +82,8 @@ export const getURLObject = async (url: string, type: WakuScriptType) => {
 		object.files[type as keyof WakuFiles].path = `${url}/${path}`
 	}
 
-	const { path, hash: integrity } = file
-	return { object, script: `${url}/${path}`, integrity }
+	const { path: script, hash: integrity } = file
+	return { object, script, integrity }
 }
 
 export const getIPFSObject = async (cid: string, type: WakuScriptType) => {
