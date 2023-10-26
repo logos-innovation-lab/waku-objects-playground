@@ -34,6 +34,7 @@
 		background-color: var(--color-base, var(--color-dark-accent));
 		border-bottom: 1px solid var(--color-step-20, var(--color-dark-step-40));
 		z-index: 100;
+		padding-top: env(safe-area-inset-top);
 
 		.white {
 			position: absolute;
