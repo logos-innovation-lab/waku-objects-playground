@@ -91,7 +91,7 @@
 				</Button>
 			{/if}
 			{#if error.reload}
-				<Button variant="strong" on:click={resolveError(error, window.location.reload)}>
+				<Button variant="strong" on:click={resolveError(error, () => window.location.reload())}>
 					<Renew /> Refresh
 				</Button>
 			{/if}
