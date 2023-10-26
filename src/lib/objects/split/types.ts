@@ -2,6 +2,8 @@ import type { Contract, Interface } from 'ethers'
 import type { Expense, Payment } from './schemas'
 
 export type View =
+	| 'collection-name'
+	| 'collection-members'
 	| 'amount'
 	| 'name'
 	| 'images'

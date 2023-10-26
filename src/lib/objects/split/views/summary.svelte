@@ -26,13 +26,13 @@
 	import Info from '../components/info.svelte'
 
 	export let amount: string
+	export let collectionName: string
 	export let description: string
 	export let images: string[]
 	export let chatName: string
 	export let profile: User
 	export let users: string[]
 	export let splitterAddress: string | undefined
-	export let instanceId: string
 	export let token: Token
 	export let nativeToken: TokenAmount
 	export let chainId: bigint
@@ -124,7 +124,7 @@
 			<div class="text-lg">{chatName}</div>
 		</Info>
 		<Info title="Collection">
-			<div class="text-lg">#{instanceId.slice(0, 4)}</div>
+			<div class="text-lg">{collectionName}</div>
 		</Info>
 		<Info title="Paid amount">
 			<div class="text-lg">{amount} {token.symbol}</div>
