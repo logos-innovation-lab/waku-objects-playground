@@ -18,12 +18,6 @@ const preInstalledObjectList: WakuObjectSvelteDescriptor[] = [
 		sandboxMeta.description,
 		sandboxLogo,
 	),
-	getExternalDescriptor(
-		'url:https://unpkg.com/@waku-objects/sandbox-example@0.5.0/object',
-		'URL test',
-		sandboxMeta.description,
-		sandboxLogo,
-	),
 ]
 
 export function lookup(objectId: string): WakuObjectSvelteDescriptor | undefined {

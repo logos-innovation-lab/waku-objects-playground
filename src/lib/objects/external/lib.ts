@@ -31,6 +31,7 @@ export type WakuFiles = {
 
 export type WakuObject = {
 	name: string
+	description: string
 	standalone?: boolean
 	csp: Csp
 	files: WakuFiles
@@ -75,6 +76,12 @@ export const getURLObject = async (url: string, type: WakuScriptType) => {
 		throw new Error(`object does not include ${type} script`)
 	}
 
+	// Prepend the URL to all files
+	for (const [type, { path }] of Object.entries(object.files)) {
+		// @ts-expect-error TODO: Fix this
+		object.files[type as keyof WakuFiles].path = `${url}/${path}`
+	}
+
 	const { path, hash: integrity } = file
 	return { object, script: `${url}/${path}`, integrity }
 }
@@ -87,6 +94,7 @@ export const getIPFSObject = async (cid: string, type: WakuScriptType) => {
 	return { object, script, integrity }
 }
 
+// TODO: Figure out the ID part
 export const getObjectSpec = async (objectId: string, type: WakuScriptType) => {
 	if (objectId.startsWith('url:')) {
 		return getURLObject(objectId.substring(4), type)

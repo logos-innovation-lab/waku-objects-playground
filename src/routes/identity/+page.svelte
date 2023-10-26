@@ -29,9 +29,12 @@
 	import { uploadPicture } from '$lib/adapters/ipfs'
 	import Avatar from '$lib/components/avatar.svelte'
 	import { errorStore } from '$lib/stores/error'
+	import { installedObjectStore } from '$lib/stores/installed-objects'
+	import { getObjectSpec } from '$lib/objects/external/lib'
 
 	let avatar = $profile.avatar
 	let name = $profile.name
+	let objectPath = ''
 
 	$: if ($profile.loading === false && !name && !avatar) {
 		name = $profile.name
@@ -92,6 +95,20 @@
 			saveProfileNow()
 			timer = undefined
 		}, 1000)
+	}
+
+	async function addObject() {
+		const { object } = await getObjectSpec(objectPath, 'chat')
+		installedObjectStore.update((state) => {
+			state.objects.set(objectPath, {
+				objectId: objectPath,
+				name: object.name,
+				description: object.description,
+				logo: object.files.logo.path,
+			})
+			return { ...state }
+		})
+		objectPath = ''
 	}
 
 	onDestroy(() => {
@@ -177,6 +194,10 @@
 				<Logout />
 				Disconnect identity from device
 			</Button>
+		</Container>
+		<Container align="center" gap={12} padX={24} padY={24}>
+			<InputField bind:value={objectPath} label="Object path" />
+			<Button on:click={addObject}>Add object</Button>
 		</Container>
 		<Spacer height={12} />
 	</AuthenticatedOnly>
