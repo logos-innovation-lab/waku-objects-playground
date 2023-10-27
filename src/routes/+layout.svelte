@@ -59,10 +59,6 @@
 	$: changeColors($theme.baseColor, $theme.darkMode, isSystemDark ?? isDarkQuery?.matches)
 </script>
 
-<svelte:head>
-	<meta name="theme-color" content={$theme.baseColor} />
-</svelte:head>
-
 <div class="root">
 	{#if loading}
 		<Container align="center" gap={6} justify="center">
