@@ -24,6 +24,14 @@ pnpm build
 
 You can preview the production build with `pnpm preview`.
 
+If you want to create a build that can be statically served, you need to set env `STATIC=TRUE`.
+
+```bash
+STATIC=TRUE pnpm build
+```
+
+The outcome is in `build` folder.
+
 ## Config
 
 Use env variables to specify:

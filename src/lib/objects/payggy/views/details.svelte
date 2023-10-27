@@ -118,7 +118,14 @@
 									{toSignificant(transaction.token.amount, transaction.token.decimals)}
 									{transaction.token.symbol}
 								</div>
-								<div class="secondary text-sm">≈ 13.91 EUR at the time of transaction</div>
+								<div class="secondary text-sm">
+									{getFiatAmountText(
+										fiatRates,
+										fiatSymbol,
+										transaction.token.amount,
+										transaction.token.symbol,
+									)}
+								</div>
 							</div>
 						</div>
 					</ReadonlyText>

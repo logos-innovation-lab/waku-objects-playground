@@ -13,13 +13,18 @@
 	export let args: WakuObjectArgs
 
 	let store: SendTransactionStore | undefined
+
 	$: {
 		if (args.store) {
 			const res = SendTransactionStoreSchema.safeParse(args.store)
 			if (res.success) {
 				store = res.data
 			} else {
-				console.error(res.error)
+				args.addError({
+					title: 'Payggy error',
+					message: `Received wrong payggy object. ${res.error.message}`,
+					ok: true,
+				})
 			}
 		}
 	}
@@ -50,6 +55,7 @@
 		exitObject={exitObject(3)}
 		fiatRates={args.exchangeRates}
 		fiatSymbol={args.fiatSymbol}
+		addError={args.addError}
 	/>
 {:else if args.view === 'details' && store}
 	<Details

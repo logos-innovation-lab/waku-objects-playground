@@ -9,6 +9,7 @@
 	import Textarea from '$lib/components/textarea.svelte'
 	import { walletStore } from '$lib/stores/wallet'
 	import Layout from '$lib/components/layout.svelte'
+	import { errorStore } from '$lib/stores/error'
 
 	let phrase = ''
 	let restoring = false
@@ -23,7 +24,12 @@
 
 			history.back()
 		} catch (error) {
-			console.error(error)
+			errorStore.addEnd({
+				title: 'Wallet error',
+				message: `Failed to restore wallet. ${(error as Error)?.message}`,
+				ok: true,
+				retry: restoreWallet,
+			})
 		}
 
 		restoring = false

@@ -1,5 +1,6 @@
 import { goto } from '$app/navigation'
 import routes from '$lib/routes'
+import { errorStore } from '$lib/stores/error'
 import { walletStore } from '$lib/stores/wallet'
 
 // This prevents the load function from running on server
@@ -22,5 +23,14 @@ export async function load() {
 		})
 	})
 
-	await promise
+	try {
+		await promise
+	} catch (error) {
+		errorStore.addEnd({
+			title: 'Account error',
+			message: `Failed to load account. ${(error as Error).message}`,
+			retry: load,
+			ok: true,
+		})
+	}
 }

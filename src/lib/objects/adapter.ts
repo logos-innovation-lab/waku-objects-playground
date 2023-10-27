@@ -33,7 +33,7 @@ export function makeWakuObjectAdapter(adapter: Adapter, wallet: BaseWallet): Wak
 	async function getTransaction(txHash: string): Promise<Transaction | undefined> {
 		const tx = await getTransactionResponse(txHash)
 		if (!tx) {
-			return undefined
+			throw new Error(`Transaction not found. ${txHash}}`)
 		}
 		const from = tx.from
 		const nonNativeToken = defaultBlockchainNetwork.tokens?.find((t) => t.address === tx.to)
@@ -70,6 +70,7 @@ export function makeWakuObjectAdapter(adapter: Adapter, wallet: BaseWallet): Wak
 			try {
 				timestamp = await getTransactionTimestamp(tx.blockNumber)
 			} catch (error) {
+				// TODO: review if this can silently fail or if we should throw
 				console.error(error)
 			}
 		}

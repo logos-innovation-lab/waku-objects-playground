@@ -29,7 +29,11 @@
 			if (res.success) {
 				data = res.data
 			} else {
-				console.error(res.error)
+				args.addError({
+					title: 'Payggy error',
+					message: `Received wrong payggy object. ${res.error.message}`,
+					ok: true,
+				})
 			}
 		}
 	}

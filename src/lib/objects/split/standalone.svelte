@@ -51,6 +51,7 @@
 			exitObject={exitObject(1)}
 			send={args.send}
 			onViewChange={args.onViewChange}
+			addError={args.addError}
 		/>
 	{/if}
 {:else if args.view === 'settle'}
@@ -70,6 +71,7 @@
 			tokens={args.tokens}
 			fiatRates={args.exchangeRates}
 			fiatSymbol={args.fiatSymbol}
+			addError={args.addError}
 		/>
 	{/if}
 {:else if args.view === 'accounting'}
@@ -81,6 +83,7 @@
 		exitObject={exitObject(2)}
 		send={args.send}
 		onViewChange={args.onViewChange}
+		addError={args.addError}
 	/>
 {:else if args.view === 'collection'}
 	<Collection
@@ -95,6 +98,7 @@
 		exitObject={exitObject(1)}
 		send={args.send}
 		onViewChange={args.onViewChange}
+		addError={args.addError}
 	/>
 {:else if args.view === 'expenses'}
 	<Expenses
@@ -132,6 +136,7 @@
 		users={args.store?.users ?? args.users.map((u) => u.address)}
 		splitterAddress={args.store?.splitterAddress}
 		instanceId={args.instanceId}
+		addError={args.addError}
 	/>
 {:else if args.view === 'images'}
 	<ChooseImages bind:images exitObject={exitObject(4)} goNext={goNext('summary')} {goBack} />

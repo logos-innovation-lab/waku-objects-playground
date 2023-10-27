@@ -15,6 +15,7 @@
 	import { chats } from '$lib/stores/chat'
 	import { DEFAULT_FIAT_SYMBOL, exchangeStore } from '$lib/stores/exchangeRates'
 	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
+	import { errorStore } from '$lib/stores/error'
 
 	export let message: DataMessage
 	export let users: User[]
@@ -65,6 +66,7 @@
 			store,
 			viewParams: [],
 			chatName,
+			addError: errorStore.addEnd,
 			send: (data: JSONSerializable) =>
 				adapter.sendData(wallet, chatId, message.objectId, message.instanceId, data),
 			updateStore,

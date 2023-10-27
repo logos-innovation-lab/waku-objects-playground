@@ -24,6 +24,7 @@
 	import type { GetContract } from '../types'
 	import type { Token, TokenAmount } from '$lib/objects/schemas'
 	import Info from '../components/info.svelte'
+	import type { ErrorDescriptor } from '$lib/stores/error'
 
 	export let amount: string
 	export let description: string
@@ -39,34 +40,40 @@
 	export let send: (message: DataMessage) => Promise<void>
 	export let exitObject: () => void
 	export let getContract: GetContract
+	export let addError: (error: ErrorDescriptor) => void
 
 	let transactionSent = false
 	let fee: bigint | undefined = undefined
 
-	async function estimateFee(users: string[], amount: string, token: Token) {
-		let amnt = toBigInt(amount, token.decimals)
-		let fee = 0n
+	async function tryEstimateFee(users: string[], amount: string, token: Token) {
+		let tmpFee = 0n
 		let splitContractAddress = splitterAddress
+		try {
+			let amnt = toBigInt(amount, token.decimals)
 
-		if (!splitContractAddress) {
-			fee = await estimateCreateSplitterContract(getContract, chainId, users)
+			if (!splitContractAddress) {
+				tmpFee = await estimateCreateSplitterContract(getContract, chainId, users)
+			}
+			tmpFee += await estimateAddExpense(
+				getContract,
+				chainId,
+				splitContractAddress,
+				amnt,
+				profile.address,
+				users,
+			)
+		} catch (error) {
+			addError({
+				title: 'Splitter error',
+				message: `Failed to estimate gas fee. ${(error as Error)?.message}`,
+				ok: true,
+				retry: () => tryEstimateFee(users, amount, token),
+			})
 		}
-		fee += await estimateAddExpense(
-			getContract,
-			chainId,
-			splitContractAddress,
-			amnt,
-			profile.address,
-			users,
-		)
-
-		return fee
+		fee = tmpFee
 	}
 
-	$: if (users && amount && token)
-		estimateFee(users, amount, token)
-			.then((amount) => (fee = amount))
-			.catch(console.error)
+	$: if (users && amount && token) tryEstimateFee(users, amount, token)
 
 	async function sendTransactionInternal() {
 		transactionSent = true
@@ -102,7 +109,12 @@
 
 			exitObject()
 		} catch (error) {
-			console.log(error)
+			addError({
+				title: 'Splitter error',
+				message: `Failed to send transaction. ${(error as Error)?.message}`,
+				ok: true,
+				retry: sendTransactionInternal,
+			})
 		}
 		transactionSent = false
 	}

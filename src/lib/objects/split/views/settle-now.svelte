@@ -8,6 +8,8 @@
 	import Layout from '$lib/components/layout.svelte'
 	import Divider from '$lib/components/divider.svelte'
 	import ReadonlyText from '$lib/components/readonly-text.svelte'
+	import Loading from '$lib/components/loading.svelte'
+	import Info from '../components/info.svelte'
 
 	import type { User as UserType } from '$lib/types'
 	import type { DataMessage } from '../schemas'
@@ -16,10 +18,9 @@
 	import { estimateSettleDebt, getOwedAmount, settleDebt } from '../blockchain'
 	import type { TokenAmount, Token } from '$lib/objects/schemas'
 	import { formatAddress, toSignificant } from '$lib/utils/format'
-	import Info from '../components/info.svelte'
 	import { getFiatAmountText } from '$lib/utils/fiat'
 	import type { ExchangeRateRecord } from '$lib/stores/exchangeRates'
-	import Loading from '$lib/components/loading.svelte'
+	import type { ErrorDescriptor } from '$lib/stores/error'
 
 	export let profile: UserType
 	export let instanceId: string
@@ -33,6 +34,7 @@
 	export let getContract: GetContract
 	export let exitObject: () => void
 	export let send: (message: DataMessage) => Promise<void>
+	export let addError: (error: ErrorDescriptor) => void
 
 	let owedAmount: undefined | bigint = undefined
 	let settling = false
@@ -40,24 +42,41 @@
 	let feeError: undefined | Error = undefined
 	let feeChecking = false
 
-	$: getOwedAmount(getContract, splitterAddress, profile.address)
-		.then((amount) => (owedAmount = amount))
-		.catch(console.error)
+	async function tryGetOwedAmount() {
+		try {
+			owedAmount = await getOwedAmount(getContract, splitterAddress, profile.address)
+		} catch (error) {
+			addError({
+				title: 'Splitter error',
+				message: `Failed to retrieve owed amount. ${(error as Error).message}`,
+				retry: tryGetOwedAmount,
+			})
+		}
+	}
+
+	async function tryEstimateSettleDebt() {
+		feeChecking = true
+		feeError = undefined
+		fee = undefined
+		try {
+			fee = await estimateSettleDebt(getContract, splitterAddress, profile.address)
+		} catch (error) {
+			feeError = error as Error
+			addError({
+				title: 'Splitter error',
+				message: `Failed to estimate fee ${feeError?.message}`,
+				retry: tryEstimateSettleDebt,
+			})
+		}
+		feeChecking = false
+	}
+
+	$: tryGetOwedAmount()
 	$: nativeToken = tokens.find((t) => !t.address)
 	$: splitToken = tokens.find((t) => t.address === token.address)
 	$: hasEnoughFunds = owedAmount && splitToken && owedAmount < splitToken?.amount
 
-	$: if (hasEnoughFunds && !fee && !feeChecking) {
-		feeChecking = true
-		feeError = undefined
-		fee = undefined
-		estimateSettleDebt(getContract, splitterAddress, profile.address)
-			.then((feeAmount) => {
-				fee = feeAmount
-			})
-			.catch((err) => (feeError = err))
-			.finally(() => (feeChecking = false))
-	}
+	$: if (hasEnoughFunds && !fee && !feeChecking) tryEstimateSettleDebt()
 
 	async function settleNow() {
 		if (!owedAmount) return
@@ -78,7 +97,12 @@
 			settling = false
 			exitObject()
 		} catch (error) {
-			console.log(error)
+			addError({
+				title: 'Blockchain error',
+				message: `Failed to settle debt. ${(error as Error).message}`,
+				retry: settleNow,
+				ok: true,
+			})
 		}
 	}
 </script>
