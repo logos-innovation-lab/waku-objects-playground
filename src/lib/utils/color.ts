@@ -94,4 +94,10 @@ export function changeColors(baseColor: string, darkMode: DarkMode, isSystemDark
 		document.documentElement.style.removeProperty(name)
 		document.documentElement.style.removeProperty(`${name}-rgb`)
 	})
+
+	// Set theme color
+	const themeColorNode = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement
+	if (themeColorNode) {
+		themeColorNode.content = isDarkMode ? '#000000' : '#ffffff'
+	}
 }
