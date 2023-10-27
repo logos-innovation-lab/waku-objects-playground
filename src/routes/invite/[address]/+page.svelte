@@ -32,6 +32,7 @@
 	import Avatar from '$lib/components/avatar.svelte'
 	import type { Unsubscriber } from 'svelte/store'
 	import Loading from '$lib/components/loading.svelte'
+	import { errorStore } from '$lib/stores/error'
 
 	// check if the chat already exists
 	$: if ($chats.chats.has($page.params.address)) {
@@ -50,18 +51,29 @@
 	let html5Qrcode: Html5Qrcode
 
 	let counterParty: UserType | undefined = undefined
+	let loadingCounterparty = false
+
+	async function tryLoadCounterPartyProfile() {
+		try {
+			loadingCounterparty = true
+			counterParty = await adapters.getUserProfile($page.params.address)
+		} catch (error) {
+			errorStore.addEnd({
+				title: 'Connection error',
+				ok: true,
+				message: `Failed to load user profile. Datails: ${(error as Error)?.message}`,
+				retry: () => tryLoadCounterPartyProfile(),
+			})
+		}
+		loadingCounterparty = false
+	}
 	$: if (
 		!counterParty &&
 		!$profile.loading &&
 		!$walletStore.loading &&
 		$walletStore.wallet?.address !== $page.params.address
 	) {
-		adapters
-			.getUserProfile($page.params.address)
-			.then((user) => {
-				counterParty = user
-			})
-			.catch(console.error)
+		tryLoadCounterPartyProfile()
 	}
 
 	function start() {
@@ -93,22 +105,44 @@
 
 		// If match found, return it, otherwise return null
 		if (match && match[1]) {
-			await stop()
+			try {
+				await stop()
+			} catch (e) {
+				errorStore.addEnd({
+					title: 'Error',
+					message: `Failed to stop QR code scanner. ${(e as Error)?.message}`,
+					retry: () => onScanSuccess(decodedText),
+					ok: true,
+				})
+			}
 			goto(routes.INVITE(match[1]))
 		}
 	}
 
 	function onScanFailure(error: string) {
-		console.warn(`Code scan error = ${error}`)
+		errorStore.addEnd({
+			title: 'Error',
+			message: `Failed to scan QR code. ${error}`,
+			ok: true,
+		})
 	}
 
 	async function startChat(address: string) {
 		loading = true
 
-		const chatId = await adapters.startChat(address, $page.params.address)
-
-		loading = false
-		goto(routes.CHAT(chatId))
+		try {
+			const chatId = await adapters.startChat(address, $page.params.address)
+			loading = false
+			goto(routes.CHAT(chatId))
+		} catch {
+			loading = false
+			errorStore.addEnd({
+				title: 'Connection error',
+				message: `Failed to start chat. Please try again later.`,
+				retry: () => startChat(address),
+				ok: true,
+			})
+		}
 	}
 
 	async function decline() {
@@ -149,7 +183,7 @@
 		</Header>
 	</svelte:fragment>
 	<AuthenticatedOnly let:wallet>
-		{#if wallet && $chats.loading}
+		{#if (wallet && $chats.loading) || loadingCounterparty}
 			<Container align="center" gap={6} justify="center">
 				<Loading />
 			</Container>

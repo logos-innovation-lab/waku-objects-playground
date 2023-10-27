@@ -19,6 +19,7 @@
 	import type { JSONSerializable } from '$lib/objects'
 	import { genRandomHex } from '$lib/utils'
 	import { getInstalledObjectList } from '$lib/objects/lookup'
+	import { errorStore } from '$lib/stores/error'
 
 	const objects = getInstalledObjectList().map((object) => ({
 		...object,
@@ -44,8 +45,24 @@
 	const sendData = async (objectId: string, instanceId: string, data: JSONSerializable) => {
 		loading = true
 		const wallet = $walletStore.wallet
-		if (!wallet) throw new Error('no wallet')
-		await adapters.sendData(wallet, $page.params.id, objectId, instanceId, data)
+		if (!wallet) {
+			errorStore.addEnd({
+				title: 'Wallet Error',
+				message: 'No wallet found',
+				retry: () => sendData(objectId, instanceId, data),
+				reload: true,
+			})
+			return
+		}
+		try {
+			await adapters.sendData(wallet, $page.params.id, objectId, instanceId, data)
+		} catch (error) {
+			errorStore.addEnd({
+				title: 'Error',
+				message: `Failed to send data. ${(error as Error)?.message}`,
+				retry: () => sendData(objectId, instanceId, data),
+			})
+		}
 		text = ''
 		loading = false
 	}

@@ -33,6 +33,7 @@
 	} from '$lib/utils/format'
 	import ChatDateBadge from '$lib/components/chat-date-badge.svelte'
 	import { userDisplayName } from '$lib/utils/user'
+	import { errorStore } from '$lib/stores/error'
 
 	let div: HTMLElement
 	let autoscroll = true
@@ -70,8 +71,16 @@
 
 	const sendMessage = async (wallet: HDNodeWallet) => {
 		isSending = true
-		await adapters.sendChatMessage(wallet, $page.params.id, text)
-		text = ''
+		try {
+			await adapters.sendChatMessage(wallet, $page.params.id, text)
+			text = ''
+		} catch (error) {
+			errorStore.addEnd({
+				title: 'Message Error',
+				message: `Failed to send message. ${(error as Error)?.message}`,
+				retry: () => sendMessage(wallet),
+			})
+		}
 		isSending = false
 	}
 

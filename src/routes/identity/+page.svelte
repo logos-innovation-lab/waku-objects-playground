@@ -27,6 +27,7 @@
 	import Layout from '$lib/components/layout.svelte'
 	import { uploadPicture } from '$lib/adapters/ipfs'
 	import Avatar from '$lib/components/avatar.svelte'
+	import { errorStore } from '$lib/stores/error'
 
 	let avatar = $profile.avatar
 	let name = $profile.name
@@ -41,7 +42,13 @@
 		try {
 			avatar = p ? await uploadPicture(await clipAndResize(p, 200, 200)) : avatar
 		} catch (error) {
-			console.error(error)
+			errorStore.addEnd({
+				title: 'Upload error',
+				message: `Failed to upload picture. Try another picture or refresh the page. ${
+					(error as Error).message
+				}`,
+				ok: true,
+			})
 		}
 	}
 	$: resizePersonaPicture(files && files[0])
@@ -55,10 +62,26 @@
 	}
 	let timer: ReturnType<typeof setTimeout> | undefined
 
-	function saveProfileNow() {
+	async function saveProfileNow() {
 		const wallet = get(walletStore).wallet
-		if (!wallet) return console.error('no wallet')
-		adapters.saveUserProfile(wallet.address, name, avatar)
+		if (!wallet) {
+			errorStore.addEnd({
+				title: 'No wallet',
+				message: `Failed to retrieve wallet.`,
+				reload: true,
+			})
+			return
+		}
+		try {
+			await adapters.saveUserProfile(wallet.address, name, avatar)
+		} catch (error) {
+			errorStore.addEnd({
+				title: 'Connection error',
+				message: `Failed to save profile. ${(error as Error).message}`,
+				ok: true,
+				retry: () => saveProfileNow(),
+			})
+		}
 	}
 
 	// Debounce saving profile

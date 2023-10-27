@@ -16,6 +16,7 @@
 	import type { DataMessage, Expense } from '../schemas'
 	import { formatDateAndTime, toSignificant } from '$lib/utils/format'
 	import type { Token } from '$lib/objects/schemas'
+	import type { ErrorDescriptor } from '$lib/stores/error'
 
 	export let expense: Expense
 	export let users: User[]
@@ -24,6 +25,7 @@
 	export let onViewChange: (view: View, ...rest: string[]) => void
 	export let exitObject: () => void
 	export let send: (message: DataMessage) => Promise<void>
+	export let addError: (error: ErrorDescriptor) => void
 
 	const bigIntPerUser = BigInt(expense.amount) / BigInt(users.length)
 	const amountPerPerson = toSignificant(bigIntPerUser, token.decimals)
@@ -42,7 +44,11 @@
 
 			exitObject()
 		} catch (error) {
-			console.log(error)
+			addError({
+				title: 'Splitter error',
+				message: `Failed to send settle reminder. ${(error as Error).message}`,
+				ok: true,
+			})
 		}
 	}
 

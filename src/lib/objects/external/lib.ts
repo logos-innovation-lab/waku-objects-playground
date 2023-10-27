@@ -62,6 +62,7 @@ export const getNPMObject = async (
 			className,
 		}
 	} catch (err) {
+		// TODO: shouldn't this throw?
 		console.error(err)
 		return null
 	}

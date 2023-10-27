@@ -59,9 +59,7 @@
 		</Container>
 		<Container direction="row" gap={12}>
 			<div class="grow">
-				<InputField bind:value={baseColor}>
-					{baseColor}
-				</InputField>
+				<InputField bind:value={baseColor} />
 			</div>
 			<label>
 				<div class="palette-overlay" />

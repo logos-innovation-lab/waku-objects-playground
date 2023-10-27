@@ -19,7 +19,7 @@
 
 	export let onViewChange: (view: View, ...rest: string[]) => void
 
-	let owedAmount = BigInt(0)
+	let owedAmount = 0n
 	$: {
 		const balance = balances.find(({ address }) => address === profile.address)
 		if (balance) {

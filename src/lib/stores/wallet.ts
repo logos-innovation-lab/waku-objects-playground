@@ -21,8 +21,7 @@ interface WalletStore extends Writable<WalletState> {
 function storeInLocalstorage(wallet: HDNodeWallet) {
 	const phrase = wallet.mnemonic?.phrase
 	if (!phrase) {
-		console.error('No mnemonic found in wallet')
-		return
+		throw new Error('No mnemonic found in wallet')
 	}
 	saveToLocalStorage('mnemonic', phrase)
 }
@@ -38,7 +37,12 @@ function createWalletStore(): WalletStore {
 		storeInLocalstorage(wallet)
 	}
 
-	const mnemonic = getFromLocalStorage<Mnemonic12>('mnemonic', Mnemonic12Schema)
+	let mnemonic: string | undefined
+	try {
+		getFromLocalStorage<Mnemonic12>('mnemonic', Mnemonic12Schema)
+	} catch (error) {
+		// this is fine
+	}
 	if (mnemonic) {
 		restoreWallet(mnemonic)
 	} else {
