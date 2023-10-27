@@ -24,6 +24,9 @@
 	let unsubscribeWalletStore: (() => void) | undefined = undefined
 	let unsubscribeExchangeStore: (() => void) | undefined = undefined
 	let loading = true
+	let error: string | undefined = undefined
+	let isDarkQuery: MediaQueryList
+	let isSystemDark: boolean | undefined
 
 	onMount(async () => {
 		unsubscribeWalletStore = walletStore.subscribe(({ wallet }) => {
@@ -57,6 +60,11 @@
 			})
 		}
 		loading = false
+
+		isDarkQuery = window.matchMedia('(prefers-color-scheme: dark)')
+		isDarkQuery.onchange = (event) => {
+			isSystemDark = event.matches
+		}
 	})
 
 	onDestroy(() => {
@@ -65,7 +73,7 @@
 		if (unsubscribeExchangeStore) unsubscribeExchangeStore()
 	})
 
-	$: changeColors($theme.baseColor, $theme.darkMode)
+	$: changeColors($theme.baseColor, $theme.darkMode, isSystemDark ?? isDarkQuery?.matches)
 
 	const resolveError =
 		(error: ErrorDescriptor, handler: () => Promise<void> | void) => async () => {

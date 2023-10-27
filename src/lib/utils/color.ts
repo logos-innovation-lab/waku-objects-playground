@@ -70,13 +70,10 @@ const lightColorsVars: Color[] = [
 	},
 ]
 
-export function changeColors(baseColor: string, darkMode: DarkMode) {
+export function changeColors(baseColor: string, darkMode: DarkMode, isSystemDark: boolean) {
 	if (!browser) return
 
-	const isDarkMode =
-		darkMode === 'dark' ||
-		(darkMode === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
-
+	const isDarkMode = darkMode === 'dark' || (darkMode === 'system' && isSystemDark)
 	const colors = isDarkMode ? darkColorVars : lightColorsVars
 	const colorsToRemove = isDarkMode ? lightColorsVars : darkColorVars
 
