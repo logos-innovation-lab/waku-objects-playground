@@ -39,7 +39,7 @@ function createWalletStore(): WalletStore {
 
 	let mnemonic: string | undefined
 	try {
-		getFromLocalStorage<Mnemonic12>('mnemonic', Mnemonic12Schema)
+		mnemonic = getFromLocalStorage<Mnemonic12>('mnemonic', Mnemonic12Schema)
 	} catch (error) {
 		// this is fine
 	}
