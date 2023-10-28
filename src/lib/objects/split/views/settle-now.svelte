@@ -21,7 +21,7 @@
 	import { getFiatAmountText } from '$lib/utils/fiat'
 	import type { ExchangeRateRecord } from '$lib/stores/exchangeRates'
 	import type { ErrorDescriptor } from '$lib/stores/error'
-	import type { FiatSymbol } from '$lib/stores/preferrences'
+	import type { FiatSymbol } from '$lib/stores/preferences'
 
 	export let profile: UserType
 	export let instanceId: string

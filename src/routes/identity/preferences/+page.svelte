@@ -25,7 +25,7 @@
 	</svelte:fragment>
 	<AuthenticatedOnly>
 		<Container padY={12}>
-			<Dropdown label="Mode">
+			<Dropdown label="Prefered display currency">
 				<Button grow align="block" slot="button">
 					{$preferences.fiatSymbol}
 					<CaretDown />

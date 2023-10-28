@@ -1,5 +1,5 @@
 import type { ExchangeRateRecord } from '$lib/stores/exchangeRates'
-import type { FiatSymbol } from '$lib/stores/preferrences'
+import type { FiatSymbol } from '$lib/stores/preferences'
 import { isValidNumber } from '$lib/utils'
 
 interface FiatAmount {

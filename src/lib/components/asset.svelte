@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Container from '$lib/components/container.svelte'
 	import { toSignificant } from '$lib/utils/format'
-	import type { FiatSymbol } from '$lib/stores/preferrences'
+	import type { FiatSymbol } from '$lib/stores/preferences'
 
 	export let name: string
 	export let token: string

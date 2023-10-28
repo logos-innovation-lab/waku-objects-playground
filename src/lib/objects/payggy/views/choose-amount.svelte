@@ -19,7 +19,7 @@
 	import { payggyDescriptor } from '..'
 	import type { ExchangeRateRecord } from '$lib/stores/exchangeRates'
 	import { getFiatAmountText } from '$lib/utils/fiat'
-	import type { FiatSymbol } from '$lib/stores/preferrences'
+	import type { FiatSymbol } from '$lib/stores/preferences'
 
 	export let amount: string
 	export let token: TokenAmount

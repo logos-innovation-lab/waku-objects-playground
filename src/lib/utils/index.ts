@@ -3,8 +3,8 @@ export function genRandomHex(size: number) {
 	return [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('')
 }
 
-const regex = /^[-+]?(\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?$/
+const numberRegex = /^[-+]?(\d+(\.\d*)?|\.\d+)([eE][-+]?\d+)?$/
 
 export function isValidNumber(input: string): boolean {
-	return regex.test(input)
+	return numberRegex.test(input)
 }
