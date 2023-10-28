@@ -25,7 +25,7 @@
 		flex-direction: column;
 		position: relative;
 		height: 100vh;
-		height: 100dvh;
+		height: --100vvh;
 	}
 
 	.base {

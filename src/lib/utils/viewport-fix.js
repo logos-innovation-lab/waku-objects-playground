@@ -1,6 +1,6 @@
 export class VVP {
 	constructor() {
-        console.debug('VVP fix')
+		console.debug('VVP fix')
 		this.enabled = typeof window === 'object' && typeof window.visualViewport === 'object'
 		if (!this.enabled) {
 			console.error('Visual Viewport is not available in this browser.')
