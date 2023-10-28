@@ -24,8 +24,8 @@
 		display: flex;
 		flex-direction: column;
 		position: relative;
-		height: 100vh;
-		height: --100vvh;
+		height: 100vvh;
+		height: var(--100vvh);
 	}
 
 	.base {
