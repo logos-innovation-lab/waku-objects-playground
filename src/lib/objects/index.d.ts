@@ -33,7 +33,7 @@ export interface WakuObjectState {
 	readonly users: User[]
 	readonly tokens: TokenAmount[]
 	readonly exchangeRates: Map<string, ExchangeRateRecord>
-	readonly fiatSymbol: string
+	readonly fiatSymbol: FiatSymbol
 	readonly chatName: string
 }
 

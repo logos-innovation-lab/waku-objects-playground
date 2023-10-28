@@ -1,12 +1,14 @@
 <script lang="ts">
 	import Container from '$lib/components/container.svelte'
 	import { toSignificant } from '$lib/utils/format'
+	import type { FiatSymbol } from '$lib/stores/preferences'
+
 	export let name: string
 	export let token: string
 	export let amount: bigint
 	export let decimals: number
 	export let image: string | undefined = undefined
-	export let fiatSymbol: string | undefined = undefined
+	export let fiatSymbol: FiatSymbol
 	export let fiatExchange: number | undefined = undefined
 
 	const fiatAmount = fiatExchange

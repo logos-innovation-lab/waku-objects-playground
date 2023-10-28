@@ -13,7 +13,8 @@
 	import { onDestroy } from 'svelte'
 	import adapters from '$lib/adapters'
 	import { walletStore } from '$lib/stores/wallet'
-	import { DEFAULT_FIAT_SYMBOL, exchangeStore } from '$lib/stores/exchangeRates'
+	import { exchangeStore } from '$lib/stores/exchangeRates'
+	import { preferences } from '$lib/stores/preferences'
 	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 
 	// TODO: This needs escaping for the CSP
@@ -110,7 +111,7 @@
 				users,
 				tokens,
 				exchangeRates: $exchangeStore.exchange,
-				fiatSymbol: DEFAULT_FIAT_SYMBOL,
+				fiatSymbol: $preferences.fiatSymbol,
 			},
 			context: {
 				view,

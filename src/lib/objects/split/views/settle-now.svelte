@@ -21,6 +21,7 @@
 	import { getFiatAmountText } from '$lib/utils/fiat'
 	import type { ExchangeRateRecord } from '$lib/stores/exchangeRates'
 	import type { ErrorDescriptor } from '$lib/stores/error'
+	import type { FiatSymbol } from '$lib/stores/preferences'
 
 	export let profile: UserType
 	export let instanceId: string
@@ -29,7 +30,7 @@
 	export let tokens: TokenAmount[]
 	export let token: Token
 	export let fiatRates: Map<string, ExchangeRateRecord>
-	export let fiatSymbol: string | undefined
+	export let fiatSymbol: FiatSymbol
 
 	export let getContract: GetContract
 	export let exitObject: () => void
