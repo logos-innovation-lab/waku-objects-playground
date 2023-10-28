@@ -33,7 +33,6 @@ function createThemeStore(): ThemeStore {
 	const store = writable<Theme>({ darkMode, baseColor, isDarkMode: false })
 
 	isSystemDark.subscribe((isSystemDark) => {
-		console.log({ isSystemDark })
 		store.update((theme) => ({
 			...theme,
 			isDarkMode: isSystemDark && theme.darkMode === 'system',
