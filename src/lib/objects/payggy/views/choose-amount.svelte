@@ -19,12 +19,13 @@
 	import { payggyDescriptor } from '..'
 	import type { ExchangeRateRecord } from '$lib/stores/exchangeRates'
 	import { getFiatAmountText } from '$lib/utils/fiat'
+	import type { FiatSymbol } from '$lib/stores/preferrences'
 
 	export let amount: string
 	export let token: TokenAmount
 	export let tokens: TokenAmount[]
 	export let fiatRates: Map<string, ExchangeRateRecord>
-	export let fiatSymbol: string
+	export let fiatSymbol: FiatSymbol
 	export let onViewChange: (view: string) => void
 	export let exitObject: () => void
 

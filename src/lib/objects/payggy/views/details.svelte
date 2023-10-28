@@ -20,6 +20,7 @@
 	import { payggyDescriptor } from '..'
 	import { getFiatAmountText } from '$lib/utils/fiat'
 	import type { ExchangeRateRecord } from '$lib/stores/exchangeRates'
+	import type { FiatSymbol } from '$lib/stores/preferrences'
 
 	export let transaction: Transaction
 	export let users: User[]
@@ -27,7 +28,7 @@
 	export let profile: User
 	export let status: string
 	export let fiatRates: Map<string, ExchangeRateRecord>
-	export let fiatSymbol: string
+	export let fiatSymbol: FiatSymbol
 	export let exitObject: () => void
 
 	$: sender = users.find((u) => u.address === transaction.from)

@@ -1,4 +1,5 @@
 import type { ExchangeRateRecord } from '$lib/stores/exchangeRates'
+import type { FiatSymbol } from '$lib/stores/preferrences'
 import { isValidNumber } from '$lib/utils'
 
 interface FiatAmount {
@@ -10,7 +11,7 @@ interface FiatAmount {
 
 function calculateFiatAmount(
 	fiatRates: Map<string, ExchangeRateRecord>,
-	fiatSymbol: string,
+	fiatSymbol: FiatSymbol,
 	tokenAmount: number,
 	tokenSymbol: string,
 ): FiatAmount {
@@ -35,7 +36,7 @@ function calculateFiatAmount(
 
 export function getFiatAmountText(
 	fiatRates: Map<string, ExchangeRateRecord>,
-	fiatSymbol: string,
+	fiatSymbol: FiatSymbol,
 	tokenAmount: string,
 	tokenSymbol: string,
 ): string {
