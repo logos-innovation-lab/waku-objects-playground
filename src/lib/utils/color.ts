@@ -1,6 +1,5 @@
 import { getClosestColor, hexToRgb } from '@waku-objects/luminance'
 import { browser } from '$app/environment'
-import type { DarkMode } from '$lib/stores/theme'
 
 interface Color {
 	name: string
@@ -70,10 +69,9 @@ const lightColorsVars: Color[] = [
 	},
 ]
 
-export function changeColors(baseColor: string, darkMode: DarkMode, isSystemDark: boolean) {
+export function changeColors(baseColor: string, isDarkMode: boolean) {
 	if (!browser) return
 
-	const isDarkMode = darkMode === 'dark' || (darkMode === 'system' && isSystemDark)
 	const colors = isDarkMode ? darkColorVars : lightColorsVars
 	const colorsToRemove = isDarkMode ? lightColorsVars : darkColorVars
 

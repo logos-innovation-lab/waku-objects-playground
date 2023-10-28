@@ -1,6 +1,7 @@
 import { getFromLocalStorage, saveToLocalStorage } from '$lib/adapters/utils'
 import { writable, type Writable } from 'svelte/store'
 import { z } from 'zod'
+import { isSystemDark } from './is-system-dark'
 
 const darkModeSchema = z.enum(['dark', 'light', 'system'])
 export type DarkMode = z.infer<typeof darkModeSchema>
@@ -8,6 +9,7 @@ export type DarkMode = z.infer<typeof darkModeSchema>
 interface Theme {
 	darkMode: DarkMode
 	baseColor: string
+	isDarkMode: boolean
 }
 
 interface ThemeStore extends Writable<Theme> {
@@ -28,7 +30,14 @@ function createThemeStore(): ThemeStore {
 	} catch (error) {
 		// this is fine
 	}
-	const store = writable<Theme>({ darkMode, baseColor })
+	const store = writable<Theme>({ darkMode, baseColor, isDarkMode: false })
+
+	isSystemDark.subscribe((isSystemDark) => {
+		store.update((theme) => ({
+			...theme,
+			isDarkMode: isSystemDark && theme.darkMode === 'system',
+		}))
+	})
 
 	return {
 		...store,
