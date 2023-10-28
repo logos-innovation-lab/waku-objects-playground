@@ -12,7 +12,7 @@ function createSchema(tokens: string[]) {
 }
 
 // TODO: with centralised endpoint, we can add more fiat currencies
-const fiatList = ['DAI']
+const fiatList = ['DAI', 'EUR', 'USD', 'CZK']
 
 const resSchema = createSchema(fiatList)
 type ExchangeRates = z.infer<typeof resSchema>
@@ -84,6 +84,7 @@ function createExchangeStore(): BalanceRateStore {
 
 			try {
 				rates = await fetchTokenPrice(symbol)
+				console.log(rates)
 			} catch (err) {
 				error = err as Error
 			}
@@ -107,4 +108,4 @@ function createExchangeStore(): BalanceRateStore {
 }
 
 export const exchangeStore = createExchangeStore()
-export const DEFAULT_FIAT_SYMBOL = fiatList[0] // TODO: we could set this in user preferences as originally designed
+export const DEFAULT_FIAT_SYMBOL = fiatList[1] // TODO: we could set this in user preferences as originally designed
