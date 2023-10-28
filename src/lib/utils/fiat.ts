@@ -46,7 +46,7 @@ export function getFiatAmountText(
 		if (fiatAmount.refreshing) return `Getting exchange rate`
 		return `Failed to load ${fiatSymbol} amount`
 	}
-	
+
 	if (!isValidNumber(tokenAmount)) return 'Please enter a valid number'
 	const amount = Number(tokenAmount)
 	if (isNaN(amount)) return 'Please enter a valid number'
