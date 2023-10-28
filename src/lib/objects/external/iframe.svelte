@@ -14,7 +14,7 @@
 	import adapters from '$lib/adapters'
 	import { walletStore } from '$lib/stores/wallet'
 	import { exchangeStore } from '$lib/stores/exchangeRates'
-	import { preferences } from '$lib/stores/preferences'
+	import { preferrences } from '$lib/stores/preferrences'
 	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 
 	// TODO: This needs escaping for the CSP
@@ -111,7 +111,7 @@
 				users,
 				tokens,
 				exchangeRates: $exchangeStore.exchange,
-				fiatSymbol: $preferences.fiatSymbol,
+				fiatSymbol: $preferrences.fiatSymbol,
 			},
 			context: {
 				view,

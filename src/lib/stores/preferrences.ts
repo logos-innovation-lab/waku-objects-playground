@@ -32,4 +32,4 @@ function createPreferenceStore(): PreferenceStore {
 	}
 }
 
-export const preferences = createPreferenceStore()
+export const preferrences = createPreferenceStore()

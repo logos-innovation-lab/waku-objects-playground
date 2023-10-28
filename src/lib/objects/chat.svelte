@@ -15,7 +15,7 @@
 	import { chats } from '$lib/stores/chat'
 	import { exchangeStore } from '$lib/stores/exchangeRates'
 	import { errorStore } from '$lib/stores/error'
-	import { preferences } from '$lib/stores/preferences'
+	import { preferrences } from '$lib/stores/preferrences'
 	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 
 	export let message: DataMessage
@@ -63,7 +63,7 @@
 			users,
 			tokens,
 			exchangeRates: $exchangeStore.exchange,
-			fiatSymbol: $preferences.fiatSymbol,
+			fiatSymbol: $preferrences.fiatSymbol,
 			store,
 			viewParams: [],
 			chatName,

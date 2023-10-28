@@ -10,7 +10,7 @@
 
 	import { goto } from '$app/navigation'
 	import routes from '$lib/routes'
-	import { fiatSymbolList, preferences } from '$lib/stores/preferences'
+	import { fiatSymbolList, preferrences } from '$lib/stores/preferrences'
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 	import Layout from '$lib/components/layout.svelte'
 </script>
@@ -27,11 +27,11 @@
 		<Container padY={12}>
 			<Dropdown label="Mode">
 				<Button grow align="block" slot="button">
-					{$preferences.fiatSymbol}
+					{$preferrences.fiatSymbol}
 					<CaretDown />
 				</Button>
 				{#each fiatSymbolList as fiatSymbol}
-					<DropdownItem onClick={() => preferences.setFiatSymbol(fiatSymbol)}
+					<DropdownItem onClick={() => preferrences.setFiatSymbol(fiatSymbol)}
 						>{fiatSymbol}</DropdownItem
 					>
 				{/each}
