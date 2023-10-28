@@ -1,5 +1,5 @@
 import { getFromLocalStorage, saveToLocalStorage } from '$lib/adapters/utils'
-import { writable, type Writable } from 'svelte/store'
+import { get, writable, type Writable } from 'svelte/store'
 import { z } from 'zod'
 import { isSystemDark } from './is-system-dark'
 
@@ -35,7 +35,7 @@ function createThemeStore(): ThemeStore {
 	isSystemDark.subscribe((isSystemDark) => {
 		store.update((theme) => ({
 			...theme,
-			isDarkMode: isSystemDark && theme.darkMode === 'system',
+			isDarkMode: get(store).darkMode === 'dark' || (isSystemDark && theme.darkMode === 'system'),
 		}))
 	})
 
@@ -47,7 +47,11 @@ function createThemeStore(): ThemeStore {
 		},
 		setDarkMode: (newDarkMode: DarkMode) => {
 			saveToLocalStorage('dark-mode', newDarkMode)
-			store.update((theme) => ({ ...theme, darkMode: newDarkMode }))
+			store.update((theme) => ({
+				...theme,
+				darkMode: newDarkMode,
+				isDarkMode: newDarkMode === 'dark' || (get(isSystemDark) && newDarkMode === 'system'),
+			}))
 		},
 	}
 }
