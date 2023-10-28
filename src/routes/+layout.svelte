@@ -73,7 +73,7 @@
 		if (unsubscribeExchangeStore) unsubscribeExchangeStore()
 	})
 
-	$: changeColors($theme.baseColor, $theme.darkMode, isSystemDark ?? isDarkQuery?.matches)
+	$: changeColors($theme.baseColor, $theme.isDarkMode)
 
 	const resolveError =
 		(error: ErrorDescriptor, handler: () => Promise<void> | void) => async () => {
@@ -81,6 +81,10 @@
 			errorStore.resolve(error)
 		}
 </script>
+
+<svelte:head>
+	<meta name="theme-color" content={$theme.isDarkMode ? '#000000' : '#ffffff'} />
+</svelte:head>
 
 <div class="root">
 	{#if $errorStore.length > 0}

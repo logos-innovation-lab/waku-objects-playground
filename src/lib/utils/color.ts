@@ -70,10 +70,9 @@ const lightColorsVars: Color[] = [
 	},
 ]
 
-export function changeColors(baseColor: string, darkMode: DarkMode, isSystemDark: boolean) {
+export function changeColors(baseColor: string, isDarkMode: boolean) {
 	if (!browser) return
 
-	const isDarkMode = darkMode === 'dark' || (darkMode === 'system' && isSystemDark)
 	const colors = isDarkMode ? darkColorVars : lightColorsVars
 	const colorsToRemove = isDarkMode ? lightColorsVars : darkColorVars
 
@@ -94,10 +93,4 @@ export function changeColors(baseColor: string, darkMode: DarkMode, isSystemDark
 		document.documentElement.style.removeProperty(name)
 		document.documentElement.style.removeProperty(`${name}-rgb`)
 	})
-
-	// Set theme color
-	const themeColorNode = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement
-	if (themeColorNode) {
-		themeColorNode.content = isDarkMode ? '#000000' : '#ffffff'
-	}
 }
