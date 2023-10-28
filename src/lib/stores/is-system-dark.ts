@@ -1,15 +1,11 @@
 import { browser } from '$app/environment'
 import { readable } from 'svelte/store'
 
-export const isSystemDark = readable(false, (set) => {
-	if (!browser) {
-		return
-	}
+const isDarkQuery = browser && window.matchMedia('(prefers-color-scheme: dark)')
 
-	const isDarkQuery = window.matchMedia('(prefers-color-scheme: dark)')
-	isDarkQuery.onchange = (event) => set(event.matches)
-
-	set(isDarkQuery.matches)
-
-	return () => (isDarkQuery.onchange = null)
-})
+export const isSystemDark = !isDarkQuery
+	? readable(false)
+	: readable(isDarkQuery.matches, (set) => {
+			isDarkQuery.onchange = (event) => set(event.matches)
+			return () => (isDarkQuery.onchange = null)
+	  })
