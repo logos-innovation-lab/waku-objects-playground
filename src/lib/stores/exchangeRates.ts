@@ -2,7 +2,7 @@ import { writable, get } from 'svelte/store'
 import type { Writable } from 'svelte/store'
 import { z } from 'zod'
 import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
-import { fiatSymbolList } from './preferrences'
+import { fiatSymbolList } from './preferences'
 
 function createSchema(tokens: readonly string[]) {
 	const schemas: Record<string, z.ZodNumber> = {}
@@ -82,6 +82,7 @@ function createExchangeStore(): BalanceRateStore {
 
 			try {
 				rates = await fetchTokenPrice(symbol)
+				console.log(rates)
 			} catch (err) {
 				error = err as Error
 			}

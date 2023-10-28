@@ -7,7 +7,7 @@ export default {
 	IDENTITY_ACCOUNT: '/identity/account',
 	IDENTITY_BACKUP: '/identity/backup',
 	IDENTITY_CHAT: '/identity/chat',
-	IDENTITY_PREFERRENCES: '/identity/preferrences',
+	IDENTITY_PREFERENCES: '/identity/preferences',
 	CHAT: (id: string) => `/chat/${id}`,
 	INVITE: (address: string) => `/invite/${address}`,
 	OBJECTS: (id: string) => `/chat/${id}/object/new`,

@@ -15,7 +15,7 @@
 	import { exchangeStore } from '$lib/stores/exchangeRates'
 	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 	import { errorStore } from '$lib/stores/error'
-	import { preferrences } from '$lib/stores/preferrences'
+	import { preferences } from '$lib/stores/preferences'
 
 	export let objectId: string
 	export let instanceId: string
@@ -85,7 +85,7 @@
 				view,
 				viewParams,
 				exchangeRates: $exchangeStore.exchange,
-				fiatSymbol: $preferrences.fiatSymbol,
+				fiatSymbol: $preferences.fiatSymbol,
 				...wakuObjectAdapter,
 			}
 		}

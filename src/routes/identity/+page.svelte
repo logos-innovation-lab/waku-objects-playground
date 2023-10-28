@@ -145,7 +145,7 @@
 				</div>
 			</Container>
 		</ButtonBlock>
-		<ButtonBlock borderTop borderBottom on:click={() => goto(routes.IDENTITY_PREFERRENCES)}>
+		<ButtonBlock borderTop borderBottom on:click={() => goto(routes.IDENTITY_PREFERENCES)}>
 			<Container direction="row" justify="space-between" align="center" alignItems="center">
 				<div class="icon">
 					<SettingsAdjust size={20} /> Preferences
