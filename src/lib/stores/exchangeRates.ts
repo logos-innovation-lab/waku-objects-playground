@@ -82,7 +82,6 @@ function createExchangeStore(): BalanceRateStore {
 
 			try {
 				rates = await fetchTokenPrice(symbol)
-				console.log(rates)
 			} catch (err) {
 				error = err as Error
 			}
