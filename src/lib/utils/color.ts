@@ -1,6 +1,5 @@
 import { getClosestColor, hexToRgb } from '@waku-objects/luminance'
 import { browser } from '$app/environment'
-import type { DarkMode } from '$lib/stores/theme'
 
 interface Color {
 	name: string
