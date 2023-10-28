@@ -33,6 +33,7 @@
 	} from '$lib/utils/format'
 	import ChatDateBadge from '$lib/components/chat-date-badge.svelte'
 	import { userDisplayName } from '$lib/utils/user'
+	import { VVP } from '$lib/utils/viewport-fix'
 
 	let div: HTMLElement
 	let autoscroll = true
@@ -52,6 +53,8 @@
 	})
 
 	onMount(() => {
+		new VVP()
+
 		if (browser && div) {
 			div.scrollTo({
 				top: div.scrollHeight,
