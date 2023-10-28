@@ -4,6 +4,7 @@
 </script>
 
 <div class={`wrapper ${bgColor}`}>
+	<div class="keyboard-fix" />
 	{#if $$slots.header}
 		<div class="header">
 			<slot name="header" />
@@ -53,5 +54,9 @@
 	.footer {
 		position: sticky;
 		inset: auto 0 0 0;
+	}
+	.keyboard-fix {
+		height: var(--offset-h, 0);
+		width: 100%;
 	}
 </style>
