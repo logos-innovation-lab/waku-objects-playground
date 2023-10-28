@@ -4,6 +4,7 @@
 	import Renew from '$lib/components/icons/renew.svelte'
 	import Wallet from '$lib/components/icons/wallet.svelte'
 	import SettingsView from '$lib/components/icons/settings-view.svelte'
+	import SettingsAdjust from '$lib/components/icons/settings-adjust.svelte'
 	import Logout from '$lib/components/icons/logout.svelte'
 	import DocumentSigned from '$lib/components/icons/document-signed.svelte'
 
@@ -132,10 +133,22 @@
 				</div>
 			</Container>
 		</ButtonBlock>
-		<ButtonBlock borderTop borderBottom on:click={() => goto(routes.IDENTITY_CHAT)}>
+		<ButtonBlock borderTop on:click={() => goto(routes.IDENTITY_CHAT)}>
 			<Container direction="row" justify="space-between" align="center" alignItems="center">
 				<div class="icon">
 					<SettingsView size={20} /> Chat appearance
+				</div>
+				<div>
+					<Button variant="icon">
+						<ChevronRight />
+					</Button>
+				</div>
+			</Container>
+		</ButtonBlock>
+		<ButtonBlock borderTop borderBottom on:click={() => goto(routes.IDENTITY_PREFERENCES)}>
+			<Container direction="row" justify="space-between" align="center" alignItems="center">
+				<div class="icon">
+					<SettingsAdjust size={20} /> Preferences
 				</div>
 				<div>
 					<Button variant="icon">

@@ -24,7 +24,7 @@
 	export let token: TokenAmount
 	export let tokens: TokenAmount[]
 	export let fiatRates: Map<string, ExchangeRateRecord>
-	export let fiatSymbol: string | undefined
+	export let fiatSymbol: string
 	export let onViewChange: (view: string) => void
 	export let exitObject: () => void
 

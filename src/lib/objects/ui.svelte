@@ -12,9 +12,10 @@
 	import Loading from '$lib/components/loading.svelte'
 	import type { HDNodeWallet } from 'ethers/lib.commonjs'
 	import type { TokenAmount } from './schemas'
-	import { DEFAULT_FIAT_SYMBOL, exchangeStore } from '$lib/stores/exchangeRates'
+	import { exchangeStore } from '$lib/stores/exchangeRates'
 	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 	import { errorStore } from '$lib/stores/error'
+	import { preferences } from '$lib/stores/preferences'
 
 	export let objectId: string
 	export let instanceId: string
@@ -84,7 +85,7 @@
 				view,
 				viewParams,
 				exchangeRates: $exchangeStore.exchange,
-				fiatSymbol: DEFAULT_FIAT_SYMBOL,
+				fiatSymbol: $preferences.fiatSymbol,
 				...wakuObjectAdapter,
 			}
 		}

@@ -41,7 +41,8 @@ import type {
 import { walletStore } from '$lib/stores/wallet'
 import { SafeWaku } from './safe-waku'
 import type { TokenAmount } from '$lib/objects/schemas'
-import { DEFAULT_FIAT_SYMBOL, exchangeStore } from '$lib/stores/exchangeRates'
+import { exchangeStore } from '$lib/stores/exchangeRates'
+import { preferences } from '$lib/stores/preferences'
 import { balanceStore } from '$lib/stores/balances'
 import type { ContentTopic } from './waku'
 import { installedObjectStore } from '$lib/stores/installed-objects'
@@ -167,7 +168,7 @@ async function executeOnDataMessage(
 			users: users,
 			profile: myProfile,
 			exchangeRates: get(exchangeStore).exchange,
-			fiatSymbol: DEFAULT_FIAT_SYMBOL,
+			fiatSymbol: get(preferences).fiatSymbol,
 			tokens: get(balanceStore).balances,
 		}
 		await descriptor.onMessage(dataMessage, args)

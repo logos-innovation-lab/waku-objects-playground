@@ -21,7 +21,8 @@
 	import { fetchBalances } from '$lib/adapters/balance'
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 	import Layout from '$lib/components/layout.svelte'
-	import { exchangeStore, DEFAULT_FIAT_SYMBOL } from '$lib/stores/exchangeRates'
+	import { exchangeStore } from '$lib/stores/exchangeRates'
+	import { preferences } from '$lib/stores/preferences'
 	import Loading from '$lib/components/loading.svelte'
 
 	let copied = false
@@ -85,8 +86,10 @@
 						amount={balance.amount}
 						decimals={balance.decimals}
 						image={balance.image}
-						fiatSymbol={DEFAULT_FIAT_SYMBOL}
-						fiatExchange={$exchangeStore.exchange.get(balance.symbol)?.rates[DEFAULT_FIAT_SYMBOL]}
+						fiatSymbol={$preferences.fiatSymbol}
+						fiatExchange={$exchangeStore.exchange.get(balance.symbol)?.rates[
+							$preferences.fiatSymbol
+						]}
 					/>
 				{/each}
 			</div>

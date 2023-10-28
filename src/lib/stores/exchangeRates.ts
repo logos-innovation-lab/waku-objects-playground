@@ -2,8 +2,9 @@ import { writable, get } from 'svelte/store'
 import type { Writable } from 'svelte/store'
 import { z } from 'zod'
 import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
+import { fiatSymbolList } from './preferences'
 
-function createSchema(tokens: string[]) {
+function createSchema(tokens: readonly string[]) {
 	const schemas: Record<string, z.ZodNumber> = {}
 	for (const token of tokens) {
 		schemas[token] = z.number()
@@ -11,10 +12,7 @@ function createSchema(tokens: string[]) {
 	return z.object(schemas)
 }
 
-// TODO: with centralised endpoint, we can add more fiat currencies
-const fiatList = ['DAI', 'EUR', 'USD', 'CZK']
-
-const resSchema = createSchema(fiatList)
+const resSchema = createSchema(fiatSymbolList)
 type ExchangeRates = z.infer<typeof resSchema>
 
 export interface ExchangeRateRecord {
@@ -34,7 +32,7 @@ interface BalanceRateStore extends Writable<ExchangeRateState> {
 }
 
 async function fetchTokenPrice(symbol: string): Promise<ExchangeRates> {
-	const endpoint = `https://min-api.cryptocompare.com/data/price?fsym=${symbol}&tsyms=${fiatList.join(
+	const endpoint = `https://min-api.cryptocompare.com/data/price?fsym=${symbol}&tsyms=${fiatSymbolList.join(
 		',',
 	)}&extraParams=0f8e116726ca17f20d95cd93fb85c7740c3bdb86719a58164ca28ed10df3320c`
 	const response = await fetch(endpoint)
@@ -108,4 +106,3 @@ function createExchangeStore(): BalanceRateStore {
 }
 
 export const exchangeStore = createExchangeStore()
-export const DEFAULT_FIAT_SYMBOL = fiatList[1] // TODO: we could set this in user preferences as originally designed

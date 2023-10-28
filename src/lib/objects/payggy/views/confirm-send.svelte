@@ -25,7 +25,7 @@
 	export let amount: string
 	export let token: TokenAmount
 	export let fiatRates: Map<string, ExchangeRateRecord>
-	export let fiatSymbol: string | undefined
+	export let fiatSymbol: string
 
 	export let estimateTransaction: (to: string, token: TokenAmount) => Promise<TokenAmount>
 	export let sendTransaction: (to: string, token: TokenAmount, fee: TokenAmount) => Promise<string>

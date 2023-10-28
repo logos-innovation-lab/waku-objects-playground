@@ -27,7 +27,7 @@
 	export let profile: User
 	export let status: string
 	export let fiatRates: Map<string, ExchangeRateRecord>
-	export let fiatSymbol: string | undefined
+	export let fiatSymbol: string
 	export let exitObject: () => void
 
 	$: sender = users.find((u) => u.address === transaction.from)
