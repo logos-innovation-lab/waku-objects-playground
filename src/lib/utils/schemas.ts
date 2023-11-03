@@ -6,7 +6,7 @@ export const AddressSchema = z
 
 export const PublicKeySchema = z
 	.string()
-	.regex(/^(0x)?(02|03)[a-f0-9]{64}$/i, 'Public key must be 65 hex numbers')
+	.regex(/^(0x)?(02|03)[a-f0-9]{64}$/i, 'Public key must be 66 hex numbers')
 
 export const TransactionHashSchema = z
 	.string()
