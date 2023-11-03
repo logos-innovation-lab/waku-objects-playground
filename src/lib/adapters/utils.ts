@@ -46,8 +46,6 @@ export function getFromLocalStorage<T extends JSONdecoded>(
 		throw new Error(`Error getting from local storage: invalid data. ${parseData.error.issues}`)
 	}
 
-	console.log('Retrieved', key, parseData.data)
-
 	return parseData.data
 }
 
