@@ -25,11 +25,6 @@ function getPeers(): string[] {
 				'/ip4/127.0.0.1/tcp/8000/ws/p2p/16Uiu2HAm53sojJN72rFbYg6GV2LpRRER9XeWkiEAhjKy3aL9cN5Z',
 			]
 
-		case 'test':
-			return [
-				'/dns4/ws.waku.apyos.dev/tcp/8123/wss/p2p/16Uiu2HAkzy7Apy2H72WYx3cSdPFqmeLThHTi8EY2KN22rpKHZ4gM ',
-			]
-
 		// Defaults to production
 		case 'production':
 		default:
