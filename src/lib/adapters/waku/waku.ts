@@ -29,13 +29,7 @@ function getPeers(): string[] {
 		case 'production':
 		default:
 			return [
-				'/dns4/go-waku.gra.nomad.apyos.dev/tcp/443/wss/p2p/16Uiu2HAmMafTFmwN9xat1jw7eHnwZJruQiezttwfRaeSgY5hkwe5',
-				'/dns4/go-waku.de.nomad.apyos.dev/tcp/443/wss/p2p/16Uiu2HAmTwF1VMGkNLXJDj7jLNLMeFwZt8jP8qKS1uojQSCiHib6',
-				'/dns4/go-waku.bhs.nomad.apyos.dev/tcp/443/wss/p2p/16Uiu2HAm2RwLYewyx3UWZgKT7SQPjASF8AYE3WCyWiM9xupZNCmW',
-
-				'/dns4/waku.gra.nomad.apyos.dev/tcp/443/wss/p2p/16Uiu2HAmDvywnsGaB32tFqwjTsg8sfC1ZV2EXo3xjxM4V2gvH6Up',
-				'/dns4/waku.bhs.nomad.apyos.dev/tcp/443/wss/p2p/16Uiu2HAkvrRkEHRMfe26F8NCWUfzMuaCfyCzwoPSUYG7yminM5Bn',
-				'/dns4/waku.de.nomad.apyos.dev/tcp/443/wss/p2p/16Uiu2HAmRgjA134DcoyK8r44pKWJQ69C7McLSWtRgxUVwkKAsbGx',
+				'/dns4/ws.waku.apyos.dev/tcp/8123/wss/p2p/16Uiu2HAkzy7Apy2H72WYx3cSdPFqmeLThHTi8EY2KN22rpKHZ4gM ',
 			]
 	}
 }
