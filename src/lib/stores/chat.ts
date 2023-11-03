@@ -27,11 +27,6 @@ export interface InviteMessage {
 
 export type Message = UserMessage | DataMessage | InviteMessage
 
-export interface SignedMessage {
-	message: Message
-	signature: string
-}
-
 export type ChatType = 'private' | 'group'
 
 export interface Chat {
@@ -60,17 +55,6 @@ interface ChatStore extends Writable<ChatData> {
 
 export function isGroupChat(chat: Chat) {
 	return chat.type === 'group'
-}
-
-export function getLastSeenMessageTime(chats: Chat[]) {
-	let lastMessageTime = 0
-	for (const chat of chats) {
-		const time = getLastMessageTime(chat)
-		if (time > lastMessageTime) {
-			lastMessageTime = time
-		}
-	}
-	return lastMessageTime
 }
 
 export function getLastMessageTime(chat?: Chat) {

@@ -282,11 +282,7 @@ export default class WakuAdapter implements Adapter {
 
 				createPrivateChat(chatEncryptionKey, user, ownPublicKey)
 			}
-			await this.subscribeToPrivateChat(
-				ownPublicKey,
-				hexToBytes(chatEncryptionKey),
-				wakuObjectAdapter,
-			)
+			await this.subscribeToPrivateChat(ownPublicKey, chatEncryptionKey, wakuObjectAdapter)
 		})
 
 		// subscribe to chats
@@ -434,11 +430,7 @@ export default class WakuAdapter implements Adapter {
 		createPrivateChat(chatEncryptionKey, user, ownPublicKey, joined)
 
 		const wakuObjectAdapter = makeWakuObjectAdapter(this, wallet)
-		await this.subscribeToPrivateChat(
-			ownPublicKey,
-			hexToBytes(chatEncryptionKey),
-			wakuObjectAdapter,
-		)
+		await this.subscribeToPrivateChat(ownPublicKey, chatEncryptionKey, wakuObjectAdapter)
 
 		return chatEncryptionKey
 	}
@@ -691,8 +683,7 @@ export default class WakuAdapter implements Adapter {
 		if (isGroupChat(chat)) {
 			await this.subscribeToGroupChat(ownPublicKey, chat.chatId, wakuObjectAdapter, timeFilter)
 		} else {
-			const encryptionKey = hexToBytes(chat.chatId)
-			await this.subscribeToPrivateChat(ownPublicKey, encryptionKey, wakuObjectAdapter, timeFilter)
+			await this.subscribeToPrivateChat(ownPublicKey, chat.chatId, wakuObjectAdapter, timeFilter)
 		}
 	}
 
@@ -737,20 +728,17 @@ export default class WakuAdapter implements Adapter {
 		)
 		this.subscriptions.push(groupChatSubscription)
 
-		await this.subscribeToPrivateChat(
-			ownPublicKey,
-			groupEncryptionKey,
-			wakuObjectAdapter,
-			timeFilter,
-		)
+		await this.subscribeToPrivateChat(ownPublicKey, groupChatId, wakuObjectAdapter, timeFilter)
 	}
 
 	private async subscribeToPrivateChat(
 		ownPublicKey: string,
-		encryptionKey: Uint8Array,
+		chatId: string,
 		wakuObjectAdapter: WakuObjectAdapter,
 		timeFilter?: TimeFilter,
 	) {
+		const encryptionKey = hexToBytes(chatId)
+
 		this.safeWaku.subscribe(encryptionKey, timeFilter, (message) =>
 			this.handleMessage(ownPublicKey, message, encryptionKey, wakuObjectAdapter),
 		)
