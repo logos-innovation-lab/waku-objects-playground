@@ -25,6 +25,7 @@
 	import type { Token, TokenAmount } from '$lib/objects/schemas'
 	import Info from '../components/info.svelte'
 	import type { ErrorDescriptor } from '$lib/stores/error'
+	import { publicKeyToAddress } from '$lib/adapters/waku/crypto'
 
 	export let amount: string
 	export let description: string
@@ -59,7 +60,7 @@
 				chainId,
 				splitContractAddress,
 				amnt,
-				profile.address,
+				publicKeyToAddress(profile.publicKey),
 				users,
 			)
 		} catch (error) {
@@ -88,7 +89,7 @@
 				getContract,
 				splitContractAddress,
 				amnt,
-				profile.address,
+				publicKeyToAddress(profile.publicKey),
 				users,
 			)
 
@@ -102,7 +103,7 @@
 					images,
 					txHash,
 					timestamp: Date.now(),
-					paidBy: profile.address,
+					paidBy: publicKeyToAddress(profile.publicKey),
 				},
 				users,
 			})

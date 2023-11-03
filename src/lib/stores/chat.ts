@@ -5,14 +5,14 @@ import { writable, type Writable } from 'svelte/store'
 export interface UserMessage {
 	type: 'user'
 	timestamp: number
-	fromAddress: string
+	senderPublicKey: string
 	text: string
 }
 
 export interface DataMessage<T extends JSONSerializable = JSONSerializable> {
 	type: 'data'
 	timestamp: number
-	fromAddress: string
+	senderPublicKey: string
 	objectId: string
 	instanceId: string
 	data: T
@@ -21,14 +21,22 @@ export interface DataMessage<T extends JSONSerializable = JSONSerializable> {
 export interface InviteMessage {
 	type: 'invite'
 	timestamp: number
-	fromAddress: string
+	senderPublicKey: string
 	chatId: string
 }
 
 export type Message = UserMessage | DataMessage | InviteMessage
 
+export interface SignedMessage {
+	message: Message
+	signature: string
+}
+
+export type ChatType = 'private' | 'group'
+
 export interface Chat {
 	chatId: string
+	type: ChatType
 	messages: Message[]
 	unread: number
 	users: User[]
@@ -50,9 +58,8 @@ interface ChatStore extends Writable<ChatData> {
 	removeChat: (chatId: string) => void
 }
 
-// FIXME temporary hack
-export function isGroupChatId(id: string) {
-	return id.length === 64
+export function isGroupChat(chat: Chat) {
+	return chat.type === 'group'
 }
 
 export function getLastSeenMessageTime(chats: Chat[]) {

@@ -8,7 +8,6 @@
 	import ChooseAmount from './views/choose-amount.svelte'
 	import ConfirmSend from './views/confirm-send.svelte'
 	import SelectUser from './views/select-user.svelte'
-	import { isGroupChatId } from '$lib/stores/chat'
 
 	export let args: WakuObjectArgs
 
@@ -33,11 +32,11 @@
 	let amount = ''
 	let toUser: User | undefined = undefined
 
-	$: isGroupchat = isGroupChatId(args.chatId)
+	$: isGroupchat = args.chatType === 'group'
 
 	// If this is private chat, set the user to which we want to send funds to the other user
 	$: if (!isGroupchat && !args.view)
-		toUser = args.users.find((u) => u.address !== args.profile.address)
+		toUser = args.users.find((u) => u.publicKey !== args.profile.publicKey)
 
 	// Utility function which makes it easier to handle history for closing the object
 	const exitObject = (depth: number) => () => history.go(isGroupchat ? -depth - 1 : -depth)

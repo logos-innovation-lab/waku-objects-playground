@@ -48,7 +48,7 @@
 		try {
 			if (!wallet) throw new Error('no wallet')
 
-			await adapters.saveUserProfile(wallet.address, name, picture)
+			await adapters.saveUserProfile(wallet, name, picture)
 			walletStore.saveWallet(wallet)
 			goto(routes.IDENTITY_CONFIRM)
 		} catch (e) {
@@ -86,7 +86,7 @@
 	</svelte:fragment>
 	<Container gap={12} justify="center">
 		<div class="avatar">
-			<Avatar size={140} {picture} seed={wallet?.address} />
+			<Avatar size={140} {picture} seed={wallet?.signingKey.compressedPublicKey} />
 		</div>
 		<InputFile bind:files={pictureFiles}>
 			<Renew />

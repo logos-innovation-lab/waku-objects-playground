@@ -21,6 +21,7 @@
 	import { toSignificant } from '$lib/utils/format'
 	import type { Token } from '$lib/objects/schemas'
 	import type { ErrorDescriptor } from '$lib/stores/error'
+	import { publicKeyToAddress } from '$lib/adapters/waku/crypto'
 
 	export let profile: UserType
 	export let balances: Balance[]
@@ -38,7 +39,9 @@
 
 	let owedAmount = 0n
 	$: {
-		const balance = balances.find(({ address }) => address === profile.address)
+		const balance = balances.find(
+			({ address }) => address === publicKeyToAddress(profile.publicKey),
+		)
 		if (balance) {
 			// FIXME: we should handle non-number strings parse error
 			owedAmount = BigInt(balance.amount)

@@ -22,6 +22,7 @@
 	import type { ExchangeRateRecord } from '$lib/stores/exchangeRates'
 	import type { ErrorDescriptor } from '$lib/stores/error'
 	import type { FiatSymbol } from '$lib/stores/preferences'
+	import { publicKeyToAddress } from '$lib/adapters/waku/crypto'
 
 	export let profile: UserType
 	export let instanceId: string
@@ -45,7 +46,11 @@
 
 	async function tryGetOwedAmount() {
 		try {
-			owedAmount = await getOwedAmount(getContract, splitterAddress, profile.address)
+			owedAmount = await getOwedAmount(
+				getContract,
+				splitterAddress,
+				publicKeyToAddress(profile.publicKey),
+			)
 		} catch (error) {
 			addError({
 				title: 'Splitter error',
@@ -60,7 +65,11 @@
 		feeError = undefined
 		fee = undefined
 		try {
-			fee = await estimateSettleDebt(getContract, splitterAddress, profile.address)
+			fee = await estimateSettleDebt(
+				getContract,
+				splitterAddress,
+				publicKeyToAddress(profile.publicKey),
+			)
 		} catch (error) {
 			feeError = error as Error
 			addError({
@@ -83,7 +92,11 @@
 		if (!owedAmount) return
 		try {
 			settling = true
-			const txHash = await settleDebt(getContract, splitterAddress, profile.address)
+			const txHash = await settleDebt(
+				getContract,
+				splitterAddress,
+				publicKeyToAddress(profile.publicKey),
+			)
 			send({
 				type: 'payment',
 				splitterAddress,
@@ -91,7 +104,7 @@
 				payment: {
 					txHash,
 					amount: owedAmount.toString(),
-					paidBy: profile.address,
+					paidBy: publicKeyToAddress(profile.publicKey),
 					timestamp: Date.now(),
 				},
 			})
@@ -151,7 +164,7 @@
 					<Info title="From">
 						<p>Your account</p>
 						<p class="text-sm">
-							{formatAddress(profile.address, 6, 6)}
+							{formatAddress(publicKeyToAddress(profile.publicKey), 6, 6)}
 						</p>
 					</Info>
 				</Container>

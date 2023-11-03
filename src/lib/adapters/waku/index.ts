@@ -4,11 +4,11 @@ import {
 	chats,
 	type Chat,
 	type Message,
-	isGroupChatId,
+	isGroupChat,
 	type DataMessage,
-	getLastSeenMessageTime,
 	type ChatData,
 	getLastMessageTime,
+	type InviteMessage,
 } from '$lib/stores/chat'
 import type { User } from '$lib/types'
 import type { TimeFilter } from '@waku/interfaces'
@@ -47,26 +47,30 @@ import { balanceStore } from '$lib/stores/balances'
 import type { ContentTopic } from './waku'
 import { installedObjectStore } from '$lib/stores/installed-objects'
 import { errorStore } from '$lib/stores/error'
+import { getSharedSecret, hash, hashHex } from './crypto'
+import { bytesToHex, hexToBytes } from '@waku/utils/bytes'
+import { encrypt, decrypt } from './crypto'
 
 const MAX_MESSAGES = 100
 
 function createPrivateChat(
 	chatId: string,
 	user: User,
-	ownAddress: string,
+	ownPublicKey: string,
 	joined?: boolean,
 ): string {
 	const ownProfile = get(profile)
 	const ownUser = {
 		name: ownProfile.name,
 		avatar: ownProfile.avatar,
-		address: ownAddress,
+		publicKey: ownPublicKey,
 	}
-	const chat = {
+	const chat: Chat = {
 		chatId,
+		type: 'private',
 		messages: [],
 		users: [user, ownUser],
-		name: user.name ?? user.address,
+		name: user.name ?? user.publicKey,
 		unread: 0,
 		joined,
 	}
@@ -83,8 +87,9 @@ function createGroupChat(
 	joined: boolean | undefined = undefined,
 	inviter: string | undefined = undefined,
 ): string {
-	const groupChat = {
+	const groupChat: Chat = {
 		chatId,
+		type: 'group',
 		messages: [],
 		users,
 		name,
@@ -99,17 +104,17 @@ function createGroupChat(
 }
 
 async function addMessageToChat(
-	address: string,
+	ownPublicKey: string,
 	blockchainAdapter: WakuObjectAdapter,
 	chatId: string,
 	message: Message,
 	send?: (data: JSONValue) => Promise<void>,
 ) {
 	if (message.type === 'data' && send) {
-		await executeOnDataMessage(address, blockchainAdapter, chatId, message, send)
+		await executeOnDataMessage(ownPublicKey, blockchainAdapter, chatId, message, send)
 	}
 
-	const unread = message.fromAddress !== address && message.type === 'user' ? 1 : 0
+	const unread = message.senderPublicKey !== ownPublicKey && message.type === 'user' ? 1 : 0
 	chats.updateChat(chatId, (chat) => ({
 		...chat,
 		messages: [...chat.messages.slice(-MAX_MESSAGES), message],
@@ -118,7 +123,7 @@ async function addMessageToChat(
 }
 
 async function executeOnDataMessage(
-	address: string,
+	publicKey: string,
 	blockchainAdapter: WakuObjectAdapter,
 	chatId: string,
 	dataMessage: DataMessage,
@@ -154,14 +159,18 @@ async function executeOnDataMessage(
 			},
 		}
 		const chat = get(chats).chats.get(chatId)
-		const users = chat ? chat.users : []
-		const myProfile: User = { ...get(profile), address }
+		if (!chat) {
+			return
+		}
+		const users = chat.users
+		const myProfile: User = { ...get(profile), publicKey }
 		const chatName =
-			chat?.name ?? users.find((u) => u.address !== myProfile.address)?.name ?? 'Unknown'
+			chat?.name ?? users.find((u) => u.publicKey !== myProfile.publicKey)?.name ?? 'Unknown'
 		const args: WakuObjectArgs = {
 			...context,
 			chainId: defaultBlockchainNetwork.chainId,
 			chatName,
+			chatType: chat.type,
 			chatId,
 			objectId: dataMessage.objectId,
 			instanceId: dataMessage.instanceId,
@@ -175,31 +184,51 @@ async function executeOnDataMessage(
 	}
 }
 
+function decryptHexToString(h: string, symKey: Uint8Array): string {
+	const encrypted = hexToBytes(h)
+	const decrypted = decrypt(encrypted, symKey)
+	return new TextDecoder().decode(decrypted)
+}
+
+function encryptStringToHex(s: string, symKey: Uint8Array): string {
+	const plaintext = new TextEncoder().encode(s)
+	const encrypted = encrypt(plaintext, symKey)
+	return bytesToHex(encrypted)
+}
+
 async function getDoc<T>(
 	ws: Wakustore,
 	contentTopic: ContentTopic,
-	id: string,
+	symKey: Uint8Array,
 ): Promise<T | undefined> {
+	const id = hash(symKey)
 	const key = `${contentTopic}/${id}`
-	const value = localStorage.getItem(key)
-	if (value) {
-		// TODO encryption
-		return JSON.parse(value) as T
+	const encryptedKey = encryptStringToHex(key, symKey)
+	const value = localStorage.getItem(encryptedKey)
+	if (value && value !== 'undefined') {
+		const decryptedValue = decryptHexToString(value, symKey)
+		return JSON.parse(decryptedValue) as T
 	}
 
-	const storeValue = await ws.getDoc<T>(contentTopic, id)
+	const storeValue = await ws.getDoc<T>(contentTopic, symKey)
 	const json = JSON.stringify(storeValue)
-	localStorage.setItem(key, json)
+
+	const encryptedJson = encryptStringToHex(json, symKey)
+	localStorage.setItem(encryptedKey, encryptedJson)
 
 	return storeValue
 }
 
-async function setDoc<T>(ws: Wakustore, contentTopic: ContentTopic, id: string, doc: T) {
+async function setDoc<T>(ws: Wakustore, contentTopic: ContentTopic, symKey: Uint8Array, doc: T) {
+	const id = hash(symKey)
 	const key = `${contentTopic}/${id}`
+	const encryptedKey = encryptStringToHex(key, symKey)
 	const json = JSON.stringify(doc)
-	localStorage.setItem(key, json)
+	const encryptedJson = encryptStringToHex(json, symKey)
 
-	return await ws.setDoc<T>(contentTopic, id, doc)
+	localStorage.setItem(encryptedKey, encryptedJson)
+
+	return await ws.setDoc<T>(contentTopic, symKey, doc)
 }
 
 export default class WakuAdapter implements Adapter {
@@ -209,40 +238,61 @@ export default class WakuAdapter implements Adapter {
 	async onLogIn(wallet: BaseWallet): Promise<void> {
 		const address = wallet.address
 
+		const ownPrivateKey = wallet.privateKey
+		const ownPublicKey = wallet.signingKey.compressedPublicKey
+
+		const ownPublicEncryptionKey = hexToBytes(hashHex(ownPublicKey))
+		const ownPrivateEncryptionKey = hexToBytes(hashHex(wallet.privateKey))
+
 		const ws = await this.makeWakustore()
 		const wakuObjectAdapter = makeWakuObjectAdapter(this, wallet)
 
-		const storageProfile = await getDoc<StorageProfile>(ws, 'profile', address)
-		profile.update((state) => ({ ...state, ...storageProfile, address, loading: false }))
+		const storageProfile = await getDoc<StorageProfile>(ws, 'profile', ownPublicEncryptionKey)
+		profile.update((state) => ({
+			...state,
+			...storageProfile,
+			address: ownPublicKey,
+			loading: false,
+		}))
 
-		const storageChatEntries = await getDoc<StorageChatEntry[]>(ws, 'chats', address)
+		const storageChatEntries = await getDoc<StorageChatEntry[]>(
+			ws,
+			'chats',
+			ownPrivateEncryptionKey,
+		)
 		chats.update((state) => ({ ...state, chats: new Map(storageChatEntries), loading: false }))
 
-		const allChats = Array.from(get(chats).chats)
-
-		// private chats
-		const privateChats = allChats.filter(([id]) => !isGroupChatId(id)).map(([, chat]) => chat)
-
-		const lastSeenMessageTime = getLastSeenMessageTime(privateChats)
-		const now = new Date()
-		const timeFilter = {
-			startTime: new Date(lastSeenMessageTime + 1),
-			endTime: now,
-		}
-		await this.subscribeToPrivateMessages(address, address, wakuObjectAdapter, timeFilter)
-
-		// group chats
-		const groupChats = allChats.filter(([id]) => isGroupChatId(id)).map(([, chat]) => chat)
-
-		for (const groupChat of groupChats) {
-			const groupChatId = groupChat.chatId
-			const lastSeenMessageTime = getLastMessageTime(groupChat)
-			const now = new Date()
-			const timeFilter = {
-				startTime: new Date(lastSeenMessageTime + 1),
-				endTime: now,
+		// subscribe to invites
+		const inviteKey = ownPublicEncryptionKey
+		await this.safeWaku.subscribe(inviteKey, undefined, async (message) => {
+			if (message.type !== 'invite') {
+				return
 			}
-			await this.subscribeToGroupChat(groupChatId, address, wakuObjectAdapter, timeFilter)
+
+			const chatEncryptionKey = getSharedSecret(ownPrivateKey, message.senderPublicKey)
+
+			const chatsMap = get(chats).chats
+			if (!chatsMap.has(chatEncryptionKey)) {
+				let user = await this.storageProfileToUser(message.senderPublicKey)
+				if (!user) {
+					user = {
+						publicKey: message.senderPublicKey,
+					}
+				}
+
+				createPrivateChat(chatEncryptionKey, user, ownPublicKey)
+			}
+			await this.subscribeToPrivateChat(
+				ownPublicKey,
+				hexToBytes(chatEncryptionKey),
+				wakuObjectAdapter,
+			)
+		})
+
+		// subscribe to chats
+		const allChats = Array.from(get(chats).chats)
+		for (const [, chat] of allChats) {
+			await this.subscribeToChat(chat, ownPublicKey, wakuObjectAdapter)
 		}
 
 		// chat store
@@ -260,13 +310,17 @@ export default class WakuAdapter implements Adapter {
 
 			chatSaveTimeout = setTimeout(async () => {
 				chatSaveTimeout = undefined
-				await this.saveChatStore(address)
+				await this.saveChatStore(ownPrivateEncryptionKey)
 			}, 1000)
 		})
 		this.subscriptions.push(subscribeChatStore)
 
 		// object store
-		const storageObjects = await getDoc<StorageObjectEntry[]>(ws, 'objects', address)
+		const storageObjects = await getDoc<StorageObjectEntry[]>(
+			ws,
+			'objects',
+			ownPrivateEncryptionKey,
+		)
 		objectStore.update((state) => ({
 			...state,
 			objects: new Map(storageObjects),
@@ -280,14 +334,19 @@ export default class WakuAdapter implements Adapter {
 				firstObjectStoreSave = false
 				return
 			}
-			await setDoc<StorageObjectEntry[]>(ws, 'objects', address, Array.from(objects.objects))
+			await setDoc<StorageObjectEntry[]>(
+				ws,
+				'objects',
+				ownPrivateEncryptionKey,
+				Array.from(objects.objects),
+			)
 		})
 		this.subscriptions.push(subscribeObjectStore)
 
 		// installed objects
 		const storageInstalledObjects = await ws.getDoc<StorageInstalledObjectEntry[]>(
 			'installed',
-			address,
+			ownPrivateEncryptionKey,
 		)
 		installedObjectStore.update((state) => ({
 			...state,
@@ -303,7 +362,7 @@ export default class WakuAdapter implements Adapter {
 			}
 			await ws.setDoc<StorageInstalledObjectEntry[]>(
 				'installed',
-				address,
+				ownPrivateEncryptionKey,
 				Array.from(installed.objects),
 			)
 		})
@@ -321,17 +380,23 @@ export default class WakuAdapter implements Adapter {
 		profile.set({ loading: false })
 	}
 
-	async saveUserProfile(address: string, name?: string, avatar?: string): Promise<void> {
-		const defaultProfile: StorageProfile = { name: name ?? address }
-		const storageProfile = (await this.fetchStorageProfile(address)) || defaultProfile
+	async saveUserProfile(wallet: BaseWallet, name?: string, avatar?: string): Promise<void> {
+		const ownPublicKey = wallet.signingKey.compressedPublicKey
+		if (!ownPublicKey) {
+			throw 'wallet not found'
+		}
+		const ownPublicEncryptionKey = hexToBytes(hashHex(ownPublicKey))
+
+		const defaultProfile: StorageProfile = { name: name ?? ownPublicKey }
+		const storageProfile = (await this.fetchStorageProfile(ownPublicKey)) || defaultProfile
 
 		if (avatar) storageProfile.avatar = avatar
 		if (name) storageProfile.name = name
 
 		if (avatar || name) {
 			const ws = await this.makeWakustore()
-			setDoc<StorageProfile>(ws, 'profile', address, storageProfile)
-			profile.update((state) => ({ ...state, address, name, avatar }))
+			setDoc<StorageProfile>(ws, 'profile', ownPublicEncryptionKey, storageProfile)
+			profile.update((state) => ({ ...state, name, avatar }))
 		}
 	}
 
@@ -339,33 +404,57 @@ export default class WakuAdapter implements Adapter {
 		return this.storageProfileToUser(address)
 	}
 
-	async startChat(address: string, peerAddress: string): Promise<string> {
-		const chatId = peerAddress
-		let user = await this.storageProfileToUser(chatId)
-		if (!user) {
-			user = {
-				address: peerAddress,
-			}
+	async startChat(wallet: BaseWallet, peerPublicKey: string): Promise<string> {
+		const storageProfile = await this.fetchStorageProfile(peerPublicKey)
+		if (!storageProfile) {
+			throw 'User not found!'
 		}
 
-		const joined = true
-		createPrivateChat(chatId, user, address, joined)
+		const ownPrivateKey = wallet.privateKey
+		const ownPublicKey = wallet.signingKey.compressedPublicKey
 
-		return chatId
+		// send invite
+		const inviteMessage: InviteMessage = {
+			type: 'invite',
+			timestamp: Date.now(),
+			senderPublicKey: wallet.signingKey.compressedPublicKey,
+			chatId: ownPublicKey,
+		}
+
+		const inviteEncryptionKey = hexToBytes(hashHex(peerPublicKey))
+		await this.safeWaku.sendMessage(inviteMessage, inviteEncryptionKey)
+
+		const chatEncryptionKey = getSharedSecret(ownPrivateKey, peerPublicKey)
+		const joined = true
+		const user = {
+			publicKey: peerPublicKey,
+			name: storageProfile.name,
+			avatar: storageProfile.avatar,
+		}
+		createPrivateChat(chatEncryptionKey, user, ownPublicKey, joined)
+
+		const wakuObjectAdapter = makeWakuObjectAdapter(this, wallet)
+		await this.subscribeToPrivateChat(
+			ownPublicKey,
+			hexToBytes(chatEncryptionKey),
+			wakuObjectAdapter,
+		)
+
+		return chatEncryptionKey
 	}
 
 	async startGroupChat(
 		wallet: BaseWallet,
 		chatId: string,
-		memberAddresses: string[],
+		memberPublicKeys: string[],
 		name: string,
 		avatar?: string,
 	): Promise<string> {
-		if (memberAddresses.length === 0) {
+		if (memberPublicKeys.length === 0) {
 			throw 'invalid chat'
 		}
 
-		const userAddresses = [...memberAddresses, wallet.address]
+		const userAddresses = [...memberPublicKeys, wallet.signingKey.compressedPublicKey]
 		const storageChat = {
 			users: userAddresses,
 			name,
@@ -377,16 +466,21 @@ export default class WakuAdapter implements Adapter {
 		createGroupChat(chatId, chat.users, name, avatar, true)
 
 		const ws = await this.makeWakustore()
-		await ws.setDoc<StorageChat>('group-chats', chatId, storageChat)
-		await this.subscribeToGroupChat(chatId, wallet.address, wakuObjectAdapter)
+		const encryptionKey = hexToBytes(chatId)
+		console.debug({ encryptionKey, storageChat, chatId })
+		await ws.setDoc<StorageChat>('group-chats', encryptionKey, storageChat)
+
+		const ownPublicKey = wallet.signingKey.compressedPublicKey
+		await this.subscribeToGroupChat(ownPublicKey, chatId, wakuObjectAdapter)
 
 		return chatId
 	}
 
 	async addMemberToGroupChat(chatId: string, users: string[]): Promise<void> {
 		const ws = await this.makeWakustore()
+		const encryptionKey = hexToBytes(chatId)
 
-		const groupChat = await ws.getDoc<StorageChat>('group-chats', chatId)
+		const groupChat = await ws.getDoc<StorageChat>('group-chats', encryptionKey)
 		if (!groupChat) {
 			return
 		}
@@ -396,13 +490,14 @@ export default class WakuAdapter implements Adapter {
 
 		groupChat.users = uniqueUsers
 
-		await ws.setDoc<StorageChat>('group-chats', chatId, groupChat)
+		await ws.setDoc<StorageChat>('group-chats', encryptionKey, groupChat)
 	}
 
 	async removeFromGroupChat(chatId: string, address: string): Promise<void> {
 		const ws = await this.makeWakustore()
+		const encryptionKey = hexToBytes(chatId)
 
-		const groupChat = await ws.getDoc<StorageChat>('group-chats', chatId)
+		const groupChat = await ws.getDoc<StorageChat>('group-chats', encryptionKey)
 		if (!groupChat) {
 			return
 		}
@@ -411,13 +506,14 @@ export default class WakuAdapter implements Adapter {
 			users: groupChat.users.filter((user) => user !== address),
 		}
 
-		await ws.setDoc<StorageChat>('group-chats', chatId, updatedGroupChat)
+		await ws.setDoc<StorageChat>('group-chats', encryptionKey, updatedGroupChat)
 	}
 
 	async saveGroupChatProfile(chatId: string, name?: string, avatar?: string): Promise<void> {
 		const ws = await this.makeWakustore()
+		const encryptionKey = hexToBytes(chatId)
 
-		const groupChat = await ws.getDoc<StorageChat>('group-chats', chatId)
+		const groupChat = await ws.getDoc<StorageChat>('group-chats', encryptionKey)
 		if (!groupChat) {
 			return
 		}
@@ -425,22 +521,23 @@ export default class WakuAdapter implements Adapter {
 		groupChat.name = name ?? groupChat.name
 		groupChat.avatar = avatar ?? groupChat.avatar
 
-		await ws.setDoc<StorageChat>('group-chats', chatId, groupChat)
+		await ws.setDoc<StorageChat>('group-chats', encryptionKey, groupChat)
 	}
 
 	async sendChatMessage(wallet: BaseWallet, chatId: string, text: string): Promise<void> {
-		const fromAddress = wallet.address
+		const senderPublicKey = wallet.signingKey.compressedPublicKey
 		const message: Message = {
 			type: 'user',
 			timestamp: Date.now(),
 			text,
-			fromAddress,
+			senderPublicKey,
 		}
 
 		const wakuObjectAdapter = makeWakuObjectAdapter(this, wallet)
+		const encryptionKey = hexToBytes(chatId)
 
-		await addMessageToChat(fromAddress, wakuObjectAdapter, chatId, message)
-		await this.safeWaku.sendMessage(chatId, message)
+		await addMessageToChat(senderPublicKey, wakuObjectAdapter, chatId, message)
+		await this.safeWaku.sendMessage(message, encryptionKey)
 	}
 
 	async sendData(
@@ -450,11 +547,11 @@ export default class WakuAdapter implements Adapter {
 		instanceId: string,
 		data: JSONSerializable,
 	): Promise<void> {
-		const fromAddress = wallet.address
+		const senderPublicKey = wallet.signingKey.compressedPublicKey
 		const message: Message = {
 			type: 'data',
 			timestamp: Date.now(),
-			fromAddress,
+			senderPublicKey,
 			objectId,
 			instanceId,
 			data,
@@ -462,26 +559,30 @@ export default class WakuAdapter implements Adapter {
 
 		const wakuObjectAdapter = makeWakuObjectAdapter(this, wallet)
 		const send = (data: JSONValue) => this.sendData(wallet, chatId, objectId, instanceId, data)
+		const encryptionKey = hexToBytes(chatId)
 
-		await addMessageToChat(fromAddress, wakuObjectAdapter, chatId, message, send)
-		await this.safeWaku.sendMessage(chatId, message)
+		await addMessageToChat(senderPublicKey, wakuObjectAdapter, chatId, message, send)
+		await this.safeWaku.sendMessage(message, encryptionKey)
 	}
 
-	async sendInvite(wallet: BaseWallet, chatId: string, users: string[]): Promise<void> {
-		if (!isGroupChatId(chatId)) {
-			throw 'chat id is private'
-		}
-
-		const fromAddress = wallet.address
+	async sendGroupChatInvite(
+		wallet: BaseWallet,
+		chatId: string,
+		userPublicKeys: string[],
+	): Promise<void> {
+		const senderPublicKey = wallet.signingKey.compressedPublicKey
 		const message: Message = {
 			type: 'invite',
 			timestamp: Date.now(),
-			fromAddress,
+			senderPublicKey,
 			chatId,
 		}
 
-		for (const user of users) {
-			await this.safeWaku.sendMessage(user, message)
+		const ownPrivateKey = wallet.privateKey
+		for (const userPublicKey of userPublicKeys) {
+			const chatEncryptionKey = hexToBytes(getSharedSecret(ownPrivateKey, userPublicKey))
+
+			await this.safeWaku.sendMessage(message, chatEncryptionKey)
 		}
 	}
 
@@ -532,6 +633,7 @@ export default class WakuAdapter implements Adapter {
 
 		return {
 			chatId,
+			type: 'group',
 			messages: [],
 			unread: 0,
 			users,
@@ -541,25 +643,26 @@ export default class WakuAdapter implements Adapter {
 	}
 
 	// fetches the profile from the network
-	private async fetchStorageProfile(address: string): Promise<StorageProfile | undefined> {
+	private async fetchStorageProfile(profilePublicKey: string): Promise<StorageProfile | undefined> {
 		const ws = await this.makeWakustore()
-		const storageProfile = await ws.getDoc<StorageProfile>('profile', address)
+		const profileEncryptionKey = hexToBytes(hashHex(profilePublicKey))
+		const storageProfile = await ws.getDoc<StorageProfile>('profile', profileEncryptionKey)
 
 		return storageProfile
 	}
 
 	// optimised version that first checks if the user is a contact
 	// then fetches from the network if not
-	private async storageProfileToUser(address: string): Promise<User | undefined> {
+	private async storageProfileToUser(profilePublicKey: string): Promise<User | undefined> {
 		const contactUser = Array.from(get(chats).chats)
 			.flatMap(([, chat]) => chat.users)
-			.find((user) => user.address === address)
+			.find((user) => user.publicKey === profilePublicKey)
 
 		if (contactUser) {
 			return contactUser
 		}
 
-		const storageProfile = await this.fetchStorageProfile(address)
+		const storageProfile = await this.fetchStorageProfile(profilePublicKey)
 		if (!storageProfile) {
 			return
 		}
@@ -567,21 +670,43 @@ export default class WakuAdapter implements Adapter {
 		const user = {
 			name: storageProfile.name,
 			avatar: storageProfile.avatar,
-			address,
+			publicKey: profilePublicKey,
 		}
 
 		return user
 	}
 
+	private async subscribeToChat(
+		chat: Chat,
+		ownPublicKey: string,
+		wakuObjectAdapter: WakuObjectAdapter,
+	) {
+		const lastSeenMessageTime = getLastMessageTime(chat)
+		const now = new Date()
+		const timeFilter = {
+			startTime: new Date(lastSeenMessageTime + 1),
+			endTime: now,
+		}
+
+		if (isGroupChat(chat)) {
+			await this.subscribeToGroupChat(ownPublicKey, chat.chatId, wakuObjectAdapter, timeFilter)
+		} else {
+			const encryptionKey = hexToBytes(chat.chatId)
+			await this.subscribeToPrivateChat(ownPublicKey, encryptionKey, wakuObjectAdapter, timeFilter)
+		}
+	}
+
 	private async subscribeToGroupChat(
+		ownPublicKey: string,
 		groupChatId: string,
-		address: string,
 		wakuObjectAdapter: WakuObjectAdapter,
 		timeFilter?: TimeFilter,
 	) {
 		const ws = await this.makeWakustore()
 
-		const groupChat = await ws.getDoc<StorageChat>('group-chats', groupChatId)
+		const groupEncryptionKey = hexToBytes(groupChatId)
+		const groupChat = await ws.getDoc<StorageChat>('group-chats', groupEncryptionKey)
+		console.debug({ groupChat, groupChatId })
 		if (groupChat) {
 			const updatedGroupChat = await this.storageChatToChat(groupChatId, groupChat)
 			chats.updateChat(groupChatId, (chat) => ({
@@ -594,9 +719,9 @@ export default class WakuAdapter implements Adapter {
 		}
 
 		const groupChatSubscription = await ws.onSnapshot<StorageChat>(
-			ws.docQuery('group-chats', groupChatId),
+			ws.docQuery('group-chats', groupEncryptionKey),
 			async (groupChat) => {
-				if (groupChat.users.includes(address)) {
+				if (groupChat.users.includes(ownPublicKey)) {
 					const updatedGroupChat = await this.storageChatToChat(groupChatId, groupChat)
 					chats.updateChat(groupChatId, (chat) => ({
 						...chat,
@@ -612,74 +737,67 @@ export default class WakuAdapter implements Adapter {
 		)
 		this.subscriptions.push(groupChatSubscription)
 
-		await this.subscribeToPrivateMessages(groupChatId, address, wakuObjectAdapter, timeFilter)
+		await this.subscribeToPrivateChat(
+			ownPublicKey,
+			groupEncryptionKey,
+			wakuObjectAdapter,
+			timeFilter,
+		)
 	}
 
-	private async subscribeToPrivateMessages(
-		id: string,
-		address: string,
+	private async subscribeToPrivateChat(
+		ownPublicKey: string,
+		encryptionKey: Uint8Array,
 		wakuObjectAdapter: WakuObjectAdapter,
 		timeFilter?: TimeFilter,
 	) {
-		this.safeWaku.subscribe(id, timeFilter, (message, chatId) =>
-			this.handleMessage(message, address, chatId, wakuObjectAdapter),
+		this.safeWaku.subscribe(encryptionKey, timeFilter, (message) =>
+			this.handleMessage(ownPublicKey, message, encryptionKey, wakuObjectAdapter),
 		)
 	}
 
 	private async handleMessage(
+		ownPublicKey: string,
 		message: Message,
-		address: string,
-		id: string,
+		encryptionKey: Uint8Array,
 		adapter: WakuObjectAdapter,
 	) {
 		// ignore messages coming from own address
-		if (message.fromAddress === address) {
+		if (message.senderPublicKey === ownPublicKey) {
 			return
 		}
 
+		const chatId = bytesToHex(encryptionKey)
 		const chatsMap = get(chats).chats
-
-		if (isGroupChatId(id)) {
-			if (!chatsMap.has(id)) {
-				return
-			}
-			let send: undefined | ((data: JSONValue) => Promise<void>) = undefined
-
-			if (message.type === 'data') {
-				// FIXME: @agazso figure out how to get wallet here without using the store
-				const wallet = get(walletStore).wallet
-				if (wallet) {
-					const { instanceId, objectId } = message
-					send = (data: JSONValue) => this.sendData(wallet, id, objectId, instanceId, data)
-				}
-			}
-
-			await addMessageToChat(address, adapter, id, message, send)
-
-			return
-		}
 
 		// create group chat when invited
 		if (message.type === 'invite') {
+			const chat = chatsMap.get(chatId)
+			if (!chat || isGroupChat(chat)) {
+				return
+			}
+
+			// already invited
 			if (chatsMap.has(message.chatId)) {
 				return
 			}
-			createGroupChat(message.chatId, [], undefined, undefined, undefined, message.fromAddress)
+
+			createGroupChat(message.chatId, [], undefined, undefined, undefined, message.senderPublicKey)
 			// add the message to the private chat of the inviter
-			await addMessageToChat(address, adapter, message.fromAddress, message)
-			await this.subscribeToGroupChat(message.chatId, address, adapter)
+			await addMessageToChat(ownPublicKey, adapter, message.senderPublicKey, message)
+			await this.subscribeToGroupChat(ownPublicKey, message.chatId, adapter)
 
 			return
 		}
 
 		// create chat if does not exist yet
-		if (!chatsMap.has(message.fromAddress)) {
-			const user = await this.storageProfileToUser(message.fromAddress)
+		if (!chatsMap.has(chatId)) {
+			const user = await this.storageProfileToUser(message.senderPublicKey)
 			if (!user) {
 				return
 			}
 
-			createPrivateChat(message.fromAddress, user, address)
+			createPrivateChat(chatId, user, ownPublicKey)
 		}
 
 		let send: undefined | ((data: JSONValue) => Promise<void>) = undefined
@@ -689,27 +807,28 @@ export default class WakuAdapter implements Adapter {
 			const wallet = get(walletStore).wallet
 			if (wallet) {
 				const { instanceId, objectId } = message
-				send = (data: JSONValue) => this.sendData(wallet, id, objectId, instanceId, data)
+				send = (data: JSONValue) => this.sendData(wallet, chatId, objectId, instanceId, data)
 			}
 		}
-		await addMessageToChat(address, adapter, message.fromAddress, message, send)
+
+		await addMessageToChat(ownPublicKey, adapter, chatId, message, send)
 	}
 
 	private async updateContactProfiles() {
 		// look for changes in users profile name and picture
 		const allContacts = Array.from(get(chats).chats).flatMap(([, chat]) => chat.users)
-		const uniqueContacts = new Map<string, User>(allContacts.map((user) => [user.address, user]))
+		const uniqueContacts = new Map<string, User>(allContacts.map((user) => [user.publicKey, user]))
 		const changes = new Map<string, User>()
 		for (const contact of uniqueContacts) {
 			const user = contact[1]
-			const storageProfile = await this.fetchStorageProfile(user.address)
+			const storageProfile = await this.fetchStorageProfile(user.publicKey)
 
 			if (!storageProfile) {
 				continue
 			}
 
 			if (storageProfile.name != user.name || storageProfile.avatar != user.avatar) {
-				changes.set(user.address, { ...storageProfile, address: user.address })
+				changes.set(user.publicKey, { ...storageProfile, publicKey: user.publicKey })
 			}
 		}
 		if (changes.size > 0) {
@@ -717,7 +836,7 @@ export default class WakuAdapter implements Adapter {
 				const newChats = new Map<string, Chat>(state.chats)
 				newChats.forEach((chat) => {
 					chat.users.forEach((user) => {
-						const changedUser = changes.get(user.address)
+						const changedUser = changes.get(user.publicKey)
 						if (!changedUser) {
 							return
 						}
@@ -733,14 +852,14 @@ export default class WakuAdapter implements Adapter {
 		}
 	}
 
-	private async saveChatStore(address: string) {
+	private async saveChatStore(ownPrivateEncryptionKey: Uint8Array) {
 		const ws = await this.makeWakustore()
 		const chatData: ChatData = get(chats)
 
 		const result = await setDoc<StorageChatEntry[]>(
 			ws,
 			'chats',
-			address,
+			ownPrivateEncryptionKey,
 			Array.from(chatData.chats),
 		)
 

@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
+	import { publicKeyToAddress } from '$lib/adapters/waku/crypto'
 	import Loading from '$lib/components/loading.svelte'
 	import { SPLIT_TOKEN } from '.'
 	import type { WakuObjectArgs } from '..'
@@ -133,7 +134,7 @@
 		send={args.send}
 		exitObject={exitObject(5)}
 		getContract={args.getContract}
-		users={args.store?.users ?? args.users.map((u) => u.address)}
+		users={args.store?.users ?? args.users.map((u) => publicKeyToAddress(u.publicKey))}
 		splitterAddress={args.store?.splitterAddress}
 		instanceId={args.instanceId}
 		addError={args.addError}

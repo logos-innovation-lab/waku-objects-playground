@@ -9,7 +9,6 @@
 	import type { WakuObjectArgs } from '..'
 	import IframeComponent from './iframe.svelte'
 	import { getNPMObject, type LoadedObject } from './lib'
-	import { isGroupChatId } from '$lib/stores/chat'
 
 	// Exports
 	export let args: WakuObjectArgs
@@ -20,7 +19,7 @@
 
 	// Utility function which makes it easier to handle history for closing the object
 	const exitObject = (depth: number) => () =>
-		history.go(isGroupChatId(args.chatId) ? -depth - 1 : -depth)
+		history.go(args.chatType === 'group' ? -depth - 1 : -depth)
 </script>
 
 {#if object}

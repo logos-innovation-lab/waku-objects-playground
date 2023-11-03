@@ -30,12 +30,12 @@
 		throw 'no wallet'
 	}
 	const chatId = $page.params.id
-	const address = wallet.address
+	const publicKey = wallet.signingKey.compressedPublicKey
 
 	let userProfile: User
-	$: if (address && !$profile.loading) {
+	$: if (publicKey && !$profile.loading) {
 		userProfile = {
-			address,
+			publicKey,
 			name: $profile.name,
 			avatar: $profile.avatar,
 		}
@@ -44,7 +44,7 @@
 	$: tokens = $balanceStore.balances
 
 	function updateStore(updater: (state: JSONSerializable) => JSONSerializable) {
-		adapter.updateStore(address, message.objectId, message.instanceId, updater)
+		adapter.updateStore(publicKey, message.objectId, message.instanceId, updater)
 	}
 
 	const chat = $chats.chats.get(chatId)
@@ -53,7 +53,7 @@
 	$: if ((userProfile, chat)) {
 		const wakuObjectAdapter = makeWakuObjectAdapter(adapter, wallet)
 		const chatName =
-			chat?.name ?? users.find((u) => u.address !== userProfile.address)?.name ?? 'Unknown'
+			chat.name ?? users.find((u) => u.publicKey !== userProfile.publicKey)?.name ?? 'Unknown'
 		args = {
 			chainId: defaultBlockchainNetwork.chainId,
 			chatId,
@@ -68,6 +68,7 @@
 			viewParams: [],
 			chatName,
 			addError: errorStore.addEnd,
+			chatType: chat.type,
 			send: (data: JSONSerializable) =>
 				adapter.sendData(wallet, chatId, message.objectId, message.instanceId, data),
 			updateStore,

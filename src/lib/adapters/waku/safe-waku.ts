@@ -1,8 +1,9 @@
 import { connectWaku, type ConnectWakuOptions, sendMessage } from '$lib/adapters/waku/waku'
-import { isGroupChatId, type Message } from '$lib/stores/chat'
+import type { Message } from '$lib/stores/chat'
 import type { LightNode, TimeFilter, Unsubscribe } from '@waku/interfaces'
 import { PageDirection } from '@waku/interfaces'
 import { makeWakustore } from './wakustore'
+import { bytesToHex, hexToBytes } from '@noble/hashes/utils'
 
 type Callback = (message: Message, chatId: string) => Promise<void>
 
@@ -49,7 +50,7 @@ export class SafeWaku {
 	}
 
 	async subscribe(
-		chatId: string,
+		encryptionKey: Uint8Array,
 		timeFilter: TimeFilter | undefined,
 		callback: (message: Message, chatId: string) => Promise<void>,
 	) {
@@ -57,6 +58,7 @@ export class SafeWaku {
 			this.lightNode = await this.safeConnectWaku()
 		}
 
+		const chatId = bytesToHex(encryptionKey)
 		const lastMessageTime = this.lastMessages.get(chatId)?.timestamp || 0
 		const startTime = new Date(lastMessageTime + 1)
 		const endTime = new Date()
@@ -65,12 +67,12 @@ export class SafeWaku {
 			: { startTime: endTime, endTime }
 		timeFilter = timeFilter || calculatedTimeFilter
 
-		const talkEmoji = isGroupChatId(chatId) ? '🗫' : '🗩'
+		const talkEmoji = '🗩'
 		this.log(`${talkEmoji}  subscribe to ${chatId}`)
 
 		const ws = makeWakustore(this.lightNode)
 		const unsubscribe = await ws.onSnapshot<Message>(
-			ws.collectionQuery('private-message', chatId, {
+			ws.collectionQuery('private-message', encryptionKey, {
 				timeFilter,
 				pageDirection: PageDirection.FORWARD,
 				pageSize: 1000,
@@ -94,7 +96,7 @@ export class SafeWaku {
 		this.subscriptions = new Map()
 	}
 
-	async sendMessage(id: string, message: Message) {
+	async sendMessage(message: Message, encryptionKey: Uint8Array) {
 		if (!this.lightNode) {
 			this.lightNode = await this.safeConnectWaku()
 		}
@@ -111,7 +113,7 @@ export class SafeWaku {
 
 		do {
 			try {
-				error = await sendMessage(this.lightNode, id, message)
+				error = await sendMessage(this.lightNode, encryptionKey, message)
 			} catch (e) {
 				error = e
 			} finally {
@@ -218,20 +220,20 @@ export class SafeWaku {
 
 		let subscribeError = undefined
 		for (const chatId of chatIds) {
-			const callback = oldSubscriptions.get(chatId)?.callback
-			if (!callback) {
+			const subscription = oldSubscriptions.get(chatId)
+			if (!subscription) {
 				continue
 			}
-
 			if (!subscribeError) {
 				try {
-					await this.subscribe(chatId, undefined, callback)
+					const encryptionKey = hexToBytes(chatId)
+					await this.subscribe(encryptionKey, undefined, subscription.callback)
 				} catch (e) {
 					subscribeError = e
-					this.subscribeEmpty(chatId, callback)
+					this.subscribeEmpty(chatId, subscription.callback)
 				}
 			} else {
-				this.subscribeEmpty(chatId, callback)
+				this.subscribeEmpty(chatId, subscription.callback)
 			}
 		}
 
@@ -274,7 +276,7 @@ export class SafeWaku {
 					lastMessage &&
 					lastMessage.timestamp === message.timestamp &&
 					lastMessage.type === message.type &&
-					lastMessage.fromAddress === message.fromAddress
+					lastMessage.senderPublicKey === message.senderPublicKey
 				) {
 					this.log('🙈 ignoring duplicate message', { message, lastMessage })
 					continue

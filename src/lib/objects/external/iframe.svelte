@@ -90,6 +90,7 @@
 		const {
 			chatId,
 			chatName,
+			chatType,
 			objectId,
 			instanceId,
 			profile,
@@ -105,6 +106,7 @@
 				chainId: defaultBlockchainNetwork.chainId,
 				chatId,
 				chatName,
+				chatType,
 				objectId,
 				instanceId,
 				profile,
@@ -136,7 +138,7 @@
 
 {#if object}
 	{#if message}
-		<ChatMessage myMessage={args?.profile.address === message?.fromAddress} bubble noText>
+		<ChatMessage myMessage={args?.profile.publicKey === message?.senderPublicKey} bubble noText>
 			<iframe
 				title={object.name}
 				bind:this={iframe}

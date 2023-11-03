@@ -74,7 +74,7 @@
 			return
 		}
 		try {
-			await adapters.saveUserProfile(wallet.address, name, avatar)
+			await adapters.saveUserProfile(wallet, name, avatar)
 		} catch (error) {
 			errorStore.addEnd({
 				title: 'Connection error',
@@ -112,7 +112,7 @@
 	</svelte:fragment>
 	<AuthenticatedOnly let:wallet>
 		<Container gap={6}>
-			<Avatar picture={avatar} seed={wallet.address} size={140} />
+			<Avatar picture={avatar} seed={wallet.signingKey.compressedPublicKey} size={140} />
 			<InputFile bind:files>
 				<Renew />
 				Change picture

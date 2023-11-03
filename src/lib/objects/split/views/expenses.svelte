@@ -15,6 +15,7 @@
 	import type { View } from '../types'
 	import { toSignificant } from '$lib/utils/format'
 	import type { Token } from '$lib/objects/schemas'
+	import { publicKeyToAddress } from '$lib/adapters/waku/crypto'
 
 	export let users: UserType[]
 	export let expenses: Expense[]
@@ -49,9 +50,10 @@
 	<Container padX={0} padY={0} grow>
 		{#each expenses as expense}
 			{@const paidBy =
-				profile.address === expense.paidBy
+				publicKeyToAddress(profile.publicKey) === expense.paidBy
 					? 'You'
-					: users.find((user) => user.address === expense.paidBy)?.name ?? 'Unknown'}
+					: users.find((user) => publicKeyToAddress(user.publicKey) === expense.paidBy)?.name ??
+					  'Unknown'}
 			<div
 				class="action"
 				role="button"

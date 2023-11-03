@@ -15,7 +15,7 @@
 
 	// Stores
 	import { profile } from '$lib/stores/profile'
-	import { chats, isGroupChatId, type Chat, type Message } from '$lib/stores/chat'
+	import { chats, isGroupChat, type Chat, type Message } from '$lib/stores/chat'
 
 	import ROUTES from '$lib/routes'
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
@@ -23,6 +23,7 @@
 	import Events from '$lib/components/icons/events.svelte'
 	import { formatTimestamp } from '$lib/utils/format'
 	import { userDisplayName } from '$lib/utils/user'
+	import { publicKeyToAddress } from '$lib/adapters/waku/crypto'
 
 	$: orderedChats = Array.from($chats.chats)
 		.map(([, chat]) => chat)
@@ -47,8 +48,8 @@
 			return 'You: '
 		}
 
-		if (isGroupChatId(chat.chatId)) {
-			const name = chat.users.find((user) => user.address === lastMessage?.fromAddress)?.name
+		if (isGroupChat(chat)) {
+			const name = chat.users.find((user) => user.publicKey === lastMessage?.senderPublicKey)?.name
 			return name ? `${name}: ` : ''
 		}
 
@@ -60,7 +61,8 @@
 			return s
 		}
 		for (const user of chat.users) {
-			s = s.replaceAll(`@${user.address}`, `@${user.name || user.address}`)
+			const userAddress = publicKeyToAddress(user.publicKey)
+			s = s.replaceAll(`@${userAddress}`, `@${user.name || userAddress}`)
 		}
 		return s
 	}
@@ -83,13 +85,13 @@
 				</Container>
 			</Layout>
 		{:else if $chats.chats.size === 0}
-			{@const address = wallet.address}
+			{@const publicKey = wallet.signingKey.compressedPublicKey}
 			<Layout>
 				<svelte:fragment slot="header">
 					<Header mainContent="right">
 						<svelte:fragment slot="left">
 							<div class="header-btns">
-								<Button variant="icon" on:click={() => goto(ROUTES.INVITE(address))}>
+								<Button variant="icon" on:click={() => goto(ROUTES.INVITE(publicKey))}>
 									<NewChat size={24} />
 								</Button>
 							</div>
@@ -97,7 +99,7 @@
 						<svelte:fragment slot="right">
 							<Button align="right" variant="account" on:click={() => goto(ROUTES.IDENTITY)}>
 								<svelte:fragment slot="avatar">
-									<Avatar size={48} picture={$profile.avatar} seed={wallet.address} />
+									<Avatar size={48} picture={$profile.avatar} seed={publicKey} />
 								</svelte:fragment>
 								{$profile.name}
 							</Button>
@@ -108,7 +110,7 @@
 					<p class="text-lg text-bold">No active chats</p>
 					<p class="text-lg">Invite someone to chat</p>
 					<div class="btn-spacing">
-						<Button on:click={() => goto(ROUTES.INVITE(address))}>
+						<Button on:click={() => goto(ROUTES.INVITE(publicKey))}>
 							<AddComment />
 							Invite to chat
 						</Button>
@@ -116,13 +118,13 @@
 				</Container>
 			</Layout>
 		{:else}
-			{@const address = wallet.address}
+			{@const publicKey = wallet.signingKey.compressedPublicKey}
 			<Layout>
 				<svelte:fragment slot="header">
 					<Header mainContent="right">
 						<svelte:fragment slot="left">
 							<div class="header-btns">
-								<Button variant="icon" on:click={() => goto(ROUTES.INVITE(address))}>
+								<Button variant="icon" on:click={() => goto(ROUTES.INVITE(publicKey))}>
 									<NewChat size={24} />
 								</Button>
 							</div>
@@ -130,7 +132,7 @@
 						<svelte:fragment slot="right">
 							<Button align="right" variant="account" on:click={() => goto(ROUTES.IDENTITY)}>
 								<svelte:fragment slot="avatar">
-									<Avatar size={48} picture={$profile.avatar} seed={wallet.address} />
+									<Avatar size={48} picture={$profile.avatar} seed={publicKey} />
 								</svelte:fragment>
 								{$profile.name}
 							</Button>
@@ -142,18 +144,18 @@
 						{@const userMessages = chat.messages.filter((message) => message.type === 'user')}
 						{@const lastMessage =
 							userMessages.length > 0 ? userMessages[userMessages.length - 1] : undefined}
-						{@const myMessage = lastMessage && lastMessage.fromAddress === wallet.address}
-						{@const otherUser = chat.users.find((m) => m.address !== wallet.address)}
+						{@const myMessage = lastMessage && lastMessage.senderPublicKey === publicKey}
+						{@const otherUser = chat.users.find((m) => m.publicKey !== publicKey)}
 						{@const senderName = lastSenderName(chat, myMessage, lastMessage)}
 						<li>
 							<div
 								class="chat-button"
 								on:click={() =>
-									isGroupChatId(chat.chatId)
+									isGroupChat(chat)
 										? goto(ROUTES.GROUP_CHAT(chat.chatId))
 										: goto(ROUTES.CHAT(chat.chatId))}
 								on:keypress={() =>
-									isGroupChatId(chat.chatId)
+									isGroupChat(chat)
 										? goto(ROUTES.GROUP_CHAT(chat.chatId))
 										: goto(ROUTES.CHAT(chat.chatId))}
 								role="button"
@@ -161,15 +163,15 @@
 							>
 								<Container grow>
 									<div class="chat">
-										{#if isGroupChatId(chat.chatId)}
+										{#if isGroupChat(chat)}
 											<Avatar group size={70} picture={chat?.avatar} seed={chat.chatId} />
 										{:else}
-											<Avatar size={70} picture={otherUser?.avatar} seed={otherUser?.address} />
+											<Avatar size={70} picture={otherUser?.avatar} seed={otherUser?.publicKey} />
 										{/if}
 										<div class="content">
 											<div class="chat-info">
 												<span class="chat-name text-lg text-bold">
-													{#if isGroupChatId(chat.chatId)}
+													{#if isGroupChat(chat)}
 														<span class="truncate">
 															{chat?.name}
 														</span>
@@ -197,15 +199,16 @@
 													{@html lastMessage && lastMessage.type === 'user'
 														? replaceAddressesWithNames(lastMessage.text?.substring(0, 150), chat)
 														: 'No messages yet'}
+												{:else if isGroupChat(chat)}
+													{@const inviter = chat?.users.find(
+														(user) => user.publicKey === chat?.inviter,
+													)?.name}
+													{inviter} invited you to join this group
 												{:else}
 													{@const inviter =
 														chat.inviter ||
-														chat.users.find((user) => user.address !== wallet.address)?.name}
-													{#if isGroupChatId(chat.chatId)}
-														{inviter} invited you to join this group
-													{:else}
-														{inviter} wants to chat privately
-													{/if}
+														chat.users.find((user) => user.publicKey !== publicKey)?.name}
+													{inviter} wants to chat privately
 												{/if}
 											</p>
 										</div>

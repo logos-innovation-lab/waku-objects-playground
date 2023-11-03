@@ -69,7 +69,7 @@
 
 	$: otherUser = $chats.chats
 		.get($page.params.id)
-		?.users.find((m) => m.address !== $walletStore.wallet?.address)
+		?.users.find((m) => m.publicKey !== $walletStore.wallet?.signingKey.compressedPublicKey)
 </script>
 
 <AuthenticatedOnly>

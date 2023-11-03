@@ -20,6 +20,7 @@
 	import { getFiatAmountText } from '$lib/utils/fiat'
 	import type { ErrorDescriptor } from '$lib/stores/error'
 	import type { FiatSymbol } from '$lib/stores/preferences'
+	import { publicKeyToAddress } from '$lib/adapters/waku/crypto'
 
 	export let toUser: User
 	export let profile: User
@@ -40,7 +41,7 @@
 	async function tryEstimateTransaction() {
 		try {
 			const tokenToTransfer = { ...token, amount: toBigInt(amount, token.decimals) }
-			fee = await estimateTransaction(toUser.address, tokenToTransfer)
+			fee = await estimateTransaction(toUser.publicKey, tokenToTransfer)
 		} catch (e) {
 			addError({
 				title: 'Payggy error',
@@ -68,7 +69,7 @@
 
 		let transactionHash: string
 		try {
-			transactionHash = await sendTransaction(toUser.address, tokenToTransfer, fee)
+			transactionHash = await sendTransaction(toUser.publicKey, tokenToTransfer, fee)
 
 			await send({ hash: transactionHash })
 			exitObject()
@@ -111,11 +112,15 @@
 		</ReadonlyText>
 		<ReadonlyText label="From">
 			<div class="text-lg">Your account</div>
-			<div class="secondary text-sm">{formatAddress(profile.address, 4, 4)}</div>
+			<div class="secondary text-sm">
+				{formatAddress(publicKeyToAddress(profile.publicKey), 4, 4)}
+			</div>
 		</ReadonlyText>
 		<ReadonlyText label="To">
 			<div class="text-lg">{toUser.name}'s account</div>
-			<div class="secondary text-sm">{formatAddress(toUser.address, 4, 4)}</div>
+			<div class="secondary text-sm">
+				{formatAddress(publicKeyToAddress(toUser.publicKey), 4, 4)}
+			</div>
 		</ReadonlyText>
 		<ReadonlyText label="Transaction fee (max)">
 			<div class="text-lg">
@@ -148,7 +153,7 @@
 	</Container>
 	<Container direction="row" justify="space-between" alignItems="center" padX={24}>
 		<div class="secondary text-normal">
-			{toUser.name ?? formatAddress(toUser.address, 4, 4)}
+			{toUser.name ?? formatAddress(publicKeyToAddress(toUser.publicKey), 4, 4)}
 		</div>
 		<Button
 			variant="strong"

@@ -37,6 +37,7 @@
 	} from '$lib/utils/format'
 	import ChatDateBadge from '$lib/components/chat-date-badge.svelte'
 	import { errorStore } from '$lib/stores/error'
+	import { publicKeyToAddress } from '$lib/adapters/waku/crypto'
 
 	let div: HTMLElement
 	let autoscroll = true
@@ -91,7 +92,7 @@
 		isSending = false
 	}
 
-	$: inviter = chat?.users.find((user) => user.address === chat?.inviter)
+	$: inviter = chat?.users.find((user) => user.publicKey === chat?.inviter)
 	$: wallet = $walletStore.wallet
 
 	function join() {
@@ -99,9 +100,9 @@
 	}
 
 	async function decline() {
-		if (wallet?.address) {
+		if (wallet?.signingKey.compressedPublicKey) {
 			chats.removeChat($page.params.id)
-			adapters.removeFromGroupChat($page.params.id, wallet.address)
+			adapters.removeFromGroupChat($page.params.id, wallet.signingKey.compressedPublicKey)
 			goto(ROUTES.HOME)
 		}
 	}
@@ -117,7 +118,8 @@
 			return s
 		}
 		for (const user of chat.users) {
-			s = s.replaceAll(`@${user.address}`, `@${user.name || user.address}`)
+			const userAddress = publicKeyToAddress(user.publicKey)
+			s = s.replaceAll(`@${userAddress}`, `@${user.name || userAddress}`)
 		}
 		return s
 	}
@@ -134,7 +136,8 @@
 			if (!user.name) {
 				continue
 			}
-			s = s.replaceAll(`@${user.name}`, `@${user.address}`)
+			const userAddress = publicKeyToAddress(user.publicKey)
+			s = s.replaceAll(`@${user.name}`, `@${userAddress}`)
 		}
 		return s
 	}
@@ -201,21 +204,25 @@
 								<!-- Chat bubbles -->
 								{#each messages as message, i}
 									{#if message.type === 'user' && message.text?.length > 0}
-										{@const sameSender = messages[i].fromAddress === messages[i - 1]?.fromAddress}
+										{@const sameSender =
+											messages[i].senderPublicKey === messages[i - 1]?.senderPublicKey}
 										{@const lastMessage =
 											i + 1 === messages.length ||
-											messages[i].fromAddress !== messages[i + 1]?.fromAddress ||
+											messages[i].senderPublicKey !== messages[i + 1]?.senderPublicKey ||
 											messages[i + 1]?.type !== 'user'}
-										{@const sender = chat.users.find((u) => message.fromAddress === u.address)}
+										{@const sender = chat.users.find(
+											(u) => message.senderPublicKey === u.publicKey,
+										)}
+										{@const publicKey = wallet.signingKey.compressedPublicKey}
 										{#if i === 0 || (i > 0 && areDifferentDays(messages[i].timestamp, messages[i - 1].timestamp))}
 											<ChatDateBadge text={formatTimestampSeparator(message.timestamp)} />
 										{/if}
 										<ChatMessage
-											myMessage={message.fromAddress === wallet.address ? true : false}
+											myMessage={message.senderPublicKey === publicKey ? true : false}
 											bubble
 											group
 											{sameSender}
-											senderName={message.fromAddress === wallet.address || !lastMessage
+											senderName={message.senderPublicKey === publicKey || !lastMessage
 												? undefined
 												: sender?.name}
 											timestamp={lastMessage
@@ -224,8 +231,8 @@
 										>
 											{@html replaceAddressesWithNames(textToHTML(htmlize(message.text)))}
 											<svelte:fragment slot="avatar">
-												{#if message.fromAddress !== wallet.address && lastMessage}
-													<Avatar size={40} picture={sender?.avatar} seed={sender?.address} />
+												{#if message.senderPublicKey !== publicKey && lastMessage}
+													<Avatar size={40} picture={sender?.avatar} seed={sender?.publicKey} />
 												{/if}
 											</svelte:fragment>
 										</ChatMessage>

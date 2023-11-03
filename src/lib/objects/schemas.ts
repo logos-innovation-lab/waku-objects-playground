@@ -1,4 +1,4 @@
-import { AddressSchema } from '$lib/utils/schemas'
+import { AddressSchema, PublicKeySchema } from '$lib/utils/schemas'
 import z from 'zod'
 
 export const TokenSchema = z.object({
@@ -16,7 +16,7 @@ export const TokenAmountSchema = TokenSchema.extend({
 export type TokenAmount = z.infer<typeof TokenAmountSchema>
 
 export const UserSchema = z.object({
-	address: AddressSchema,
+	publicKey: PublicKeySchema,
 	name: z.string().optional(),
 	avatar: z.string().optional(),
 })

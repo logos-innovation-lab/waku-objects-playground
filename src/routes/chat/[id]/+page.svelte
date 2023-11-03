@@ -14,7 +14,7 @@
 	import WakuObject from '$lib/objects/chat.svelte'
 
 	import { goto } from '$app/navigation'
-	import { chats, isGroupChatId } from '$lib/stores/chat'
+	import { chats, isGroupChat } from '$lib/stores/chat'
 	import adapters from '$lib/adapters'
 	import ROUTES from '$lib/routes'
 	import { browser } from '$app/environment'
@@ -102,7 +102,8 @@
 			</Container>
 		</Layout>
 	{:else}
-		{@const otherUser = chat?.users.find((m) => m.address !== wallet.address)}
+		{@const publicKey = wallet.signingKey.compressedPublicKey}
+		{@const otherUser = chat?.users.find((m) => m.publicKey !== publicKey)}
 		<Layout bgColor="shade">
 			<svelte:fragment slot="header">
 				<Header>
@@ -110,23 +111,22 @@
 						<ChevronLeft />
 					</Button>
 					<svelte:fragment slot="chat">
-						<Avatar picture={otherUser?.avatar} seed={otherUser?.address} />
+						<Avatar picture={otherUser?.avatar} seed={otherUser?.publicKey} />
 						{userDisplayName(otherUser)}
 					</svelte:fragment>
 				</Header>
 			</svelte:fragment>
 			{#if !chat.joined}
-				{@const inviter = chat?.users.find((user) => user.address !== wallet.address)}
+				{@const inviter = chat?.users.find((user) => user.publicKey !== publicKey)}
 				{@const commonGroupNames = Array.from($chats.chats.values())
 					.filter(
 						(chat) =>
-							isGroupChatId(chat.chatId) &&
-							chat.users.find((user) => user.address === inviter?.address),
+							isGroupChat(chat) && chat.users.find((user) => user.publicKey === inviter?.publicKey),
 					)
 					.map((chat) => `"${chat.name}"`)
 					.slice(0, 1)}
 				<Container justify="center" alignItems="center" gap={0} padX={24}>
-					<Avatar picture={inviter?.avatar} seed={inviter?.address} size={140} />
+					<Avatar picture={inviter?.avatar} seed={inviter?.publicKey} size={140} />
 					<Spacer />
 					<p class="text-lg text-bold text-center">Chat with "{chat?.name}"?</p>
 					<Spacer height={12} />
@@ -160,10 +160,10 @@
 									{#if message.type === 'user' && message.text?.length > 0}
 										{@const lastMessage =
 											i + 1 === messages.length ||
-											messages[i].fromAddress !== messages[i + 1]?.fromAddress ||
+											messages[i].senderPublicKey !== messages[i + 1]?.senderPublicKey ||
 											messages[i + 1]?.type !== 'user'}
 										<ChatMessage
-											myMessage={message.fromAddress === wallet.address ? true : false}
+											myMessage={message.senderPublicKey === publicKey ? true : false}
 											bubble
 											timestamp={lastMessage
 												? formatTimestampTime(lastMessage ? message.timestamp : 0)
