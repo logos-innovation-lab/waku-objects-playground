@@ -34,10 +34,13 @@
 	import Loading from '$lib/components/loading.svelte'
 	import { errorStore } from '$lib/stores/error'
 	import type { BaseWallet } from 'ethers'
+	import { getSharedSecret } from '$lib/adapters/waku/crypto'
 
 	// check if the chat already exists
-	$: if ($chats.chats.has($page.params.address)) {
-		goto(routes.CHAT($page.params.address))
+	$: sharedSecret =
+		$walletStore.wallet && getSharedSecret($walletStore.wallet?.privateKey, $page.params.address)
+	$: if (sharedSecret && $chats.chats.has(sharedSecret)) {
+		goto(routes.CHAT(sharedSecret))
 	}
 
 	let unsubscribe: Unsubscriber | undefined
