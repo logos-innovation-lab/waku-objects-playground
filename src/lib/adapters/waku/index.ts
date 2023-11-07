@@ -47,7 +47,7 @@ import { balanceStore } from '$lib/stores/balances'
 import type { ContentTopic } from './waku'
 import { installedObjectStore } from '$lib/stores/installed-objects'
 import { errorStore } from '$lib/stores/error'
-import { getSharedSecret, hash, hashHex } from './crypto'
+import { getSharedSecret, hash } from './crypto'
 import { bytesToHex, hexToBytes } from '@waku/utils/bytes'
 import { encrypt, decrypt } from './crypto'
 
@@ -241,8 +241,8 @@ export default class WakuAdapter implements Adapter {
 		const ownPrivateKey = wallet.privateKey
 		const ownPublicKey = wallet.signingKey.compressedPublicKey
 
-		const ownPublicEncryptionKey = hexToBytes(hashHex(ownPublicKey))
-		const ownPrivateEncryptionKey = hexToBytes(hashHex(wallet.privateKey))
+		const ownPublicEncryptionKey = hexToBytes(hash(ownPublicKey))
+		const ownPrivateEncryptionKey = hexToBytes(hash(wallet.privateKey))
 
 		const ws = await this.makeWakustore()
 		const wakuObjectAdapter = makeWakuObjectAdapter(this, wallet)
@@ -381,7 +381,7 @@ export default class WakuAdapter implements Adapter {
 		if (!ownPublicKey) {
 			throw 'wallet not found'
 		}
-		const ownPublicEncryptionKey = hexToBytes(hashHex(ownPublicKey))
+		const ownPublicEncryptionKey = hexToBytes(hash(ownPublicKey))
 
 		const defaultProfile: StorageProfile = { name: name ?? ownPublicKey }
 		const storageProfile = (await this.fetchStorageProfile(ownPublicKey)) || defaultProfile
@@ -417,7 +417,7 @@ export default class WakuAdapter implements Adapter {
 			chatId: ownPublicKey,
 		}
 
-		const inviteEncryptionKey = hexToBytes(hashHex(peerPublicKey))
+		const inviteEncryptionKey = hexToBytes(hash(peerPublicKey))
 		await this.safeWaku.sendMessage(inviteMessage, inviteEncryptionKey)
 
 		const chatEncryptionKey = getSharedSecret(ownPrivateKey, peerPublicKey)
@@ -637,7 +637,7 @@ export default class WakuAdapter implements Adapter {
 	// fetches the profile from the network
 	private async fetchStorageProfile(profilePublicKey: string): Promise<StorageProfile | undefined> {
 		const ws = await this.makeWakustore()
-		const profileEncryptionKey = hexToBytes(hashHex(profilePublicKey))
+		const profileEncryptionKey = hexToBytes(hash(profilePublicKey))
 		const storageProfile = await ws.getDoc<StorageProfile>('profile', profileEncryptionKey)
 
 		return storageProfile

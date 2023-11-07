@@ -23,14 +23,10 @@ export function getSharedSecret(privateKey: Hex, publicKey: Hex): Hex {
 	return hash(secretBytes.slice(1))
 }
 
-export function hash(data: Uint8Array): Hex {
-	const hashBytes = keccak_256(data)
+export function hash(data: Uint8Array | Hex): Hex {
+	const bytes = typeof data === 'string' ? hexToBytes(data) : data
+	const hashBytes = keccak_256(bytes)
 	return bytesToHex(hashBytes)
-}
-
-export function hashHex(data: Hex): Hex {
-	const bytes = hexToBytes(data)
-	return hash(bytes)
 }
 
 export function encrypt(
