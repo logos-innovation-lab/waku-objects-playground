@@ -51,7 +51,8 @@ const topicApp = 'wakuobjects-playground'
 const topicVersion = '1'
 
 function getTopic(contentTopic: ContentTopic, id: string | '' = '') {
-	return hash(new TextEncoder().encode(`/${topicApp}/${topicVersion}/${contentTopic}/${id}`))
+	const hashedContentTopicName = hash(new TextEncoder().encode(`${contentTopic}/${id}`))
+	return `/${topicApp}/${topicVersion}/${hashedContentTopicName}`
 }
 
 export interface ConnectWakuOptions {
