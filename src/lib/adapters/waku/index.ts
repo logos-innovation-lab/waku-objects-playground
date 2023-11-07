@@ -525,10 +525,8 @@ export default class WakuAdapter implements Adapter {
 			senderPublicKey,
 		}
 
-		const wakuObjectAdapter = makeWakuObjectAdapter(this, wallet)
 		const encryptionKey = hexToBytes(chatId)
 
-		await addMessageToChat(senderPublicKey, wakuObjectAdapter, chatId, message)
 		await this.safeWaku.sendMessage(message, encryptionKey)
 	}
 
@@ -549,11 +547,8 @@ export default class WakuAdapter implements Adapter {
 			data,
 		}
 
-		const wakuObjectAdapter = makeWakuObjectAdapter(this, wallet)
-		const send = (data: JSONValue) => this.sendData(wallet, chatId, objectId, instanceId, data)
 		const encryptionKey = hexToBytes(chatId)
 
-		await addMessageToChat(senderPublicKey, wakuObjectAdapter, chatId, message, send)
 		await this.safeWaku.sendMessage(message, encryptionKey)
 	}
 
@@ -750,11 +745,6 @@ export default class WakuAdapter implements Adapter {
 		encryptionKey: Uint8Array,
 		adapter: WakuObjectAdapter,
 	) {
-		// ignore messages coming from own address
-		if (message.senderPublicKey === ownPublicKey) {
-			return
-		}
-
 		const chatId = bytesToHex(encryptionKey)
 		const chatsMap = get(chats).chats
 
