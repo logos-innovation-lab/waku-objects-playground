@@ -4,6 +4,10 @@ export const AddressSchema = z
 	.string()
 	.regex(/^(0x)?[a-f0-9]{40}$/i, 'Address must be 40 hex numbers')
 
+export const PublicKeySchema = z
+	.string()
+	.regex(/^(0x)?(02|03)[a-f0-9]{64}$/i, 'Public key must be 66 hex numbers')
+
 export const TransactionHashSchema = z
 	.string()
 	.regex(/^(0x)?[a-f0-9]{64}$/i, 'Transaction hash must be 64 hex numbers')

@@ -9,10 +9,10 @@
 	export let args: WakuObjectArgs
 
 	$: helloWorldStore = args.store as HelloWorldStore
-	$: address = args.profile.address
+	$: publicKey = args.profile.publicKey
 </script>
 
-{#if address === message?.fromAddress}
+{#if publicKey === message?.senderPublicKey}
 	<HelloWorldSender instanceId={message.instanceId} name={helloWorldStore?.name} />
 {:else}
 	<HelloWorldReceiver

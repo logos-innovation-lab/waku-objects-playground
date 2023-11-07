@@ -17,7 +17,7 @@
 	import Avatar from '$lib/components/avatar.svelte'
 	import InputFile from '$lib/components/input-file.svelte'
 
-	import { chats, isGroupChatId } from '$lib/stores/chat'
+	import { chats, isGroupChat } from '$lib/stores/chat'
 	import adapters from '$lib/adapters'
 	import { clipAndResize } from '$lib/utils/image'
 	import { page } from '$app/stores'
@@ -67,7 +67,7 @@
 
 		try {
 			await adapters.addMemberToGroupChat(chatId, invitedMembers)
-			await adapters.sendInvite(wallet, chatId, invitedMembers)
+			await adapters.sendGroupChatInvite(wallet, chatId, invitedMembers)
 		} catch (error) {
 			errorStore.addEnd({
 				title: 'Error',
@@ -83,8 +83,8 @@
 		screen = 'settings'
 	}
 
-	function isGroupMember(address: string) {
-		return groupChat?.users.map((user) => user.address).includes(address)
+	function isGroupMember(publicKey: string) {
+		return groupChat?.users.map((user) => user.publicKey).includes(publicKey)
 	}
 
 	$: if (
@@ -130,9 +130,9 @@
 	})
 
 	function leaveGroup() {
-		if (wallet?.address) {
+		if (wallet?.signingKey.compressedPublicKey) {
 			chats.removeChat($page.params.id)
-			adapters.removeFromGroupChat($page.params.id, wallet.address)
+			adapters.removeFromGroupChat($page.params.id, wallet?.signingKey.compressedPublicKey)
 			goto(ROUTES.HOME)
 		}
 	}
@@ -187,14 +187,14 @@
 				{#each groupMembers as user}
 					{@const isContact = Array.from($chats.chats)
 						.map(([, chat]) => chat.chatId)
-						.includes(user.address)}
-					{@const isMe = user.address === wallet.address}
+						.includes(user.publicKey)}
+					{@const isMe = user.publicKey === wallet.signingKey.compressedPublicKey}
 					<li class={`${isContact ? 'contact' : 'not-contact'} ${isMe ? 'me' : ''}`}>
 						<div class="chat-button" role="listitem">
 							<Container grow>
 								<div class="chat">
 									<div class="chat-avatar">
-										<Avatar size={48} picture={user.avatar} seed={user.address} />
+										<Avatar size={48} picture={user.avatar} seed={user.publicKey} />
 									</div>
 									<div class="content">
 										<div class="user-info">
@@ -206,11 +206,11 @@
 										</div>
 									</div>
 									{#if !isContact && !isMe}
-										<Button variant="icon" on:click={() => goto(routes.INVITE(user.address))}>
+										<Button variant="icon" on:click={() => goto(routes.INVITE(user.publicKey))}>
 											<UserFollow />
 										</Button>
 									{:else if isContact}
-										<Button variant="icon" on:click={() => goto(routes.CHAT(user.address))}>
+										<Button variant="icon" on:click={() => goto(routes.CHAT(user.publicKey))}>
 											<ChatLaunch />
 										</Button>
 									{/if}
@@ -239,13 +239,16 @@
 		</Header>
 		<ul class="chats invite" aria-label="Contact List">
 			{#each [...$chats.chats] as [id, chat]}
-				{#if !isGroupChatId(id) && !isGroupMember(id)}
+				{@const otherUser = chat.users.find(
+					(u) => u.publicKey !== wallet.signingKey.compressedPublicKey,
+				)}
+				{#if otherUser && !isGroupChat(chat) && !isGroupMember(id)}
 					<li>
 						<label for={id}>
 							<div class="chat-button" role="listitem">
 								<Container grow>
 									<div class="chat">
-										<Avatar size={48} picture={chat.users[0].avatar} seed={chat.users[0].address} />
+										<Avatar size={48} picture={otherUser.avatar} seed={otherUser.publicKey} />
 										<div class="content">
 											<div class="user-info">
 												<span class="username">
@@ -253,7 +256,11 @@
 												</span>
 											</div>
 										</div>
-										<Checkbox bind:bindGroup={invitedMembers} value={id} domId={id} />
+										<Checkbox
+											bind:bindGroup={invitedMembers}
+											value={otherUser.publicKey}
+											domId={otherUser.publicKey}
+										/>
 									</div>
 								</Container>
 							</div>

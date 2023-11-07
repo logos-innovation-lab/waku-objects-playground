@@ -1,5 +1,5 @@
 import type { TokenAmount } from '$lib/stores/balances'
-import type { DataMessage } from '$lib/stores/chat'
+import type { ChatType, DataMessage } from '$lib/stores/chat'
 import type { ComponentType } from 'svelte'
 import type { Transaction, User, TransactionState } from './schemas'
 import type { Contract, Interface } from 'ethers'
@@ -35,6 +35,7 @@ export interface WakuObjectState {
 	readonly exchangeRates: Map<string, ExchangeRateRecord>
 	readonly fiatSymbol: FiatSymbol
 	readonly chatName: string
+	readonly chatType: ChatType
 }
 
 type StoreType = JSONSerializable

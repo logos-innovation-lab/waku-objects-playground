@@ -6,10 +6,15 @@ import type { JSONSerializable } from '$lib/objects'
 export interface Adapter {
 	onLogIn: (wallet: BaseWallet) => Promise<void>
 	onLogOut: () => void
-	saveUserProfile(address: string, name?: string, avatar?: string): Promise<void>
+	saveUserProfile(
+		wallet: BaseWallet,
+		address: string,
+		name?: string,
+		avatar?: string,
+	): Promise<void>
 	getUserProfile(address: string): Promise<User | undefined>
 
-	startChat(address: string, peerAddress: string): Promise<string>
+	startChat(wallet: BaseWallet, peerAddress: string): Promise<string>
 	startGroupChat(
 		wallet: BaseWallet,
 		chatId: string,
@@ -30,7 +35,7 @@ export interface Adapter {
 		instanceId: string,
 		data: JSONSerializable,
 	): Promise<void>
-	sendInvite(wallet: BaseWallet, chatId: string, users: string[]): Promise<void>
+	sendGroupChatInvite(wallet: BaseWallet, chatId: string, users: string[]): Promise<void>
 
 	updateStore(
 		address: string,

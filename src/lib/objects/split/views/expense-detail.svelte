@@ -17,6 +17,7 @@
 	import { formatDateAndTime, toSignificant } from '$lib/utils/format'
 	import type { Token } from '$lib/objects/schemas'
 	import type { ErrorDescriptor } from '$lib/stores/error'
+	import { publicKeyToAddress } from '$lib/adapters/waku/crypto'
 
 	export let expense: Expense
 	export let users: User[]
@@ -31,10 +32,11 @@
 	const amountPerPerson = toSignificant(bigIntPerUser, token.decimals)
 	const lentAmount = toSignificant(BigInt(expense.amount) - bigIntPerUser, token.decimals)
 	const paidBy =
-		profile.address === expense.paidBy
+		publicKeyToAddress(profile.publicKey) === expense.paidBy
 			? 'You'
-			: users.find((user) => user.address === expense.paidBy)?.name ?? 'Unknown'
-	const paidByYou = expense.paidBy === profile.address
+			: users.find((user) => publicKeyToAddress(user.publicKey) === expense.paidBy)?.name ??
+			  'Unknown'
+	const paidByYou = expense.paidBy === publicKeyToAddress(profile.publicKey)
 
 	async function askToSettle() {
 		try {

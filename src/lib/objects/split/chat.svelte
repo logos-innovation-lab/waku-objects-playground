@@ -11,10 +11,10 @@
 	export let message: DataMessage<DM>
 	export let args: WakuObjectArgs<Store, DM, View>
 
-	$: myMessage = args.profile.address === message.fromAddress
-	$: sender = args.users.find((u) => u.address === message.fromAddress)
+	$: myMessage = args.profile.publicKey === message.senderPublicKey
+	$: sender = args.users.find((u) => u.publicKey === message.senderPublicKey)
 
-	$: isSender = args.profile.address === sender?.address
+	$: isSender = args.profile.publicKey === sender?.publicKey
 
 	const token = SPLIT_TOKEN
 </script>

@@ -14,30 +14,46 @@ interface QueryOptions extends StoreQueryOptions {
 
 interface Query {
 	contentTopic: ContentTopic
-	id: string
+	symKey: Uint8Array
 	queryOptions?: QueryOptions
 }
 
 export interface Wakustore {
 	readonly waku: LightNode
-	docQuery: (contentTopic: ContentTopic, id: string, queryOptions?: QueryOptions) => Query
-	collectionQuery: (contentTopic: ContentTopic, id: string, queryOptions?: QueryOptions) => Query
+	docQuery: (contentTopic: ContentTopic, symKey: Uint8Array, queryOptions?: QueryOptions) => Query
+	collectionQuery: (
+		contentTopic: ContentTopic,
+		symKey: Uint8Array,
+		queryOptions?: QueryOptions,
+	) => Query
 	onSnapshot: <T>(query: Query, callback: (value: T) => void) => Promise<Unsubscribe>
-	getDoc: <T>(contentTopic: ContentTopic, id: string) => Promise<T | undefined>
-	setDoc: <T>(contentTopic: ContentTopic, id: string, data: T) => Promise<SendError[] | undefined>
+	getDoc: <T>(contentTopic: ContentTopic, symKey: Uint8Array) => Promise<T | undefined>
+	setDoc: <T>(
+		contentTopic: ContentTopic,
+		symKey: Uint8Array,
+		data: T,
+	) => Promise<SendError[] | undefined>
 }
 
 export function makeWakustore(waku: LightNode) {
-	function makeQuery(contentTopic: ContentTopic, id: string, queryOptions?: QueryOptions): Query {
+	function makeQuery(
+		contentTopic: ContentTopic,
+		symKey: Uint8Array,
+		queryOptions?: QueryOptions,
+	): Query {
 		return {
 			contentTopic,
-			id,
+			symKey,
 			queryOptions,
 		}
 	}
 
-	function docQuery(contentTopic: ContentTopic, id: string, queryOptions?: QueryOptions): Query {
-		return makeQuery(contentTopic, id, {
+	function docQuery(
+		contentTopic: ContentTopic,
+		symKey: Uint8Array,
+		queryOptions?: QueryOptions,
+	): Query {
+		return makeQuery(contentTopic, symKey, {
 			pageDirection: PageDirection.BACKWARD,
 			limit: 1,
 			...queryOptions,
@@ -46,10 +62,10 @@ export function makeWakustore(waku: LightNode) {
 
 	function collectionQuery(
 		contentTopic: ContentTopic,
-		id: string,
+		symKey: Uint8Array,
 		queryOptions?: QueryOptions,
 	): Query {
-		return makeQuery(contentTopic, id, queryOptions)
+		return makeQuery(contentTopic, symKey, queryOptions)
 	}
 
 	function decodedMessageToTypedResult<T>(message: DecodedMessage): T {
@@ -98,14 +114,14 @@ export function makeWakustore(waku: LightNode) {
 		return typedResults
 	}
 
-	async function getDoc<T>(contentTopic: ContentTopic, id: string): Promise<T | undefined> {
-		const query = docQuery(contentTopic, id)
+	async function getDoc<T>(contentTopic: ContentTopic, symKey: Uint8Array): Promise<T | undefined> {
+		const query = docQuery(contentTopic, symKey)
 		const queryOptions = {
 			...query.queryOptions,
 			pageSize: query.queryOptions?.pageSize ?? query.queryOptions?.limit,
 		}
 
-		const result = await readStore(waku, query.contentTopic, query.id, queryOptions)
+		const result = await readStore(waku, query.contentTopic, query.symKey, queryOptions)
 		const values = await parseQueryResults<T>(result, queryOptions)
 
 		if (values.length === 1) {
@@ -113,15 +129,15 @@ export function makeWakustore(waku: LightNode) {
 		}
 	}
 
-	async function setDoc<T>(contentTopic: ContentTopic, id: string, data: T) {
-		return await storeDocument(waku, contentTopic, id, data)
+	async function setDoc<T>(contentTopic: ContentTopic, symKey: Uint8Array, data: T) {
+		return await storeDocument(waku, contentTopic, symKey, data)
 	}
 
 	async function onSnapshot<T>(query: Query, callback: (value: T) => void): Promise<Unsubscribe> {
 		const subscription = await subscribe(
 			waku,
 			query.contentTopic,
-			query.id,
+			query.symKey,
 			(msg: DecodedMessage) => {
 				const typedResult = decodedMessageToTypedResult<T>(msg)
 				callback(typedResult)
@@ -132,7 +148,7 @@ export function makeWakustore(waku: LightNode) {
 			...query.queryOptions,
 			pageSize: query.queryOptions?.pageSize ?? query.queryOptions?.limit,
 		}
-		const result = await readStore(waku, query.contentTopic, query.id, queryOptions)
+		const result = await readStore(waku, query.contentTopic, query.symKey, queryOptions)
 		const values = await parseQueryResults<T>(result, queryOptions)
 
 		for (const value of values) {

@@ -17,7 +17,7 @@
 	import { goto } from '$app/navigation'
 	import routes from '$lib/routes'
 	import { page } from '$app/stores'
-	import { chats, isGroupChatId } from '$lib/stores/chat'
+	import { chats, isGroupChat } from '$lib/stores/chat'
 	import adapters from '$lib/adapters'
 	import { Html5Qrcode } from 'html5-qrcode'
 	import Camera from '$lib/components/icons/camera.svelte'
@@ -33,10 +33,14 @@
 	import type { Unsubscriber } from 'svelte/store'
 	import Loading from '$lib/components/loading.svelte'
 	import { errorStore } from '$lib/stores/error'
+	import type { BaseWallet } from 'ethers'
+	import { getSharedSecret } from '$lib/adapters/waku/crypto'
 
 	// check if the chat already exists
-	$: if ($chats.chats.has($page.params.address)) {
-		goto(routes.CHAT($page.params.address))
+	$: sharedSecret =
+		$walletStore.wallet && getSharedSecret($walletStore.wallet?.privateKey, $page.params.address)
+	$: if (sharedSecret && $chats.chats.has(sharedSecret)) {
+		goto(routes.CHAT(sharedSecret))
 	}
 
 	let unsubscribe: Unsubscriber | undefined
@@ -71,7 +75,7 @@
 		!counterParty &&
 		!$profile.loading &&
 		!$walletStore.loading &&
-		$walletStore.wallet?.address !== $page.params.address
+		$walletStore.wallet?.signingKey.publicKey !== $page.params.address
 	) {
 		tryLoadCounterPartyProfile()
 	}
@@ -127,11 +131,11 @@
 		})
 	}
 
-	async function startChat(address: string) {
+	async function startChat(wallet: BaseWallet) {
 		loading = true
 
 		try {
-			const chatId = await adapters.startChat(address, $page.params.address)
+			const chatId = await adapters.startChat(wallet, $page.params.address)
 			loading = false
 			goto(routes.CHAT(chatId))
 		} catch {
@@ -139,7 +143,7 @@
 			errorStore.addEnd({
 				title: 'Connection error',
 				message: `Failed to start chat. Please try again later.`,
-				retry: () => startChat(address),
+				retry: () => startChat(wallet),
 				ok: true,
 			})
 		}
@@ -152,14 +156,17 @@
 	onMount(() => {
 		// when you show your QR code and link to someone, start looking for changes in the contacts
 		// and if a new contact is detected, redirect to their chat page
-		if (!$chats.loading && $page.params.address === $walletStore.wallet?.address) {
+		if (
+			!$chats.loading &&
+			$page.params.address === $walletStore.wallet?.signingKey.compressedPublicKey
+		) {
 			// make a copy of the list of chatIds when the screen is opened so that later we can compare
 			const oldChatIds = new Set($chats.chats.keys())
 			unsubscribe = chats.subscribe((store) => {
-				store.chats.forEach((value, key) => {
-					if (!oldChatIds.has(key) && !isGroupChatId(value.chatId)) {
+				store.chats.forEach((chat, chatId) => {
+					if (!oldChatIds.has(chatId) && !isGroupChat(chat)) {
 						// found new private chat
-						goto(routes.CHAT(value.chatId))
+						goto(routes.CHAT(chat.chatId))
 					}
 				})
 			})
@@ -187,7 +194,7 @@
 			<Container align="center" gap={6} justify="center">
 				<Loading />
 			</Container>
-		{:else if wallet.address === $page.params.address}
+		{:else if wallet.signingKey.compressedPublicKey === $page.params.address}
 			<ButtonBlock borderBottom on:click={() => goto(routes.GROUP_NEW)}>
 				<Container direction="row" justify="space-between" align="center" alignItems="center">
 					<div class="icon">
@@ -235,14 +242,14 @@
 			</Container>
 		{:else}
 			<Container gap={6} justify="center" align="center" padX={24}>
-				<Avatar picture={counterParty?.avatar} seed={counterParty?.address} size={140} />
+				<Avatar picture={counterParty?.avatar} seed={counterParty?.publicKey} size={140} />
 				<p class="text-lg text-bold">Chat with {counterParty?.name ?? $page.params.address}</p>
 				<p class="text-lg description">
 					Connect with {counterParty?.name ?? $page.params.address} and start a private chat on Waku
 					chats
 				</p>
 				<Container direction="row" justify="center" gap={12} alignItems="center" padY={0}>
-					<Button align="block" variant="strong" on:click={() => startChat(wallet.address)}>
+					<Button align="block" variant="strong" on:click={() => startChat(wallet)}>
 						<CopyLink />
 						Start new chat
 					</Button>

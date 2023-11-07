@@ -45,14 +45,14 @@
 	}
 
 	$: if (!loading && wallet) {
-		const address = wallet.address
+		const publicKey = wallet.signingKey.compressedPublicKey
 
 		store = $objectStore.objects.get(objectKey(objectId, instanceId))
 		tokens = $balanceStore.balances
 
-		if (address && !$profile.loading) {
+		if (publicKey && !$profile.loading) {
 			userProfile = {
-				address,
+				publicKey,
 				name: $profile.name,
 				avatar: $profile.avatar,
 			}
@@ -67,7 +67,7 @@
 
 		if (userProfile && users) {
 			const chatName =
-				chat?.name ?? users.find((u) => u.address !== userProfile.address)?.name ?? 'Unknown'
+				chat?.name ?? users.find((u) => u.publicKey !== userProfile.publicKey)?.name ?? 'Unknown'
 			args = {
 				chainId: defaultBlockchainNetwork.chainId,
 				chatId,
@@ -77,6 +77,7 @@
 				users,
 				tokens,
 				chatName,
+				chatType: chat.type,
 				store,
 				send,
 				updateStore,

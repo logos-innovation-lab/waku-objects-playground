@@ -18,6 +18,7 @@
 	import Spacer from '$lib/components/spacer.svelte'
 	import { payggyDescriptor } from '.'
 	import Loading from '$lib/components/loading.svelte'
+	import { publicKeyToAddress } from '$lib/adapters/waku/crypto'
 
 	export let message: DataMessage<SendTransactionDataMessage>
 	export let args: WakuObjectArgs
@@ -42,12 +43,12 @@
 		if (args.onViewChange) args.onViewChange('details')
 	}
 
-	$: sender = args.users.find((u) => u.address === data?.transaction.from)
-	$: recipient = args.users.find((u) => u.address === data?.transaction.to)
+	$: sender = args.users.find((u) => publicKeyToAddress(u.publicKey) === data?.transaction.from)
+	$: recipient = args.users.find((u) => publicKeyToAddress(u.publicKey) === data?.transaction.to)
 
-	$: myMessage = args.profile.address === message.fromAddress
-	$: isSender = args.profile.address === sender?.address
-	$: isRecipient = args.profile.address === recipient?.address
+	$: myMessage = args.profile.publicKey === message.senderPublicKey
+	$: isSender = args.profile.publicKey === sender?.publicKey
+	$: isRecipient = args.profile.publicKey === recipient?.publicKey
 </script>
 
 <ChatMessage {myMessage} object bubble>

@@ -10,6 +10,7 @@
 	import type { User } from '$lib/types'
 	import ChatMessage from '$lib/components/chat-message.svelte'
 	import Renew from '$lib/components/icons/renew.svelte'
+	import { publicKeyToAddress } from '$lib/adapters/waku/crypto'
 
 	export let instanceId: string
 	export let profile: User
@@ -21,7 +22,9 @@
 
 	let owedAmount = 0n
 	$: {
-		const balance = balances.find(({ address }) => address === profile.address)
+		const balance = balances.find(
+			({ address }) => address === publicKeyToAddress(profile.publicKey),
+		)
 		if (balance) {
 			owedAmount = BigInt(balance.amount)
 		}

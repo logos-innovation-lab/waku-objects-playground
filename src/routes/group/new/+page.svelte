@@ -11,7 +11,7 @@
 
 	import routes from '$lib/routes'
 	import Avatar from '$lib/components/avatar.svelte'
-	import { chats, isGroupChatId } from '$lib/stores/chat'
+	import { chats, isGroupChat } from '$lib/stores/chat'
 	import ArrowRight from '$lib/components/icons/arrow-right.svelte'
 	import Checkmark from '$lib/components/icons/checkmark.svelte'
 	import InputFile from '$lib/components/input-file.svelte'
@@ -23,9 +23,10 @@
 	import Layout from '$lib/components/layout.svelte'
 	import Checkbox from '$lib/components/checkbox.svelte'
 	import { uploadPicture } from '$lib/adapters/ipfs'
-	import { genRandomHex } from '$lib/utils'
 	import Loading from '$lib/components/loading.svelte'
 	import { errorStore } from '$lib/stores/error'
+	import { bytesToHex } from '@waku/utils/bytes'
+	import { randomBytes } from '@noble/ciphers/webcrypto/utils'
 
 	let groupMembers: string[] = []
 	let screen: 'create' | 'details' = 'create'
@@ -33,8 +34,7 @@
 	let name = ''
 	let pictureFiles: FileList | undefined = undefined
 	let buttonDisabled = false
-
-	const chatId = genRandomHex(64)
+	const chatId = bytesToHex(randomBytes(32))
 
 	async function resizePicture(p?: File) {
 		try {
@@ -55,7 +55,7 @@
 
 		try {
 			await adapters.startGroupChat(wallet, chatId, groupMembers, name, picture)
-			await adapters.sendInvite(wallet, chatId, groupMembers)
+			await adapters.sendGroupChatInvite(wallet, chatId, groupMembers)
 		} catch (error) {
 			errorStore.addEnd({
 				title: 'Error',
@@ -79,7 +79,7 @@
 			</Container>
 		</Layout>
 	{:else if $chats.chats.size === 0}
-		{@const address = wallet.address}
+		{@const publicKey = wallet.signingKey.compressedPublicKey}
 		<Layout>
 			<svelte:fragment slot="header">
 				<Header title="Create group">
@@ -96,7 +96,7 @@
 				<p class="text-lg text-bold">No contacts</p>
 				<p class="text-lg">You can only create groups from existing chat contacts</p>
 				<div class="btn-spacing">
-					<Button on:click={() => goto(routes.INVITE(address))}>
+					<Button on:click={() => goto(routes.INVITE(publicKey))}>
 						<AddComment />
 						Invite to chat
 					</Button>
@@ -118,25 +118,28 @@
 			</svelte:fragment>
 			<ul class="chats" aria-label="Contact List">
 				{#each [...$chats.chats] as [id, chat]}
-					{#if !isGroupChatId(id)}
+					{@const otherUser = chat.users.find(
+						(u) => u.publicKey !== wallet.signingKey.compressedPublicKey,
+					)}
+					{#if otherUser && !isGroupChat(chat)}
 						<li>
 							<label for={id}>
 								<div class="chat-button" role="listitem">
 									<Container grow>
 										<div class="chat">
-											<Avatar
-												size={48}
-												picture={chat.users[0].avatar}
-												seed={chat.users[0].address}
-											/>
+											<Avatar size={48} picture={otherUser.avatar} seed={otherUser.publicKey} />
 											<div class="content">
 												<div class="user-info">
 													<span class="username">
-														{chat.users[0].name}
+														{otherUser.name}
 													</span>
 												</div>
 											</div>
-											<Checkbox bind:bindGroup={groupMembers} value={id} domId={id} />
+											<Checkbox
+												bind:bindGroup={groupMembers}
+												value={otherUser.publicKey}
+												domId={otherUser.publicKey}
+											/>
 										</div>
 									</Container>
 								</div>

@@ -21,6 +21,7 @@
 	import { getFiatAmountText } from '$lib/utils/fiat'
 	import type { ExchangeRateRecord } from '$lib/stores/exchangeRates'
 	import type { FiatSymbol } from '$lib/stores/preferences'
+	import { publicKeyToAddress } from '$lib/adapters/waku/crypto'
 
 	export let transaction: Transaction
 	export let users: User[]
@@ -31,11 +32,11 @@
 	export let fiatSymbol: FiatSymbol
 	export let exitObject: () => void
 
-	$: sender = users.find((u) => u.address === transaction.from)
-	$: recipient = users.find((u) => u.address === transaction.to)
+	$: sender = users.find((u) => publicKeyToAddress(u.publicKey) === transaction.from)
+	$: recipient = users.find((u) => publicKeyToAddress(u.publicKey) === transaction.to)
 
-	$: isSender = profile.address === sender?.address
-	$: isRecipient = profile.address === recipient?.address
+	$: isSender = profile.publicKey === sender?.publicKey
+	$: isRecipient = profile.publicKey === recipient?.publicKey
 </script>
 
 <Layout>

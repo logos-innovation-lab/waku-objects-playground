@@ -17,6 +17,7 @@
 	import type { View } from '../types'
 	import type { Token } from '$lib/objects/schemas'
 	import type { ErrorDescriptor } from '$lib/stores/error'
+	import { publicKeyToAddress } from '$lib/adapters/waku/crypto'
 
 	export let users: UserType[]
 	export let profile: UserType
@@ -29,12 +30,14 @@
 	export let addError: (error: ErrorDescriptor) => void
 
 	const usersAmounts = balances.map(({ address, amount }) => ({
-		user: users.find((user) => user.address === address),
+		user: users.find((user) => publicKeyToAddress(user.publicKey) === address),
 		amount: BigInt(amount),
 	}))
 	let userAmount = 0n
 	$: {
-		const balance = balances.find(({ address }) => address === profile.address)
+		const balance = balances.find(
+			({ address }) => address === publicKeyToAddress(profile.publicKey),
+		)
 		if (balance) {
 			userAmount = BigInt(balance.amount)
 		}
@@ -75,11 +78,11 @@
 	<Container grow>
 		<ul>
 			{#each usersAmounts as { user, amount }}
-				{@const isYou = user?.address === profile.address}
+				{@const isYou = user?.publicKey === profile.publicKey}
 				<li>
 					<Container grow>
 						<div class="chat">
-							<Avatar size={48} picture={user?.avatar} seed={user?.address} />
+							<Avatar size={48} picture={user?.avatar} seed={user?.publicKey} />
 							<Container direction="column">
 								<p>
 									{(isYou ? 'You' : user?.name) ?? 'unknown'}

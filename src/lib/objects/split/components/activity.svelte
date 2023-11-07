@@ -11,6 +11,7 @@
 	import type { Activity } from '../types'
 	import type { User } from '$lib/types'
 	import type { Token } from '$lib/objects/schemas'
+	import { publicKeyToAddress } from '$lib/adapters/waku/crypto'
 
 	export let activity: Activity
 	export let users: User[]
@@ -20,9 +21,10 @@
 	let expanded = false
 
 	$: paidBy =
-		profile.address === activity.paidBy
+		publicKeyToAddress(profile.publicKey) === activity.paidBy
 			? 'You'
-			: users.find((user) => user.address === activity.paidBy)?.name ?? 'Unknown'
+			: users.find((user) => publicKeyToAddress(user.publicKey) === activity.paidBy)?.name ??
+			  'Unknown'
 </script>
 
 <div class="activity">

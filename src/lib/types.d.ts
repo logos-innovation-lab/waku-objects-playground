@@ -11,7 +11,7 @@ export interface IconProps {
 }
 
 export interface User {
-	address: string
+	publicKey: string
 	name?: string
 	avatar?: string
 }

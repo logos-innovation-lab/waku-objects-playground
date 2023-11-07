@@ -22,7 +22,7 @@
 		toUser = user
 		onViewChange('amount')
 	}
-	$: otherUsers = users.filter((user) => user.address !== profile.address)
+	$: otherUsers = users.filter((user) => user.publicKey !== profile.publicKey)
 	let filterText = ''
 </script>
 
@@ -51,7 +51,7 @@
 			<li on:click={() => setUser(user)}>
 				<Container grow>
 					<div class="chat">
-						<Avatar size={48} picture={user.avatar} seed={user.address} />
+						<Avatar size={48} picture={user.avatar} seed={user.publicKey} />
 						<div class="content">
 							<div class="user-info">
 								<span class="username text-lg">
