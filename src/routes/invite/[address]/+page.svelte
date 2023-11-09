@@ -65,7 +65,7 @@
 			errorStore.addEnd({
 				title: 'Connection error',
 				ok: true,
-				message: `Failed to load user profile. Datails: ${(error as Error)?.message}`,
+				message: `Failed to load user profile. Details: ${(error as Error)?.message}`,
 				retry: () => tryLoadCounterPartyProfile(),
 			})
 		}

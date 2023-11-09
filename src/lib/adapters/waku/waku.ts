@@ -1,10 +1,4 @@
-import {
-	createLightNode,
-	waitForRemotePeer,
-	utf8ToBytes,
-	bytesToUtf8,
-	type DecodedMessage,
-} from '@waku/sdk'
+import { createLightNode, waitForRemotePeer, utf8ToBytes, bytesToUtf8 } from '@waku/sdk'
 import { multiaddr } from '@multiformats/multiaddr'
 import {
 	type LightNode,
@@ -12,9 +6,11 @@ import {
 	type Callback,
 	type StoreQueryOptions,
 	type Unsubscribe,
+	type IEncoder,
+	type IDecoder,
 } from '@waku/interfaces'
 import { PUBLIC_WAKU } from '$env/static/public'
-import { createDecoder, createEncoder } from '@waku/message-encryption/symmetric'
+import type { DecodedMessage } from '@waku/message-encryption'
 import { hash } from './crypto'
 
 function getPeers(): string[] {
@@ -89,28 +85,19 @@ export async function connectWaku(options?: ConnectWakuOptions) {
 
 export async function subscribe(
 	waku: LightNode,
-	contentTopic: ContentTopic,
-	symKey: Uint8Array,
+	decoder: IDecoder<DecodedMessage>,
 	callback: Callback<DecodedMessage>,
 ): Promise<Unsubscribe> {
-	const topicKey = hash(symKey)
-	const messageDecoder = createDecoder(getTopic(contentTopic, topicKey), symKey)
-	const unsubscribe = await waku.filter.subscribe([messageDecoder], callback)
+	const unsubscribe = await waku.filter.subscribe([decoder], callback)
 
 	return unsubscribe
 }
 
-export async function storeDocument(
-	waku: LightNode,
-	contentTopicName: ContentTopic,
-	symKey: Uint8Array,
-	document: unknown,
-) {
-	const topicKey = hash(symKey)
-	const contentTopic = getTopic(contentTopicName, topicKey)
-	const encoder = createEncoder({ contentTopic, symKey })
+export async function storeDocument(waku: LightNode, encoder: IEncoder, document: unknown) {
 	const json = JSON.stringify(document)
 	const payload = utf8ToBytes(json)
+
+	console.debug('storeDocument', { encoder, document })
 
 	const sendResult = await waku.lightPush.send(encoder, { payload })
 	if (sendResult.errors && sendResult.errors.length > 0) {
@@ -120,30 +107,12 @@ export async function storeDocument(
 
 export async function readStore(
 	waku: LightNode,
-	contentTopic: ContentTopic,
-	symKey: Uint8Array,
+	decoder: IDecoder<DecodedMessage>,
 	storeQueryOptions?: StoreQueryOptions,
 ): Promise<QueryResult> {
-	const topicKey = hash(symKey)
-	const topic = getTopic(contentTopic, topicKey)
-	const decoder = createDecoder(topic, symKey)
-
 	return waku.store.queryGenerator([decoder], storeQueryOptions)
 }
 
 export function decodeMessagePayload(wakuMessage: DecodedMessage): string {
 	return bytesToUtf8(wakuMessage.payload)
-}
-
-export async function sendMessage(waku: LightNode, symKey: Uint8Array, message: unknown) {
-	const json = JSON.stringify(message)
-	const payload = utf8ToBytes(json)
-	const topicKey = hash(symKey)
-	const contentTopic = getTopic('private-message', topicKey)
-	const encoder = createEncoder({ contentTopic, symKey })
-
-	const sendResult = await waku.lightPush.send(encoder, { payload })
-	if (sendResult.errors && sendResult.errors.length > 0) {
-		return sendResult.errors
-	}
 }

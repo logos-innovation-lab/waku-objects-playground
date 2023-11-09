@@ -3,15 +3,16 @@ import {
 	sign as nobleSign,
 	ProjectivePoint,
 	Signature,
+	getPublicKey,
 } from '@noble/secp256k1'
 import { keccak_256 } from '@noble/hashes/sha3'
 import { bytesToHex, hexToBytes } from '@waku/utils/bytes'
 import { gcm } from '@noble/ciphers/aes'
 import { randomBytes } from '@noble/ciphers/webcrypto/utils'
 
-type Hex = string
+export type Hex = string
 
-function fixHex(h: Hex): Hex {
+export function fixHex(h: Hex): Hex {
 	if (h.startsWith('0x')) {
 		return h.slice(2)
 	}
@@ -53,6 +54,11 @@ export function publicKeyToAddress(publicKey: Hex): Hex {
 	return '0x' + keyHash.slice(-40)
 }
 
+export function compressPublicKey(publicKey: Hex | Uint8Array): Hex {
+	publicKey = typeof publicKey === 'string' ? fixHex(publicKey) : bytesToHex(publicKey)
+	return ProjectivePoint.fromHex(publicKey).toHex(true)
+}
+
 export function signatureToPublicKey(signature: Hex, messageHash: Hex): Hex {
 	const publicKey = Signature.fromCompact(fixHex(signature)).recoverPublicKey(fixHex(messageHash))
 	return publicKey.toHex(true)
@@ -62,4 +68,10 @@ export function sign(privateKey: Hex, data: Uint8Array): Hex {
 	const messageHash = hash(data)
 	const signature = nobleSign(messageHash, fixHex(privateKey))
 	return signature.toCompactHex()
+}
+
+export function privateKeyToPublicKey(privateKey: Hex | Uint8Array): Hex {
+	const privateKeyHex = typeof privateKey === 'string' ? fixHex(privateKey) : bytesToHex(privateKey)
+	const publicKeyBytes = getPublicKey(privateKeyHex)
+	return bytesToHex(publicKeyBytes)
 }
