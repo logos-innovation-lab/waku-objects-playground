@@ -97,6 +97,8 @@ export async function storeDocument(waku: LightNode, encoder: IEncoder, document
 	const json = JSON.stringify(document)
 	const payload = utf8ToBytes(json)
 
+	console.debug('storeDocument', { encoder, document })
+
 	const sendResult = await waku.lightPush.send(encoder, { payload })
 	if (sendResult.errors && sendResult.errors.length > 0) {
 		return sendResult.errors
