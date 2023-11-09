@@ -71,9 +71,7 @@ async function waku() {
 	const command = process.argv[3]
 	const restArgs = process.argv.slice(4)
 
-	const commands: Record<string, (...args: string[]) => Promise<void>> = {
-		doc,
-	}
+	const commands: Record<string, (...args: string[]) => Promise<void>> = {}
 
 	const fn = commands[command]
 	if (!fn) {
