@@ -39,7 +39,7 @@ export type WakuObject = {
 
 export type LoadedObject = {
 	script: string
-	scriptIntegrity: `sha256-${string}` | null
+	scriptIntegrity: `sha256-${string}`
 	csp: string
 	name: string
 	className: string
@@ -61,11 +61,14 @@ const formatCsp = (csp: Csp, add?: Csp): string => {
 
 export const getNPMObject = async (module: string, type: WakuScriptType) => {
 	const object = (await objects[`/node_modules/${module}/object/metadata.json`]()) as WakuObject
-	const script = await scripts[
-		`/node_modules/${module}/object/${type === 'chat' ? 'index' : 'standalone'}.js`
-	]()
+	const file = object.files[type]
 
-	return { object, script, integrity: null }
+	if (!file) {
+		throw new Error(`object does not include ${type} script`)
+	}
+
+	const script = await scripts[`/node_modules/${module}/object/${file.path}`]()
+	return { object, script, integrity: file.hash }
 }
 
 export const getURLObject = async (url: string, type: WakuScriptType) => {
