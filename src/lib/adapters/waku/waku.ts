@@ -29,7 +29,7 @@ function getPeers(): string[] {
 		case 'production':
 		default:
 			return [
-				'/dns4/ws.waku.apyos.dev/tcp/8123/wss/p2p/16Uiu2HAkzy7Apy2H72WYx3cSdPFqmeLThHTi8EY2KN22rpKHZ4gM ',
+				'/dns4/waku.gra.nomad.apyos.dev/tcp/443/wss/p2p/16Uiu2HAmDvywnsGaB32tFqwjTsg8sfC1ZV2EXo3xjxM4V2gvH6Up',
 			]
 	}
 }
