@@ -50,12 +50,7 @@ import { errorStore } from '$lib/stores/error'
 import { compressPublicKey, fixHex, getSharedSecret, hash } from './crypto'
 import { bytesToHex, hexToBytes } from '@waku/utils/bytes'
 import { encrypt, decrypt } from './crypto'
-import {
-	createEciesDecoder,
-	createEciesEncoder,
-	createSymmetricDecoder,
-	createSymmetricEncoder,
-} from './codec'
+import { createSymmetricDecoder, createSymmetricEncoder } from './codec'
 import type { DecodedMessage } from '@waku/message-encryption'
 
 const MAX_MESSAGES = 100
@@ -286,11 +281,16 @@ export default class WakuAdapter implements Adapter {
 		chats.update((state) => ({ ...state, chats: new Map(storageChatEntries), loading: false }))
 
 		// subscribe to invites
-		const decoder = createEciesDecoder({ contentTopic: 'invites', privateKey: ownPrivateKey })
+		const decoder = createSymmetricDecoder({
+			contentTopic: 'invites',
+			symKey: ownPublicEncryptionKey,
+		})
 		await this.safeWaku.subscribeEncrypted(
 			ownPublicKey,
 			decoder,
 			async (message, decodedMessage) => {
+				console.debug('invite', { message, decodedMessage })
+
 				if (!this.checkMessageSignature(message, decodedMessage)) {
 					return
 				}
@@ -456,12 +456,11 @@ export default class WakuAdapter implements Adapter {
 			chatId: ownPublicKey,
 		}
 
-		// const inviteEncryptionKey = hexToBytes(hash(peerPublicKey))
-		// await this.safeWaku.sendMessage(inviteMessage, inviteEncryptionKey, hexToBytes(ownPrivateKey))
+		const inviteEncryptionKey = hexToBytes(hash(peerPublicKey))
 		const ws = await this.makeWakustore()
-		const encoder = createEciesEncoder({
+		const encoder = createSymmetricEncoder({
 			contentTopic: 'invites',
-			publicKey: peerPublicKey,
+			symKey: inviteEncryptionKey,
 			sigPrivKey: ownPrivateKey,
 		})
 		await ws.setDoc(encoder, inviteMessage)

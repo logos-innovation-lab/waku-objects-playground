@@ -69,9 +69,3 @@ export function sign(privateKey: Hex, data: Uint8Array): Hex {
 	const signature = nobleSign(messageHash, fixHex(privateKey))
 	return signature.toCompactHex()
 }
-
-export function privateKeyToPublicKey(privateKey: Hex | Uint8Array): Hex {
-	const privateKeyHex = typeof privateKey === 'string' ? fixHex(privateKey) : bytesToHex(privateKey)
-	const publicKeyBytes = getPublicKey(privateKeyHex)
-	return bytesToHex(publicKeyBytes)
-}
