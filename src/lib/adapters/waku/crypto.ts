@@ -3,7 +3,6 @@ import {
 	sign as nobleSign,
 	ProjectivePoint,
 	Signature,
-	getPublicKey,
 } from '@noble/secp256k1'
 import { keccak_256 } from '@noble/hashes/sha3'
 import { bytesToHex, hexToBytes } from '@waku/utils/bytes'
@@ -68,4 +67,5 @@ export function sign(privateKey: Hex, data: Uint8Array): Hex {
 	const messageHash = hash(data)
 	const signature = nobleSign(messageHash, fixHex(privateKey))
 	return signature.toCompactHex()
+
 }
