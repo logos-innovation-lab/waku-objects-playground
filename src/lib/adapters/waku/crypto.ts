@@ -1,9 +1,4 @@
-import {
-	getSharedSecret as nobleGetSharedSecret,
-	sign as nobleSign,
-	ProjectivePoint,
-	Signature,
-} from '@noble/secp256k1'
+import { getSharedSecret as nobleGetSharedSecret, ProjectivePoint } from '@noble/secp256k1'
 import { keccak_256 } from '@noble/hashes/sha3'
 import { bytesToHex, hexToBytes } from '@waku/utils/bytes'
 import { gcm } from '@noble/ciphers/aes'
