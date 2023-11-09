@@ -43,7 +43,7 @@ export type ContentTopic =
 
 export type QueryResult = AsyncGenerator<Promise<DecodedMessage | undefined>[]>
 
-function getTopic(contentTopic: ContentTopic, id: string | '' = '') {
+export function getTopic(contentTopic: ContentTopic, id: string | '' = '') {
 	const topicApp = 'wakuplay.im'
 	const topicVersion = '1'
 	const topicEncoding = 'json'

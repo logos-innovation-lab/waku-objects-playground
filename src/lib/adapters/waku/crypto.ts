@@ -57,14 +57,3 @@ export function compressPublicKey(publicKey: Hex | Uint8Array): Hex {
 	publicKey = typeof publicKey === 'string' ? fixHex(publicKey) : bytesToHex(publicKey)
 	return ProjectivePoint.fromHex(publicKey).toHex(true)
 }
-
-export function signatureToPublicKey(signature: Hex, messageHash: Hex): Hex {
-	const publicKey = Signature.fromCompact(fixHex(signature)).recoverPublicKey(fixHex(messageHash))
-	return publicKey.toHex(true)
-}
-
-export function sign(privateKey: Hex, data: Uint8Array): Hex {
-	const messageHash = hash(data)
-	const signature = nobleSign(messageHash, fixHex(privateKey))
-	return signature.toCompactHex()
-}
