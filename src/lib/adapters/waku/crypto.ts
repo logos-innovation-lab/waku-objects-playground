@@ -67,5 +67,4 @@ export function sign(privateKey: Hex, data: Uint8Array): Hex {
 	const messageHash = hash(data)
 	const signature = nobleSign(messageHash, fixHex(privateKey))
 	return signature.toCompactHex()
-
 }
