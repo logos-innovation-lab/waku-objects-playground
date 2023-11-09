@@ -289,8 +289,6 @@ export default class WakuAdapter implements Adapter {
 			ownPublicKey,
 			decoder,
 			async (message, decodedMessage) => {
-				console.debug('invite', { message, decodedMessage })
-
 				if (!this.checkMessageSignature(message, decodedMessage)) {
 					return
 				}
@@ -749,8 +747,6 @@ export default class WakuAdapter implements Adapter {
 
 		const storageProfile = await ws.decodeDoc<StorageProfile>(decodedMessage)
 
-		console.debug({ storageProfile, profilePublicKey, decoder })
-
 		return storageProfile
 	}
 
@@ -812,7 +808,6 @@ export default class WakuAdapter implements Adapter {
 			symKey: groupEncryptionKey,
 		})
 		const groupChat = await ws.getDoc<StorageChat>(decoder)
-		console.debug({ groupChat, groupChatId })
 		if (groupChat) {
 			const updatedGroupChat = await this.storageChatToChat(groupChatId, groupChat)
 			chats.updateChat(groupChatId, (chat) => ({
@@ -946,7 +941,6 @@ export default class WakuAdapter implements Adapter {
 
 	private checkMessageSignature(message: Message, decodedMessage: DecodedMessage): boolean {
 		if (!decodedMessage.signaturePublicKey) {
-			console.debug('missing signature')
 			return false
 		}
 
