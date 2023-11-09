@@ -289,8 +289,6 @@ export default class WakuAdapter implements Adapter {
 			ownPublicKey,
 			decoder,
 			async (message, decodedMessage) => {
-				console.debug('invite', { message, decodedMessage })
-
 				if (!this.checkMessageSignature(message, decodedMessage)) {
 					return
 				}
