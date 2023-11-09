@@ -18,7 +18,6 @@ async function main() {
 		fund,
 		balance,
 		txinfo,
-		waku,
 	}
 
 	const fn = commands[command]
@@ -65,22 +64,6 @@ async function txinfo(hash: string) {
 	const receipt = await getTransactionReceipt(hash)
 
 	console.log({ tx, receipt })
-}
-
-async function waku() {
-	const command = process.argv[3]
-	const restArgs = process.argv.slice(4)
-
-	const commands: Record<string, (...args: string[]) => Promise<void>> = {}
-
-	const fn = commands[command]
-	if (!fn) {
-		throw `unknown command: ${command}\nUsage: cli waku ${Object.keys(commands).join('|')}`
-	}
-
-	await fn(...restArgs)
-
-	process.exit(0)
 }
 
 main().catch(console.error)
