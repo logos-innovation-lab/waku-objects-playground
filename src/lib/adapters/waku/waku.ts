@@ -47,12 +47,13 @@ export type ContentTopic =
 
 export type QueryResult = AsyncGenerator<Promise<DecodedMessage | undefined>[]>
 
-const topicApp = 'wakuobjects-playground'
-const topicVersion = '1'
-
 function getTopic(contentTopic: ContentTopic, id: string | '' = '') {
+	const topicApp = 'wakuplay.im'
+	const topicVersion = '1'
+	const topicEncoding = 'json'
+
 	const hashedContentTopicName = hash(new TextEncoder().encode(`${contentTopic}/${id}`))
-	return `/${topicApp}/${topicVersion}/${hashedContentTopicName}`
+	return `/${topicApp}/${topicVersion}/${hashedContentTopicName}/${topicEncoding}`
 }
 
 export interface ConnectWakuOptions {
