@@ -54,23 +54,9 @@ export function makeWakustore(waku: LightNode): Wakustore {
 
 	function decodeDoc<T>(message: DecodedMessage): T {
 		const decodedPayload = decodeMessagePayload(message)
-		const typedPayload = JSON.parse(decodedPayload) as T & { timestamp?: number }
+		const typedPayload = JSON.parse(decodedPayload) as T
 
-		// HACK to use waku timestamp instead of the type T's
-		if (
-			typedPayload &&
-			typeof typedPayload === 'object' &&
-			!Array.isArray(typedPayload) &&
-			typedPayload.timestamp
-		) {
-			return {
-				...typedPayload,
-				timestamp: Number(message.timestamp),
-				origTimestamp: typedPayload.timestamp,
-			}
-		} else {
-			return typedPayload
-		}
+		return typedPayload
 	}
 
 	async function getQueryResults(

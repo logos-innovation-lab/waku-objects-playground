@@ -20,13 +20,18 @@
 
 	export let timestamp: string | undefined = undefined
 
+	export let onClick: (() => void) | undefined = undefined
+
 	const isFF = () => {
 		let browserInfo = navigator.userAgent
 		return browserInfo.includes('Firefox')
 	}
 </script>
 
+<!-- svelte-ignore a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y-click-events-have-key-events -->
 <div
+	on:click={() => (onClick ? onClick() : {})}
 	class={`message ${myMessage ? 'my-message' : 'their-message'} ${isFF() ? 'ff' : ''} ${
 		object ? 'object' : ''
 	} ${group ? 'group' : ''} ${sameSender ? 'same' : ''} ${noText ? 'no-text' : ''}`}

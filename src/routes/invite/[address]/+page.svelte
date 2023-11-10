@@ -207,6 +207,18 @@
 					</div>
 				</Container>
 			</ButtonBlock>
+			<ButtonBlock borderBottom on:click={() => goto(routes.BABBLES_NEW)}>
+				<Container direction="row" justify="space-between" align="center" alignItems="center">
+					<div class="icon">
+						<Events size={20} /> Create babbles
+					</div>
+					<div>
+						<Button variant="icon">
+							<ChevronRight />
+						</Button>
+					</div>
+				</Container>
+			</ButtonBlock>
 			<Container gap={12} justify="flex-start" align="center" padX={24} padY={24}>
 				<p class="text-lg text-bold">Show QR code or share link below</p>
 				<div class="qr">

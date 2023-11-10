@@ -4,6 +4,7 @@ import {
 	getPublicKey,
 } from '@noble/secp256k1'
 import { keccak_256 } from '@noble/hashes/sha3'
+import { sha256 as nobleSha256 } from '@noble/hashes/sha256'
 import { bytesToHex, hexToBytes } from '@waku/utils/bytes'
 import { gcm } from '@noble/ciphers/aes'
 import { randomBytes } from '@noble/ciphers/webcrypto/utils'
@@ -17,6 +18,16 @@ export function fixHex(h: Hex): Hex {
 	return h
 }
 
+export function keccak256(data: Uint8Array | Hex): Hex {
+	const hashBytes = keccak_256(data)
+	return bytesToHex(hashBytes)
+}
+
+export function sha256(data: Uint8Array | Hex): Hex {
+	const hashBytes = nobleSha256(data)
+	return bytesToHex(hashBytes)
+}
+
 export function getSharedSecret(privateKey: Hex, publicKey: Hex): Hex {
 	const secretBytes = nobleGetSharedSecret(fixHex(privateKey), fixHex(publicKey), true)
 	return hash(secretBytes.slice(1))
@@ -24,8 +35,7 @@ export function getSharedSecret(privateKey: Hex, publicKey: Hex): Hex {
 
 export function hash(data: Uint8Array | Hex): Hex {
 	const bytes = typeof data === 'string' ? hexToBytes(data) : data
-	const hashBytes = keccak_256(bytes)
-	return bytesToHex(hashBytes)
+	return keccak256(bytes)
 }
 
 export function encrypt(

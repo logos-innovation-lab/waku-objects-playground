@@ -9,6 +9,10 @@ import {
 	type ChatData,
 	getLastMessageTime,
 	type InviteMessage,
+	type UserMessage,
+	type WithoutMeta,
+	type ChatMessage,
+	type BabbleMessage,
 } from '$lib/stores/chat'
 import type { User } from '$lib/types'
 import type { TimeFilter } from '@waku/interfaces'
@@ -52,6 +56,7 @@ import { bytesToHex, hexToBytes } from '@waku/utils/bytes'
 import { encrypt, decrypt } from './crypto'
 import { createSymmetricDecoder, createSymmetricEncoder } from './codec'
 import type { DecodedMessage } from '@waku/message-encryption'
+import { utils } from '@noble/secp256k1'
 
 const MAX_MESSAGES = 100
 
@@ -105,18 +110,40 @@ function createGroupChat(
 	return chatId
 }
 
+function createBabbles(
+	chatId: string,
+	name: string,
+	avatar: string | undefined = undefined,
+	joined: boolean | undefined = undefined,
+): string {
+	const groupChat: Chat = {
+		chatId,
+		type: 'babbles',
+		messages: [],
+		users: [],
+		name,
+		avatar,
+		unread: 0,
+		joined,
+		inviter: undefined,
+	}
+	chats.createChat(groupChat)
+
+	return chatId
+}
+
 async function addMessageToChat(
 	ownPublicKey: string,
 	blockchainAdapter: WakuObjectAdapter,
 	chatId: string,
-	message: Message,
+	message: ChatMessage,
 	send?: (data: JSONValue) => Promise<void>,
 ) {
 	if (message.type === 'data' && send) {
 		await executeOnDataMessage(ownPublicKey, blockchainAdapter, chatId, message, send)
 	}
 
-	const unread = message.senderPublicKey !== ownPublicKey && message.type === 'user' ? 1 : 0
+	const unread = message.type === 'user' && message.senderPublicKey !== ownPublicKey ? 1 : 0
 	chats.updateChat(chatId, (chat) => ({
 		...chat,
 		messages: [...chat.messages.slice(-MAX_MESSAGES), message],
@@ -437,6 +464,22 @@ export default class WakuAdapter implements Adapter {
 		return this.storageProfileToUser(address)
 	}
 
+	async startBabbles(
+		wallet: BaseWallet,
+		chatId: string,
+		name: string,
+		avatar?: string,
+	): Promise<string> {
+		const wakuObjectAdapter = makeWakuObjectAdapter(this, wallet)
+
+		createBabbles(chatId, name, avatar, true)
+
+		const ownPublicKey = wallet.signingKey.compressedPublicKey
+		await this.subscribeToBabbles(ownPublicKey, chatId, wakuObjectAdapter)
+
+		return chatId
+	}
+
 	async startChat(wallet: BaseWallet, peerPublicKey: string): Promise<string> {
 		const storageProfile = await this.fetchStorageProfile(peerPublicKey)
 		if (!storageProfile) {
@@ -601,18 +644,27 @@ export default class WakuAdapter implements Adapter {
 	}
 
 	async sendChatMessage(wallet: BaseWallet, chatId: string, text: string): Promise<void> {
-		const senderPublicKey = wallet.signingKey.compressedPublicKey
 		const senderPrivateKey = wallet.privateKey
-		const message: Message = {
+		const message: WithoutMeta<UserMessage> = {
 			type: 'user',
-			timestamp: Date.now(),
 			text,
-			senderPublicKey,
 		}
-
 		const encryptionKey = hexToBytes(chatId)
 
 		await this.safeWaku.sendMessage(message, encryptionKey, hexToBytes(senderPrivateKey))
+	}
+
+	async sendBabblesMessage(chatId: string, text: string, parentId?: string): Promise<void> {
+		const message: WithoutMeta<BabbleMessage> = {
+			type: 'babble',
+			text,
+			parentId,
+		}
+		const encryptionKey = hexToBytes(chatId)
+		// TODO find a better value
+		const senderPrivateKey = utils.randomPrivateKey()
+
+		await this.safeWaku.sendMessage(message, encryptionKey, senderPrivateKey)
 	}
 
 	async sendData(
@@ -622,12 +674,9 @@ export default class WakuAdapter implements Adapter {
 		instanceId: string,
 		data: JSONSerializable,
 	): Promise<void> {
-		const senderPublicKey = wallet.signingKey.compressedPublicKey
 		const senderPrivateKey = wallet.privateKey
-		const message: Message = {
+		const message: WithoutMeta<DataMessage<JSONSerializable>> = {
 			type: 'data',
-			timestamp: Date.now(),
-			senderPublicKey,
 			objectId,
 			instanceId,
 			data,
@@ -643,11 +692,8 @@ export default class WakuAdapter implements Adapter {
 		chatId: string,
 		userPublicKeys: string[],
 	): Promise<void> {
-		const senderPublicKey = wallet.signingKey.compressedPublicKey
-		const message: Message = {
+		const message: WithoutMeta<InviteMessage> = {
 			type: 'invite',
-			timestamp: Date.now(),
-			senderPublicKey,
 			chatId,
 		}
 
@@ -727,7 +773,7 @@ export default class WakuAdapter implements Adapter {
 		const decodedMessage = await ws.getDecodedMessage(decoder)
 
 		if (!decodedMessage) {
-			console.error('missing document')
+			console.error('missing profile', { profilePublicKey })
 			return
 		}
 
@@ -787,10 +833,28 @@ export default class WakuAdapter implements Adapter {
 			endTime: now,
 		}
 
-		if (isGroupChat(chat)) {
-			await this.subscribeToGroupChat(ownPublicKey, chat.chatId, wakuObjectAdapter, timeFilter)
-		} else {
-			await this.subscribeToPrivateChat(ownPublicKey, chat.chatId, wakuObjectAdapter, timeFilter)
+		switch (chat.type) {
+			case 'private':
+				return await this.subscribeToPrivateChat(
+					ownPublicKey,
+					chat.chatId,
+					wakuObjectAdapter,
+					timeFilter,
+				)
+			case 'group':
+				return await this.subscribeToGroupChat(
+					ownPublicKey,
+					chat.chatId,
+					wakuObjectAdapter,
+					timeFilter,
+				)
+			case 'babbles':
+				return await this.subscribeToBabbles(
+					ownPublicKey,
+					chat.chatId,
+					wakuObjectAdapter,
+					timeFilter,
+				)
 		}
 	}
 
@@ -880,18 +944,23 @@ export default class WakuAdapter implements Adapter {
 				if (!this.checkMessageSignature(message, decodedMessage)) {
 					return
 				}
-				await this.handleMessage(ownPublicKey, message, encryptionKey, wakuObjectAdapter)
+				await this.handleChatMessage(ownPublicKey, message, encryptionKey, wakuObjectAdapter)
 			},
 			timeFilter,
 		)
 	}
 
-	private async handleMessage(
+	private async handleChatMessage(
 		ownPublicKey: string,
-		message: Message,
+		message: ChatMessage,
 		encryptionKey: Uint8Array,
 		adapter: WakuObjectAdapter,
 	) {
+		// only handle certain types of messages
+		if (!(message.type === 'invite' || message.type === 'data' || message.type === 'user')) {
+			return
+		}
+
 		const chatId = bytesToHex(encryptionKey)
 		const chatsMap = get(chats).chats
 
@@ -939,13 +1008,37 @@ export default class WakuAdapter implements Adapter {
 		await addMessageToChat(ownPublicKey, adapter, chatId, message, send)
 	}
 
+	private async subscribeToBabbles(
+		ownPublicKey: string,
+		chatId: string,
+		wakuObjectAdapter: WakuObjectAdapter,
+		timeFilter?: TimeFilter,
+	) {
+		const encryptionKey = hexToBytes(chatId)
+		const decoder = createSymmetricDecoder({
+			contentTopic: 'private-message',
+			symKey: encryptionKey,
+		})
+
+		this.safeWaku.subscribeEncrypted(
+			chatId,
+			decoder,
+			async (message) => {
+				console.debug({ message, chatId, ownPublicKey })
+				if (message.type === 'babble') {
+					await addMessageToChat(ownPublicKey, wakuObjectAdapter, chatId, message)
+				}
+			},
+			timeFilter,
+		)
+	}
+
 	private checkMessageSignature(message: Message, decodedMessage: DecodedMessage): boolean {
-		if (!decodedMessage.signaturePublicKey) {
-			return false
+		if (message.type === 'babble') {
+			return true
 		}
 
-		if (compressPublicKey(decodedMessage.signaturePublicKey) !== fixHex(message.senderPublicKey)) {
-			console.error('invalid signature', { decodedMessage, message })
+		if (!decodedMessage.signaturePublicKey) {
 			return false
 		}
 
