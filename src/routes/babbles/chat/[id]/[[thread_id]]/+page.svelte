@@ -15,11 +15,11 @@
 	import WakuObject from '$lib/objects/chat.svelte'
 
 	import { goto } from '$app/navigation'
-	import { chats } from '$lib/stores/chat'
+	import { chats, type ChatMessage } from '$lib/stores/chat'
 	import adapters from '$lib/adapters'
 	import ROUTES from '$lib/routes'
 	import { browser } from '$app/environment'
-	import ChatMessage from '$lib/components/chat-message.svelte'
+	import ChatMessageComponent from '$lib/components/chat-message.svelte'
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 	import type { HDNodeWallet } from 'ethers/lib.commonjs'
 	import Layout from '$lib/components/layout.svelte'
@@ -29,20 +29,18 @@
 	import Checkmark from '$lib/components/icons/checkmark.svelte'
 	import Settings from '$lib/components/icons/settings.svelte'
 	import { walletStore } from '$lib/stores/wallet'
-	import {
-		areDifferentDays,
-		formatTimestampSeparator,
-		formatTimestampTime,
-	} from '$lib/utils/format'
-	import ChatDateBadge from '$lib/components/chat-date-badge.svelte'
+	import { formatTimestampTime } from '$lib/utils/format'
 	import { errorStore } from '$lib/stores/error'
 
 	let div: HTMLElement
 	let autoscroll = true
 
+	type ThreadedMessage = ChatMessage & { level: number }
+
 	$: chat = $chats.chats.get($page.params.id)
-	$: threadId = $page.params.threadId
-	$: console.debug({ chat, threadId })
+	$: threadId = $page.params.thread_id
+	$: chatMessages = $chats.chats.get($page.params.id)?.messages || []
+	$: displayMessages = convertMessagesToThreaded(chatMessages)
 
 	beforeUpdate(() => {
 		autoscroll = div && div.offsetHeight + div.scrollTop > div.scrollHeight - 74
@@ -72,14 +70,13 @@
 		}
 	})
 
-	$: messages = $chats.chats.get($page.params.id)?.messages || []
 	let isSending = false
 	let text = ''
 
 	const sendMessage = async (wallet: HDNodeWallet) => {
 		isSending = true
 		try {
-			await adapters.sendBabblesMessage($page.params.id, text)
+			await adapters.sendBabblesMessage($page.params.id, text, threadId)
 		} catch (error) {
 			console.error({ error })
 			errorStore.addEnd({
@@ -110,6 +107,50 @@
 		txt.innerHTML = s
 		return txt.value
 	}
+
+	function convertMessagesToThreaded(messages: ChatMessage[]): ThreadedMessage[] {
+		type ParentMessage = ChatMessage & { children: ParentMessage[] }
+
+		const roots: ParentMessage[] = []
+		const parentMap = new Map<string, ParentMessage>()
+		console.debug({ messages })
+		for (const message of messages) {
+			if (message.type !== 'babble') {
+				continue
+			}
+
+			const parent = { ...message, children: [] as ParentMessage[] }
+			parentMap.set(message.id, parent)
+
+			if (!message.parentId || threadId === message.id) {
+				roots.push(parent)
+				continue
+			}
+
+			const parentMessage = parentMap.get(message.parentId)
+			if (!parentMessage) {
+				console.debug('no parent found', { message })
+				continue
+			}
+
+			parentMessage.children.push(parent)
+		}
+
+		const threadedMessages: ThreadedMessage[] = []
+
+		function walk(messages: ParentMessage[], level = 0) {
+			for (const message of messages) {
+				threadedMessages.push({ ...message, level })
+				walk(message.children, level + 1)
+			}
+		}
+
+		walk(roots.filter((root) => (threadId ? root.id === threadId : root)))
+
+		console.debug({ threadedMessages })
+
+		return threadedMessages
+	}
 </script>
 
 <AuthenticatedOnly let:wallet>
@@ -123,7 +164,7 @@
 		<Layout bgColor="shade">
 			<svelte:fragment slot="header">
 				<Header>
-					<Button variant="icon" slot="left" on:click={() => goto(ROUTES.HOME)}>
+					<Button variant="icon" slot="left" on:click={() => history.go(-1)}>
 						<ChevronLeft />
 					</Button>
 					<svelte:fragment slot="chat">
@@ -167,20 +208,23 @@
 						<div class="messages">
 							<div class="messages-inner">
 								<!-- Chat bubbles -->
-								{#each messages as message, i}
+								{#each displayMessages as message, i}
 									{#if message.type === 'babble' && message.text?.length > 0}
 										{@const sameSender =
-											messages[i].senderPublicKey === messages[i - 1]?.senderPublicKey}
+											displayMessages[i].senderPublicKey ===
+											displayMessages[i - 1]?.senderPublicKey}
 										{@const lastMessage =
-											i + 1 === messages.length ||
-											messages[i].senderPublicKey !== messages[i + 1]?.senderPublicKey ||
-											messages[i + 1]?.type !== 'babble'}
-										{#if i === 0 || (i > 0 && areDifferentDays(messages[i].timestamp, messages[i - 1].timestamp))}
+											i + 1 === displayMessages.length ||
+											displayMessages[i].senderPublicKey !==
+												displayMessages[i + 1]?.senderPublicKey ||
+											displayMessages[i + 1]?.type !== 'babble'}
+										<!-- {#if i === 0 || (i > 0 && areDifferentDays(displayMessages[i].timestamp, displayMessages[i - 1].timestamp))}
 											<ChatDateBadge text={formatTimestampSeparator(message.timestamp)} />
-										{/if}
-										<ChatMessage
+										{/if} -->
+										<ChatMessageComponent
 											onClick={() =>
 												chat?.chatId && goto(ROUTES.BABBLES_CHAT(chat?.chatId, message.id))}
+											leftPadding={message.level}
 											myMessage={false}
 											bubble
 											group
@@ -194,7 +238,7 @@
 											<svelte:fragment slot="avatar">
 												<Avatar size={40} picture={undefined} seed={message.senderPublicKey} />
 											</svelte:fragment>
-										</ChatMessage>
+										</ChatMessageComponent>
 									{:else if message.type === 'data'}
 										<WakuObject {message} users={chat.users} />
 									{/if}

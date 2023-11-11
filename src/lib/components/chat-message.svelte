@@ -22,6 +22,8 @@
 
 	export let onClick: (() => void) | undefined = undefined
 
+	export let leftPadding: number | undefined = undefined
+
 	const isFF = () => {
 		let browserInfo = navigator.userAgent
 		return browserInfo.includes('Firefox')
@@ -35,6 +37,7 @@
 	class={`message ${myMessage ? 'my-message' : 'their-message'} ${isFF() ? 'ff' : ''} ${
 		object ? 'object' : ''
 	} ${group ? 'group' : ''} ${sameSender ? 'same' : ''} ${noText ? 'no-text' : ''}`}
+	style={`${leftPadding ? `margin-left: ${leftPadding * 24}px` : ''}`}
 >
 	<div class={`${bubble ? 'bubble message-content message-text text-lg' : ''}`}>
 		<slot />
