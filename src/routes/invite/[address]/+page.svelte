@@ -35,6 +35,7 @@
 	import { errorStore } from '$lib/stores/error'
 	import type { BaseWallet } from 'ethers'
 	import { getSharedSecret } from '$lib/adapters/waku/crypto'
+	import Babbles from '$lib/components/icons/babbles.svelte'
 
 	// check if the chat already exists
 	$: sharedSecret =
@@ -210,7 +211,7 @@
 			<ButtonBlock borderBottom on:click={() => goto(routes.BABBLES_NEW)}>
 				<Container direction="row" justify="space-between" align="center" alignItems="center">
 					<div class="icon">
-						<Events size={20} /> Create babbles
+						<Babbles size={20} /> Create babbles
 					</div>
 					<div>
 						<Button variant="icon">

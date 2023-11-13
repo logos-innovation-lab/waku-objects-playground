@@ -24,6 +24,7 @@
 	import { formatTimestamp } from '$lib/utils/format'
 	import { userDisplayName } from '$lib/utils/user'
 	import { publicKeyToAddress } from '$lib/adapters/waku/crypto'
+	import Babbles from '$lib/components/icons/babbles.svelte'
 
 	$: orderedChats = Array.from($chats.chats)
 		.map(([, chat]) => chat)
@@ -175,11 +176,14 @@
 										<div class="content">
 											<div class="chat-info">
 												<span class="chat-name text-lg text-bold">
-													{#if isGroupChat(chat) || isBabbles(chat)}
+													{#if isGroupChat(chat)}
 														<span class="truncate">
 															{chat?.name}
 														</span>
 														<Events />
+													{:else if isBabbles(chat)}
+														<span class="truncate"> Babbles </span>
+														<Babbles />
 													{:else}
 														<span class="truncate">
 															{userDisplayName(otherUser)}

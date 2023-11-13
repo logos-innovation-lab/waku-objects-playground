@@ -2,7 +2,6 @@
 	import { beforeUpdate, afterUpdate, onMount } from 'svelte'
 	import { page } from '$app/stores'
 
-	import Add from '$lib/components/icons/add.svelte'
 	import ArrowUp from '$lib/components/icons/arrow-up.svelte'
 	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
 	import Close from '$lib/components/icons/close.svelte'
@@ -12,10 +11,9 @@
 	import Textarea from '$lib/components/textarea.svelte'
 	import Button from '$lib/components/button.svelte'
 	import Avatar from '$lib/components/avatar.svelte'
-	import WakuObject from '$lib/objects/chat.svelte'
 
 	import { goto } from '$app/navigation'
-	import { chats, type ChatMessage } from '$lib/stores/chat'
+	import { chats, type ChatMessage, type BabbleMessage } from '$lib/stores/chat'
 	import adapters from '$lib/adapters'
 	import ROUTES from '$lib/routes'
 	import { browser } from '$app/environment'
@@ -23,14 +21,14 @@
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 	import type { HDNodeWallet } from 'ethers/lib.commonjs'
 	import Layout from '$lib/components/layout.svelte'
-	import Events from '$lib/components/icons/events.svelte'
 	import { textToHTML } from '$lib/utils/text'
 	import Spacer from '$lib/components/spacer.svelte'
 	import Checkmark from '$lib/components/icons/checkmark.svelte'
 	import Settings from '$lib/components/icons/settings.svelte'
 	import { walletStore } from '$lib/stores/wallet'
-	import { formatTimestampTime } from '$lib/utils/format'
+	import { formatTimestamp } from '$lib/utils/format'
 	import { errorStore } from '$lib/stores/error'
+	import Babbles from '$lib/components/icons/babbles.svelte'
 
 	let div: HTMLElement
 	let autoscroll = true
@@ -106,14 +104,13 @@
 		return txt.value
 	}
 
-	type ThreadedMessage = ChatMessage & { level: number }
+	type ThreadedMessage = BabbleMessage & { level: number }
 
 	function convertMessagesToThreaded(messages: ChatMessage[]): ThreadedMessage[] {
-		type ParentMessage = ChatMessage & { children: ParentMessage[] }
+		type ParentMessage = BabbleMessage & { children: ParentMessage[] }
 
 		const roots: ParentMessage[] = []
 		const parentMap = new Map<string, ParentMessage>()
-		console.debug({ messages })
 		for (const message of messages) {
 			if (message.type !== 'babble') {
 				continue
@@ -129,7 +126,6 @@
 
 			const parentMessage = parentMap.get(message.parentId)
 			if (!parentMessage) {
-				console.debug('no parent found', { message })
 				continue
 			}
 
@@ -151,8 +147,6 @@
 		const threadedMessages = flatten(
 			roots.filter((root) => (threadId ? root.id === threadId : root)),
 		)
-
-		console.debug({ threadedMessages })
 
 		return threadedMessages
 	}
@@ -178,7 +172,7 @@
 							{chat?.name}
 						</span>
 						<span class="group-icon">
-							<Events />
+							<Babbles />
 						</span>
 					</svelte:fragment>
 					<svelte:fragment slot="right">
@@ -214,7 +208,7 @@
 							<div class="messages-inner">
 								<!-- Chat bubbles -->
 								{#each displayMessages as message, i}
-									{#if message.type === 'babble' && message.text?.length > 0}
+									{#if message.text?.length > 0}
 										{@const sameSender =
 											displayMessages[i].senderPublicKey ===
 											displayMessages[i - 1]?.senderPublicKey}
@@ -236,16 +230,11 @@
 											{sameSender}
 											senderName={undefined}
 											timestamp={lastMessage
-												? formatTimestampTime(lastMessage ? message.timestamp : 0)
+												? formatTimestamp(lastMessage ? message.timestamp : 0)
 												: undefined}
 										>
 											{@html textToHTML(htmlize(message.text))}
-											<svelte:fragment slot="avatar">
-												<Avatar size={40} picture={undefined} seed={message.senderPublicKey} />
-											</svelte:fragment>
 										</ChatMessageComponent>
-									{:else if message.type === 'data'}
-										<WakuObject {message} users={chat.users} />
 									{/if}
 								{/each}
 							</div>
@@ -255,9 +244,6 @@
 				<div class="chat-input-wrapper">
 					<Container>
 						<div class="chat-input">
-							<Button variant="icon" on:click={() => goto(ROUTES.OBJECTS($page.params.id))}>
-								<Add />
-							</Button>
 							<Textarea
 								placeholder="Message"
 								autofocus
