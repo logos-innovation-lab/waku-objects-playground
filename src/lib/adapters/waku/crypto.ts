@@ -1,8 +1,4 @@
-import {
-	getSharedSecret as nobleGetSharedSecret,
-	ProjectivePoint,
-	getPublicKey,
-} from '@noble/secp256k1'
+import { getSharedSecret as nobleGetSharedSecret, ProjectivePoint } from '@noble/secp256k1'
 import { keccak_256 } from '@noble/hashes/sha3'
 import { sha256 as nobleSha256 } from '@noble/hashes/sha256'
 import { bytesToHex, hexToBytes } from '@waku/utils/bytes'
@@ -65,10 +61,4 @@ export function publicKeyToAddress(publicKey: Hex): Hex {
 export function compressPublicKey(publicKey: Hex | Uint8Array): Hex {
 	publicKey = typeof publicKey === 'string' ? fixHex(publicKey) : bytesToHex(publicKey)
 	return ProjectivePoint.fromHex(publicKey).toHex(true)
-}
-
-export function privateKeyToPublicKey(privateKey: Hex | Uint8Array): Hex {
-	const privateKeyHex = typeof privateKey === 'string' ? fixHex(privateKey) : bytesToHex(privateKey)
-	const publicKeyBytes = getPublicKey(privateKeyHex)
-	return bytesToHex(publicKeyBytes)
 }
