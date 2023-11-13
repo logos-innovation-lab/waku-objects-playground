@@ -35,8 +35,6 @@
 	let div: HTMLElement
 	let autoscroll = true
 
-	type ThreadedMessage = ChatMessage & { level: number }
-
 	$: chat = $chats.chats.get($page.params.id)
 	$: threadId = $page.params.thread_id
 	$: chatMessages = $chats.chats.get($page.params.id)?.messages || []
@@ -108,6 +106,8 @@
 		return txt.value
 	}
 
+	type ThreadedMessage = ChatMessage & { level: number }
+
 	function convertMessagesToThreaded(messages: ChatMessage[]): ThreadedMessage[] {
 		type ParentMessage = ChatMessage & { children: ParentMessage[] }
 
@@ -136,16 +136,21 @@
 			parentMessage.children.push(parent)
 		}
 
-		const threadedMessages: ThreadedMessage[] = []
-
-		function walk(messages: ParentMessage[], level = 0) {
+		function flatten(
+			messages: ParentMessage[],
+			level = 0,
+			threadedMessages: ThreadedMessage[] = [],
+		) {
 			for (const message of messages) {
 				threadedMessages.push({ ...message, level })
-				walk(message.children, level + 1)
+				flatten(message.children, level + 1, threadedMessages)
 			}
+			return threadedMessages
 		}
 
-		walk(roots.filter((root) => (threadId ? root.id === threadId : root)))
+		const threadedMessages = flatten(
+			roots.filter((root) => (threadId ? root.id === threadId : root)),
+		)
 
 		console.debug({ threadedMessages })
 
