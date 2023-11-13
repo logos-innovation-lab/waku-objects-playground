@@ -33,6 +33,8 @@
 	import { userDisplayName } from '$lib/utils/user'
 	import { errorStore } from '$lib/stores/error'
 
+	$: console.log($chats)
+
 	$: chatId = $page.params.id
 	$: groupChat = $chats.chats.get(chatId)
 	let picture: string | undefined
@@ -185,9 +187,11 @@
 			</Container>
 			<ul class="chats" aria-label="Contact List">
 				{#each groupMembers as user}
-					{@const isContact = Array.from($chats.chats)
-						.map(([, chat]) => chat.chatId)
-						.includes(user.publicKey)}
+					{@const contactChat = Array.from($chats.chats)
+						.filter(([, chat]) => chat.type === 'private')
+						.map(([, chat]) => chat)
+						.find((chat) => chat.users.map((user) => user.publicKey).includes(user.publicKey))}
+					{@const isContact = !!contactChat}
 					{@const isMe = user.publicKey === wallet.signingKey.compressedPublicKey}
 					<li class={`${isContact ? 'contact' : 'not-contact'} ${isMe ? 'me' : ''}`}>
 						<div class="chat-button" role="listitem">
@@ -210,7 +214,7 @@
 											<UserFollow />
 										</Button>
 									{:else if isContact}
-										<Button variant="icon" on:click={() => goto(routes.CHAT(user.publicKey))}>
+										<Button variant="icon" on:click={() => goto(routes.CHAT(contactChat.chatId))}>
 											<ChatLaunch />
 										</Button>
 									{/if}

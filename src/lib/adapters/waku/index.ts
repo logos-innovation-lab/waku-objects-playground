@@ -47,9 +47,11 @@ import { balanceStore } from '$lib/stores/balances'
 import type { ContentTopic } from './waku'
 import { installedObjectStore } from '$lib/stores/installed-objects'
 import { errorStore } from '$lib/stores/error'
-import { getSharedSecret, hash } from './crypto'
+import { compressPublicKey, fixHex, getSharedSecret, hash } from './crypto'
 import { bytesToHex, hexToBytes } from '@waku/utils/bytes'
 import { encrypt, decrypt } from './crypto'
+import { createSymmetricDecoder, createSymmetricEncoder } from './codec'
+import type { DecodedMessage } from '@waku/message-encryption'
 
 const MAX_MESSAGES = 100
 
@@ -203,32 +205,48 @@ async function getDoc<T>(
 ): Promise<T | undefined> {
 	const id = hash(symKey)
 	const key = `${contentTopic}/${id}`
-	const encryptedKey = encryptStringToHex(key, symKey)
-	const value = localStorage.getItem(encryptedKey)
+	const hashedKey = hash(new TextEncoder().encode(key))
+	const value = localStorage.getItem(hashedKey)
+
 	if (value && value !== 'undefined') {
 		const decryptedValue = decryptHexToString(value, symKey)
 		return JSON.parse(decryptedValue) as T
 	}
 
-	const storeValue = await ws.getDoc<T>(contentTopic, symKey)
-	const json = JSON.stringify(storeValue)
+	const decoder = createSymmetricDecoder({ contentTopic, symKey })
+	const storeValue = await ws.getDoc<T>(decoder)
+	if (!storeValue) {
+		return
+	}
 
+	const json = JSON.stringify(storeValue)
 	const encryptedJson = encryptStringToHex(json, symKey)
-	localStorage.setItem(encryptedKey, encryptedJson)
+	localStorage.setItem(hashedKey, encryptedJson)
 
 	return storeValue
 }
 
-async function setDoc<T>(ws: Wakustore, contentTopic: ContentTopic, symKey: Uint8Array, doc: T) {
+async function setDoc<T>(
+	ws: Wakustore,
+	contentTopic: ContentTopic,
+	symKey: Uint8Array,
+	sigPrivKey: Uint8Array,
+	doc: T,
+) {
+	if (!doc) {
+		return
+	}
+
 	const id = hash(symKey)
 	const key = `${contentTopic}/${id}`
-	const encryptedKey = encryptStringToHex(key, symKey)
+	const hashedKey = hash(new TextEncoder().encode(key))
 	const json = JSON.stringify(doc)
 	const encryptedJson = encryptStringToHex(json, symKey)
 
-	localStorage.setItem(encryptedKey, encryptedJson)
+	localStorage.setItem(hashedKey, encryptedJson)
 
-	return await ws.setDoc<T>(contentTopic, symKey, doc)
+	const encoder = createSymmetricEncoder({ contentTopic, symKey, sigPrivKey })
+	return await ws.setDoc<T>(encoder, doc)
 }
 
 export default class WakuAdapter implements Adapter {
@@ -242,7 +260,7 @@ export default class WakuAdapter implements Adapter {
 		const ownPublicKey = wallet.signingKey.compressedPublicKey
 
 		const ownPublicEncryptionKey = hexToBytes(hash(ownPublicKey))
-		const ownPrivateEncryptionKey = hexToBytes(hash(wallet.privateKey))
+		const ownPrivateEncryptionKey = hexToBytes(hash(ownPrivateKey))
 
 		const ws = await this.makeWakustore()
 		const wakuObjectAdapter = makeWakuObjectAdapter(this, wallet)
@@ -263,27 +281,38 @@ export default class WakuAdapter implements Adapter {
 		chats.update((state) => ({ ...state, chats: new Map(storageChatEntries), loading: false }))
 
 		// subscribe to invites
-		const inviteKey = ownPublicEncryptionKey
-		await this.safeWaku.subscribe(inviteKey, undefined, async (message) => {
-			if (message.type !== 'invite') {
-				return
-			}
-
-			const chatEncryptionKey = getSharedSecret(ownPrivateKey, message.senderPublicKey)
-
-			const chatsMap = get(chats).chats
-			if (!chatsMap.has(chatEncryptionKey)) {
-				let user = await this.storageProfileToUser(message.senderPublicKey)
-				if (!user) {
-					user = {
-						publicKey: message.senderPublicKey,
-					}
+		const decoder = createSymmetricDecoder({
+			contentTopic: 'invites',
+			symKey: ownPublicEncryptionKey,
+		})
+		await this.safeWaku.subscribeEncrypted(
+			ownPublicKey,
+			decoder,
+			async (message, decodedMessage) => {
+				if (!this.checkMessageSignature(message, decodedMessage)) {
+					return
 				}
 
-				createPrivateChat(chatEncryptionKey, user, ownPublicKey)
-			}
-			await this.subscribeToPrivateChat(ownPublicKey, chatEncryptionKey, wakuObjectAdapter)
-		})
+				if (message.type !== 'invite') {
+					return
+				}
+
+				const chatEncryptionKey = getSharedSecret(ownPrivateKey, message.senderPublicKey)
+
+				const chatsMap = get(chats).chats
+				if (!chatsMap.has(chatEncryptionKey)) {
+					let user = await this.storageProfileToUser(message.senderPublicKey)
+					if (!user) {
+						user = {
+							publicKey: message.senderPublicKey,
+						}
+					}
+
+					createPrivateChat(chatEncryptionKey, user, ownPublicKey)
+				}
+				await this.subscribeToPrivateChat(ownPublicKey, chatEncryptionKey, wakuObjectAdapter)
+			},
+		)
 
 		// subscribe to chats
 		const allChats = Array.from(get(chats).chats)
@@ -334,13 +363,15 @@ export default class WakuAdapter implements Adapter {
 				ws,
 				'objects',
 				ownPrivateEncryptionKey,
+				hexToBytes(ownPrivateKey),
 				Array.from(objects.objects),
 			)
 		})
 		this.subscriptions.push(subscribeObjectStore)
 
 		// installed objects
-		const storageInstalledObjects = await ws.getDoc<StorageInstalledObjectEntry[]>(
+		const storageInstalledObjects = await getDoc<StorageInstalledObjectEntry[]>(
+			ws,
 			'installed',
 			ownPrivateEncryptionKey,
 		)
@@ -356,9 +387,11 @@ export default class WakuAdapter implements Adapter {
 				firstInstalledObjectStoreSave = false
 				return
 			}
-			await ws.setDoc<StorageInstalledObjectEntry[]>(
+			await setDoc<StorageInstalledObjectEntry[]>(
+				ws,
 				'installed',
 				ownPrivateEncryptionKey,
+				hexToBytes(ownPrivateKey),
 				Array.from(installed.objects),
 			)
 		})
@@ -378,10 +411,8 @@ export default class WakuAdapter implements Adapter {
 
 	async saveUserProfile(wallet: BaseWallet, name?: string, avatar?: string): Promise<void> {
 		const ownPublicKey = wallet.signingKey.compressedPublicKey
-		if (!ownPublicKey) {
-			throw 'wallet not found'
-		}
 		const ownPublicEncryptionKey = hexToBytes(hash(ownPublicKey))
+		const ownPrivateKey = wallet.privateKey
 
 		const defaultProfile: StorageProfile = { name: name ?? ownPublicKey }
 		const storageProfile = (await this.fetchStorageProfile(ownPublicKey)) || defaultProfile
@@ -391,7 +422,13 @@ export default class WakuAdapter implements Adapter {
 
 		if (avatar || name) {
 			const ws = await this.makeWakustore()
-			setDoc<StorageProfile>(ws, 'profile', ownPublicEncryptionKey, storageProfile)
+			setDoc<StorageProfile>(
+				ws,
+				'profile',
+				ownPublicEncryptionKey,
+				hexToBytes(ownPrivateKey),
+				storageProfile,
+			)
 			profile.update((state) => ({ ...state, name, avatar }))
 		}
 	}
@@ -418,7 +455,13 @@ export default class WakuAdapter implements Adapter {
 		}
 
 		const inviteEncryptionKey = hexToBytes(hash(peerPublicKey))
-		await this.safeWaku.sendMessage(inviteMessage, inviteEncryptionKey)
+		const ws = await this.makeWakustore()
+		const encoder = createSymmetricEncoder({
+			contentTopic: 'invites',
+			symKey: inviteEncryptionKey,
+			sigPrivKey: ownPrivateKey,
+		})
+		await ws.setDoc(encoder, inviteMessage)
 
 		const chatEncryptionKey = getSharedSecret(ownPrivateKey, peerPublicKey)
 		const joined = true
@@ -459,8 +502,13 @@ export default class WakuAdapter implements Adapter {
 
 		const ws = await this.makeWakustore()
 		const encryptionKey = hexToBytes(chatId)
-		console.debug({ encryptionKey, storageChat, chatId })
-		await ws.setDoc<StorageChat>('group-chats', encryptionKey, storageChat)
+		const privateKey = hexToBytes(wallet.privateKey)
+		const encoder = createSymmetricEncoder({
+			contentTopic: 'group-chats',
+			symKey: encryptionKey,
+			sigPrivKey: privateKey,
+		})
+		await ws.setDoc<StorageChat>(encoder, storageChat)
 
 		const ownPublicKey = wallet.signingKey.compressedPublicKey
 		await this.subscribeToGroupChat(ownPublicKey, chatId, wakuObjectAdapter)
@@ -471,8 +519,9 @@ export default class WakuAdapter implements Adapter {
 	async addMemberToGroupChat(chatId: string, users: string[]): Promise<void> {
 		const ws = await this.makeWakustore()
 		const encryptionKey = hexToBytes(chatId)
+		const decoder = createSymmetricDecoder({ contentTopic: 'group-chats', symKey: encryptionKey })
 
-		const groupChat = await ws.getDoc<StorageChat>('group-chats', encryptionKey)
+		const groupChat = await ws.getDoc<StorageChat>(decoder)
 		if (!groupChat) {
 			return
 		}
@@ -482,14 +531,26 @@ export default class WakuAdapter implements Adapter {
 
 		groupChat.users = uniqueUsers
 
-		await ws.setDoc<StorageChat>('group-chats', encryptionKey, groupChat)
+		const wallet = get(walletStore).wallet
+		if (!wallet) {
+			return
+		}
+
+		const privateKey = hexToBytes(wallet.privateKey)
+		const encoder = createSymmetricEncoder({
+			contentTopic: 'group-chats',
+			symKey: encryptionKey,
+			sigPrivKey: privateKey,
+		})
+		await ws.setDoc<StorageChat>(encoder, groupChat)
 	}
 
 	async removeFromGroupChat(chatId: string, address: string): Promise<void> {
 		const ws = await this.makeWakustore()
 		const encryptionKey = hexToBytes(chatId)
 
-		const groupChat = await ws.getDoc<StorageChat>('group-chats', encryptionKey)
+		const decoder = createSymmetricDecoder({ contentTopic: 'group-chats', symKey: encryptionKey })
+		const groupChat = await ws.getDoc<StorageChat>(decoder)
 		if (!groupChat) {
 			return
 		}
@@ -498,14 +559,26 @@ export default class WakuAdapter implements Adapter {
 			users: groupChat.users.filter((user) => user !== address),
 		}
 
-		await ws.setDoc<StorageChat>('group-chats', encryptionKey, updatedGroupChat)
+		const wallet = get(walletStore).wallet
+		if (!wallet) {
+			return
+		}
+
+		const privateKey = hexToBytes(wallet.privateKey)
+		const encoder = createSymmetricEncoder({
+			contentTopic: 'group-chats',
+			symKey: encryptionKey,
+			sigPrivKey: privateKey,
+		})
+		await ws.setDoc<StorageChat>(encoder, updatedGroupChat)
 	}
 
 	async saveGroupChatProfile(chatId: string, name?: string, avatar?: string): Promise<void> {
 		const ws = await this.makeWakustore()
 		const encryptionKey = hexToBytes(chatId)
 
-		const groupChat = await ws.getDoc<StorageChat>('group-chats', encryptionKey)
+		const decoder = createSymmetricDecoder({ contentTopic: 'group-chats', symKey: encryptionKey })
+		const groupChat = await ws.getDoc<StorageChat>(decoder)
 		if (!groupChat) {
 			return
 		}
@@ -513,11 +586,23 @@ export default class WakuAdapter implements Adapter {
 		groupChat.name = name ?? groupChat.name
 		groupChat.avatar = avatar ?? groupChat.avatar
 
-		await ws.setDoc<StorageChat>('group-chats', encryptionKey, groupChat)
+		const wallet = get(walletStore).wallet
+		if (!wallet) {
+			return
+		}
+
+		const privateKey = hexToBytes(wallet.privateKey)
+		const encoder = createSymmetricEncoder({
+			contentTopic: 'group-chats',
+			symKey: encryptionKey,
+			sigPrivKey: privateKey,
+		})
+		await ws.setDoc<StorageChat>(encoder, groupChat)
 	}
 
 	async sendChatMessage(wallet: BaseWallet, chatId: string, text: string): Promise<void> {
 		const senderPublicKey = wallet.signingKey.compressedPublicKey
+		const senderPrivateKey = wallet.privateKey
 		const message: Message = {
 			type: 'user',
 			timestamp: Date.now(),
@@ -527,7 +612,7 @@ export default class WakuAdapter implements Adapter {
 
 		const encryptionKey = hexToBytes(chatId)
 
-		await this.safeWaku.sendMessage(message, encryptionKey)
+		await this.safeWaku.sendMessage(message, encryptionKey, hexToBytes(senderPrivateKey))
 	}
 
 	async sendData(
@@ -538,6 +623,7 @@ export default class WakuAdapter implements Adapter {
 		data: JSONSerializable,
 	): Promise<void> {
 		const senderPublicKey = wallet.signingKey.compressedPublicKey
+		const senderPrivateKey = wallet.privateKey
 		const message: Message = {
 			type: 'data',
 			timestamp: Date.now(),
@@ -549,7 +635,7 @@ export default class WakuAdapter implements Adapter {
 
 		const encryptionKey = hexToBytes(chatId)
 
-		await this.safeWaku.sendMessage(message, encryptionKey)
+		await this.safeWaku.sendMessage(message, encryptionKey, hexToBytes(senderPrivateKey))
 	}
 
 	async sendGroupChatInvite(
@@ -566,10 +652,11 @@ export default class WakuAdapter implements Adapter {
 		}
 
 		const ownPrivateKey = wallet.privateKey
+		const sigPrivKey = hexToBytes(ownPrivateKey)
 		for (const userPublicKey of userPublicKeys) {
 			const chatEncryptionKey = hexToBytes(getSharedSecret(ownPrivateKey, userPublicKey))
 
-			await this.safeWaku.sendMessage(message, chatEncryptionKey)
+			await this.safeWaku.sendMessage(message, chatEncryptionKey, sigPrivKey)
 		}
 	}
 
@@ -633,7 +720,32 @@ export default class WakuAdapter implements Adapter {
 	private async fetchStorageProfile(profilePublicKey: string): Promise<StorageProfile | undefined> {
 		const ws = await this.makeWakustore()
 		const profileEncryptionKey = hexToBytes(hash(profilePublicKey))
-		const storageProfile = await ws.getDoc<StorageProfile>('profile', profileEncryptionKey)
+		const decoder = createSymmetricDecoder({
+			contentTopic: 'profile',
+			symKey: profileEncryptionKey,
+		})
+		const decodedMessage = await ws.getDecodedMessage(decoder)
+
+		if (!decodedMessage) {
+			console.error('missing document')
+			return
+		}
+
+		if (!decodedMessage.signaturePublicKey) {
+			console.error('missing signature', { decodedMessage })
+			return
+		}
+
+		if (compressPublicKey(decodedMessage.signaturePublicKey) !== fixHex(profilePublicKey)) {
+			console.error('invalid signature', {
+				decodedMessage,
+				profilePublicKey,
+				signaturePublicKey: bytesToHex(decodedMessage.signaturePublicKey),
+			})
+			return
+		}
+
+		const storageProfile = await ws.decodeDoc<StorageProfile>(decodedMessage)
 
 		return storageProfile
 	}
@@ -691,8 +803,11 @@ export default class WakuAdapter implements Adapter {
 		const ws = await this.makeWakustore()
 
 		const groupEncryptionKey = hexToBytes(groupChatId)
-		const groupChat = await ws.getDoc<StorageChat>('group-chats', groupEncryptionKey)
-		console.debug({ groupChat, groupChatId })
+		const decoder = createSymmetricDecoder({
+			contentTopic: 'group-chats',
+			symKey: groupEncryptionKey,
+		})
+		const groupChat = await ws.getDoc<StorageChat>(decoder)
 		if (groupChat) {
 			const updatedGroupChat = await this.storageChatToChat(groupChatId, groupChat)
 			chats.updateChat(groupChatId, (chat) => ({
@@ -705,8 +820,28 @@ export default class WakuAdapter implements Adapter {
 		}
 
 		const groupChatSubscription = await ws.onSnapshot<StorageChat>(
-			ws.docQuery('group-chats', groupEncryptionKey),
-			async (groupChat) => {
+			ws.docQuery(decoder),
+			async (groupChat, decodedMessage) => {
+				// check if signed
+				if (!decodedMessage.signaturePublicKey) {
+					return
+				}
+
+				// check if the chat exists locally
+				const chat = get(chats).chats.get(groupChatId)
+				if (!chat) {
+					return
+				}
+
+				// check if the signature matches a member of the group
+				if (
+					!chat.users
+						.map((user) => user.publicKey)
+						.includes(bytesToHex(decodedMessage.signaturePublicKey))
+				) {
+					return
+				}
+
 				if (groupChat.users.includes(ownPublicKey)) {
 					const updatedGroupChat = await this.storageChatToChat(groupChatId, groupChat)
 					chats.updateChat(groupChatId, (chat) => ({
@@ -733,9 +868,21 @@ export default class WakuAdapter implements Adapter {
 		timeFilter?: TimeFilter,
 	) {
 		const encryptionKey = hexToBytes(chatId)
+		const decoder = createSymmetricDecoder({
+			contentTopic: 'private-message',
+			symKey: encryptionKey,
+		})
 
-		this.safeWaku.subscribe(encryptionKey, timeFilter, (message) =>
-			this.handleMessage(ownPublicKey, message, encryptionKey, wakuObjectAdapter),
+		this.safeWaku.subscribeEncrypted(
+			chatId,
+			decoder,
+			async (message, decodedMessage) => {
+				if (!this.checkMessageSignature(message, decodedMessage)) {
+					return
+				}
+				await this.handleMessage(ownPublicKey, message, encryptionKey, wakuObjectAdapter)
+			},
+			timeFilter,
 		)
 	}
 
@@ -792,6 +939,19 @@ export default class WakuAdapter implements Adapter {
 		await addMessageToChat(ownPublicKey, adapter, chatId, message, send)
 	}
 
+	private checkMessageSignature(message: Message, decodedMessage: DecodedMessage): boolean {
+		if (!decodedMessage.signaturePublicKey) {
+			return false
+		}
+
+		if (compressPublicKey(decodedMessage.signaturePublicKey) !== fixHex(message.senderPublicKey)) {
+			console.error('invalid signature', { decodedMessage, message })
+			return false
+		}
+
+		return true
+	}
+
 	private async updateContactProfiles() {
 		// look for changes in users profile name and picture
 		const allContacts = Array.from(get(chats).chats).flatMap(([, chat]) => chat.users)
@@ -834,10 +994,17 @@ export default class WakuAdapter implements Adapter {
 		const ws = await this.makeWakustore()
 		const chatData: ChatData = get(chats)
 
+		const wallet = get(walletStore).wallet
+		if (!wallet) {
+			return
+		}
+
+		const sigPrivKey = hexToBytes(wallet.privateKey)
 		const result = await setDoc<StorageChatEntry[]>(
 			ws,
 			'chats',
 			ownPrivateEncryptionKey,
+			sigPrivKey,
 			Array.from(chatData.chats),
 		)
 

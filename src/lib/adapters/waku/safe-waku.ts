@@ -1,14 +1,16 @@
-import { connectWaku, type ConnectWakuOptions, sendMessage } from '$lib/adapters/waku/waku'
+import { connectWaku, storeDocument, type ConnectWakuOptions } from '$lib/adapters/waku/waku'
 import type { Message } from '$lib/stores/chat'
-import type { LightNode, TimeFilter, Unsubscribe } from '@waku/interfaces'
+import type { IDecoder, IEncoder, LightNode, TimeFilter, Unsubscribe } from '@waku/interfaces'
 import { PageDirection } from '@waku/interfaces'
 import { makeWakustore } from './wakustore'
-import { bytesToHex, hexToBytes } from '@noble/hashes/utils'
+import { createSymmetricEncoder } from './codec'
+import type { DecodedMessage } from '@waku/message-encryption'
 
-type Callback = (message: Message, chatId: string) => Promise<void>
+type Callback = (message: Message, decodedMessage: DecodedMessage) => Promise<void>
 
 interface QueuedMessage {
 	chatMessage: Message
+	decodedMessage: DecodedMessage
 	chatId: string
 	callback: Callback
 }
@@ -16,6 +18,8 @@ interface QueuedMessage {
 interface Subscription {
 	unsubscribe: Unsubscribe
 	callback: Callback
+	decoder: IDecoder<DecodedMessage>
+	id: string
 }
 
 async function sleep(msec: number) {
@@ -49,17 +53,17 @@ export class SafeWaku {
 		return this.lightNode
 	}
 
-	async subscribe(
-		encryptionKey: Uint8Array,
-		timeFilter: TimeFilter | undefined,
-		callback: (message: Message, chatId: string) => Promise<void>,
+	async subscribeEncrypted(
+		id: string,
+		decoder: IDecoder<DecodedMessage>,
+		callback: Callback,
+		timeFilter?: TimeFilter,
 	) {
 		if (!this.lightNode) {
 			this.lightNode = await this.safeConnectWaku()
 		}
 
-		const chatId = bytesToHex(encryptionKey)
-		const lastMessageTime = this.lastMessages.get(chatId)?.timestamp || 0
+		const lastMessageTime = this.lastMessages.get(id)?.timestamp || 0
 		const startTime = new Date(lastMessageTime + 1)
 		const endTime = new Date()
 		const calculatedTimeFilter = lastMessageTime
@@ -68,24 +72,28 @@ export class SafeWaku {
 		timeFilter = timeFilter || calculatedTimeFilter
 
 		const talkEmoji = '🗩'
-		this.log(`${talkEmoji}  subscribe to ${chatId}`)
+		this.log(`${talkEmoji}  subscribe to ${id}`)
 
 		const ws = makeWakustore(this.lightNode)
 		const unsubscribe = await ws.onSnapshot<Message>(
-			ws.collectionQuery('private-message', encryptionKey, {
+			ws.collectionQuery(decoder, {
 				timeFilter,
 				pageDirection: PageDirection.FORWARD,
 				pageSize: 1000,
 			}),
-			(message) => this.queueMessage(callback, message, chatId),
+			(message, decodedMessage) => {
+				this.queueMessage(id, callback, message, decodedMessage)
+			},
 		)
 
 		const subscription = {
 			unsubscribe,
 			callback,
+			id,
+			decoder,
 		}
 
-		this.subscriptions.set(chatId, subscription)
+		this.subscriptions.set(id, subscription)
 	}
 
 	async unsubscribeAll() {
@@ -96,7 +104,16 @@ export class SafeWaku {
 		this.subscriptions = new Map()
 	}
 
-	async sendMessage(message: Message, encryptionKey: Uint8Array) {
+	async sendMessage(message: Message, encryptionKey: Uint8Array, sigPrivKey: Uint8Array) {
+		const encoder = createSymmetricEncoder({
+			contentTopic: 'private-message',
+			symKey: encryptionKey,
+			sigPrivKey,
+		})
+		return await this.storeEncrypted(encoder, message)
+	}
+
+	async storeEncrypted(encoder: IEncoder, message: { timestamp: number }) {
 		if (!this.lightNode) {
 			this.lightNode = await this.safeConnectWaku()
 		}
@@ -113,7 +130,7 @@ export class SafeWaku {
 
 		do {
 			try {
-				error = await sendMessage(this.lightNode, encryptionKey, message)
+				error = await storeDocument(this.lightNode, encoder, message)
 			} catch (e) {
 				error = e
 			} finally {
@@ -226,14 +243,17 @@ export class SafeWaku {
 			}
 			if (!subscribeError) {
 				try {
-					const encryptionKey = hexToBytes(chatId)
-					await this.subscribe(encryptionKey, undefined, subscription.callback)
+					await this.subscribeEncrypted(
+						subscription.id,
+						subscription.decoder,
+						subscription.callback,
+					)
 				} catch (e) {
 					subscribeError = e
-					this.subscribeEmpty(chatId, subscription.callback)
+					this.subscribeEmpty(chatId, subscription.callback, subscription.decoder)
 				}
 			} else {
-				this.subscribeEmpty(chatId, subscription.callback)
+				this.subscribeEmpty(chatId, subscription.callback, subscription.decoder)
 			}
 		}
 
@@ -242,21 +262,29 @@ export class SafeWaku {
 		}
 	}
 
-	private subscribeEmpty(chatId: string, callback: Callback) {
+	private subscribeEmpty(chatId: string, callback: Callback, decoder: IDecoder<DecodedMessage>) {
 		const unsubscribe = () => {
 			/* empty */
 		}
 		const subscription = {
+			id: chatId,
 			callback,
 			unsubscribe,
+			decoder,
 		}
 		this.subscriptions.set(chatId, subscription)
 	}
 
-	private async queueMessage(callback: Callback, chatMessage: Message, chatId: string) {
+	private async queueMessage(
+		chatId: string,
+		callback: Callback,
+		chatMessage: Message,
+		decodedMessage: DecodedMessage,
+	) {
 		this.queuedMessages.push({
 			callback,
 			chatMessage,
+			decodedMessage,
 			chatId,
 		})
 
@@ -285,7 +313,7 @@ export class SafeWaku {
 				this.lastMessages.set(chatId, message)
 
 				try {
-					await callback(queuedMessage.chatMessage, queuedMessage.chatId)
+					await callback(queuedMessage.chatMessage, queuedMessage.decodedMessage)
 				} catch (e) {
 					this.log(`⁉️ Error in callback: ${e}`)
 				}
