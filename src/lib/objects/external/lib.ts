@@ -1,3 +1,5 @@
+import { IPFS_GATEWAY } from '$lib/adapters/ipfs'
+
 // Not sure how inefficient this is
 const scripts = import.meta.glob('/node_modules/**/object/index.js', {
 	as: 'url',
@@ -14,14 +16,30 @@ export type Csp = {
 	'base-uri'?: string
 }
 
+export type WakuScriptType = 'chat' | 'standalone'
+
+export type WakuFile = {
+	path: string
+	hash: `sha256-${string}`
+}
+
+export type WakuFiles = {
+	logo: WakuFile
+	chat: WakuFile
+	standalone?: WakuFile
+}
+
 export type WakuObject = {
 	name: string
+	description: string
 	standalone?: boolean
 	csp: Csp
+	files: WakuFiles
 }
 
 export type LoadedObject = {
 	script: string
+	scriptIntegrity: `sha256-${string}`
 	csp: string
 	name: string
 	className: string
@@ -41,25 +59,76 @@ const formatCsp = (csp: Csp, add?: Csp): string => {
 		.join('; ')
 }
 
-export const getNPMObject = async (
-	module: string,
-	className: 'chat' | 'standalone',
+export const getNPMObject = async (module: string, type: WakuScriptType) => {
+	const object = (await objects[`/node_modules/${module}/object/metadata.json`]()) as WakuObject
+	const file = object.files[type]
+
+	if (!file) {
+		throw new Error(`object does not include ${type} script`)
+	}
+
+	const script = await scripts[`/node_modules/${module}/object/${file.path}`]()
+	return { object, script, integrity: file.hash }
+}
+
+export const getURLObject = async (url: string, type: WakuScriptType) => {
+	const object = (await (await fetch(`${url}/metadata.json`)).json()) as WakuObject
+	const file = object.files[type]
+
+	if (!file) {
+		throw new Error(`object does not include ${type} script`)
+	}
+
+	// Prepend the URL to all files
+	for (const [type, { path }] of Object.entries(object.files)) {
+		// @ts-expect-error TODO: Fix this
+		object.files[type as keyof WakuFiles].path = `${url}/${path}`
+	}
+
+	const { path: script, hash: integrity } = file
+	return { object, script, integrity }
+}
+
+export const getIPFSObject = async (cid: string, type: WakuScriptType) => {
+	const { object, script, integrity } = await getURLObject(`${IPFS_GATEWAY}/${cid}`, type)
+
+	// TODO: Validate metadata.json hash
+
+	return { object, script, integrity }
+}
+
+// TODO: Figure out the ID part
+export const getObjectSpec = async (objectId: string, type: WakuScriptType) => {
+	if (objectId.startsWith('url:')) {
+		return getURLObject(objectId.substring(4), type)
+	}
+
+	if (objectId.startsWith('ipfs:')) {
+		return getIPFSObject(objectId.substring(5), type)
+	}
+
+	return getNPMObject(objectId, type)
+}
+
+export const getObject = async (
+	objectId: string,
+	type: WakuScriptType,
 ): Promise<LoadedObject | null> => {
 	try {
-		const object = (await objects[`/node_modules/${module}/object/metadata.json`]()) as WakuObject
-		const script = await scripts[`/node_modules/${module}/object/index.js`]()
+		const { object, script, integrity } = await getObjectSpec(objectId, type)
 
 		const added = { ...DEFAULT_CSP } as Csp
 		if (!added['script-src']) {
 			added['script-src'] = ''
 		}
-		added['script-src'] += ` ${script}`
+		added['script-src'] += ` '${integrity}'`
 
 		return {
 			script,
+			scriptIntegrity: integrity,
 			csp: formatCsp(object.csp, added),
 			name: object.name,
-			className,
+			className: type,
 		}
 	} catch (err) {
 		// TODO: shouldn't this throw?

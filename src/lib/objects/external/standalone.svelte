@@ -8,14 +8,14 @@
 
 	import type { WakuObjectArgs } from '..'
 	import IframeComponent from './iframe.svelte'
-	import { getNPMObject, type LoadedObject } from './lib'
+	import { getObject, type LoadedObject } from './lib'
 
 	// Exports
 	export let args: WakuObjectArgs
 
 	let object: LoadedObject | null
 
-	$: args && getNPMObject(args.objectId, 'standalone').then((result) => (object = result))
+	$: args && getObject(args.objectId, 'standalone').then((result) => (object = result))
 
 	// Utility function which makes it easier to handle history for closing the object
 	const exitObject = (depth: number) => () =>
