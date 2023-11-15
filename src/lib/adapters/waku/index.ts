@@ -54,7 +54,12 @@ import { errorStore } from '$lib/stores/error'
 import { compressPublicKey, fixHex, getSharedSecret, hash } from './crypto'
 import { bytesToHex, hexToBytes } from '@waku/utils/bytes'
 import { encrypt, decrypt } from './crypto'
-import { createSymmetricDecoder, createSymmetricEncoder } from './codec'
+import {
+	createEciesDecoder,
+	createEciesEncoder,
+	createSymmetricDecoder,
+	createSymmetricEncoder,
+} from './codec'
 import type { DecodedMessage } from '@waku/message-encryption'
 import { utils } from '@noble/secp256k1'
 
@@ -308,38 +313,7 @@ export default class WakuAdapter implements Adapter {
 		chats.update((state) => ({ ...state, chats: new Map(storageChatEntries), loading: false }))
 
 		// subscribe to invites
-		const decoder = createSymmetricDecoder({
-			contentTopic: 'invites',
-			symKey: ownPublicEncryptionKey,
-		})
-		await this.safeWaku.subscribeEncrypted(
-			ownPublicKey,
-			decoder,
-			async (message, decodedMessage) => {
-				if (!this.checkMessageSignature(message, decodedMessage)) {
-					return
-				}
-
-				if (message.type !== 'invite') {
-					return
-				}
-
-				const chatEncryptionKey = getSharedSecret(ownPrivateKey, message.senderPublicKey)
-
-				const chatsMap = get(chats).chats
-				if (!chatsMap.has(chatEncryptionKey)) {
-					let user = await this.storageProfileToUser(message.senderPublicKey)
-					if (!user) {
-						user = {
-							publicKey: message.senderPublicKey,
-						}
-					}
-
-					createPrivateChat(chatEncryptionKey, user, ownPublicKey)
-				}
-				await this.subscribeToPrivateChat(ownPublicKey, chatEncryptionKey, wakuObjectAdapter)
-			},
-		)
+		await this.subscribeToInvites(ownPrivateKey, ownPublicKey, wakuObjectAdapter)
 
 		// subscribe to chats
 		const allChats = Array.from(get(chats).chats)
@@ -490,18 +464,15 @@ export default class WakuAdapter implements Adapter {
 		const ownPublicKey = wallet.signingKey.compressedPublicKey
 
 		// send invite
-		const inviteMessage: InviteMessage = {
+		const inviteMessage: WithoutMeta<InviteMessage> = {
 			type: 'invite',
-			timestamp: Date.now(),
-			senderPublicKey: wallet.signingKey.compressedPublicKey,
 			chatId: ownPublicKey,
 		}
 
-		const inviteEncryptionKey = hexToBytes(hash(peerPublicKey))
 		const ws = await this.makeWakustore()
-		const encoder = createSymmetricEncoder({
+		const encoder = createEciesEncoder({
 			contentTopic: 'invites',
-			symKey: inviteEncryptionKey,
+			publicKey: peerPublicKey,
 			sigPrivKey: ownPrivateKey,
 		})
 		await ws.setDoc(encoder, inviteMessage)
@@ -1024,12 +995,50 @@ export default class WakuAdapter implements Adapter {
 			chatId,
 			decoder,
 			async (message) => {
-				console.debug({ message, chatId, ownPublicKey })
 				if (message.type === 'babble') {
 					await addMessageToChat(ownPublicKey, wakuObjectAdapter, chatId, message)
 				}
 			},
 			timeFilter,
+		)
+	}
+
+	private async subscribeToInvites(
+		ownPrivateKey: string,
+		ownPublicKey: string,
+		wakuObjectAdapter: WakuObjectAdapter,
+	) {
+		const decoder = createEciesDecoder({
+			contentTopic: 'invites',
+			privateKey: ownPrivateKey,
+		})
+		await this.safeWaku.subscribeEncrypted(
+			ownPublicKey,
+			decoder,
+			async (message, decodedMessage) => {
+				if (!this.checkMessageSignature(message, decodedMessage)) {
+					return
+				}
+
+				if (message.type !== 'invite') {
+					return
+				}
+
+				const chatEncryptionKey = getSharedSecret(ownPrivateKey, message.senderPublicKey)
+
+				const chatsMap = get(chats).chats
+				if (!chatsMap.has(chatEncryptionKey)) {
+					let user = await this.storageProfileToUser(message.senderPublicKey)
+					if (!user) {
+						user = {
+							publicKey: message.senderPublicKey,
+						}
+					}
+
+					createPrivateChat(chatEncryptionKey, user, ownPublicKey)
+				}
+				await this.subscribeToPrivateChat(ownPublicKey, chatEncryptionKey, wakuObjectAdapter)
+			},
 		)
 	}
 
