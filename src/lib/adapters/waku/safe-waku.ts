@@ -31,7 +31,7 @@ async function sleep(msec: number) {
 export class SafeWaku {
 	public lightNode: LightNode | undefined = undefined
 	private subscriptions = new Map<string, Subscription>()
-	private lastMessages = new Map<string, Message>()
+	private lastMessages = new Map<string, ChatMessage>()
 	private isReSubscribing = false
 	public readonly errors = {
 		numDisconnect: 0,
@@ -290,17 +290,14 @@ export class SafeWaku {
 		this.subscriptions.set(chatId, subscription)
 	}
 
-	private areMessagesEqual(a: Message, b: Message): boolean {
+	private areMessagesEqual(a: ChatMessage, b: ChatMessage): boolean {
 		if (a.timestamp !== b.timestamp) {
 			return false
 		}
-		if (a.type !== b.type) {
+		if (a.senderPublicKey !== b.senderPublicKey) {
 			return false
 		}
-		if (a.type === 'babble' && b.type === 'babble' && a.id !== b.id) {
-			return false
-		}
-		if (a.type !== 'babble' && b.type !== 'babble' && a.senderPublicKey !== b.senderPublicKey) {
+		if (a.id !== b.id) {
 			return false
 		}
 
