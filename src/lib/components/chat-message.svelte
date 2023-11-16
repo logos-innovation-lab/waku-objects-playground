@@ -30,6 +30,7 @@
 	}
 </script>
 
+<!-- TODO: remove onClick and the ignores once the real design is implemented for babbles -->
 <!-- svelte-ignore a11y-no-static-element-interactions -->
 <!-- svelte-ignore a11y-click-events-have-key-events -->
 <div
