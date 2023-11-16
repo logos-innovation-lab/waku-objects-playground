@@ -1,5 +1,5 @@
 import { connectWaku, storeDocument, type ConnectWakuOptions } from '$lib/adapters/waku/waku'
-import type { ChatMessage, Message } from '$lib/stores/chat'
+import type { ChatMessage, Message, WithoutMeta } from '$lib/stores/chat'
 import type { IDecoder, IEncoder, LightNode, TimeFilter, Unsubscribe } from '@waku/interfaces'
 import { PageDirection } from '@waku/interfaces'
 import { makeWakustore } from './wakustore'
@@ -106,7 +106,11 @@ export class SafeWaku {
 		this.subscriptions = new Map()
 	}
 
-	async sendMessage(message: unknown, encryptionKey: Uint8Array, sigPrivKey: Uint8Array) {
+	async sendMessage(
+		message: WithoutMeta<Message>,
+		encryptionKey: Uint8Array,
+		sigPrivKey: Uint8Array,
+	) {
 		const encoder = createSymmetricEncoder({
 			contentTopic: 'private-message',
 			symKey: encryptionKey,
