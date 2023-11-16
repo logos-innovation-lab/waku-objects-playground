@@ -2,6 +2,12 @@ import type { JSONSerializable } from '$lib/objects'
 import type { User } from '$lib/types'
 import { writable, type Writable } from 'svelte/store'
 
+export interface MessageMetadata {
+	timestamp: number
+	senderPublicKey: string
+	id: string
+}
+
 export interface UserMessage {
 	type: 'user'
 	timestamp: number
@@ -25,14 +31,27 @@ export interface InviteMessage {
 	chatId: string
 }
 
-export type Message = UserMessage | DataMessage | InviteMessage
+export interface BabbleMessage {
+	type: 'babble'
+	timestamp: number
+	senderPublicKey: string
+	text: string
+	id: string
+	parentId?: string
+}
 
-export type ChatType = 'private' | 'group'
+export type Message = UserMessage | DataMessage | InviteMessage | BabbleMessage
+
+export type WithoutMeta<T> = Omit<T, keyof MessageMetadata>
+export type WithMeta<T> = T & MessageMetadata
+export type ChatMessage = WithMeta<Message>
+
+export type ChatType = 'private' | 'group' | 'babbles'
 
 export interface Chat {
 	chatId: string
 	type: ChatType
-	messages: Message[]
+	messages: ChatMessage[]
 	unread: number
 	users: User[]
 	name?: string
@@ -55,6 +74,10 @@ interface ChatStore extends Writable<ChatData> {
 
 export function isGroupChat(chat: Chat) {
 	return chat.type === 'group'
+}
+
+export function isBabbles(chat: Chat) {
+	return chat.type === 'babbles'
 }
 
 export function getLastMessageTime(chat?: Chat) {

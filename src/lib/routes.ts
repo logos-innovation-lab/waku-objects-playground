@@ -16,4 +16,8 @@ export default {
 	GROUP_NEW: `/group/new`,
 	GROUP_CHAT: (id: string) => `/group/chat/${id}`,
 	GROUP_EDIT: (id: string) => `/group/chat/${id}/edit`,
+	BABBLES_NEW: `/babbles/new`,
+	BABBLES_CHAT: (id: string, threadId?: string) =>
+		`/babbles/chat/${id}${threadId ? `/${threadId}` : ''}`,
+	BABBLES_EDIT: (id: string) => `/babbles/chat/${id}/edit`,
 }

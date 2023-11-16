@@ -15,7 +15,7 @@
 
 	// Stores
 	import { profile } from '$lib/stores/profile'
-	import { chats, isGroupChat, type Chat, type Message } from '$lib/stores/chat'
+	import { chats, isGroupChat, type Chat, type Message, isBabbles } from '$lib/stores/chat'
 
 	import ROUTES from '$lib/routes'
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
@@ -24,11 +24,11 @@
 	import { formatTimestamp } from '$lib/utils/format'
 	import { userDisplayName } from '$lib/utils/user'
 	import { publicKeyToAddress } from '$lib/adapters/waku/crypto'
+	import Babbles from '$lib/components/icons/babbles.svelte'
 
 	$: orderedChats = Array.from($chats.chats)
 		.map(([, chat]) => chat)
 		.sort(compareChats)
-		.filter((chat) => chat.chatId) // HACK to remove early version broken group chats
 
 	function compareChats(a: Chat, b: Chat) {
 		// put not joined chats at the top
@@ -65,6 +65,17 @@
 			s = s.replaceAll(`@${userAddress}`, `@${user.name || userAddress}`)
 		}
 		return s
+	}
+
+	function gotoChat(chat: Chat) {
+		switch (chat.type) {
+			case 'private':
+				return goto(ROUTES.CHAT(chat.chatId))
+			case 'group':
+				return goto(ROUTES.GROUP_CHAT(chat.chatId))
+			case 'babbles':
+				return goto(ROUTES.BABBLES_CHAT(chat.chatId))
+		}
 	}
 
 	$: loading = $profile.loading || $chats.loading
@@ -150,20 +161,14 @@
 						<li>
 							<div
 								class="chat-button"
-								on:click={() =>
-									isGroupChat(chat)
-										? goto(ROUTES.GROUP_CHAT(chat.chatId))
-										: goto(ROUTES.CHAT(chat.chatId))}
-								on:keypress={() =>
-									isGroupChat(chat)
-										? goto(ROUTES.GROUP_CHAT(chat.chatId))
-										: goto(ROUTES.CHAT(chat.chatId))}
+								on:click={() => gotoChat(chat)}
+								on:keypress={() => gotoChat(chat)}
 								role="button"
 								tabindex="0"
 							>
 								<Container grow>
 									<div class="chat">
-										{#if isGroupChat(chat)}
+										{#if isGroupChat(chat) || isBabbles(chat)}
 											<Avatar group size={70} picture={chat?.avatar} seed={chat.chatId} />
 										{:else}
 											<Avatar size={70} picture={otherUser?.avatar} seed={otherUser?.publicKey} />
@@ -176,6 +181,9 @@
 															{chat?.name}
 														</span>
 														<Events />
+													{:else if isBabbles(chat)}
+														<span class="truncate"> Babbles </span>
+														<Babbles />
 													{:else}
 														<span class="truncate">
 															{userDisplayName(otherUser)}

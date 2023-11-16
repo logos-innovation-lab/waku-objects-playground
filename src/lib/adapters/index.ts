@@ -22,7 +22,7 @@ export interface Adapter {
 		name: string,
 		avatar?: string,
 	): Promise<string>
-
+	startBabbles(wallet: BaseWallet, chatId: string, name: string, avatar?: string): Promise<string>
 	addMemberToGroupChat(chatId: string, users: string[]): Promise<void>
 	removeFromGroupChat(chatId: string, address: string): Promise<void>
 	saveGroupChatProfile(chatId: string): Promise<void>

@@ -1,15 +1,17 @@
 import { connectWaku, storeDocument, type ConnectWakuOptions } from '$lib/adapters/waku/waku'
-import type { Message } from '$lib/stores/chat'
+import type { ChatMessage, Message, WithoutMeta } from '$lib/stores/chat'
 import type { IDecoder, IEncoder, LightNode, TimeFilter, Unsubscribe } from '@waku/interfaces'
 import { PageDirection } from '@waku/interfaces'
 import { makeWakustore } from './wakustore'
 import { createSymmetricEncoder } from './codec'
 import type { DecodedMessage } from '@waku/message-encryption'
+import { hashDecodedMessage } from './message-hash'
+import { compressPublicKey } from './crypto'
 
-type Callback = (message: Message, decodedMessage: DecodedMessage) => Promise<void>
+type Callback = (message: ChatMessage, decodedMessage: DecodedMessage) => Promise<void>
 
 interface QueuedMessage {
-	chatMessage: Message
+	chatMessage: ChatMessage
 	decodedMessage: DecodedMessage
 	chatId: string
 	callback: Callback
@@ -29,8 +31,7 @@ async function sleep(msec: number) {
 export class SafeWaku {
 	public lightNode: LightNode | undefined = undefined
 	private subscriptions = new Map<string, Subscription>()
-	private lastMessages = new Map<string, Message>()
-	private lastSentTimestamp = 0
+	private lastMessages = new Map<string, ChatMessage>()
 	private isReSubscribing = false
 	public readonly errors = {
 		numDisconnect: 0,
@@ -82,7 +83,8 @@ export class SafeWaku {
 				pageSize: 1000,
 			}),
 			(message, decodedMessage) => {
-				this.queueMessage(id, callback, message, decodedMessage)
+				const chatMessage = this.augmentMessageWithMetadata(message, decodedMessage)
+				this.queueMessage(id, callback, chatMessage, decodedMessage)
 			},
 		)
 
@@ -104,7 +106,11 @@ export class SafeWaku {
 		this.subscriptions = new Map()
 	}
 
-	async sendMessage(message: Message, encryptionKey: Uint8Array, sigPrivKey: Uint8Array) {
+	async sendMessage(
+		message: WithoutMeta<Message>,
+		encryptionKey: Uint8Array,
+		sigPrivKey: Uint8Array,
+	) {
 		const encoder = createSymmetricEncoder({
 			contentTopic: 'private-message',
 			symKey: encryptionKey,
@@ -113,7 +119,7 @@ export class SafeWaku {
 		return await this.storeEncrypted(encoder, message)
 	}
 
-	async storeEncrypted(encoder: IEncoder, message: { timestamp: number }) {
+	async storeEncrypted(encoder: IEncoder, message: unknown) {
 		if (!this.lightNode) {
 			this.lightNode = await this.safeConnectWaku()
 		}
@@ -122,11 +128,6 @@ export class SafeWaku {
 		let timeout = 1_000
 
 		const start = Date.now()
-
-		if (message.timestamp === this.lastSentTimestamp) {
-			message.timestamp++
-		}
-		this.lastSentTimestamp = message.timestamp
 
 		do {
 			try {
@@ -150,6 +151,20 @@ export class SafeWaku {
 
 		if (elapsed > 1000) {
 			this.log(`⏰ sending message took ${elapsed} milliseconds`)
+		}
+	}
+
+	private augmentMessageWithMetadata(
+		message: Message,
+		decodedMessage: DecodedMessage,
+	): ChatMessage {
+		return {
+			...message,
+			id: hashDecodedMessage(decodedMessage),
+			timestamp: Number(decodedMessage.timestamp),
+			senderPublicKey: decodedMessage.signaturePublicKey
+				? '0x' + compressPublicKey(decodedMessage.signaturePublicKey)
+				: '',
 		}
 	}
 
@@ -275,10 +290,24 @@ export class SafeWaku {
 		this.subscriptions.set(chatId, subscription)
 	}
 
+	private areMessagesEqual(a: ChatMessage, b: ChatMessage): boolean {
+		if (a.timestamp !== b.timestamp) {
+			return false
+		}
+		if (a.senderPublicKey !== b.senderPublicKey) {
+			return false
+		}
+		if (a.id !== b.id) {
+			return false
+		}
+
+		return true
+	}
+
 	private async queueMessage(
 		chatId: string,
 		callback: Callback,
-		chatMessage: Message,
+		chatMessage: ChatMessage,
 		decodedMessage: DecodedMessage,
 	) {
 		this.queuedMessages.push({
@@ -300,12 +329,7 @@ export class SafeWaku {
 				// deduplicate already seen messages
 				const message = queuedMessage.chatMessage
 				const lastMessage = this.lastMessages.get(chatId)
-				if (
-					lastMessage &&
-					lastMessage.timestamp === message.timestamp &&
-					lastMessage.type === message.type &&
-					lastMessage.senderPublicKey === message.senderPublicKey
-				) {
+				if (lastMessage && this.areMessagesEqual(lastMessage, message)) {
 					this.log('🙈 ignoring duplicate message', { message, lastMessage })
 					continue
 				}
