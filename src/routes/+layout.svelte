@@ -17,7 +17,7 @@
 	import { defaultBlockchainNetwork, getChainId } from '$lib/adapters/transaction'
 	import Container from '$lib/components/container.svelte'
 	import Loading from '$lib/components/loading.svelte'
-	import ErrorModal from '$lib/components/error-modal.svelte'
+	import ErrorModal from '$lib/components/modal.svelte'
 	import Button from '$lib/components/button.svelte'
 	import Renew from '$lib/components/icons/renew.svelte'
 

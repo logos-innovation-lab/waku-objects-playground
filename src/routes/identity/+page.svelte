@@ -31,6 +31,7 @@
 	import { errorStore } from '$lib/stores/error'
 	import { installedObjectStore } from '$lib/stores/installed-objects'
 	import { getObjectSpec } from '$lib/objects/external/lib'
+	import DataBlob from '$lib/components/icons/data-blob.svelte'
 
 	let avatar = $profile.avatar
 	let name = $profile.name
@@ -97,20 +98,6 @@
 		}, 1000)
 	}
 
-	async function addObject() {
-		const { object } = await getObjectSpec(objectPath, 'chat')
-		installedObjectStore.update((state) => {
-			state.objects.set(objectPath, {
-				objectId: objectPath,
-				name: object.name,
-				description: object.description,
-				logo: object.files.logo.path,
-			})
-			return { ...state }
-		})
-		objectPath = ''
-	}
-
 	onDestroy(() => {
 		if (timer) {
 			clearTimeout(timer)
@@ -162,10 +149,22 @@
 				</div>
 			</Container>
 		</ButtonBlock>
-		<ButtonBlock borderTop borderBottom on:click={() => goto(routes.IDENTITY_PREFERENCES)}>
+		<ButtonBlock borderTop on:click={() => goto(routes.IDENTITY_PREFERENCES)}>
 			<Container direction="row" justify="space-between" align="center" alignItems="center">
 				<div class="icon">
 					<SettingsAdjust size={20} /> Preferences
+				</div>
+				<div>
+					<Button variant="icon">
+						<ChevronRight />
+					</Button>
+				</div>
+			</Container>
+		</ButtonBlock>
+		<ButtonBlock borderTop borderBottom on:click={() => goto(routes.SETTINGS_OBJECTS)}>
+			<Container direction="row" justify="space-between" align="center" alignItems="center">
+				<div class="icon">
+					<DataBlob size={20} /> Waku Objects
 				</div>
 				<div>
 					<Button variant="icon">
@@ -195,11 +194,7 @@
 				Disconnect identity from device
 			</Button>
 		</Container>
-		<Container align="center" gap={12} padX={24} padY={24}>
-			<InputField bind:value={objectPath} label="Object path" />
-			<Button on:click={addObject}>Add object</Button>
-		</Container>
-		<Spacer height={12} />
+		<Spacer />
 	</AuthenticatedOnly>
 </Layout>
 

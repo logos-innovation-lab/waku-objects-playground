@@ -36,6 +36,7 @@ export interface Adapter {
 		data: JSONSerializable,
 	): Promise<void>
 	sendGroupChatInvite(wallet: BaseWallet, chatId: string, users: string[]): Promise<void>
+	sendInstall(chatId: string, objectId: string, command: 'invite' | 'accept'): Promise<void>
 
 	updateStore(
 		address: string,

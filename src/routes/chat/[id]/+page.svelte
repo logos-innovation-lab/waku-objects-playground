@@ -12,6 +12,7 @@
 	import Button from '$lib/components/button.svelte'
 	import Avatar from '$lib/components/avatar.svelte'
 	import WakuObject from '$lib/objects/chat.svelte'
+	import ChatObjectInvite from '$lib/components/chat-object-invite.svelte'
 
 	import { goto } from '$app/navigation'
 	import { chats, isGroupChat } from '$lib/stores/chat'
@@ -173,6 +174,15 @@
 										</ChatMessage>
 									{:else if message.type === 'data'}
 										<WakuObject {message} users={chat.users} />
+									{:else if message.type === 'install'}
+										<ChatObjectInvite
+											{message}
+											chatId={$page.params.id}
+											myMessage={message.senderPublicKey === publicKey ? true : false}
+											users={chat.users}
+											objects={chat.objects}
+											timestamp={formatTimestampTime(message.timestamp)}
+										/>
 									{/if}
 								{/each}
 							</div>

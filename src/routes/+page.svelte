@@ -15,7 +15,7 @@
 
 	// Stores
 	import { profile } from '$lib/stores/profile'
-	import { chats, isGroupChat, type Chat, type Message, isBabbles } from '$lib/stores/chat'
+	import { chats, isGroupChat, type Chat, isBabbles, type ChatMessage } from '$lib/stores/chat'
 
 	import ROUTES from '$lib/routes'
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
@@ -43,7 +43,7 @@
 		return lastMessage ? lastMessage.timestamp : 0
 	}
 
-	function lastSenderName(chat: Chat, myMessage?: boolean, lastMessage?: Message) {
+	function lastSenderName(chat: Chat, myMessage?: boolean, lastMessage?: ChatMessage) {
 		if (myMessage) {
 			return 'You: '
 		}
