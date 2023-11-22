@@ -89,13 +89,11 @@
 	}
 
 	async function sendInstallInvite(object: InstalledObjectDescriptor) {
-		// TODO temporary workaround for preinstalled objects
+		// workaround for preinstalled objects
 		if (object.preInstalled) {
 			addObject(object)
 			return
 		}
-
-		console.debug('send invite', { object })
 
 		try {
 			await adapters.sendInstall($page.params.id, object.objectId, 'invite')
