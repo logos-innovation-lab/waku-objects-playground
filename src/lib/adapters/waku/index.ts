@@ -231,8 +231,6 @@ async function executeOnInstallMessage(
 	chatId: string,
 	message: WithMeta<InstallMessage>,
 ) {
-	console.debug({ publicKey, message })
-
 	if (message.senderPublicKey === publicKey) {
 		if (message.command === 'accept') {
 			const installedObjects = get(installedObjectStore).objects
