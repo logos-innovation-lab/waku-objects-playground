@@ -150,7 +150,7 @@
 					<ObjectLink
 						on:click={object.add}
 						imgSrc={object.logo}
-						title={object.name}
+						title={object.name + (object.preInstalled ? '*' : '')}
 						description={object.description}
 					/>
 				</div>
@@ -166,7 +166,7 @@
 					<ObjectLink
 						on:click={object.showInvite}
 						imgSrc={object.logo}
-						title={object.name}
+						title={object.name + (object.preInstalled ? '*' : '')}
 						description={object.description}
 					/>
 				</div>
