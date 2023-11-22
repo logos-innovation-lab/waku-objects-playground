@@ -29,13 +29,10 @@
 	import { uploadPicture } from '$lib/adapters/ipfs'
 	import Avatar from '$lib/components/avatar.svelte'
 	import { errorStore } from '$lib/stores/error'
-	import { installedObjectStore } from '$lib/stores/installed-objects'
-	import { getObjectSpec } from '$lib/objects/external/lib'
 	import DataBlob from '$lib/components/icons/data-blob.svelte'
 
 	let avatar = $profile.avatar
 	let name = $profile.name
-	let objectPath = ''
 
 	$: if ($profile.loading === false && !name && !avatar) {
 		name = $profile.name

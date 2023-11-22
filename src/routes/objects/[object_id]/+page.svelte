@@ -13,14 +13,13 @@
 	import { page } from '$app/stores'
 	import { getInstalledObjectList } from '$lib/objects/lookup'
 	import { hashString } from '$lib/adapters/waku/crypto'
+	import TrashCan from '$lib/components/icons/trash-can.svelte'
 
 	let hashedObjectId = $page.params.object_id
 
 	$: loading = $installedObjectStore.loading
 	$: objects = loading ? undefined : getInstalledObjectList()
 	$: object = objects?.find((object) => hashString(object.objectId) === hashedObjectId)
-
-	$: console.debug({ objects, object })
 
 	function uninstall(objectId: string) {
 		// TODO are you sure dialog
@@ -46,12 +45,13 @@
 		</svelte:fragment>
 		<AuthenticatedOnly let:wallet>
 			<Container align="center" gap={12} padX={24} padY={24}>
+				<img src={object.logo} alt={object.name} />
 				<p class="title">{object.name}</p>
 				<p class="description">{object.description}</p>
 			</Container>
 			<Spacer height={12} />
 			{#if !object.preInstalled && object.installed}
-				<Button on:click={() => object && uninstall(object.objectId)}>Uninstall</Button>
+				<Button on:click={() => object && uninstall(object.objectId)}><TrashCan />Uninstall</Button>
 			{/if}
 		</AuthenticatedOnly>
 	</Layout>
@@ -59,17 +59,14 @@
 
 <style lang="scss">
 	img {
-		width: 72px;
-		height: 72px;
+		width: 140px;
+		height: 140px;
 		aspect-ratio: 1;
-		border-radius: 18px;
+		border-radius: 35px;
 	}
 
-	.icon {
-		display: flex;
-		justify-content: flex-start;
-		align-items: center;
-		gap: var(--spacing-12);
-		padding-left: var(--spacing-12);
+	.title {
+		font-size: var(--font-size-lg);
+		font-weight: bold;
 	}
 </style>

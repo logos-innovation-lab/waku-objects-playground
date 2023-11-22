@@ -231,6 +231,8 @@ async function executeOnInstallMessage(
 	chatId: string,
 	message: WithMeta<InstallMessage>,
 ) {
+	console.debug({ publicKey, message })
+
 	if (message.senderPublicKey === publicKey) {
 		if (message.command === 'accept') {
 			const installedObjects = get(installedObjectStore).objects
@@ -275,22 +277,20 @@ async function executeOnInstallMessage(
 			objectId: message.objectId,
 			name: objectSpec.object.name,
 			description: objectSpec.object.description,
-			// TODO fix relative path to absolute
 			logo: objectSpec.object.files.logo.path,
 			installed: false,
 		}
 
 		installedObjectStore.addInstalledObject(installedObject)
 	} else if (message.command === 'accept') {
-		const installedObjects = get(installedObjectStore).objects
-		if (!installedObjects.has(message.objectId)) {
+		const installedObject = get(installedObjectStore).objects.get(message.objectId)
+		if (!installedObject) {
 			return
 		}
 
-		installedObjectStore.updateInstalledObject(message.objectId, (object) => ({
-			...object,
-			installed: true,
-		}))
+		if (!installedObject.installed) {
+			return
+		}
 
 		// add to chat objects
 		chats.updateChat(chatId, (chat) => {

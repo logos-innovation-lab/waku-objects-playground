@@ -22,7 +22,7 @@
 	let objectPath = ''
 
 	$: loading = $installedObjectStore.loading
-	$: installedObjects = loading ? [] : getInstalledObjectList()
+	$: installedObjects = $installedObjectStore && getInstalledObjectList()
 
 	async function addObject() {
 		const { object } = await getObjectSpec(objectPath, 'chat')
@@ -75,6 +75,7 @@
 				</ButtonBlock>
 			{/each}
 			<Container align="center" gap={12} padX={24} padY={24}>
+				Developer stuff
 				<InputField bind:value={objectPath} label="Object path" />
 				<Button on:click={addObject}>Add object</Button>
 			</Container>

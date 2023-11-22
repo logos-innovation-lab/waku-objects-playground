@@ -97,17 +97,6 @@
 
 		console.debug('send invite', { object })
 
-		const wallet = $walletStore.wallet
-		if (!wallet) {
-			errorStore.addEnd({
-				title: 'Wallet Error',
-				message: 'No wallet found',
-				retry: () => sendInstallInvite(object),
-				reload: true,
-			})
-			return
-		}
-
 		try {
 			await adapters.sendInstall($page.params.id, object.objectId, 'invite')
 			showInvite = undefined
