@@ -40,7 +40,13 @@ export interface BabbleMessage {
 	parentId?: string
 }
 
-export type Message = UserMessage | DataMessage | InviteMessage | BabbleMessage
+export interface InstallMessage {
+	type: 'install'
+	objectId: string
+	command: 'invite' | 'accept'
+}
+
+export type Message = UserMessage | DataMessage | InviteMessage | BabbleMessage | InstallMessage
 
 export type WithoutMeta<T> = Omit<T, keyof MessageMetadata>
 export type WithMeta<T> = T & MessageMetadata
@@ -58,6 +64,7 @@ export interface Chat {
 	avatar?: string
 	joined?: boolean
 	inviter?: string
+	objects?: string[]
 }
 
 export interface ChatData {

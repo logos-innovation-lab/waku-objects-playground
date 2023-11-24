@@ -21,5 +21,6 @@ export interface StorageInstalledObject {
 	name: string
 	description: string
 	logo: string
+	installed: boolean
 }
 export type StorageInstalledObjectEntry = [objectId: string, object: StorageInstalledObject]

@@ -38,6 +38,7 @@
 	import ChatDateBadge from '$lib/components/chat-date-badge.svelte'
 	import { errorStore } from '$lib/stores/error'
 	import { publicKeyToAddress } from '$lib/adapters/waku/crypto'
+	import ChatObjectInvite from '$lib/components/chat-object-invite.svelte'
 
 	let div: HTMLElement
 	let autoscroll = true
@@ -197,12 +198,14 @@
 					</Container>
 				</Container>
 			{:else}
+				{@const publicKey = wallet.signingKey.compressedPublicKey}
 				<div class="chat-messages" bind:this={div}>
 					<Container grow>
 						<div class="messages">
 							<div class="messages-inner">
 								<!-- Chat bubbles -->
 								{#each messages as message, i}
+									{@const sender = chat.users.find((u) => message.senderPublicKey === u.publicKey)}
 									{#if message.type === 'user' && message.text?.length > 0}
 										{@const sameSender =
 											messages[i].senderPublicKey === messages[i - 1]?.senderPublicKey}
@@ -210,10 +213,6 @@
 											i + 1 === messages.length ||
 											messages[i].senderPublicKey !== messages[i + 1]?.senderPublicKey ||
 											messages[i + 1]?.type !== 'user'}
-										{@const sender = chat.users.find(
-											(u) => message.senderPublicKey === u.publicKey,
-										)}
-										{@const publicKey = wallet.signingKey.compressedPublicKey}
 										{#if i === 0 || (i > 0 && areDifferentDays(messages[i].timestamp, messages[i - 1].timestamp))}
 											<ChatDateBadge text={formatTimestampSeparator(message.timestamp)} />
 										{/if}
@@ -238,6 +237,23 @@
 										</ChatMessage>
 									{:else if message.type === 'data'}
 										<WakuObject {message} users={chat.users} />
+									{:else if message.type === 'install'}
+										<ChatObjectInvite
+											{message}
+											group={true}
+											chatId={$page.params.id}
+											myMessage={message.senderPublicKey === publicKey ? true : false}
+											users={chat.users}
+											objects={chat.objects}
+											timestamp={formatTimestampTime(message.timestamp)}
+											senderName={message.senderPublicKey === publicKey ? undefined : sender?.name}
+										>
+											<svelte:fragment slot="avatar">
+												{#if message.senderPublicKey !== publicKey}
+													<Avatar size={40} picture={sender?.avatar} seed={sender?.publicKey} />
+												{/if}
+											</svelte:fragment>
+										</ChatObjectInvite>
 									{/if}
 								{/each}
 							</div>

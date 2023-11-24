@@ -8,6 +8,11 @@ import { splitDescriptor } from './split'
 import { installedObjectStore } from '$lib/stores/installed-objects'
 import { get } from 'svelte/store'
 
+export type InstalledObjectDescriptor = WakuObjectSvelteDescriptor & {
+	preInstalled: boolean
+	installed: boolean
+}
+
 const preInstalledObjectList: WakuObjectSvelteDescriptor[] = [
 	helloWorldDescriptor,
 	payggyDescriptor,
@@ -20,16 +25,25 @@ const preInstalledObjectList: WakuObjectSvelteDescriptor[] = [
 	),
 ]
 
-export function lookup(objectId: string): WakuObjectSvelteDescriptor | undefined {
+export function lookup(objectId: string): InstalledObjectDescriptor | undefined {
 	const installedObjectList = getInstalledObjectList()
 	return installedObjectList.find((object) => object.objectId === objectId)
 }
 
-export function getInstalledObjectList() {
-	const installedObjectList = Array.from(get(installedObjectStore).objects)
-		.map((item) => item[1])
-		.map((object) =>
-			getExternalDescriptor(object.objectId, object.name, object.description, object.logo),
-		)
-	return preInstalledObjectList.concat(installedObjectList)
+export function getInstalledObjectList(): InstalledObjectDescriptor[] {
+	const installedObjectList = Array.from(get(installedObjectStore).objects).map((item) => {
+		const object = item[1]
+		return {
+			...getExternalDescriptor(object.objectId, object.name, object.description, object.logo),
+			preInstalled: false,
+			installed: object.installed,
+		}
+	})
+	return preInstalledObjectList
+		.map((object) => ({
+			...object,
+			preInstalled: true,
+			installed: true,
+		}))
+		.concat(installedObjectList)
 }

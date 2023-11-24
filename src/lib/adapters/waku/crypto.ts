@@ -38,6 +38,11 @@ export function hash(data: Uint8Array | Hex): Hex {
 	return keccak256(bytes)
 }
 
+export function hashString(s: string): Hex {
+	const data = new TextEncoder().encode(s)
+	return hash(data)
+}
+
 export function encrypt(
 	plaintext: Uint8Array,
 	key: Uint8Array,

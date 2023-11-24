@@ -77,12 +77,14 @@
 		max-width: 75%;
 		margin-right: auto;
 		margin-left: 0;
+		font-family: (--font-serif);
 
 		&:not(:last-child) {
 			margin-bottom: var(--spacing-12);
 		}
 
 		&.object {
+			font-family: sans-serif;
 			.message-content {
 				width: 100%;
 			}
@@ -93,7 +95,6 @@
 		padding: var(--spacing-12);
 		border-radius: var(--border-radius);
 		display: inline-block;
-		font-family: var(--font-serif);
 		background-color: var(--color-base, var(--color-dark-step-40));
 	}
 
@@ -116,6 +117,10 @@
 			.message-text {
 				border-bottom-right-radius: 0;
 			}
+		}
+
+		&.object {
+			font-style: normal;
 		}
 
 		.timestamp {

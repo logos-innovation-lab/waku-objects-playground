@@ -20,4 +20,6 @@ export default {
 	BABBLES_CHAT: (id: string, threadId?: string) =>
 		`/babbles/chat/${id}${threadId ? `/${threadId}` : ''}`,
 	BABBLES_EDIT: (id: string) => `/babbles/chat/${id}/edit`,
+	SETTINGS_OBJECTS: '/objects',
+	SETTINGS_OBJECT: (objectId: string) => `/objects/${objectId}`,
 }

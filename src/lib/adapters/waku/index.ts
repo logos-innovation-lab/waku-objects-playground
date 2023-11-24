@@ -13,6 +13,8 @@ import {
 	type WithoutMeta,
 	type ChatMessage,
 	type BabbleMessage,
+	type WithMeta,
+	type InstallMessage,
 } from '$lib/stores/chat'
 import type { User } from '$lib/types'
 import type { TimeFilter } from '@waku/interfaces'
@@ -38,6 +40,7 @@ import { makeWakustore, type Wakustore } from './wakustore'
 import type {
 	StorageChat,
 	StorageChatEntry,
+	StorageInstalledObject,
 	StorageInstalledObjectEntry,
 	StorageObjectEntry,
 	StorageProfile,
@@ -62,6 +65,7 @@ import {
 } from './codec'
 import type { DecodedMessage } from '@waku/message-encryption'
 import { utils } from '@noble/secp256k1'
+import { getObjectSpec } from '$lib/objects/external/lib'
 
 const MAX_MESSAGES = 100
 
@@ -148,6 +152,10 @@ async function addMessageToChat(
 		await executeOnDataMessage(ownPublicKey, blockchainAdapter, chatId, message, send)
 	}
 
+	if (message.type === 'install') {
+		await executeOnInstallMessage(ownPublicKey, chatId, message)
+	}
+
 	const unread = message.type === 'user' && message.senderPublicKey !== ownPublicKey ? 1 : 0
 	chats.updateChat(chatId, (chat) => ({
 		...chat,
@@ -160,7 +168,7 @@ async function executeOnDataMessage(
 	publicKey: string,
 	blockchainAdapter: WakuObjectAdapter,
 	chatId: string,
-	dataMessage: DataMessage,
+	dataMessage: WithMeta<DataMessage>,
 	send: (data: JSONValue) => Promise<void>,
 ) {
 	const descriptor = lookup(dataMessage.objectId)
@@ -215,6 +223,83 @@ async function executeOnDataMessage(
 			tokens: get(balanceStore).balances,
 		}
 		await descriptor.onMessage(dataMessage, args)
+	}
+}
+
+async function executeOnInstallMessage(
+	publicKey: string,
+	chatId: string,
+	message: WithMeta<InstallMessage>,
+) {
+	if (message.senderPublicKey === publicKey) {
+		if (message.command === 'accept') {
+			const installedObjects = get(installedObjectStore).objects
+			if (!installedObjects.has(message.objectId)) {
+				return
+			}
+
+			installedObjectStore.updateInstalledObject(message.objectId, (object) => ({
+				...object,
+				installed: true,
+			}))
+
+			// add to chat objects
+			chats.updateChat(chatId, (chat) => {
+				if (!chat.objects) {
+					chat.objects = []
+				}
+				if (!chat.objects.includes(message.objectId)) {
+					chat.objects.push(message.objectId)
+				}
+				return chat
+			})
+		}
+
+		return
+	}
+
+	if (message.command === 'invite') {
+		// add to installed objects
+		const installedObjects = get(installedObjectStore).objects
+		if (installedObjects.has(message.objectId)) {
+			return
+		}
+
+		// TODO fix WakuScriptType
+		const objectSpec = await getObjectSpec(message.objectId, 'chat')
+		if (!objectSpec) {
+			return
+		}
+
+		const installedObject: StorageInstalledObject = {
+			objectId: message.objectId,
+			name: objectSpec.object.name,
+			description: objectSpec.object.description,
+			logo: objectSpec.object.files.logo.path,
+			installed: false,
+		}
+
+		installedObjectStore.addInstalledObject(installedObject)
+	} else if (message.command === 'accept') {
+		const installedObject = get(installedObjectStore).objects.get(message.objectId)
+		if (!installedObject) {
+			return
+		}
+
+		if (!installedObject.installed) {
+			return
+		}
+
+		// add to chat objects
+		chats.updateChat(chatId, (chat) => {
+			if (!chat.objects) {
+				chat.objects = []
+			}
+			if (!chat.objects.includes(message.objectId)) {
+				chat.objects.push(message.objectId)
+			}
+			return chat
+		})
 	}
 }
 
@@ -677,6 +762,23 @@ export default class WakuAdapter implements Adapter {
 		}
 	}
 
+	async sendInstall(chatId: string, objectId: string, command: 'invite' | 'accept'): Promise<void> {
+		const wallet = get(walletStore).wallet
+		if (!wallet) {
+			return
+		}
+
+		const senderPrivateKey = wallet.privateKey
+		const message: WithoutMeta<InstallMessage> = {
+			type: 'install',
+			objectId,
+			command,
+		}
+		const encryptionKey = hexToBytes(chatId)
+
+		await this.safeWaku.sendMessage(message, encryptionKey, hexToBytes(senderPrivateKey))
+	}
+
 	async updateStore(
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		_address: string,
@@ -928,7 +1030,14 @@ export default class WakuAdapter implements Adapter {
 		adapter: WakuObjectAdapter,
 	) {
 		// only handle certain types of messages
-		if (!(message.type === 'invite' || message.type === 'data' || message.type === 'user')) {
+		if (
+			!(
+				message.type === 'invite' ||
+				message.type === 'data' ||
+				message.type === 'user' ||
+				message.type === 'install'
+			)
+		) {
 			return
 		}
 
