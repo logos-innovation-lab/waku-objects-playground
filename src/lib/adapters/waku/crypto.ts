@@ -83,6 +83,6 @@ export function privateKeyToPublicKey(privateKey: Hex | Uint8Array): Hex {
 	return bytesToHex(publicKeyBytes)
 }
 
-export function arePublicKeysEqual(pkA: Hex, pkB: Hex): boolean {
-	return fixHex(pkA) === fixHex(pkB)
+export function arePublicKeysEqual(pkA: Hex | Uint8Array, pkB: Hex | Uint8Array): boolean {
+	return compressPublicKey(pkA) === compressPublicKey(pkB)
 }
