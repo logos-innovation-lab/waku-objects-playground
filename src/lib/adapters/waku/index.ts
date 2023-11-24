@@ -54,7 +54,7 @@ import { balanceStore } from '$lib/stores/balances'
 import type { ContentTopic } from './waku'
 import { installedObjectStore } from '$lib/stores/installed-objects'
 import { errorStore } from '$lib/stores/error'
-import { compressPublicKey, fixHex, getSharedSecret, hash } from './crypto'
+import { arePublicKeysEqual, compressPublicKey, fixHex, getSharedSecret, hash } from './crypto'
 import { bytesToHex, hexToBytes } from '@waku/utils/bytes'
 import { encrypt, decrypt } from './crypto'
 import {
@@ -855,7 +855,9 @@ export default class WakuAdapter implements Adapter {
 			return
 		}
 
-		if (compressPublicKey(decodedMessage.signaturePublicKey) !== fixHex(profilePublicKey)) {
+		if (
+			!arePublicKeysEqual(compressPublicKey(decodedMessage.signaturePublicKey), profilePublicKey)
+		) {
 			console.error('invalid signature', {
 				decodedMessage,
 				profilePublicKey,
@@ -970,12 +972,10 @@ export default class WakuAdapter implements Adapter {
 					return
 				}
 
+				const signaturePublicKey = compressPublicKey(decodedMessage.signaturePublicKey)
+
 				// check if the signature matches a member of the group
-				if (
-					!chat.users
-						.map((user) => user.publicKey)
-						.includes(bytesToHex(decodedMessage.signaturePublicKey))
-				) {
+				if (!chat.users.map((user) => fixHex(user.publicKey)).includes(signaturePublicKey)) {
 					return
 				}
 
