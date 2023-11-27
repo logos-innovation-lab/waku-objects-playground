@@ -33,8 +33,6 @@
 	import { userDisplayName } from '$lib/utils/user'
 	import { errorStore } from '$lib/stores/error'
 
-	$: console.log($chats)
-
 	$: chatId = $page.params.id
 	$: groupChat = $chats.chats.get(chatId)
 	let picture: string | undefined

@@ -82,3 +82,7 @@ export function privateKeyToPublicKey(privateKey: Hex | Uint8Array): Hex {
 	const publicKeyBytes = getPublicKey(privateKey)
 	return bytesToHex(publicKeyBytes)
 }
+
+export function arePublicKeysEqual(pkA: Hex | Uint8Array, pkB: Hex | Uint8Array): boolean {
+	return compressPublicKey(pkA) === compressPublicKey(pkB)
+}
