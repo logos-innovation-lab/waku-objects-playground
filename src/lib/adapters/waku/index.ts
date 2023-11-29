@@ -484,9 +484,11 @@ export default class WakuAdapter implements Adapter {
 		this.subscriptions.push(subscribeInstalledObjectStore)
 
 		// subscribe to default Babbles
-		const defaultBabblesId = '0fbc5ad135290633aab3f37e5e0529fefa3c77cd9122b9a9e814bc8622e44d3f'
+		const defaultBabblesId = '67de48e09e52efce6a5f01197259c648412129dddc578bb2d6888aa69e2fed4c'
 		if (!get(chats).chats.has(defaultBabblesId)) {
-			await this.startBabbles(wallet, defaultBabblesId, 'Babbles')
+			const defaultBabblesName = 'Cypher City'
+			const defaultBabblesAvatar = 'QmeQQ1RSav1ysrNoM4hpyKTEXKQ3bAt1keHU6MCkJNKScx'
+			await this.startBabbles(wallet, defaultBabblesId, defaultBabblesName, defaultBabblesAvatar)
 		}
 
 		// deferred updates
