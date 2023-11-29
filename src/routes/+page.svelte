@@ -152,7 +152,9 @@
 				</svelte:fragment>
 				<ul class="chats" aria-label="Chat List">
 					{#each orderedChats as chat}
-						{@const userMessages = chat.messages.filter((message) => message.type === 'user')}
+						{@const userMessages = chat.messages.filter(
+							(message) => message.type === 'user' || message.type === 'babble',
+						)}
 						{@const lastMessage =
 							userMessages.length > 0 ? userMessages[userMessages.length - 1] : undefined}
 						{@const myMessage = lastMessage && lastMessage.senderPublicKey === publicKey}
@@ -182,7 +184,7 @@
 														</span>
 														<Events />
 													{:else if isBabbles(chat)}
-														<span class="truncate"> Babbles </span>
+														<span class="truncate">{chat?.name}</span>
 														<Babbles />
 													{:else}
 														<span class="truncate">
@@ -204,7 +206,8 @@
 											<p class={`message text-serif ${myMessage ? 'my-message' : ''}`}>
 												{#if chat.joined}
 													{senderName}
-													{@html lastMessage && lastMessage.type === 'user'
+													{@html lastMessage &&
+													(lastMessage.type === 'user' || lastMessage.type === 'babble')
 														? replaceAddressesWithNames(lastMessage.text?.substring(0, 150), chat)
 														: 'No messages yet'}
 												{:else if isGroupChat(chat)}
