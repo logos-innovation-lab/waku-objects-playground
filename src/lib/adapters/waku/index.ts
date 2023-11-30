@@ -488,7 +488,18 @@ export default class WakuAdapter implements Adapter {
 		if (!get(chats).chats.has(defaultBabblesId)) {
 			const defaultBabblesName = 'Cypher City'
 			const defaultBabblesAvatar = 'QmeQQ1RSav1ysrNoM4hpyKTEXKQ3bAt1keHU6MCkJNKScx'
-			await this.startBabbles(wallet, defaultBabblesId, defaultBabblesName, defaultBabblesAvatar)
+			// retrieve history
+			const timeFilter = {
+				startTime: new Date(0),
+				endTime: new Date(),
+			}
+			await this.startBabbles(
+				wallet,
+				defaultBabblesId,
+				defaultBabblesName,
+				defaultBabblesAvatar,
+				timeFilter,
+			)
 		}
 
 		// deferred updates
@@ -536,13 +547,14 @@ export default class WakuAdapter implements Adapter {
 		chatId: string,
 		name: string,
 		avatar?: string,
+		timeFilter?: TimeFilter,
 	): Promise<string> {
 		const wakuObjectAdapter = makeWakuObjectAdapter(this, wallet)
 
 		createBabbles(chatId, name, avatar, true)
 
 		const ownPublicKey = wallet.signingKey.compressedPublicKey
-		await this.subscribeToBabbles(ownPublicKey, chatId, wakuObjectAdapter)
+		await this.subscribeToBabbles(ownPublicKey, chatId, wakuObjectAdapter, timeFilter)
 
 		return chatId
 	}
