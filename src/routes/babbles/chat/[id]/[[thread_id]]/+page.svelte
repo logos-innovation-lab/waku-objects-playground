@@ -38,6 +38,8 @@
 	$: chatMessages = $chats.chats.get($page.params.id)?.messages || []
 	$: displayMessages = convertMessagesToThreaded(chatMessages)
 
+	$: console.debug({ chatMessages, displayMessages })
+
 	beforeUpdate(() => {
 		autoscroll = div && div.offsetHeight + div.scrollTop > div.scrollHeight - 74
 	})
