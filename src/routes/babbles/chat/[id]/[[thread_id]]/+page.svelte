@@ -38,8 +38,6 @@
 	$: chatMessages = $chats.chats.get($page.params.id)?.messages || []
 	$: displayMessages = convertMessagesToThreaded(chatMessages)
 
-	$: console.debug({ chatMessages, displayMessages })
-
 	beforeUpdate(() => {
 		autoscroll = div && div.offsetHeight + div.scrollTop > div.scrollHeight - 74
 	})
@@ -128,6 +126,9 @@
 
 			const parentMessage = parentMap.get(message.parentId)
 			if (!parentMessage) {
+				// this is a workaround for the case when the parent is lost to
+				// keep the rest of the thread
+				roots.push(parent)
 				continue
 			}
 
