@@ -32,6 +32,7 @@
 	import Loading from '$lib/components/loading.svelte'
 	import { userDisplayName } from '$lib/utils/user'
 	import { errorStore } from '$lib/stores/error'
+	import { fixHex } from '$lib/adapters/waku/crypto'
 
 	$: chatId = $page.params.id
 	$: groupChat = $chats.chats.get(chatId)
@@ -84,7 +85,8 @@
 	}
 
 	function isGroupMember(publicKey: string) {
-		return groupChat?.users.map((user) => user.publicKey).includes(publicKey)
+		publicKey = fixHex(publicKey)
+		return groupChat?.users.map((user) => fixHex(user.publicKey)).includes(publicKey)
 	}
 
 	$: if (
@@ -244,7 +246,7 @@
 				{@const otherUser = chat.users.find(
 					(u) => u.publicKey !== wallet.signingKey.compressedPublicKey,
 				)}
-				{#if otherUser && !isGroupChat(chat) && !isGroupMember(id)}
+				{#if otherUser && !isGroupChat(chat) && !isGroupMember(otherUser.publicKey)}
 					<li>
 						<label for={id}>
 							<div class="chat-button" role="listitem">
