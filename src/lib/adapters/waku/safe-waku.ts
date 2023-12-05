@@ -304,7 +304,7 @@ export class SafeWaku {
 		return true
 	}
 
-	private async queueMessage(
+	private queueMessage(
 		chatId: string,
 		callback: Callback,
 		chatMessage: ChatMessage,
