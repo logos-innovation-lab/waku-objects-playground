@@ -126,6 +126,9 @@
 
 			const parentMessage = parentMap.get(message.parentId)
 			if (!parentMessage) {
+				// this is a workaround for the case when the parent is lost to
+				// keep the rest of the thread
+				roots.push(parent)
 				continue
 			}
 
