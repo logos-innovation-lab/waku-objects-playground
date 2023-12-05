@@ -321,6 +321,10 @@ export class SafeWaku {
 			return
 		}
 
+		this.handleMessages().catch((e) => this.log(`⁉️ Error in handleMessage: ${e}`))
+	}
+
+	private async handleMessages() {
 		this.isHandlingMessage = true
 
 		while (this.queuedMessages.length > 0) {
@@ -328,16 +332,16 @@ export class SafeWaku {
 			if (queuedMessage) {
 				// deduplicate already seen messages
 				const message = queuedMessage.chatMessage
-				const lastMessage = this.lastMessages.get(chatId)
+				const lastMessage = this.lastMessages.get(queuedMessage.chatId)
 				if (lastMessage && this.areMessagesEqual(lastMessage, message)) {
 					this.log('🙈 ignoring duplicate message', { message, lastMessage })
 					continue
 				}
 
-				this.lastMessages.set(chatId, message)
+				this.lastMessages.set(queuedMessage.chatId, message)
 
 				try {
-					await callback(queuedMessage.chatMessage, queuedMessage.decodedMessage)
+					await queuedMessage.callback(queuedMessage.chatMessage, queuedMessage.decodedMessage)
 				} catch (e) {
 					this.log(`⁉️ Error in callback: ${e}`)
 				}
