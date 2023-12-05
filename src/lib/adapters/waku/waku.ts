@@ -9,9 +9,11 @@ import {
 	type IEncoder,
 	type IDecoder,
 } from '@waku/interfaces'
-import { PUBLIC_WAKU } from '$env/static/public'
+// import { PUBLIC_WAKU } from '$env/static/public'
 import type { DecodedMessage } from '@waku/message-encryption'
 import { hash } from './crypto'
+
+const PUBLIC_WAKU = 'production'
 
 function getPeers(): string[] {
 	switch (PUBLIC_WAKU) {
