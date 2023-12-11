@@ -14,6 +14,10 @@ export interface WakuObjectAdapter {
 	sendTransaction: (to: string, token: TokenAmount) => Promise<string>
 	estimateTransaction: (to: string, token: TokenAmount) => Promise<TokenAmount>
 	getContract(address: string, abi: Interface): Contract
+
+	// TODO: Add typings
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	rpcRequest(method: string, params: any): Promise<any>
 }
 
 export type JSONPrimitive = string | number | boolean | null

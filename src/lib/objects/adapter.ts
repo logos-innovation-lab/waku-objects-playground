@@ -1,5 +1,12 @@
 import type { Adapter } from '$lib/adapters'
-import { Contract, type BaseWallet, type TransactionReceipt, Interface } from 'ethers'
+import {
+	Contract,
+	type BaseWallet,
+	type TransactionReceipt,
+	Interface,
+	JsonRpcProvider,
+	getBytes,
+} from 'ethers'
 import type { WakuObjectAdapter } from '.'
 import {
 	defaultBlockchainNetwork,
@@ -130,6 +137,36 @@ export function makeWakuObjectAdapter(adapter: Adapter, wallet: BaseWallet): Wak
 		return new Contract(address, abi, txWallet)
 	}
 
+	// TODO: Add typings
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	async function rpcRequest(method: string, params: any): Promise<any> {
+		const provider = getProvider()
+		const txWallet = wallet.connect(provider)
+
+		switch (method) {
+			case 'eth_accounts': {
+				return [await wallet.getAddress()]
+			}
+
+			case 'eth_sign': {
+				return txWallet.signMessage(getBytes(params[1]))
+			}
+
+			case 'eth_sendTransaction': {
+				const tx = await txWallet.sendTransaction(params[0])
+				return tx.hash
+			}
+
+			default: {
+				const provider = getProvider()
+				if (provider.constructor !== JsonRpcProvider) {
+					throw new Error('Unsupported provider, requires JsonRpcProvider')
+				}
+				return await (provider as JsonRpcProvider).send(method, params)
+			}
+		}
+	}
+
 	return {
 		getTransaction,
 		getTransactionState,
@@ -138,5 +175,6 @@ export function makeWakuObjectAdapter(adapter: Adapter, wallet: BaseWallet): Wak
 		sendTransaction,
 		estimateTransaction,
 		getContract,
+		rpcRequest,
 	}
 }

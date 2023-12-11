@@ -132,6 +132,10 @@ export function makeIframeDispatcher(
 				args.onViewChange(view)
 				return undefined
 			}
+			case 'rpcRequest': {
+				const [method, params] = request.args
+				return await objectAdapter.rpcRequest(method, params && JSON.parse(params))
+			}
 			default: {
 				throw `not implemented: ${request.function}`
 			}
