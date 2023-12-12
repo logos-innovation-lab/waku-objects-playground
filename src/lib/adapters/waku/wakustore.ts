@@ -24,7 +24,7 @@ export interface Wakustore {
 	collectionQuery: (decoder: IDecoder<DecodedMessage>, queryOptions?: QueryOptions) => Query
 	onSnapshot: <T>(
 		query: Query,
-		callback: (value: T, decodedMessage: DecodedMessage) => void,
+		callback: (value: T, decodedMessage: DecodedMessage) => void | Promise<void>,
 	) => Promise<Unsubscribe>
 	getDoc: <T>(decoder: IDecoder<DecodedMessage>) => Promise<T | undefined>
 	setDoc: <T>(encoder: IEncoder, data: T) => Promise<SendError[] | undefined>
@@ -115,23 +115,24 @@ export function makeWakustore(waku: LightNode): Wakustore {
 
 	async function onSnapshot<T>(
 		query: Query,
-		callback: (value: T, decodedMessage: DecodedMessage) => void,
+		callback: (value: T, decodedMessage: DecodedMessage) => void | Promise<void>,
 	): Promise<Unsubscribe> {
-		const subscription = await subscribe(waku, query.decoder, (msg: DecodedMessage) => {
+		const subscription = await subscribe(waku, query.decoder, async (msg: DecodedMessage) => {
 			const typedResult = decodeDoc<T>(msg)
-			callback(typedResult, msg)
+			await callback(typedResult, msg)
 		})
 
 		const queryOptions = {
 			...query.queryOptions,
 			pageSize: query.queryOptions?.pageSize ?? query.queryOptions?.limit,
 		}
+
 		const result = await readStore(waku, query.decoder, queryOptions)
 		const messages = await getQueryResults(result, queryOptions)
 
 		for (const message of messages) {
 			const value = decodeDoc<T>(message)
-			callback(value, message)
+			await callback(value, message)
 		}
 
 		return subscription
