@@ -9,7 +9,9 @@ import {
 	Contract,
 } from 'ethers'
 import abi from '$lib/abis/erc20.json'
-import { PUBLIC_BLOCKCHAIN } from '$env/static/public'
+// import { PUBLIC_BLOCKCHAIN } from '$env/static/public'
+
+const PUBLIC_BLOCKCHAIN = 'gnosis'
 
 interface BlockchainExplorer {
 	name: string
