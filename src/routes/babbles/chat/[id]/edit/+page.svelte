@@ -1,6 +1,5 @@
 <script lang="ts">
-	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
-	import Checkmark from '$lib/components/icons/checkmark.svelte'
+	import { ChevronLeft, Checkmark, Logout, CopyLink } from 'carbon-icons-svelte'
 
 	import Button from '$lib/components/button.svelte'
 	import Header from '$lib/components/header.svelte'
@@ -12,10 +11,8 @@
 	import { chats } from '$lib/stores/chat'
 	import { page } from '$app/stores'
 	import { goto } from '$app/navigation'
-	import Logout from '$lib/components/icons/logout.svelte'
 	import ROUTES from '$lib/routes'
 	import Loading from '$lib/components/loading.svelte'
-	import CopyLink from '$lib/components/icons/copy-link.svelte'
 	import ReadonlyText from '$lib/components/readonly-text.svelte'
 	import QRCode from '@bonosoft/sveltekit-qrcode'
 	import copy from 'copy-to-clipboard'

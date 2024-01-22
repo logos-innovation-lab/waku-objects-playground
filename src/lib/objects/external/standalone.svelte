@@ -1,10 +1,10 @@
 <script lang="ts">
+	import { ChevronLeft, Close } from 'carbon-icons-svelte'
+
 	import Layout from '$lib/components/layout.svelte'
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'
 	import Container from '$lib/components/container.svelte'
-	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
-	import Close from '$lib/components/icons/close.svelte'
 
 	import type { WakuObjectArgs } from '..'
 	import IframeComponent from './iframe.svelte'

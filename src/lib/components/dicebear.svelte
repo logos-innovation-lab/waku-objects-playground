@@ -1,5 +1,5 @@
 <script lang="ts">
-	import User from './icons/user.svelte'
+	import { User } from 'carbon-icons-svelte'
 
 	export let seed: string
 	export let size = 48
@@ -7,7 +7,7 @@
 	export let scale = 75
 	export let radius = 50
 
-	const avatarSize = size / 2
+	const avatarSize = (size / 2) as any // FIXME: the carbon design icons have native sizes 15, 20, 24 and 32. We should stick to those
 </script>
 
 {#if style === 'user'}

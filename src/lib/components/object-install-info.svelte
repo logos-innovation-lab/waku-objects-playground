@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Information from './icons/information.svelte'
+	import { Information } from 'carbon-icons-svelte'
 
 	export let name: string | undefined = undefined
 	export let logoImg: string | undefined = undefined

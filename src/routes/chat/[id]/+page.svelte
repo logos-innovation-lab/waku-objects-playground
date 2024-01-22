@@ -1,10 +1,7 @@
 <script lang="ts">
 	import { beforeUpdate, afterUpdate, onMount } from 'svelte'
-	import { page } from '$app/stores'
 
-	import Add from '$lib/components/icons/add.svelte'
-	import ArrowUp from '$lib/components/icons/arrow-up.svelte'
-	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
+	import { Add, ArrowUp, ChevronLeft, Checkmark, Close } from 'carbon-icons-svelte'
 
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
@@ -13,26 +10,25 @@
 	import Avatar from '$lib/components/avatar.svelte'
 	import WakuObject from '$lib/objects/chat.svelte'
 	import ChatObjectInvite from '$lib/components/chat-object-invite.svelte'
+	import ChatMessage from '$lib/components/chat-message.svelte'
+	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
+	import Layout from '$lib/components/layout.svelte'
+	import Spacer from '$lib/components/spacer.svelte'
+	import ChatDateBadge from '$lib/components/chat-date-badge.svelte'
 
+	import { page } from '$app/stores'
 	import { goto } from '$app/navigation'
 	import { chats, isGroupChat } from '$lib/stores/chat'
 	import adapters from '$lib/adapters'
 	import ROUTES from '$lib/routes'
 	import { browser } from '$app/environment'
-	import ChatMessage from '$lib/components/chat-message.svelte'
-	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 	import type { HDNodeWallet } from 'ethers/lib.commonjs'
-	import Layout from '$lib/components/layout.svelte'
 	import { textToHTML } from '$lib/utils/text'
-	import Spacer from '$lib/components/spacer.svelte'
-	import Checkmark from '$lib/components/icons/checkmark.svelte'
-	import Close from '$lib/components/icons/close.svelte'
 	import {
 		areDifferentDays,
 		formatTimestampSeparator,
 		formatTimestampTime,
 	} from '$lib/utils/format'
-	import ChatDateBadge from '$lib/components/chat-date-badge.svelte'
 	import { userDisplayName } from '$lib/utils/user'
 	import { errorStore } from '$lib/stores/error'
 

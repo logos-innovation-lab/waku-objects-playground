@@ -1,9 +1,5 @@
 <script lang="ts">
-	import { goto } from '$app/navigation'
-
-	// Icons
-	import AddComment from '$lib/components/icons/add-comment.svelte'
-	import NewChat from '$lib/components/icons/add-comment.svelte'
+	import { AddComment, Events } from 'carbon-icons-svelte'
 
 	// Components
 	import Avatar from '$lib/components/avatar.svelte'
@@ -12,19 +8,19 @@
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
 	import Loading from '$lib/components/loading.svelte'
+	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
+	import Layout from '$lib/components/layout.svelte'
+	import Babbles from '$lib/components/icons/babbles.svelte'
 
 	// Stores
 	import { profile } from '$lib/stores/profile'
 	import { chats, isGroupChat, type Chat, isBabbles, type ChatMessage } from '$lib/stores/chat'
 
+	import { goto } from '$app/navigation'
 	import ROUTES from '$lib/routes'
-	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
-	import Layout from '$lib/components/layout.svelte'
-	import Events from '$lib/components/icons/events.svelte'
 	import { formatTimestamp } from '$lib/utils/format'
 	import { userDisplayName } from '$lib/utils/user'
 	import { publicKeyToAddress } from '$lib/adapters/waku/crypto'
-	import Babbles from '$lib/components/icons/babbles.svelte'
 
 	$: orderedChats = Array.from($chats.chats)
 		.map(([, chat]) => chat)
@@ -103,7 +99,7 @@
 						<svelte:fragment slot="left">
 							<div class="header-btns">
 								<Button variant="icon" on:click={() => goto(ROUTES.INVITE(publicKey))}>
-									<NewChat size={24} />
+									<AddComment size={24} />
 								</Button>
 							</div>
 						</svelte:fragment>
@@ -136,7 +132,7 @@
 						<svelte:fragment slot="left">
 							<div class="header-btns">
 								<Button variant="icon" on:click={() => goto(ROUTES.INVITE(publicKey))}>
-									<NewChat size={24} />
+									<AddComment size={24} />
 								</Button>
 							</div>
 						</svelte:fragment>

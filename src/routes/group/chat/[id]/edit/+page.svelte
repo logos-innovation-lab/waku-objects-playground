@@ -1,10 +1,13 @@
 <script lang="ts">
-	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
-	import UserIcon from '$lib/components/icons/user.svelte'
-	import Checkmark from '$lib/components/icons/checkmark.svelte'
-	import Renew from '$lib/components/icons/renew.svelte'
-	import UserFollow from '$lib/components/icons/user-follow.svelte'
-	import ChatLaunch from '$lib/components/icons/chat-launch.svelte'
+	import {
+		ChevronLeft,
+		User,
+		Checkmark,
+		Renew,
+		UserFollow,
+		ChatLaunch,
+		Logout,
+	} from 'carbon-icons-svelte'
 
 	import Button from '$lib/components/button.svelte'
 	import Header from '$lib/components/header.svelte'
@@ -26,7 +29,6 @@
 	import { goto } from '$app/navigation'
 	import { uploadPicture } from '$lib/adapters/ipfs'
 	import { onDestroy } from 'svelte'
-	import Logout from '$lib/components/icons/logout.svelte'
 	import { walletStore } from '$lib/stores/wallet'
 	import ROUTES from '$lib/routes'
 	import Loading from '$lib/components/loading.svelte'
@@ -181,7 +183,7 @@
 					{groupMembers?.length} Members
 				</p>
 				<Button disabled={buttonDisabled} on:click={() => (screen = 'invite')}>
-					<UserIcon />
+					<User />
 					Invite to group
 				</Button>
 			</Container>

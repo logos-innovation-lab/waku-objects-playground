@@ -1,8 +1,5 @@
 <script lang="ts">
-	import Close from '$lib/components/icons/close.svelte'
-	import Bullhorn from '$lib/components/icons/bullhorn.svelte'
-	import DataViewAlt from '$lib/components/icons/data-view-alt.svelte'
-	import Renew from '$lib/components/icons/renew.svelte'
+	import { Close, Bullhorn, DataViewAlt, Renew } from 'carbon-icons-svelte'
 
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'

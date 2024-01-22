@@ -1,6 +1,5 @@
 <script lang="ts">
-	import Close from '$lib/components/icons/close.svelte'
-	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
+	import { Close, ChevronLeft } from 'carbon-icons-svelte'
 
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'

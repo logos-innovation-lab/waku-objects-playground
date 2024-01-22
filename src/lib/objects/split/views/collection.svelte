@@ -1,11 +1,13 @@
 <script lang="ts">
-	import Bullhorn from '$lib/components/icons/bullhorn.svelte'
-	import Renew from '$lib/components/icons/renew.svelte'
-	import Close from '$lib/components/icons/close.svelte'
-	import ArrowRight from '$lib/components/icons/arrow-right.svelte'
-	import ArrowsVertical from '$lib/components/icons/arrows-vertical.svelte'
-	import Receipt from '$lib/components/icons/receipt.svelte'
-	import ShowDataCards from '$lib/components/icons/show-data-cards.svelte'
+	import {
+		Bullhorn,
+		Renew,
+		Close,
+		ArrowRight,
+		ArrowsVertical,
+		Receipt,
+		ShowDataCards,
+	} from 'carbon-icons-svelte'
 
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'

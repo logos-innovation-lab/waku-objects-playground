@@ -1,6 +1,5 @@
 <script lang="ts">
-	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
-	import ChevronRight from '$lib/components/icons/chevron-right.svelte'
+	import { ChevronLeft, ChevronRight } from 'carbon-icons-svelte'
 
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'

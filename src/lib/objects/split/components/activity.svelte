@@ -1,6 +1,5 @@
 <script lang="ts">
-	import ChevronDown from '$lib/components/icons/chevron-down.svelte'
-	import ChevronUp from '$lib/components/icons/chevron-up.svelte'
+	import { ChevronDown, ChevronUp } from 'carbon-icons-svelte'
 
 	import Container from '$lib/components/container.svelte'
 	import Timestamp from '$lib/components/timestamp.svelte'

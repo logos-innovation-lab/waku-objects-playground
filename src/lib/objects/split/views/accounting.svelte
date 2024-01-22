@@ -1,8 +1,5 @@
 <script lang="ts">
-	import Bullhorn from '$lib/components/icons/bullhorn.svelte'
-	import Renew from '$lib/components/icons/renew.svelte'
-	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
-	import Close from '$lib/components/icons/close.svelte'
+	import { Bullhorn, Renew, ChevronLeft, Close } from 'carbon-icons-svelte'
 
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'

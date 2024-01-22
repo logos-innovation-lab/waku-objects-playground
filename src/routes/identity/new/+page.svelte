@@ -1,7 +1,5 @@
 <script lang="ts">
-	import ArrowRight from '$lib/components/icons/arrow-right.svelte'
-	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
-	import Renew from '$lib/components/icons/renew.svelte'
+	import { ArrowRight, ChevronLeft, Renew } from 'carbon-icons-svelte'
 
 	import Button from '$lib/components/button.svelte'
 	import Container from '$lib/components/container.svelte'

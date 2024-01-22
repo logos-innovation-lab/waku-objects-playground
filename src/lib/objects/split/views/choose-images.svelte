@@ -1,7 +1,5 @@
 <script lang="ts">
-	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
-	import ArrowRight from '$lib/components/icons/arrow-right.svelte'
-	import Close from '$lib/components/icons/close.svelte'
+	import { Add, ArrowRight, ChevronLeft, Close, TrashCan } from 'carbon-icons-svelte'
 
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'
@@ -13,8 +11,6 @@
 	import { resize } from '$lib/utils/image'
 	import Image from '$lib/components/image.svelte'
 	import InputFile from '$lib/components/input-file.svelte'
-	import Add from '$lib/components/icons/add.svelte'
-	import TrashCan from '$lib/components/icons/trash-can.svelte'
 	import { errorStore } from '$lib/stores/error'
 	import Loading from '$lib/components/loading.svelte'
 

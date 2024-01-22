@@ -1,13 +1,11 @@
 <script lang="ts">
-	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
-	import Close from '$lib/components/icons/close.svelte'
+	import { ArrowRight, ChevronLeft, Close } from 'carbon-icons-svelte'
 
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'
 	import Container from '$lib/components/container.svelte'
 	import type { User } from '$lib/types'
 	import Avatar from '$lib/components/avatar.svelte'
-	import ArrowRight from '$lib/components/icons/arrow-right.svelte'
 	import Divider from '$lib/components/divider.svelte'
 	import InputField from '$lib/components/input-field.svelte'
 	import Layout from '$lib/components/layout.svelte'

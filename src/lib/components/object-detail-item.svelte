@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte'
 	import { slide } from 'svelte/transition'
+	import { ChevronLeft, Launch } from 'carbon-icons-svelte'
+
 	import ButtonBlock from './button-block.svelte'
 	import Container from './container.svelte'
 	import Button from './button.svelte'
-	import ChevronLeft from './icons/chevron-left.svelte'
-	import Launch from './icons/launch.svelte'
 	import { defaultBlockchainNetwork } from '$lib/adapters/transaction'
 
 	let detailId: string

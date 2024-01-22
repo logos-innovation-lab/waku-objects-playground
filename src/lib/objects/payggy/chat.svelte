@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { ArrowDownRight, ArrowUpRight, DataViewAlt, CheckmarkFilled } from 'carbon-icons-svelte'
+
 	import {
 		type SendTransactionDataMessage,
 		type SendTransactionStore,
@@ -10,10 +12,6 @@
 	import ChatMessage from '$lib/components/chat-message.svelte'
 	import ReadonlyText from '$lib/components/readonly-text.svelte'
 	import ObjectHeader from '$lib/components/object-header.svelte'
-	import ArrowDownRight from '$lib/components/icons/arrow-down-right.svelte'
-	import ArrowUpRight from '$lib/components/icons/arrow-up-right.svelte'
-	import DataViewAlt from '$lib/components/icons/data-view-alt.svelte'
-	import CheckmarkFilled from '$lib/components/icons/checkmark-filled.svelte'
 	import Container from '$lib/components/container.svelte'
 	import Spacer from '$lib/components/spacer.svelte'
 	import { payggyDescriptor } from '.'

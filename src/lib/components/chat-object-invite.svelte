@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { CheckmarkFilled, Checkmark, Pending } from 'carbon-icons-svelte'
+
 	import adapters from '$lib/adapters'
 	import routes from '$lib/routes'
 	import type { InstallMessage, WithMeta } from '$lib/stores/chat'
@@ -7,14 +9,11 @@
 	import Button from './button.svelte'
 	import ChatMessage from './chat-message.svelte'
 	import Container from './container.svelte'
-	import CheckmarkFilled from './icons/checkmark-filled.svelte'
 	import Loading from './loading.svelte'
 	import ObjectInstallInfo from './object-install-info.svelte'
 
 	import { goto } from '$app/navigation'
 	import { hashString } from '$lib/adapters/waku/crypto'
-	import Checkmark from './icons/checkmark.svelte'
-	import Pending from './icons/pending.svelte'
 
 	//am I the sender of this message?
 	export let myMessage = false
