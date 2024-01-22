@@ -1,27 +1,25 @@
 <script lang="ts">
-	import { page } from '$app/stores'
+	import { ArrowUp, Close, ChatLaunch } from 'carbon-icons-svelte'
 
-	import ArrowUp from '$lib/components/icons/arrow-up.svelte'
+	import { page } from '$app/stores'
 
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'
-	import Close from '$lib/components/icons/close.svelte'
 	import Modal from '$lib/components/modal.svelte'
+	import ObjectLink from '$lib/components/object-link.svelte'
+	import ButtonBlock from '$lib/components/button-block.svelte'
+	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
+	import Layout from '$lib/components/layout.svelte'
 
 	import { goto } from '$app/navigation'
 	import { chats } from '$lib/stores/chat'
 	import adapters from '$lib/adapters'
 	import ROUTES from '$lib/routes'
 	import { walletStore } from '$lib/stores/wallet'
-	import ObjectLink from '$lib/components/object-link.svelte'
-	import ButtonBlock from '$lib/components/button-block.svelte'
-	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
-	import Layout from '$lib/components/layout.svelte'
 	import type { JSONSerializable, WakuObjectSvelteDescriptor } from '$lib/objects'
 	import { genRandomHex } from '$lib/utils'
 	import { getInstalledObjectList, type InstalledObjectDescriptor } from '$lib/objects/lookup'
 	import { errorStore } from '$lib/stores/error'
-	import ChatLaunch from '$lib/components/icons/chat-launch.svelte'
 
 	$: otherUser = $chats.chats
 		.get($page.params.id)

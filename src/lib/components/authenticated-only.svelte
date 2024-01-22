@@ -1,20 +1,15 @@
 <script lang="ts">
-	import routes from '$lib/routes'
+	import { ChatBot, Login, UserFollow } from 'carbon-icons-svelte'
+	import type { HDNodeWallet } from 'ethers/lib.commonjs'
 
 	import { profile } from '$lib/stores/profile'
-
 	import { walletStore } from '$lib/stores/wallet'
 
 	import { goto } from '$app/navigation'
-
+	import routes from '$lib/routes'
 	import Button from '$lib/components/button.svelte'
 	import Container from '$lib/components/container.svelte'
 	import Loading from '$lib/components/loading.svelte'
-
-	import ChatBot from '$lib/components/icons/chat-bot.svelte'
-	import Login from '$lib/components/icons/login.svelte'
-	import UserFollow from '$lib/components/icons/user-follow.svelte'
-	import type { HDNodeWallet } from 'ethers/lib.commonjs'
 
 	$: wallet = $walletStore.wallet
 

@@ -1,7 +1,8 @@
 <script lang="ts">
+	import { DataViewAlt } from 'carbon-icons-svelte'
+
 	import type { Expense } from '../schemas'
 	import Container from '$lib/components/container.svelte'
-	import DataViewAlt from '$lib/components/icons/data-view-alt.svelte'
 	import ObjectHeader from '$lib/components/object-header.svelte'
 	import ReadonlyText from '$lib/components/readonly-text.svelte'
 	import { splitDescriptor } from '../'

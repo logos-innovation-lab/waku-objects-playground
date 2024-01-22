@@ -1,12 +1,11 @@
 <script lang="ts">
+	import { ChevronLeft, CaretDown } from 'carbon-icons-svelte'
+
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'
 	import Dropdown from '$lib/components/dropdown.svelte'
 	import DropdownItem from '$lib/components/dropdown-item.svelte'
-
-	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
-	import CaretDown from '$lib/components/icons/caret-down.svelte'
 
 	import { goto } from '$app/navigation'
 	import routes from '$lib/routes'

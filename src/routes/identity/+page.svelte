@@ -1,12 +1,15 @@
 <script lang="ts">
-	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
-	import ChevronRight from '$lib/components/icons/chevron-right.svelte'
-	import Renew from '$lib/components/icons/renew.svelte'
-	import Wallet from '$lib/components/icons/wallet.svelte'
-	import SettingsView from '$lib/components/icons/settings-view.svelte'
-	import SettingsAdjust from '$lib/components/icons/settings-adjust.svelte'
-	import Logout from '$lib/components/icons/logout.svelte'
-	import DocumentSigned from '$lib/components/icons/document-signed.svelte'
+	import {
+		ChevronLeft,
+		ChevronRight,
+		Renew,
+		Wallet,
+		SettingsView,
+		SettingsAdjust,
+		Logout,
+		DocumentSigned,
+		DataBlob,
+	} from 'carbon-icons-svelte'
 
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
@@ -29,7 +32,6 @@
 	import { uploadPicture } from '$lib/adapters/ipfs'
 	import Avatar from '$lib/components/avatar.svelte'
 	import { errorStore } from '$lib/stores/error'
-	import DataBlob from '$lib/components/icons/data-blob.svelte'
 
 	let avatar = $profile.avatar
 	let name = $profile.name

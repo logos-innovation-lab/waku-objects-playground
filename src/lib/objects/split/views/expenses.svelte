@@ -1,8 +1,5 @@
 <script lang="ts">
-	import Close from '$lib/components/icons/close.svelte'
-	import ArrowRight from '$lib/components/icons/arrow-right.svelte'
-	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
-	import Receipt from '$lib/components/icons/receipt.svelte'
+	import { Close, ArrowRight, ChevronLeft, Receipt } from 'carbon-icons-svelte'
 
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'

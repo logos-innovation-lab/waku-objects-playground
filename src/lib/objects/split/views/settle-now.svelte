@@ -1,6 +1,5 @@
 <script lang="ts">
-	import ArrowUp from '$lib/components/icons/arrow-up.svelte'
-	import Close from '$lib/components/icons/close.svelte'
+	import { ArrowUp, Close } from 'carbon-icons-svelte'
 
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'

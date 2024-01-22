@@ -1,7 +1,5 @@
 <script lang="ts">
-	import Checkmark from '$lib/components/icons/checkmark.svelte'
-	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
-	import DocumentSigned from '$lib/components/icons/document-signed.svelte'
+	import { Checkmark, ChevronLeft, DocumentSigned } from 'carbon-icons-svelte'
 
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'

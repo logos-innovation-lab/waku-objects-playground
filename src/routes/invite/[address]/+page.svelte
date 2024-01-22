@@ -2,11 +2,17 @@
 	import copy from 'copy-to-clipboard'
 	import QRCode from '@bonosoft/sveltekit-qrcode'
 
-	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
-	import Checkmark from '$lib/components/icons/checkmark.svelte'
-	import Events from '$lib/components/icons/events.svelte'
-	import CopyLink from '$lib/components/icons/copy-link.svelte'
-	import Close from '$lib/components/icons/close.svelte'
+	import {
+		QrCode,
+		Camera,
+		ChevronLeft,
+		ChevronRight,
+		Checkmark,
+		Events,
+		CopyLink,
+		Close,
+		IbmWatsonAssistant,
+	} from 'carbon-icons-svelte'
 
 	import Button from '$lib/components/button.svelte'
 	import Container from '$lib/components/container.svelte'
@@ -20,11 +26,8 @@
 	import { chats, isGroupChat } from '$lib/stores/chat'
 	import adapters from '$lib/adapters'
 	import { Html5Qrcode } from 'html5-qrcode'
-	import Camera from '$lib/components/icons/camera.svelte'
-	import QrCodeIcon from '$lib/components/icons/qr-code.svelte'
 	import { onDestroy, onMount } from 'svelte'
 	import ButtonBlock from '$lib/components/button-block.svelte'
-	import ChevronRight from '$lib/components/icons/chevron-right.svelte'
 	import Layout from '$lib/components/layout.svelte'
 	import type { User as UserType } from '$lib/types'
 	import { profile } from '$lib/stores/profile'
@@ -35,7 +38,6 @@
 	import { errorStore } from '$lib/stores/error'
 	import type { BaseWallet } from 'ethers'
 	import { getSharedSecret } from '$lib/adapters/waku/crypto'
-	import Babbles from '$lib/components/icons/babbles.svelte'
 
 	// check if the chat already exists
 	$: sharedSecret =
@@ -211,7 +213,7 @@
 			<ButtonBlock borderBottom on:click={() => goto(routes.BABBLES_NEW)}>
 				<Container direction="row" justify="space-between" align="center" alignItems="center">
 					<div class="icon">
-						<Babbles size={20} /> Create babbles
+						<IbmWatsonAssistant size={20} /> Create babbles
 					</div>
 					<div>
 						<Button variant="icon">
@@ -233,7 +235,7 @@
 							Scan QR code
 						</Button>
 					{:else}
-						<Button on:click={stop}><QrCodeIcon />Show my QR code</Button>
+						<Button on:click={stop}><QrCode />Show my QR code</Button>
 					{/if}
 				</div>
 			</Container>

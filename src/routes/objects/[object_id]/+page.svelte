@@ -1,5 +1,5 @@
 <script lang="ts">
-	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
+	import { ChevronLeft, TrashCan } from 'carbon-icons-svelte'
 
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
@@ -13,7 +13,6 @@
 	import { page } from '$app/stores'
 	import { getInstalledObjectList } from '$lib/objects/lookup'
 	import { hashString } from '$lib/adapters/waku/crypto'
-	import TrashCan from '$lib/components/icons/trash-can.svelte'
 
 	let hashedObjectId = $page.params.object_id
 

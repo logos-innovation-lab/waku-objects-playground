@@ -1,9 +1,6 @@
 <script lang="ts">
 	import copy from 'copy-to-clipboard'
-
-	import Close from '$lib/components/icons/close.svelte'
-	import Copy from '$lib/components/icons/copy.svelte'
-	import Checkmark from '$lib/components/icons/checkmark.svelte'
+	import { Close, Copy, Checkmark } from 'carbon-icons-svelte'
 
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'

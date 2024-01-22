@@ -1,7 +1,5 @@
 <script lang="ts">
-	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
-	import ArrowUp from '$lib/components/icons/arrow-up.svelte'
-	import Close from '$lib/components/icons/close.svelte'
+	import { ChevronLeft, ArrowUp, Close } from 'carbon-icons-svelte'
 
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'
@@ -10,6 +8,7 @@
 	import Layout from '$lib/components/layout.svelte'
 	import Image from '$lib/components/image.svelte'
 	import Grid from '$lib/components/grid.svelte'
+	import Info from '../components/info.svelte'
 
 	import type { DataMessage } from '../schemas'
 	import { splitDescriptor } from '..'
@@ -23,7 +22,6 @@
 	} from '../blockchain'
 	import type { GetContract } from '../types'
 	import type { Token, TokenAmount } from '$lib/objects/schemas'
-	import Info from '../components/info.svelte'
 	import type { ErrorDescriptor } from '$lib/stores/error'
 	import { publicKeyToAddress } from '$lib/adapters/waku/crypto'
 

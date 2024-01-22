@@ -1,16 +1,18 @@
 <script lang="ts">
-	import WarningAltFilled from '$lib/components/icons/warning-alt-filled.svelte'
-	import Close from '$lib/components/icons/close.svelte'
-	import ArrowDownRight from '$lib/components/icons/arrow-down-right.svelte'
-	import ArrowUpRight from '$lib/components/icons/arrow-up-right.svelte'
-	import Pending from '$lib/components/icons/pending.svelte'
+	import {
+		ArrowDownRight,
+		ArrowUpRight,
+		CheckmarkFilled,
+		Close,
+		Pending,
+		WarningAltFilled,
+	} from 'carbon-icons-svelte'
 
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'
 	import ReadonlyText from '$lib/components/readonly-text.svelte'
 	import Container from '$lib/components/container.svelte'
 	import ObjectDetailItem from '$lib/components/object-detail-item.svelte'
-	import CheckmarkFilled from '$lib/components/icons/checkmark-filled.svelte'
 	import Timestamp from '$lib/components/timestamp.svelte'
 
 	import { toSignificant, formatDateAndTime } from '$lib/utils/format'

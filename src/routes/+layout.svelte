@@ -8,7 +8,7 @@
 	import { onDestroy, onMount } from 'svelte'
 	import adapter from '$lib/adapters'
 	import { changeColors } from '$lib/utils/color'
-	import Checkmark from '$lib/components/icons/checkmark.svelte'
+	import { Checkmark, Renew } from 'carbon-icons-svelte'
 
 	import { walletStore } from '$lib/stores/wallet'
 	import { theme } from '$lib/stores/theme'
@@ -19,7 +19,6 @@
 	import Loading from '$lib/components/loading.svelte'
 	import ErrorModal from '$lib/components/modal.svelte'
 	import Button from '$lib/components/button.svelte'
-	import Renew from '$lib/components/icons/renew.svelte'
 
 	let unsubscribeWalletStore: (() => void) | undefined = undefined
 	let unsubscribeExchangeStore: (() => void) | undefined = undefined

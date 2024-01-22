@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation'
-
-	import AddComment from '$lib/components/icons/add-comment.svelte'
-	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
+	import { AddComment, ChevronLeft, ArrowRight, Checkmark, Renew } from 'carbon-icons-svelte'
 
 	import Button from '$lib/components/button.svelte'
 	import Header from '$lib/components/header.svelte'
@@ -12,12 +10,9 @@
 	import routes from '$lib/routes'
 	import Avatar from '$lib/components/avatar.svelte'
 	import { chats, isGroupChat } from '$lib/stores/chat'
-	import ArrowRight from '$lib/components/icons/arrow-right.svelte'
-	import Checkmark from '$lib/components/icons/checkmark.svelte'
 	import InputFile from '$lib/components/input-file.svelte'
 	import adapters from '$lib/adapters'
 	import { clipAndResize } from '$lib/utils/image'
-	import Renew from '$lib/components/icons/renew.svelte'
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 	import type { HDNodeWallet } from 'ethers/lib.commonjs'
 	import Layout from '$lib/components/layout.svelte'

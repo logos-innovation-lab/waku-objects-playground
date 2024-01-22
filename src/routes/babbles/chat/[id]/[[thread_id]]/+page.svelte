@@ -1,34 +1,35 @@
 <script lang="ts">
 	import { beforeUpdate, afterUpdate, onMount } from 'svelte'
-	import { page } from '$app/stores'
-
-	import ArrowUp from '$lib/components/icons/arrow-up.svelte'
-	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
-	import Close from '$lib/components/icons/close.svelte'
+	import {
+		ArrowUp,
+		ChevronLeft,
+		Close,
+		Checkmark,
+		IbmWatsonAssistant,
+		Settings,
+	} from 'carbon-icons-svelte'
 
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
 	import Textarea from '$lib/components/textarea.svelte'
 	import Button from '$lib/components/button.svelte'
 	import Avatar from '$lib/components/avatar.svelte'
+	import ChatMessageComponent from '$lib/components/chat-message.svelte'
+	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
+	import Spacer from '$lib/components/spacer.svelte'
 
+	import { page } from '$app/stores'
 	import { goto } from '$app/navigation'
 	import { chats, type ChatMessage, type BabbleMessage } from '$lib/stores/chat'
 	import adapters from '$lib/adapters'
 	import ROUTES from '$lib/routes'
 	import { browser } from '$app/environment'
-	import ChatMessageComponent from '$lib/components/chat-message.svelte'
-	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 	import type { HDNodeWallet } from 'ethers/lib.commonjs'
 	import Layout from '$lib/components/layout.svelte'
 	import { textToHTML } from '$lib/utils/text'
-	import Spacer from '$lib/components/spacer.svelte'
-	import Checkmark from '$lib/components/icons/checkmark.svelte'
-	import Settings from '$lib/components/icons/settings.svelte'
 	import { walletStore } from '$lib/stores/wallet'
 	import { formatTimestamp } from '$lib/utils/format'
 	import { errorStore } from '$lib/stores/error'
-	import Babbles from '$lib/components/icons/babbles.svelte'
 
 	let div: HTMLElement
 	let autoscroll = true
@@ -175,7 +176,7 @@
 							{chat?.name}
 						</span>
 						<span class="group-icon">
-							<Babbles />
+							<IbmWatsonAssistant />
 						</span>
 					</svelte:fragment>
 					<svelte:fragment slot="right">

@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { ChevronLeft, ColorPalette, CaretDown } from 'carbon-icons-svelte'
+
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
 	import Button from '$lib/components/button.svelte'
@@ -7,10 +9,6 @@
 	import DropdownItem from '$lib/components/dropdown-item.svelte'
 	import Spacer from '$lib/components/spacer.svelte'
 	import InputField from '$lib/components/input-field.svelte'
-
-	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
-	import PaintPalette from '$lib/components/icons/paint-palette.svelte'
-	import CaretDown from '$lib/components/icons/caret-down.svelte'
 
 	import { goto } from '$app/navigation'
 	import routes from '$lib/routes'
@@ -64,7 +62,7 @@
 			<label>
 				<div class="palette-overlay" />
 				<div class="palette-icon">
-					<PaintPalette />
+					<ColorPalette />
 				</div>
 				<input type="color" bind:value={baseColor} />
 			</label>

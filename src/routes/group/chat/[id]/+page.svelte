@@ -1,11 +1,14 @@
 <script lang="ts">
 	import { beforeUpdate, afterUpdate, onMount } from 'svelte'
-	import { page } from '$app/stores'
-
-	import Add from '$lib/components/icons/add.svelte'
-	import ArrowUp from '$lib/components/icons/arrow-up.svelte'
-	import ChevronLeft from '$lib/components/icons/chevron-left.svelte'
-	import Close from '$lib/components/icons/close.svelte'
+	import {
+		Add,
+		ArrowUp,
+		ChevronLeft,
+		Close,
+		Events,
+		Checkmark,
+		Settings,
+	} from 'carbon-icons-svelte'
 
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
@@ -14,6 +17,7 @@
 	import Avatar from '$lib/components/avatar.svelte'
 	import WakuObject from '$lib/objects/chat.svelte'
 
+	import { page } from '$app/stores'
 	import { goto } from '$app/navigation'
 	import { chats } from '$lib/stores/chat'
 	import adapters from '$lib/adapters'
@@ -23,11 +27,8 @@
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 	import type { HDNodeWallet } from 'ethers/lib.commonjs'
 	import Layout from '$lib/components/layout.svelte'
-	import Events from '$lib/components/icons/events.svelte'
 	import { textToHTML } from '$lib/utils/text'
 	import Spacer from '$lib/components/spacer.svelte'
-	import Checkmark from '$lib/components/icons/checkmark.svelte'
-	import Settings from '$lib/components/icons/settings.svelte'
 	import { walletStore } from '$lib/stores/wallet'
 	import type { User } from '$lib/types'
 	import {
