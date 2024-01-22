@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { AddComment, Events } from 'carbon-icons-svelte'
+	import { AddComment, Events, IbmWatsonAssistant } from 'carbon-icons-svelte'
 
 	// Components
 	import Avatar from '$lib/components/avatar.svelte'
@@ -10,7 +10,6 @@
 	import Loading from '$lib/components/loading.svelte'
 	import AuthenticatedOnly from '$lib/components/authenticated-only.svelte'
 	import Layout from '$lib/components/layout.svelte'
-	import Babbles from '$lib/components/icons/babbles.svelte'
 
 	// Stores
 	import { profile } from '$lib/stores/profile'
@@ -181,7 +180,7 @@
 														<Events />
 													{:else if isBabbles(chat)}
 														<span class="truncate">{chat?.name}</span>
-														<Babbles />
+														<IbmWatsonAssistant />
 													{:else}
 														<span class="truncate">
 															{userDisplayName(otherUser)}

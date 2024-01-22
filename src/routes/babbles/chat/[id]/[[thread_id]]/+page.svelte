@@ -1,6 +1,13 @@
 <script lang="ts">
 	import { beforeUpdate, afterUpdate, onMount } from 'svelte'
-	import { ArrowUp, ChevronLeft, Close, Checkmark, Settings } from 'carbon-icons-svelte'
+	import {
+		ArrowUp,
+		ChevronLeft,
+		Close,
+		Checkmark,
+		IbmWatsonAssistant,
+		Settings,
+	} from 'carbon-icons-svelte'
 
 	import Container from '$lib/components/container.svelte'
 	import Header from '$lib/components/header.svelte'
@@ -23,7 +30,6 @@
 	import { walletStore } from '$lib/stores/wallet'
 	import { formatTimestamp } from '$lib/utils/format'
 	import { errorStore } from '$lib/stores/error'
-	import Babbles from '$lib/components/icons/babbles.svelte'
 
 	let div: HTMLElement
 	let autoscroll = true
@@ -170,7 +176,7 @@
 							{chat?.name}
 						</span>
 						<span class="group-icon">
-							<Babbles />
+							<IbmWatsonAssistant />
 						</span>
 					</svelte:fragment>
 					<svelte:fragment slot="right">

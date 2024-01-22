@@ -11,8 +11,8 @@
 		Events,
 		CopyLink,
 		Close,
+		IbmWatsonAssistant,
 	} from 'carbon-icons-svelte'
-	import Babbles from '$lib/components/icons/babbles.svelte'
 
 	import Button from '$lib/components/button.svelte'
 	import Container from '$lib/components/container.svelte'
@@ -213,7 +213,7 @@
 			<ButtonBlock borderBottom on:click={() => goto(routes.BABBLES_NEW)}>
 				<Container direction="row" justify="space-between" align="center" alignItems="center">
 					<div class="icon">
-						<Babbles size={20} /> Create babbles
+						<IbmWatsonAssistant size={20} /> Create babbles
 					</div>
 					<div>
 						<Button variant="icon">

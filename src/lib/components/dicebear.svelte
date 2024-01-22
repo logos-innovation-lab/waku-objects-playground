@@ -7,7 +7,8 @@
 	export let scale = 75
 	export let radius = 50
 
-	const avatarSize = (size / 2) as any // FIXME: the carbon design icons have native sizes 15, 20, 24 and 32. We should stick to those
+	// FIXME: the carbon design icons have native sizes 16, 20, 24 and 32. We should stick to those
+	const avatarSize = (size / 2) as unknown as 16 | 20 | 24 | 32
 </script>
 
 {#if style === 'user'}
